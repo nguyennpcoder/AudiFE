@@ -1,0 +1,17 @@
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+#root {
+  max-width: 100%;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  overflow-x: hidden;
+  background-color: #000;
+}
+
+/* Loại bỏ padding-top vì chúng ta đã xử lý trong HeroBanner */

@@ -1,0 +1,109 @@
+/* Notification.css */
+/* Higher specificity styles for notifications */
+:root .notifications-container {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  flex-direction: column-reverse !important; /* Thay đổi direction để notification mới nằm dưới cùng */
+  gap: 10px !important;
+  max-width: 400px !important;
+  pointer-events: none; /* Để cho phép các phần tử dưới nó vẫn có thể click được */
+}
+
+:root .notification {
+  display: flex !important;
+  align-items: flex-start !important;
+  padding: 10px 15px !important;
+  border-radius: 8px !important;
+  background-color: white !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+  animation: slideIn 0.3s ease forwards !important;
+  overflow: hidden !important;
+  position: relative !important;
+  z-index: 1 !important;
+  pointer-events: auto !important; /* Khôi phục pointer-events cho notification */
+  margin-top: 0 !important; /* Đảm bảo không có margin */
+  transform: none !important; /* Reset transform */
+}
+
+
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-title {
+  font-weight: 600;
+  margin-bottom: 3px;
+  font-size: 14px;
+}
+
+.notification-message {
+  font-size: 13px;
+  color: #4a4a4a;
+}
+
+.notification-close {
+  font-size: 20px;
+  line-height: 1;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 0 5px;
+  margin-left: 10px;
+}
+
+.notification.success {
+  border-left: 4px solid #00C9A7;
+}
+
+.notification.error {
+  border-left: 4px solid #FF3D71;
+}
+
+.notification.warning {
+  border-left: 4px solid #FFB800;
+}
+
+.notification.info {
+  border-left: 4px solid #1E86FF;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);  /* Changed from 100% to 20px */
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(20px);  /* Changed from 100% to 20px */
+    opacity: 0;
+  }
+}
+
+.notification.removing {
+  animation: fadeOut 0.3s ease forwards;
+}
+
+/* Responsive styles */
+@media (max-width: 576px) {
+  .notifications-container {
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: calc(100% - 20px);
+  }
+}
