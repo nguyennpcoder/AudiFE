@@ -6,9 +6,9 @@ import { useNotification } from '../../context/NotificationContext';
 
 // Import hình ảnh
 import etronGTImage from '../../assets/rs-etron-gt.jpg';
-import rsSevenImage from '../../assets/audi-rs7.jpg';
-import rsFiveImage from '../../assets/audi-rs5.jpg';
-import aSevenImage from '../../assets/audi-a7.jpg';
+import rsSevenImage from '../../assets/audi-rs7.jpeg';
+import rsFiveImage from '../../assets/audi-rs5.jpeg';
+import aSevenImage from '../../assets/audi-a7.jpeg';
 import qFourImage from '../../assets/audi-r8.jpg';
 
 import etronGTImage1 from '../../assets/etron.avif';

@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import '../../styles/FeaturedProducts.css';
 
-// Import hình ảnh từ thư mục assets (sẽ dùng làm fallback)
+// Import hình ảnh từ thư mục assets (fallback images)
 import rs7Image from '../../assets/rs7.jpeg';
 import q4Image from '../../assets/audi-q4.jpg';
-import a7Image from '../../assets/audi-a7.jpg';
-import rs5Image from '../../assets/audi-rs5.jpg';
+import a7Image from '../../assets/audi-a7.jpeg';
+import rs5Image from '../../assets/audi-rs5.jpeg';
 import etronImage from '../../assets/rs-etron-gt.jpg';
 import r8Image from '../../assets/audi-r8.jpg';
 
@@ -39,11 +39,12 @@ interface FeaturedProductsProps {
   subtitle?: string;
 }
 
+// const BACKEND_URL = 'https://audivn.onrender.com/api/v1';
 const BACKEND_URL = 'http://localhost:8080';
 // Ảnh mặc định hiển thị khi không tìm thấy ảnh
-const FALLBACK_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSIgZmlsbD0iIzk5OSI+No image</dGV4dD48L3N2Zz4=";
+const FALLBACK_IMAGE = rs7Image;
 
-// Mapping ID sản phẩm với ảnh từ assets (dùng làm fallback)
+// Mapping ID sản phẩm với ảnh từ assets (fallback)
 const productImageMap: Record<number, string> = {
   1: rs7Image,
   2: q4Image,
@@ -51,6 +52,69 @@ const productImageMap: Record<number, string> = {
   4: rs5Image,
   5: etronImage,
   6: r8Image
+};
+
+// Thêm component này vào đầu file hoặc tạo file riêng
+const ImageWithFallback: React.FC<{
+  src: string;
+  alt: string;
+  fallbackSrc: string;
+}> = ({ src, alt, fallbackSrc }) => {
+  const [imgSrc, setImgSrc] = useState<string>(src);
+  const [hasError, setHasError] = useState<boolean>(false);
+
+  useEffect(() => {
+    console.log(`ImageWithFallback received src: "${src}"`);
+    
+    // Fix the issue with /src/assets/ paths getting resolved to the frontend URL
+    if (src.startsWith('/src/assets/')) {
+      // Use the imported assets directly instead of URL path
+      if (src.includes('rs7.jpeg')) {
+        setImgSrc(rs7Image);
+      } else if (src.includes('audi-q4.jpg')) {
+        setImgSrc(q4Image);
+      } else if (src.includes('audi-a7.jpeg')) {
+        setImgSrc(a7Image);
+      } else if (src.includes('rs-etron-gt.jpg')) {
+        setImgSrc(etronImage);
+      } else if (src.includes('audi-rs5.jpeg')) {
+        setImgSrc(rs5Image);
+      } else if (src.includes('audi-r8.jpg')) {
+        setImgSrc(r8Image);
+      } else {
+        // For any other asset path, switch to the fallback
+        setImgSrc(fallbackSrc);
+      }
+      return;
+    }
+    
+    // Fix for localhost:5173 URLs
+    if (src.includes('localhost:5173')) {
+      const updatedSrc = src.replace(/http:\/\/localhost:5173/g, BACKEND_URL);
+      console.log(`Corrected URL to backend: "${updatedSrc}"`);
+      setImgSrc(updatedSrc);
+    } else {
+      setImgSrc(src);
+    }
+    
+    setHasError(false);
+  }, [src, fallbackSrc]);
+
+  return (
+    <img
+      src={imgSrc}
+      alt={alt}
+      onError={(e) => {
+        console.error(`Image load failed for src: ${imgSrc}`, e);
+        if (!hasError) {
+          console.log(`Switching to fallback: ${fallbackSrc}`);
+          setHasError(true);
+          setImgSrc(fallbackSrc);
+        }
+      }}
+      onLoad={() => console.log(`Image loaded successfully: ${imgSrc}`)}
+    />
+  );
 };
 
 const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ 
@@ -62,7 +126,6 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [categories, setCategories] = useState<string[]>([]);
-  const [productImages, setProductImages] = useState<Record<number, HinhAnhXe[]>>({});
   const [isVisible, setIsVisible] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -72,9 +135,13 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
   const headerRef = useRef<HTMLDivElement>(null);
   const productRefs = useRef<(HTMLDivElement | null)[]>([]);
   const gridRef = useRef<HTMLDivElement>(null);
+  
+  // Add new state to store product images
+  const [productImagesMap, setProductImagesMap] = useState<Record<number, HinhAnhXe[]>>({});
 
   // Xử lý khi thay đổi danh mục lọc
   const handleCategoryChange = (category: string) => {
+    console.log(`Changing category from ${activeCategory} to ${category}`);
     setActiveCategory(category);
     setFilterChanged(true);
     
@@ -548,18 +615,6 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
         transition-delay: 0s;
       }
       
-      /* Progress indicator effect */
-      .scroll-progress {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 0;
-        height: 3px;
-        background: linear-gradient(to right, #e50000, #ff3333);
-        z-index: 1000;
-        transition: width 0.2s ease-out;
-      }
-      
       /* Enhanced filter buttons */
       .products-filter {
         display: flex;
@@ -824,52 +879,76 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
       try {
         setIsLoading(true);
         
-        // Lấy danh sách xe còn hàng
+        // Lấy danh sách dòng xe (car series)
+        const dongXeResponse = await axios.get(`${BACKEND_URL}/api/v1/dong-xe`);
+        const seriesData = dongXeResponse.data;
+        console.log("Car series from API:", seriesData);
+        
+        // Xử lý danh sách dòng xe để hiển thị trên filter
+        const allCategories = seriesData.map((series: any) => series.ten);
+        console.log("All categories from series API:", allCategories);
+        setCategories(allCategories);
+        
+        // Lấy danh sách xe còn hàng - KHÔNG GIỚI HẠN SỐ LƯỢNG
         const response = await axios.get(`${BACKEND_URL}/api/v1/mau-xe/con-hang?conHang=true`);
         const data = response.data;
         
-        // Lọc chỉ lấy 6 sản phẩm mới nhất
-        const limitedProducts = data
-          .sort((a: MauXe, b: MauXe) => b.namSanXuat - a.namSanXuat)
-          .slice(0, 6);
+        // Log data để debug
+        console.log("Products data from API:", data);
         
-        setProducts(limitedProducts);
+        // Map tenDong from the car series information
+        const mappedProducts = data.map((product: MauXe) => {
+          // Find the correct series name for this model
+          const series = seriesData.find((s: any) => s.id === product.idDong);
+          const product_with_dong = {
+            ...product,
+            tenDong: series ? series.ten : 'Không xác định'
+          };
+          console.log(`Mapped product: ${product_with_dong.tenMau}, Dong: ${product_with_dong.tenDong}`);
+          return product_with_dong;
+        });
         
-        // Tạo danh sách phân loại
-        const uniqueCategories = Array.from(
-          new Set(limitedProducts.map((product: MauXe) => product.tenDong))
-        );
-        setCategories(uniqueCategories as string[]);
+        // BỎ giới hạn 6 sản phẩm, lấy tất cả
+        setProducts(mappedProducts);
+        console.log("All products:", mappedProducts);
         
-        // Lấy hình ảnh cho từng sản phẩm
-        const imagesObj: Record<number, HinhAnhXe[]> = {};
-        for (const product of limitedProducts) {
-          const images = await fetchProductImages(product.id);
-          imagesObj[product.id] = images;
+        // Fetch images for each product
+        const imagesMap: Record<number, HinhAnhXe[]> = {};
+        
+        for (const product of mappedProducts) {
+          try {
+            const imagesResponse = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${product.id}`);
+            const imagesData = imagesResponse.data;
+            
+            // Log để debug
+            console.log(`Images for product ${product.id}:`, imagesData);
+            
+            if (Array.isArray(imagesData) && imagesData.length > 0) {
+              // Kiểm tra xem có thuộc tính duongDanAnh không
+              const hasValidPaths = imagesData.some(img => img.duongDanAnh && typeof img.duongDanAnh === 'string');
+              if (!hasValidPaths) {
+                console.error(`Product ${product.id} has images but no valid paths`);
+              }
+            }
+            
+            imagesMap[product.id] = imagesData;
+          } catch (imageError) {
+            console.error(`Failed to fetch images for product ${product.id}:`, imageError);
+            imagesMap[product.id] = [];
+          }
         }
-        setProductImages(imagesObj);
         
-        setIsLoading(false);
+        setProductImagesMap(imagesMap);
       } catch (error) {
         console.error('Lỗi khi tải sản phẩm:', error);
         setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi');
+      } finally {
         setIsLoading(false);
       }
     };
     
     fetchProducts();
   }, []);
-
-  // Fetch product images from API
-  const fetchProductImages = async (productId: number) => {
-    try {
-      const response = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${productId}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Lỗi khi tải hình ảnh cho sản phẩm ${productId}:`, error);
-      return [];
-    }
-  };
 
   // Format giá tiền theo định dạng Việt Nam
   const formatPrice = (price: number) => {
@@ -883,31 +962,31 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
   // Lọc sản phẩm theo danh mục
   const filteredProducts = activeCategory === 'all' 
     ? products 
-    : products.filter(product => product.tenDong === activeCategory);
+    : products.filter(product => {
+        console.log(`Filtering: Category=${activeCategory}, Product=${product.tenDong}`);
+        return product.tenDong.toLowerCase() === activeCategory.toLowerCase();
+      });
 
-  // Hàm lấy URL hình ảnh cho sản phẩm
+  // Hàm lấy URL hình ảnh cho sản phẩm - cải tiến để giảm tải và tối ưu hiệu suất
   const getProductImageUrl = (productId: number): string => {
-    if (!productImages[productId] || productImages[productId].length === 0) {
+    try {
+      const productImages = productImagesMap[productId];
+      if (productImages && productImages.length > 0) {
+        const exteriorImages = productImages.filter(img => img.loaiHinh === 'ngoai_that');
+        const targetImage = exteriorImages.length > 0 ? exteriorImages[0] : productImages[0];
+  
+        if (targetImage && targetImage.duongDanAnh) {
+          // Đơn giản là ghép BACKEND_URL với đường dẫn
+          return `${BACKEND_URL}${targetImage.duongDanAnh}`;
+        }
+      }
+      
+      // Fallback to local images
+      return productImageMap[productId] || FALLBACK_IMAGE;
+    } catch (error) {
+      console.error('Error getting image URL:', error);
       return productImageMap[productId] || FALLBACK_IMAGE;
     }
-
-    const images = productImages[productId];
-    const thumbnailImage = images.find(img => img.loaiHinh === 'thu_nho');
-    const exteriorImage = images.find(img => img.loaiHinh === 'ngoai_that');
-    const anyImage = images[0];
-    
-    const selectedImage = thumbnailImage || exteriorImage || anyImage;
-    
-    if (selectedImage && selectedImage.duongDanAnh) {
-      // Đảm bảo URL đúng định dạng
-      if (selectedImage.duongDanAnh.startsWith('http')) {
-        return selectedImage.duongDanAnh;
-      } else {
-        return `${BACKEND_URL}${selectedImage.duongDanAnh}`;
-      }
-    }
-    
-    return productImageMap[productId] || FALLBACK_IMAGE;
   };
 
   // Hiển thị tất cả các sản phẩm khi component được tải
@@ -953,8 +1032,6 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
 
   return (
     <>
-      <div className="scroll-progress" style={{ width: `${scrollProgress}%` }}></div>
-      
       <div className="hero-header" ref={headerRef}>
         <div className="container">
           <h1 className={`hero-title ${headerVisible ? 'visible' : ''}`}>{title}</h1>
@@ -1000,12 +1077,10 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                   }}
                 >
                   <div className="product-image">
-                    <img 
+                    <ImageWithFallback 
                       src={getProductImageUrl(product.id)} 
                       alt={product.tenMau}
-                      onError={(e) => {
-                        e.currentTarget.src = productImageMap[product.id] || FALLBACK_IMAGE;
-                      }}
+                      fallbackSrc={FALLBACK_IMAGE}
                     />
                   </div>
                   <div className="product-info">

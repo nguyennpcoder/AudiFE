@@ -6,6 +6,17 @@
     background-color: transparent;
     z-index: 1000;
     box-shadow: none;
+    border-top: none;
+  }
+  
+  .header::before {
+    display: none;
+  }
+  
+  .header .red-bar,
+  .header .top-bar,
+  .header::after {
+    display: none;
   }
   
   .header-container {
@@ -16,6 +27,7 @@
     height: 80px;
     margin: 0 auto;
     max-width: 100%;
+    border-top: none;
   }
   
   .logo-container {
@@ -33,6 +45,9 @@
   .main-nav {
     display: flex;
     margin: 0 auto;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
   }
   
   .nav-list {
@@ -305,7 +320,7 @@
       transition: transform 0.3s ease;
       flex-direction: column;
       padding: 2rem;
-      overflow-y: auto;
+      overflow-y: hidden;
     }
     
     .main-nav.active {
@@ -651,4 +666,18 @@
       font-size: 0.9rem;
       margin-right: 1rem;
     }
+  }
+
+  /* Cho Chrome, Edge, và Safari */
+  .main-nav::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .main-nav::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .main-nav::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
   }

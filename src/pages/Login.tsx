@@ -408,6 +408,13 @@ const Login: React.FC = () => {
               <Link to="/register">Chưa có tài khoản? Đăng ký ngay</Link>
             </div>
           </form>
+
+          {/* Nút trở về trang chủ màu xanh dương đậm */}
+          <div className="back-home-container">
+            <Link to="/" className="back-home-button">
+              <i className="fas fa-home"></i> TRỞ VỀ TRANG CHỦ
+            </Link>
+          </div>
         </div>
       </div>
     </div>

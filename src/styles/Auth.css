@@ -4,6 +4,8 @@
   min-height: 100vh;
   background-color: #fff;
   position: relative;
+  overflow: hidden;
+ 
 }
 
 .auth-video-background {
@@ -15,6 +17,9 @@
   overflow: hidden;
   background-color: #000;
   z-index: 0;
+  border-radius: 20px;
+  margin: 20px;
+  max-height: calc(100vh - 40px);
 }
 
 .auth-video-background video {
@@ -24,6 +29,7 @@
   position: absolute;
   top: 0;
   left: 0;
+  border-radius: 20px;
 }
 
 /* Fallback background image if video isn't available */
@@ -32,6 +38,7 @@
   background-size: cover;
   background-position: center;
   z-index: 0;
+  border-radius: 20px;
 }
 
 .auth-video-overlay {
@@ -46,6 +53,7 @@
   justify-content: center;
   align-items: flex-start;
   padding-left: 5%;
+  border-radius: 20px;
 }
 
 .auth-video-content {
@@ -75,6 +83,10 @@
   position: relative;
   z-index: 1;
   box-shadow: 5px 0 15px rgba(0, 0, 0, 0.05);
+ 
+  margin-right: 20px;
+  margin-left: 20px;
+  margin-left: -20px;
 }
 
 .auth-logo {
@@ -402,15 +414,19 @@
 @media (max-width: 992px) {
   .auth-video-background {
     position: fixed;
-    width: 100%;
-    height: 100vh;
+    width: calc(100% - 40px);
+    height: calc(100vh - 40px);
     order: 2;
+    border-radius: 20px;
+    margin: 20px;
   }
   
   .auth-form-section {
     width: 100%;
     background-color: rgba(255, 255, 255, 0.9);
     z-index: 2;
+    margin: 0 20px;
+    border-radius: 20px;
   }
   
   .auth-video-content h1 {
@@ -440,11 +456,13 @@
   }
   
   .auth-video-background {
-    height: 30vh;
+    height: calc(30vh - 40px);
+    margin: 20px;
   }
   
   .auth-form-section {
-    padding: 15px 0;
+    padding: 15px;
+    margin: 0 20px;
   }
 }
 
@@ -463,4 +481,39 @@
   margin-bottom: 20px;
   text-align: left;
   font-size: 14px;
+}
+
+/* Thêm CSS cho nút trở về trang chủ */
+.back-home-container {
+ 
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  font-size: 14px;
+}
+
+.back-home-button {
+  background-color: #213961; /* Màu xanh dương đậm */
+  color: white;
+  padding: 10px 12px;
+  border-radius: 30px;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  max-width: 300px;
+}
+
+.back-home-button:hover {
+  background-color: #0a2554;
+  color: white;
+}
+
+.back-home-button i {
+  font-size: 16px;
 }

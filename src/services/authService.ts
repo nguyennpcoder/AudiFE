@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/v1/auth';
+// const API_URL = `${import.meta.env.VITE_API_URL || 'https://audivn.onrender.com/api/v1'}/auth`;
+const API_URL = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api/v1'}/auth`;
 
 export interface LoginForm {
   email: string;
@@ -18,6 +19,7 @@ export interface RegisterForm {
   province?: string;
   postalCode?: string;
   country?: string;
+  role?: string;
 }
 
 export interface AuthResponse {
@@ -81,7 +83,8 @@ export const registerApi = async (data: RegisterForm): Promise<AuthResponse> => 
       thanhPho: data.city || '',
       tinh: data.province || '',
       maBuuDien: data.postalCode || '',
-      quocGia: data.country || 'Việt Nam'
+      quocGia: data.country || 'Việt Nam',
+      vaiTro: data.role || 'khach_hang'
     };
 
     console.log('Sending registration data:', backendData);

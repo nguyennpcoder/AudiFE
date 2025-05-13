@@ -813,13 +813,34 @@ const ProductManagement: React.FC = () => {
       });
   };
 
-  // Thêm hàm để lấy ảnh dưới dạng Base64
+  // Thêm hàm để lấy ảnh dưới dạng Base64 - fix URL handling
   const fetchImageAsBase64 = async (url: string) => {
     if (!url) return FALLBACK_IMAGE;
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(url.startsWith('http') ? url : `http://localhost:8080${url}`, {
+      
+      // Fix 1: Check if this is a path for an RS model and add special handling
+      let fullUrl = url;
+      if (url.includes('/RS') || url.includes('rs5') || url.includes('rs7')) {
+        console.log("RS model image detected:", url);
+        // Special handling for RS models - try different URL formation
+        fullUrl = url.startsWith('http') 
+          ? url 
+          : url.startsWith('/') 
+            ? `${BACKEND_URL}${url}` 
+            : `${BACKEND_URL}/${url}`;
+      } else {
+        // Regular URL handling for other models
+        fullUrl = url.startsWith('http') 
+          ? url 
+          : url.startsWith('/') 
+            ? `${BACKEND_URL}${url}` 
+            : `${BACKEND_URL}/${url}`;
+      }
+      
+      console.log("Fetching image from:", fullUrl);
+      const response = await fetch(fullUrl, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -835,7 +856,7 @@ const ProductManagement: React.FC = () => {
         reader.readAsDataURL(blob);
       });
     } catch (e) {
-      console.error("Failed to fetch image:", e);
+      console.error("Failed to fetch image:", e, "URL:", url);
       return FALLBACK_IMAGE;
     }
   };
@@ -848,10 +869,18 @@ const ProductManagement: React.FC = () => {
   useEffect(() => {
     const loadImagesAsBase64 = async () => {
       if (state.productImages.length > 0) {
+        console.log("Loading images:", state.productImages);
         const imageMap: Record<string, string> = {};
         for (const image of state.productImages) {
           if (image.duongDanAnh) {
-            imageMap[image.id] = await fetchImageAsBase64(image.duongDanAnh) as string;
+            try {
+              imageMap[image.id] = await fetchImageAsBase64(image.duongDanAnh) as string;
+            } catch (err) {
+              console.error("Error loading image:", err);
+              imageMap[image.id] = FALLBACK_IMAGE;
+            }
+          } else {
+            imageMap[image.id] = FALLBACK_IMAGE;
           }
         }
         setImageDataMap(imageMap);
@@ -862,6 +891,68 @@ const ProductManagement: React.FC = () => {
       loadImagesAsBase64();
     }
   }, [state.productImages]);
+
+  // 1. Thêm component ImageWithFallback tương tự như trong FeaturedProducts
+  const ImageWithFallback: React.FC<{
+    src: string;
+    alt: string;
+    fallbackSrc: string;
+    imageType?: string;
+  }> = ({ src, alt, fallbackSrc, imageType }) => {
+    const [imgSrc, setImgSrc] = useState<string>(src);
+    const [hasError, setHasError] = useState<boolean>(false);
+
+    useEffect(() => {
+      console.log(`ImageWithFallback received src: "${src}", type: "${imageType}"`);
+      
+      // Fix the issue with /src/assets/ paths getting resolved to the frontend URL
+      if (src.startsWith('/src/assets/')) {
+        // Dùng fallback thay thế
+        setImgSrc(fallbackSrc);
+        return;
+      }
+      
+      // Xử lý path của RS models đặc biệt - vấn đề có thể do path khác nhau
+      if ((src.includes('RS') || src.includes('rs5') || src.includes('rs7')) && 
+          imageType === 'noi_that') {
+        console.log("Handling special RS interior image:", src);
+        // Thử một số path khác nhau nếu cần
+        if (src.startsWith('/')) {
+          setImgSrc(`${BACKEND_URL}${src}`);
+        } else {
+          setImgSrc(`${BACKEND_URL}/${src}`);
+        }
+      } else {
+        // Xử lý URL thông thường
+        if (src.startsWith('http')) {
+          setImgSrc(src);
+        } else if (src.startsWith('/')) {
+          setImgSrc(`${BACKEND_URL}${src}`);
+        } else {
+          setImgSrc(`${BACKEND_URL}/${src}`);
+        }
+      }
+      
+      setHasError(false);
+    }, [src, fallbackSrc, imageType]);
+
+    return (
+      <img
+        src={imgSrc}
+        alt={alt}
+        onError={(e) => {
+          console.error(`Image load failed for src: ${imgSrc}`, e);
+          if (!hasError) {
+            console.log(`Switching to fallback: ${fallbackSrc}`);
+            setHasError(true);
+            setImgSrc(fallbackSrc);
+          }
+        }}
+        onLoad={() => console.log(`Image loaded successfully: ${imgSrc}`)}
+        style={{ width: '100%', height: 'auto', maxHeight: '180px', objectFit: 'cover' }}
+      />
+    );
+  };
 
   return (
     <div className="admin-dashboard">
@@ -1544,19 +1635,25 @@ const ProductManagement: React.FC = () => {
                   <label>Hình ảnh sản phẩm</label>
                   <div className="product-images-container">
                     {state.productImages.length > 0 ? (
-                      state.productImages.map((image, index) => (
-                        <div key={index} className="product-image-item">
-                          <img 
-                            src={imageDataMap[image.id] || FALLBACK_IMAGE}
-                            alt={`${state.currentProduct?.tenMau || 'Product'} ${index + 1}`} 
-                            onError={(e) => {
-                              console.error(`Image failed to load:`, image.id);
-                              e.currentTarget.src = FALLBACK_IMAGE;
-                            }}
-                          />
-                          <div className="image-type">{image.loaiHinh || 'Unknown'}</div>
-                        </div>
-                      ))
+                      state.productImages.map((image, index) => {
+                        // Log thông tin cho RS model 
+                        if (state.currentProduct?.tenMau.includes('RS') || 
+                            state.currentProduct?.tenDong.includes('RS')) {
+                          console.log(`RS model image ${index}:`, image.id, image.loaiHinh, image.duongDanAnh);
+                        }
+                        
+                        return (
+                          <div key={index} className="product-image-item">
+                            <ImageWithFallback 
+                              src={image.duongDanAnh}
+                              alt={`${state.currentProduct?.tenMau || 'Product'} ${index + 1}`}
+                              fallbackSrc={FALLBACK_IMAGE}
+                              imageType={image.loaiHinh}
+                            />
+                            <div className="image-type">{image.loaiHinh || 'Unknown'}</div>
+                          </div>
+                        );
+                      })
                     ) : (
                       <div className="no-images">Không có hình ảnh</div>
                     )}
@@ -1569,7 +1666,19 @@ const ProductManagement: React.FC = () => {
                       accept="image/*" 
                       onChange={(e) => {
                         if (e.target.files && e.target.files[0] && state.currentProduct) {
-                          uploadProductImage(e.target.files[0], state.currentProduct.id, 'noi_that')
+                          // Xác định kiểu ảnh phù hợp cho từng loại xe
+                          let imageType = 'noi_that';
+                          
+                          // Xác định xem có phải RS model không
+                          const isRSModel = state.currentProduct.tenMau.includes('RS') || 
+                                            state.currentProduct.tenDong.includes('RS');
+                          
+                          // Chọn loại ảnh phù hợp dựa trên model
+                          imageType = isRSModel ? 'interior' : 'noi_that';
+                          
+                          console.log(`Uploading image for ${state.currentProduct.tenMau} with type: ${imageType}`);
+                          
+                          uploadProductImage(e.target.files[0], state.currentProduct.id, imageType)
                             .then((result) => {
                               // Refresh the product images after upload
                               if (result && state.currentProduct) {
