@@ -52,6 +52,19 @@ interface SimilarModel {
   selected?: boolean;
 }
 
+// Define a type for the color image response
+interface HinhAnhXeTheoMauDTO {
+  id: number;
+  idMauXe: number;
+  tenMauXe?: string;
+  idMauSac: number;
+  tenMauSac?: string;
+  maHex?: string;
+  duongDanAnh: string;
+  loaiHinh: string;
+  viTri?: number;
+}
+
 // const BACKEND_URL = 'https://audivn.onrender.com';
 const BACKEND_URL = 'http://localhost:8080';
 const FALLBACK_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSIgZmlsbD0iIzk5OSI+No image</dGV4dD48L3N2Zz4=";
@@ -139,27 +152,30 @@ const ProductDetail: React.FC = () => {
           }
         }
 
-        // Fetch product images
-        const imagesResponse = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${id}`);
-        const imagesData = imagesResponse.data;
-        setProductImages(imagesData);
+        // Fetch available colors for this model
+        const colorsResponse = await axios.get(`${BACKEND_URL}/api/v1/mau-sac/mau-xe/${id}`);
+        setAvailableColors(colorsResponse.data);
         
-        // Phân loại và sắp xếp hình ảnh theo vị trí
+        // Chỉ load hình ảnh mặc định từ hinh_anh_xe
+        const imagesResponse = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${id}`);
+        setProductImages(imagesResponse.data);
+        
+        // Process regular images
         const sortByPosition = (a: HinhAnhXe, b: HinhAnhXe) => {
           if (!a.viTri) return 1;
           if (!b.viTri) return -1;
           return a.viTri - b.viTri;
         };
         
-        const ngoaiThat = imagesData
+        const ngoaiThat = imagesResponse.data
           .filter((img: HinhAnhXe) => img.loaiHinh === 'ngoai_that')
           .sort(sortByPosition);
           
-        const noiThat = imagesData
+        const noiThat = imagesResponse.data
           .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
           .sort(sortByPosition);
           
-        const chiTiet = imagesData
+        const chiTiet = imagesResponse.data
           .filter((img: HinhAnhXe) => img.loaiHinh === 'chi_tiet')
           .sort(sortByPosition);
         
@@ -167,27 +183,18 @@ const ProductDetail: React.FC = () => {
         setNoiThatImages(noiThat);
         setChiTietImages(chiTiet);
 
-        // Fetch available colors for this model
-        const colorsResponse = await axios.get(`${BACKEND_URL}/api/v1/mau-sac/mau-xe/${id}`);
-        setAvailableColors(colorsResponse.data);
-        
-        // Set first color as selected by default if colors exist
-        if (colorsResponse.data.length > 0) {
-          setSelectedColor(colorsResponse.data[0]);
-        }
-
         // Fetch similar car models (from same series)
         if (productResponse.data.idDong) {
           try {
             const similarModelsResponse = await axios.get(`${BACKEND_URL}/api/v1/mau-xe/dong-xe/${productResponse.data.idDong}`);
             
             // Map models with selected status
-            const mappedModels = similarModelsResponse.data.map((model: any) => ({
+            const mappedModels = similarModelsResponse.data.map((model: MauXe) => ({
               id: model.id,
               tenMau: model.tenMau,
               tenDong: model.tenDong || productResponse.data.tenDong,
               giaCoban: model.giaCoban,
-              selected: model.id == id
+              selected: model.id == parseInt(id as string)
             }));
             
             setSimilarModels(mappedModels);
@@ -433,9 +440,9 @@ const ProductDetail: React.FC = () => {
     });
   };
 
-  // Add this useEffect hook after the existing useEffect hooks
+  // Update the useEffect hook for the color selection
   useEffect(() => {
-    // Only proceed if selectedColor exists and we have the product id
+    // Chỉ load ảnh theo màu khi người dùng thực sự chọn một màu
     if (selectedColor && id) {
       // Reset current indexes when color changes
       setCurrentImageIndex(0);
@@ -446,41 +453,118 @@ const ProductDetail: React.FC = () => {
       setInteriorFadeState('fade-out');
       
       // Slight delay before loading new images to allow for fade out animation
-      setTimeout(() => {
-        // Fetch images specifically for this model
-        axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${id}`)
-          .then(response => {
-            const imagesData = response.data;
+      setTimeout(async () => {
+        try {
+          // Use the new color-specific endpoint
+          const response = await axios.get(
+            `${BACKEND_URL}/api/v1/hinh-anh-theo-mau/mau-xe/${id}/mau-sac/${selectedColor.id}`
+          );
+          
+          // Sort images by position
+          const sortByPosition = (a: HinhAnhXe, b: HinhAnhXe) => {
+            if (!a.viTri) return 1;
+            if (!b.viTri) return -1;
+            return a.viTri - b.viTri;
+          };
+          
+          // Process the images by type
+          const ngoaiThat = response.data
+            .filter((img: HinhAnhXe) => img.loaiHinh === 'ngoai_that')
+            .sort(sortByPosition);
             
-            // Sort images by type and position
+          const noiThat = response.data
+            .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
+            .sort(sortByPosition);
+            
+          const chiTiet = response.data
+            .filter((img: HinhAnhXe) => img.loaiHinh === 'chi_tiet')
+            .sort(sortByPosition);
+          
+          // Update the state with the fetched images
+          setNgoaiThatImages(ngoaiThat);
+          setNoiThatImages(noiThat);
+          setChiTietImages(chiTiet);
+          setProductImages(response.data);
+          
+          // Fade the images back in
+          setExteriorFadeState('fade-in');
+          setInteriorFadeState('fade-in');
+          
+          console.log(`Loaded ${response.data.length} images for color ${selectedColor.ten}`);
+        } catch (error) {
+          console.error("Failed to fetch color-specific images:", error);
+          
+          // Fallback to filtering by filename if API call fails
+          // This is a backup approach that looks for color names in image filenames
+          try {
+            const colorName = selectedColor.ten.toLowerCase();
+            // Create different variations for matching color names in paths
+            const colorVariations = [
+              colorName,
+              colorName.replace(/\s+/g, ''),           // Remove spaces
+              colorName.replace(/\s+/g, '_'),          // Replace spaces with underscores
+              colorName.normalize("NFD").replace(/[\u0300-\u036f]/g, ""), // Remove diacritics
+            ];
+            
+            // Filter function for color-specific images
+            const filterByColor = (image: HinhAnhXe) => {
+              const path = image.duongDanAnh.toLowerCase();
+              // Check if any color variation exists in the path
+              return colorVariations.some(variation => path.includes(variation));
+            };
+            
+            // Get all images as fallback
+            const imagesResponse = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${id}`);
+            
+            // Filter and sort by position
             const sortByPosition = (a: HinhAnhXe, b: HinhAnhXe) => {
               if (!a.viTri) return 1;
               if (!b.viTri) return -1;
               return a.viTri - b.viTri;
             };
             
-            const ngoaiThat = imagesData
+            // Get exterior images for this color
+            let filteredExterior = imagesResponse.data
               .filter((img: HinhAnhXe) => img.loaiHinh === 'ngoai_that')
+              .filter(filterByColor)
               .sort(sortByPosition);
               
-            const noiThat = imagesData
+            // Get interior images for this color  
+            let filteredInterior = imagesResponse.data
               .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
+              .filter(filterByColor)
               .sort(sortByPosition);
             
-            // Update the state with the fresh images
-            setNgoaiThatImages(ngoaiThat);
-            setNoiThatImages(noiThat);
+            // If no color-specific exterior images found, use all exterior images
+            if (filteredExterior.length === 0) {
+              filteredExterior = imagesResponse.data
+                .filter((img: HinhAnhXe) => img.loaiHinh === 'ngoai_that')
+                .sort(sortByPosition);
+            }
+            
+            // If no color-specific interior images found, use all interior images
+            if (filteredInterior.length === 0) {
+              filteredInterior = imagesResponse.data
+                .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
+                .sort(sortByPosition);
+            }
+            
+            // Update state with filtered images
+            setNgoaiThatImages(filteredExterior);
+            setNoiThatImages(filteredInterior);
             
             // Fade the images back in
             setExteriorFadeState('fade-in');
             setInteriorFadeState('fade-in');
-          })
-          .catch(error => {
-            console.error("Failed to fetch images for selected color:", error);
-          });
+          } catch (e) {
+            console.error("Fallback method also failed:", e);
+            setExteriorFadeState('fade-in');
+            setInteriorFadeState('fade-in');
+          }
+        }
       }, 300); // Small delay for transition effect
     }
-  }, [selectedColor, id]); // Run effect when selected color changes
+  }, [selectedColor, id]); // Giữ nguyên dependencies để kích hoạt khi selectedColor thay đổi
 
   if (isLoading) {
     return (
@@ -650,16 +734,28 @@ const ProductDetail: React.FC = () => {
           <div className="section-content_details">
             <h3>Màu ngoại thất</h3>
             <div className="color-swatch-container_details">
-              {availableColors.map((color) => (
-                <button
+              {availableColors.map((color, index) => (
+                <div
                   key={color.id}
-                  className={`color-swatch_details ${selectedColor?.id === color.id ? 'selected' : ''}`}
-                  style={{ backgroundColor: color.maHex }}
-                  onClick={() => setSelectedColor(color)}
-                  title={color.ten}
+                  className={`color-option ${selectedColor?.id === color.id ? 'selected' : ''}`}
                 >
-                  {color.laMetallic && <span className="metallic-badge_details">★</span>}
-                </button>
+                  <button
+                    className={`color-swatch_details ${selectedColor?.id === color.id ? 'selected' : ''}`}
+                    style={{ 
+                      backgroundColor: color.maHex,
+                      backgroundImage: color.duongDanAnh ? `url(${BACKEND_URL}${color.duongDanAnh})` : 'none',
+                      borderRadius: '15px' /* Rounded corners like in the image */
+                    }}
+                    onClick={() => setSelectedColor(color)}
+                    title={color.ten}
+                  >
+                    {color.laMetallic && <span className="metallic-badge_details">★</span>}
+                  </button>
+                  <span className="color-name">{color.ten}</span>
+                  {color.giaThem > 0 && (
+                    <span className="color-price">+{formatPrice(color.giaThem)}</span>
+                  )}
+                </div>
               ))}
             </div>
           </div>

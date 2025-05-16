@@ -88,12 +88,20 @@ const ImageWithFallback: React.FC<{
       return;
     }
     
-    // Fix for localhost:5173 URLs
+    // Handle URLs with localhost:5173 (frontend server) by replacing with backend server
     if (src.includes('localhost:5173')) {
       const updatedSrc = src.replace(/http:\/\/localhost:5173/g, BACKEND_URL);
       console.log(`Corrected URL to backend: "${updatedSrc}"`);
       setImgSrc(updatedSrc);
-    } else {
+    } 
+    // Handle relative URLs that need the backend URL added
+    else if (src.startsWith('/uploads/')) {
+      const updatedSrc = `${BACKEND_URL}${src}`;
+      console.log(`Added backend URL to path: "${updatedSrc}"`);
+      setImgSrc(updatedSrc);
+    }
+    // For all other URLs, use as is
+    else {
       setImgSrc(src);
     }
     
@@ -972,12 +980,18 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
     try {
       const productImages = productImagesMap[productId];
       if (productImages && productImages.length > 0) {
+        // Log image paths for debugging
+        console.log(`Image paths for product ${productId}:`, 
+          productImages.map(img => img.duongDanAnh));
+        
         const exteriorImages = productImages.filter(img => img.loaiHinh === 'ngoai_that');
         const targetImage = exteriorImages.length > 0 ? exteriorImages[0] : productImages[0];
   
         if (targetImage && targetImage.duongDanAnh) {
-          // Đơn giản là ghép BACKEND_URL với đường dẫn
-          return `${BACKEND_URL}${targetImage.duongDanAnh}`;
+          // The path already starts with /uploads/, so just append to BACKEND_URL
+          const fullUrl = `${BACKEND_URL}${targetImage.duongDanAnh}`;
+          console.log(`Full image URL: ${fullUrl}`);
+          return fullUrl;
         }
       }
       

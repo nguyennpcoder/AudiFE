@@ -726,7 +726,7 @@
 
 .image-carousel_details {
   width: 100%;
-  max-width: 1550px;
+  max-width: 1450px;
   position: relative;
   height: auto;
   display: flex;
@@ -813,44 +813,93 @@
 }
 
 .section-content_details h3 {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 400;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   color: #fff;
+  letter-spacing: 0.5px;
 }
 
 /* Color swatches */
 .color-swatch-container_details {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 10px;
+  padding: 20px 0;
+}
+
+.color-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
 }
 
 .color-swatch_details {
-  width: 50px;
-  height: 50px;
-  border-radius: 5px;
-  border: 2px solid transparent;
+  width: 90px;
+  height: 90px;
+  border-radius: 15px !important;
   cursor: pointer;
+  margin-bottom: 8px;
+  border: 2px solid white;
   position: relative;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .color-swatch_details.selected {
-  border-color: #fff;
   transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(255,255,255,0.3);
+  border-width: 3px;
 }
 
-.color-swatch_details:hover {
-  transform: scale(1.05);
+.color-option .color-name {
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 8px;
+  text-align: center;
+  color: #fff;
+}
+
+.color-option .color-price {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  margin-top: 4px;
 }
 
 .metallic-badge_details {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  font-size: 12px;
-  color: gold;
+  top: 5px;
+  right: 5px;
+  font-size: 14px;
+  color: #FFD700; /* Gold color */
+  text-shadow: 0 0 3px rgba(0,0,0,0.8);
+}
+
+/* Remove this rule that makes colors starting from index 8 circular */
+.color-option:nth-child(n+9) .color-swatch_details {
+  /* border-radius: 50%; - removing this */
+}
+
+/* Remove this rule that makes the circular class swatches circular */
+.color-option-circular .color-swatch_details {
+  /* border-radius: 50%; - removing this */
+}
+
+/* Layout adjustments to better match the image */
+.section-content_details {
+  padding: 20px 0 40px;
+}
+
+.section-content_details h3 {
+  font-size: 1.3rem;
+  font-weight: 400;
+  margin-bottom: 20px;
+  color: #fff;
+  letter-spacing: 0.5px;
 }
 
 /* Interior options */
@@ -1008,7 +1057,7 @@
 /* Loại bỏ hiệu ứng trượt */
 .slide-container_details {
   width: 100%;
-  height: 700px;
+  height: 650px;
   position: relative;
   overflow: hidden;
 }
@@ -1148,4 +1197,52 @@
 
 .premium-image:hover {
   filter: brightness(1.05);
+}
+
+.color-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 10px;
+}
+
+.color-swatch_details {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-bottom: 8px;
+  border: 2px solid transparent;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+.color-swatch_details.selected {
+  border-color: #000;
+  transform: scale(1.1);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+}
+
+.color-option .color-name {
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 4px;
+  text-align: center;
+}
+
+.color-option .color-price {
+  font-size: 11px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.metallic-badge_details {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px;
+  color: gold;
+  text-shadow: 0 0 2px rgba(0,0,0,0.8);
 }
