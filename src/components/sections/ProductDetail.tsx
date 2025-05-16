@@ -92,13 +92,6 @@ const ProductDetail: React.FC = () => {
   // Add state for similar models and selected model
   const [similarModels, setSimilarModels] = useState<SimilarModel[]>([]);
   const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
-  const [showMagnifier, setShowMagnifier] = useState<boolean>(false);
-  const [magnifierPosition, setMagnifierPosition] = useState({
-    x: 0,
-    y: 0,
-    backgroundX: 0,
-    backgroundY: 0
-  });
   // Thêm state mới để quản lý hướng chuyển ảnh
   const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
   // Thay đổi state để quản lý vị trí của slideshow
@@ -119,6 +112,20 @@ const ProductDetail: React.FC = () => {
     { id: 4, ten: 'Dark Gray', mauSac: '#2a2a2a', duongDanAnh: '' },
     { id: 5, ten: 'Red', mauSac: '#6b2b2b', duongDanAnh: '' },
   ];
+
+  // Thêm state mới cho tính năng so sánh màu xe
+  const [compareMode, setCompareMode] = useState<boolean>(false);
+  const [compareColor, setCompareColor] = useState<MauSac | null>(null);
+  const [compareImages, setCompareImages] = useState<HinhAnhXe[]>([]);
+
+  // Thêm state mới để quản lý vị trí của thanh trượt
+  const [sliderPosition, setSliderPosition] = useState<number>(50); // Giá trị 0-100 đại diện cho phần trăm
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+
+  // Thêm state để lưu trữ màu trước đó
+  const [previousColor, setPreviousColor] = useState<MauSac | null>(null);
+  // State cho nút A|B
+  const [showCompareButton, setShowCompareButton] = useState<boolean>(true);
 
   // Đưa trang về đầu khi mới vào
   useEffect(() => {
@@ -409,162 +416,200 @@ const ProductDetail: React.FC = () => {
     window.location.href = `/product/${modelId}`;
   };
 
-  // Completely revised handleImageZoom for perfectly smooth movement
-  const handleImageZoom = (e: React.MouseEvent<HTMLImageElement>, tab: string) => {
-    // Get the bounding rectangle of target image
-    const targetRect = e.currentTarget.getBoundingClientRect();
+  // Hàm xử lý khi chọn màu để so sánh
+  const handleCompareColor = async (color: MauSac) => {
+    // Nếu đang so sánh với màu này rồi, tắt chế độ so sánh
+    if (compareMode && compareColor?.id === color.id) {
+      setCompareMode(false);
+      setCompareColor(null);
+      return;
+    }
     
-    // Calculate mouse position in the image
-    const x = e.clientX - targetRect.left;
-    const y = e.clientY - targetRect.top;
+    setCompareColor(color);
+    setCompareMode(true);
+    // Reset slider position to middle
+    setSliderPosition(50);
     
-    // Calculate position as percentage (for background position)
-    const backgroundX = (x / targetRect.width) * 100;
-    const backgroundY = (y / targetRect.height) * 100;
-    
-    // Calculate magnifier position - centered on cursor
-    const magnifierWidth = 180;
-    const magnifierHeight = 180;
-    const magnifierHalfWidth = magnifierWidth / 2;
-    const magnifierHalfHeight = magnifierHeight / 2;
-    
-    // For positioning the magnifier (don't constrain to image borders for smoother movement)
-    const magnifierX = x - magnifierHalfWidth;
-    const magnifierY = y - magnifierHalfHeight;
-    
-    setMagnifierPosition({
-      x: magnifierX,
-      y: magnifierY,
-      backgroundX,
-      backgroundY
-    });
+    try {
+      // Lấy hình ảnh cho màu được chọn để so sánh
+      const response = await axios.get(
+        `${BACKEND_URL}/api/v1/hinh-anh-theo-mau/mau-xe/${id}/mau-sac/${color.id}`
+      );
+      
+      // Sort images by position
+      const sortByPosition = (a: HinhAnhXe, b: HinhAnhXe) => {
+        if (!a.viTri) return 1;
+        if (!b.viTri) return -1;
+        return a.viTri - b.viTri;
+      };
+      
+      // Lọc các hình ảnh ngoại thất
+      const ngoaiThat = response.data
+        .filter((img: HinhAnhXe) => img.loaiHinh === 'ngoai_that')
+        .sort(sortByPosition);
+        
+      setCompareImages(ngoaiThat);
+      
+    } catch (error) {
+      console.error("Failed to fetch comparison images:", error);
+      setCompareImages([]);
+    }
   };
 
-  // Update the useEffect hook for the color selection
+  // Hàm bắt đầu drag
+  const handleDragStart = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+  };
+
+  // Hàm xử lý drag
+  const handleDrag = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    
+    const container = e.currentTarget.getBoundingClientRect();
+    const position = ((e.clientX - container.left) / container.width) * 100;
+    
+    // Giới hạn trong khoảng 5-95%
+    const clampedPosition = Math.max(5, Math.min(95, position));
+    setSliderPosition(clampedPosition);
+  };
+
+  // Hàm kết thúc drag
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
+  // Cài đặt sự kiện toàn trang
   useEffect(() => {
-    // Chỉ load ảnh theo màu khi người dùng thực sự chọn một màu
-    if (selectedColor && id) {
-      // Reset current indexes when color changes
+    const handleMouseUp = () => {
+      if (isDragging) {
+        setIsDragging(false);
+      }
+    };
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging && compareMode) {
+        const container = document.querySelector('.slide-container_details')?.getBoundingClientRect();
+        if (container) {
+          const position = ((e.clientX - container.left) / container.width) * 100;
+          const clampedPosition = Math.max(5, Math.min(95, position));
+          setSliderPosition(clampedPosition);
+        }
+      }
+    };
+    
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousemove', handleMouseMove);
+    
+    return () => {
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [isDragging, compareMode]);
+
+  // Hàm xử lý khi người dùng chọn màu xe
+  const handleColorSelect = (color: MauSac) => {
+    // Lưu màu hiện tại trước khi đổi
+    if (selectedColor) {
+      setPreviousColor(selectedColor);
+    }
+    
+    // Đặt màu mới được chọn
+    setSelectedColor(color);
+    
+    // Tắt chế độ so sánh khi chọn màu mới
+    if (compareMode) {
+      setCompareMode(false);
+    }
+    
+    // Load ảnh cho màu mới
+    loadColorImages(color);
+  };
+
+  // Hàm load ảnh cho màu được chọn
+  const loadColorImages = async (color: MauSac) => {
+    try {
+      const response = await axios.get(
+        `${BACKEND_URL}/api/v1/hinh-anh-theo-mau/mau-xe/${id}/mau-sac/${color.id}`
+      );
+      
+      // Sort images by position
+      const sortByPosition = (a: HinhAnhXe, b: HinhAnhXe) => {
+        if (!a.viTri) return 1;
+        if (!b.viTri) return -1;
+        return a.viTri - b.viTri;
+      };
+      
+      // Process the images by type
+      const ngoaiThat = response.data
+        .filter((img: HinhAnhXe) => img.loaiHinh === 'ngoai_that')
+        .sort(sortByPosition);
+        
+      const noiThat = response.data
+        .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
+        .sort(sortByPosition);
+        
+      const chiTiet = response.data
+        .filter((img: HinhAnhXe) => img.loaiHinh === 'chi_tiet')
+        .sort(sortByPosition);
+      
+      // Update the state with the fetched images
+      setNgoaiThatImages(ngoaiThat);
+      setNoiThatImages(noiThat);
+      setChiTietImages(chiTiet);
+      setProductImages(response.data);
+      
+      // Reset image indexes
       setCurrentImageIndex(0);
       setActiveInteriorTab(0);
-      
-      // Set fade and slide states for transition effects
-      setExteriorFadeState('fade-out');
-      setInteriorFadeState('fade-out');
-      
-      // Slight delay before loading new images to allow for fade out animation
-      setTimeout(async () => {
-        try {
-          // Use the new color-specific endpoint
-          const response = await axios.get(
-            `${BACKEND_URL}/api/v1/hinh-anh-theo-mau/mau-xe/${id}/mau-sac/${selectedColor.id}`
-          );
-          
-          // Sort images by position
-          const sortByPosition = (a: HinhAnhXe, b: HinhAnhXe) => {
-            if (!a.viTri) return 1;
-            if (!b.viTri) return -1;
-            return a.viTri - b.viTri;
-          };
-          
-          // Process the images by type
-          const ngoaiThat = response.data
-            .filter((img: HinhAnhXe) => img.loaiHinh === 'ngoai_that')
-            .sort(sortByPosition);
-            
-          const noiThat = response.data
-            .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
-            .sort(sortByPosition);
-            
-          const chiTiet = response.data
-            .filter((img: HinhAnhXe) => img.loaiHinh === 'chi_tiet')
-            .sort(sortByPosition);
-          
-          // Update the state with the fetched images
-          setNgoaiThatImages(ngoaiThat);
-          setNoiThatImages(noiThat);
-          setChiTietImages(chiTiet);
-          setProductImages(response.data);
-          
-          // Fade the images back in
-          setExteriorFadeState('fade-in');
-          setInteriorFadeState('fade-in');
-          
-          console.log(`Loaded ${response.data.length} images for color ${selectedColor.ten}`);
-        } catch (error) {
-          console.error("Failed to fetch color-specific images:", error);
-          
-          // Fallback to filtering by filename if API call fails
-          // This is a backup approach that looks for color names in image filenames
-          try {
-            const colorName = selectedColor.ten.toLowerCase();
-            // Create different variations for matching color names in paths
-            const colorVariations = [
-              colorName,
-              colorName.replace(/\s+/g, ''),           // Remove spaces
-              colorName.replace(/\s+/g, '_'),          // Replace spaces with underscores
-              colorName.normalize("NFD").replace(/[\u0300-\u036f]/g, ""), // Remove diacritics
-            ];
-            
-            // Filter function for color-specific images
-            const filterByColor = (image: HinhAnhXe) => {
-              const path = image.duongDanAnh.toLowerCase();
-              // Check if any color variation exists in the path
-              return colorVariations.some(variation => path.includes(variation));
-            };
-            
-            // Get all images as fallback
-            const imagesResponse = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${id}`);
-            
-            // Filter and sort by position
-            const sortByPosition = (a: HinhAnhXe, b: HinhAnhXe) => {
-              if (!a.viTri) return 1;
-              if (!b.viTri) return -1;
-              return a.viTri - b.viTri;
-            };
-            
-            // Get exterior images for this color
-            let filteredExterior = imagesResponse.data
-              .filter((img: HinhAnhXe) => img.loaiHinh === 'ngoai_that')
-              .filter(filterByColor)
-              .sort(sortByPosition);
-              
-            // Get interior images for this color  
-            let filteredInterior = imagesResponse.data
-              .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
-              .filter(filterByColor)
-              .sort(sortByPosition);
-            
-            // If no color-specific exterior images found, use all exterior images
-            if (filteredExterior.length === 0) {
-              filteredExterior = imagesResponse.data
-                .filter((img: HinhAnhXe) => img.loaiHinh === 'ngoai_that')
-                .sort(sortByPosition);
-            }
-            
-            // If no color-specific interior images found, use all interior images
-            if (filteredInterior.length === 0) {
-              filteredInterior = imagesResponse.data
-                .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
-                .sort(sortByPosition);
-            }
-            
-            // Update state with filtered images
-            setNgoaiThatImages(filteredExterior);
-            setNoiThatImages(filteredInterior);
-            
-            // Fade the images back in
-            setExteriorFadeState('fade-in');
-            setInteriorFadeState('fade-in');
-          } catch (e) {
-            console.error("Fallback method also failed:", e);
-            setExteriorFadeState('fade-in');
-            setInteriorFadeState('fade-in');
-          }
-        }
-      }, 300); // Small delay for transition effect
+    } catch (error) {
+      console.error("Failed to fetch color-specific images:", error);
+      // Fallback logic nếu cần
     }
-  }, [selectedColor, id]); // Giữ nguyên dependencies để kích hoạt khi selectedColor thay đổi
+  };
+
+  // Hàm xử lý khi nhấn nút A|B
+  const toggleCompareMode = async () => {
+    // Nếu đang ở chế độ so sánh, tắt nó đi
+    if (compareMode) {
+      setCompareMode(false);
+      return;
+    }
+    
+    // Nếu không có màu trước đó hoặc màu hiện tại, không làm gì cả
+    if (!previousColor || !selectedColor) {
+      return;
+    }
+    
+    // Bật chế độ so sánh
+    setCompareMode(true);
+    setCompareColor(previousColor);
+    setSliderPosition(50);
+    
+    // Load ảnh của màu trước đó để so sánh
+    try {
+      const response = await axios.get(
+        `${BACKEND_URL}/api/v1/hinh-anh-theo-mau/mau-xe/${id}/mau-sac/${previousColor.id}`
+      );
+      
+      // Sort images by position
+      const sortByPosition = (a: HinhAnhXe, b: HinhAnhXe) => {
+        if (!a.viTri) return 1;
+        if (!b.viTri) return -1;
+        return a.viTri - b.viTri;
+      };
+      
+      // Lọc các hình ảnh ngoại thất
+      const ngoaiThat = response.data
+        .filter((img: HinhAnhXe) => img.loaiHinh === 'ngoai_that')
+        .sort(sortByPosition);
+        
+      setCompareImages(ngoaiThat);
+      
+    } catch (error) {
+      console.error("Failed to fetch comparison images:", error);
+      setCompareImages([]);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -683,34 +728,80 @@ const ProductDetail: React.FC = () => {
               <div className="image-slideshow_details">
                 <div className="slide-container_details">
                   <div className={`slide_details ${exteriorFadeState || ''} ${exteriorSlideDirection || ''}`}>
-                    <div className="image-magnifier-container_details">
+                    {/* Nút A|B nằm đè lên hình ảnh */}
+                    {showCompareButton && previousColor && selectedColor && (
+                      <button 
+                        className={`compare-button-overlay ${compareMode ? 'active' : ''}`}
+                        onClick={toggleCompareMode}
+                        title={compareMode ? "Hủy so sánh" : "So sánh với màu trước"}
+                      >
+                        <span className="compare-label">A|B</span>
+                      </button>
+                    )}
+                    
+                    {compareMode && compareColor && compareImages.length > 0 ? (
+                      <div 
+                        className="compare-slider-container"
+                        onMouseDown={handleDragStart}
+                        onMouseMove={handleDrag}
+                        onMouseUp={handleDragEnd}
+                      >
+                        {/* Hình ảnh hiện tại (màu mới) */}
+                        <div className="compare-original" style={{ zIndex: 1 }}>
+                          <img 
+                            src={imageCache[ngoaiThatImages[currentImageIndex]?.duongDanAnh] || getImageUrl(ngoaiThatImages[currentImageIndex]?.duongDanAnh)} 
+                            alt={`${product.tenMau} exterior`}
+                            onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
+                            className="premium-image"
+                          />
+                        </div>
+                        
+                        {/* Hình ảnh so sánh (màu cũ) với clip-path */}
+                        <div 
+                          className="compare-overlay" 
+                          style={{ 
+                            clipPath: `inset(0 ${100-sliderPosition}% 0 0)`,
+                            zIndex: 2
+                          }}
+                        >
+                          <img 
+                            src={imageCache[compareImages[currentImageIndex < compareImages.length ? currentImageIndex : 0]?.duongDanAnh] || 
+                               getImageUrl(compareImages[currentImageIndex < compareImages.length ? currentImageIndex : 0]?.duongDanAnh)} 
+                            alt={`${product.tenMau} ${compareColor.ten} exterior`}
+                            onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
+                            className="premium-image"
+                          />
+                        </div>
+                        
+                        {/* Thanh trượt */}
+                        <div 
+                          className="slider-handle"
+                          style={{ 
+                            left: `${sliderPosition}%`,
+                            cursor: isDragging ? 'grabbing' : 'grab'
+                          }}
+                        >
+                          <div className="slider-divider"></div>
+                          <div className="slider-button">
+                            <span>◀</span>
+                            <span>▶</span>
+                          </div>
+                        </div>
+                        
+                        {/* Nhãn màu sắc */}
+                        <div className="color-labels">
+                          <div className="color-label left">{compareColor?.ten || 'Previous'}</div>
+                          <div className="color-label right">{selectedColor?.ten || 'Current'}</div>
+                        </div>
+                      </div>
+                    ) : (
                       <img 
                         src={imageCache[ngoaiThatImages[currentImageIndex]?.duongDanAnh] || getImageUrl(ngoaiThatImages[currentImageIndex]?.duongDanAnh)} 
                         alt={`${product.tenMau} exterior`}
                         onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
-                        onMouseMove={(e) => handleImageZoom(e, 'exterior')}
-                        onMouseEnter={() => { setShowMagnifier(true); setActiveTab('exterior'); }}
-                        onMouseLeave={() => setShowMagnifier(false)}
                         className="premium-image"
                       />
-                      {showMagnifier && activeTab === 'exterior' && (
-                        <div 
-                          className="image-magnifier_details"
-                          style={{
-                            left: `${magnifierPosition.x}px`,
-                            top: `${magnifierPosition.y}px`
-                          }}
-                        >
-                          <div 
-                            className="magnifier-content_details"
-                            style={{
-                              backgroundImage: `url(${imageCache[ngoaiThatImages[currentImageIndex]?.duongDanAnh] || getImageUrl(ngoaiThatImages[currentImageIndex]?.duongDanAnh)})`,
-                              backgroundPosition: `${magnifierPosition.backgroundX}% ${magnifierPosition.backgroundY}%`
-                            }}
-                          ></div>
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
                 
@@ -737,16 +828,16 @@ const ProductDetail: React.FC = () => {
               {availableColors.map((color, index) => (
                 <div
                   key={color.id}
-                  className={`color-option ${selectedColor?.id === color.id ? 'selected' : ''}`}
+                  className={`color-option ${selectedColor?.id === color.id ? 'selected' : ''} ${compareColor?.id === color.id ? 'comparing' : ''}`}
                 >
                   <button
-                    className={`color-swatch_details ${selectedColor?.id === color.id ? 'selected' : ''}`}
+                    className={`color-swatch_details ${selectedColor?.id === color.id ? 'selected' : ''} ${compareColor?.id === color.id ? 'comparing' : ''}`}
                     style={{ 
                       backgroundColor: color.maHex,
                       backgroundImage: color.duongDanAnh ? `url(${BACKEND_URL}${color.duongDanAnh})` : 'none',
-                      borderRadius: '15px' /* Rounded corners like in the image */
+                      borderRadius: '15px'
                     }}
-                    onClick={() => setSelectedColor(color)}
+                    onClick={() => handleColorSelect(color)}
                     title={color.ten}
                   >
                     {color.laMetallic && <span className="metallic-badge_details">★</span>}
@@ -787,28 +878,8 @@ const ProductDetail: React.FC = () => {
                         src={imageCache[noiThatImages[activeInteriorTab]?.duongDanAnh] || getImageUrl(noiThatImages[activeInteriorTab]?.duongDanAnh)} 
                         alt={`${product.tenMau} interior`}
                         onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
-                        onMouseMove={(e) => handleImageZoom(e, 'interior')}
-                        onMouseEnter={() => { setShowMagnifier(true); setActiveTab('interior'); }}
-                        onMouseLeave={() => setShowMagnifier(false)}
                         className="premium-image"
                       />
-                      {showMagnifier && activeTab === 'interior' && (
-                        <div 
-                          className="image-magnifier_details"
-                          style={{
-                            left: `${magnifierPosition.x}px`,
-                            top: `${magnifierPosition.y}px`
-                          }}
-                        >
-                          <div 
-                            className="magnifier-content_details"
-                            style={{
-                              backgroundImage: `url(${imageCache[noiThatImages[activeInteriorTab]?.duongDanAnh] || getImageUrl(noiThatImages[activeInteriorTab]?.duongDanAnh)})`,
-                              backgroundPosition: `${magnifierPosition.backgroundX}% ${magnifierPosition.backgroundY}%`
-                            }}
-                          ></div>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
