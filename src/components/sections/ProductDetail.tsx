@@ -749,9 +749,29 @@ const ProductDetail: React.FC = () => {
         // Update interior images if found
         if (interiorImages.length > 0) {
           setNoiThatImages(interiorImages);
-        } else if (noiThat.length > 0) {
-          // Fallback to color-specific interior images
-          setNoiThatImages(noiThat);
+        } else {
+          // If no color-specific images, try to get default interior images
+          const defaultInteriorImagesResponse = await axios.get(
+            `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${id}/noi-that/${currentNoiThat.id}`
+          );
+
+          const defaultInteriorImages = defaultInteriorImagesResponse.data
+            .filter((img: HinhAnhTheoNoiThatDTO) => img.loaiHinh === 'noi_that')
+            .sort(sortByPosition)
+            .map((img: HinhAnhTheoNoiThatDTO) => ({
+              id: img.id,
+              idMauXe: img.idMau,
+              duongDanAnh: img.duongDanAnh,
+              loaiHinh: img.loaiHinh,
+              viTri: img.viTri
+            }));
+
+          if (defaultInteriorImages.length > 0) {
+            setNoiThatImages(defaultInteriorImages);
+          } else if (noiThat.length > 0) {
+            // Fallback to color-specific interior images
+            setNoiThatImages(noiThat);
+          }
         }
       } else {
         // If no current interior option, use color-specific interior images

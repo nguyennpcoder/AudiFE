@@ -1,54 +1,94 @@
-# React + TypeScript + Vite
+# Audi Showroom Web Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🚗 Project Overview
+A modern and interactive web application for Audi Showroom, built with React, TypeScript, and Vite, providing a seamless and professional user experience.
 
-Currently, two official plugins are available:
+## ✨ Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 1. Dynamic Home Page
+- Dynamic banner showcase with highlighted Audi car models
+- Detailed feature display for each car line
+- Interactive interface with smooth slide transition effects
 
-## Expanding the ESLint configuration
+### 2. User Authentication
+- Login/Register with multiple methods:
+  - Manual login
+  - Google Sign-In
+  - Facebook Sign-In
+  - GitHub Sign-In
+- Secure user authentication with JWT
+- User role-based access (Admin, Regular Users)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 3. Admin Dashboard
+- Statistical dashboard
+- User management
+- Product management
+- Order management
+- Responsive and user-friendly interface
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### 4. Product Page
+- Car list display with filtering
+- In-depth product details
+- Online customization and quotation
+- High-quality images
+
+### 5. Personal Page (MyAudi)
+- Personal information management
+- Manage your vehicles
+- Test drive scheduling
+- Favorite cars list
+
+### 6. Map Integration
+- Display Audi dealerships
+- Routing and navigation
+
+## 🛠 Technologies Used
+- React 19
+- TypeScript
+- Vite
+- React Router
+- Firebase Authentication
+- Ant Design
+- Leaflet Maps
+- Axios
+
+## 🚀 Installation & Running the Project
+
+```bash
+# Install dependencies
+yarn 
+
+# Run application in development mode
+yarn dev
+
+# Build application for production
+yarn build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🔒 Security
+- JWT authentication
+- Route protection with role-based access
+- Client and server-side validation
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📱 Responsive Design
+The application is designed to work smoothly on all devices:
+- Desktop
+- Tablet
+- Mobile
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+## 🎨 Interface
+Designed in Audi's style:
+- Accurate color palette
+- Professional typography
+- Smooth animations
+
+## 🔜 Development Roadmap
+- Add dark/light mode
+- Performance optimization
+- Multi-language support
+
+## 📸 Demo
+[Attach GIF file demonstrating key features]
+
+## 👥 Developers
+- Nguyennpcoder - Team Lead & Lead Developer
