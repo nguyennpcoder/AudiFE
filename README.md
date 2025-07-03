@@ -88,7 +88,16 @@ Designed in Audi's style:
 - Multi-language support
 
 ## 📸 Demo
-![Audi Project Demo](./src/assets/video1.gif)
+- Gif Demo file is in development. Please see the link 👇
+## 🌐 Live Demo & Deployment
+
+### 🚀 Web Application
+[🌍 Audi Showroom - audivn.web.app](https://audivn.web.app)
+
+### ✨ Key Deployment Details
+- **Platform**: Firebase Hosting
+- **Domain**: audivn.web.app
+- **Status**: Active and Fully Functional
 
 ## 👥 Developers
 - Nguyennpcoder - Team Lead & Lead Developer
