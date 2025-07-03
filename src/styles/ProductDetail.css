@@ -254,24 +254,61 @@
 }
 
 .interior-option_details {
-  width: 60px;
-  height: 60px;
+  position: relative;
+  width: 110px;
+  height: 110px;
   border-radius: 8px;
-  border: 2px solid transparent;
-  cursor: pointer;
-  background-color: #333;
   overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+
+.interior-option_details img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .interior-option_details.selected {
-  border-color: #fff;
+  border-color: #d5001c;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-.interior-option_details:nth-child(1) { background-color: #333; }
-.interior-option_details:nth-child(2) { background-color: #523f3f; }
-.interior-option_details:nth-child(3) { background-color: #2c2c2c; }
-.interior-option_details:nth-child(4) { background-color: #3c3c3c; }
-.interior-option_details:nth-child(5) { background-color: #5a3030; }
+.interior-option-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 5px;
+  color: white;
+}
+
+.interior-option-name {
+  font-size: 12px;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.interior-option-price {
+  font-size: 10px;
+  color: #ff9999;
+  margin: 2px 0 0;
+}
+
+.interior-description {
+  margin-top: 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #555;
+}
 
 /* Summary section */
 .summary-section_details {
@@ -338,6 +375,18 @@
     flex-direction: column;
     gap: 20px;
     text-align: center;
+  }
+  
+  .interior-option_details {
+    width: 100px;
+  }
+  
+  .interior-option_details img {
+    height: 70px;
+  }
+  
+  .interior-option-name {
+    font-size: 11px;
   }
 }
 
@@ -981,8 +1030,8 @@
 @keyframes slideInRight {
   from { 
     opacity: 0;
-    transform: translateX(5%);
-    filter: blur(5px);
+    transform: translateX(8%);
+    filter: blur(2px);
   }
   to { 
     opacity: 1;
@@ -994,8 +1043,8 @@
 @keyframes slideInLeft {
   from { 
     opacity: 0;
-    transform: translateX(-5%);
-    filter: blur(5px);
+    transform: translateX(-8%);
+    filter: blur(2px);
   }
   to { 
     opacity: 1;
@@ -1012,8 +1061,8 @@
   }
   to { 
     opacity: 0;
-    transform: translateX(5%);
-    filter: blur(5px);
+    transform: translateX(8%);
+    filter: blur(2px);
   }
 }
 
@@ -1025,8 +1074,8 @@
   }
   to { 
     opacity: 0;
-    transform: translateX(-5%);
-    filter: blur(5px);
+    transform: translateX(-8%);
+    filter: blur(2px);
   }
 }
 
@@ -1060,6 +1109,9 @@
   height: 650px;
   position: relative;
   overflow: hidden;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .slide_details {
@@ -1070,31 +1122,35 @@
   left: 0;
   opacity: 1;
   will-change: transform, opacity;
-  transition: opacity 0.7s cubic-bezier(0.215, 0.61, 0.355, 1);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition: opacity 0.4s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .slide_details.fade-out {
   opacity: 0;
+  transition: opacity 0.28s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .slide_details.fade-in {
   opacity: 1;
+  transition: opacity 0.4s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .slide_details.fade-out.slide-left {
-  animation: slideOutLeft 0.7s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+  animation: slideOutLeft 0.28s cubic-bezier(0.65, 0, 0.35, 1) forwards;
 }
 
 .slide_details.fade-out.slide-right {
-  animation: slideOutRight 0.7s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+  animation: slideOutRight 0.28s cubic-bezier(0.65, 0, 0.35, 1) forwards;
 }
 
 .slide_details.fade-in.slide-left {
-  animation: slideInRight 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: slideInRight 0.4s cubic-bezier(0.33, 1, 0.68, 1) forwards;
 }
 
 .slide_details.fade-in.slide-right {
-  animation: slideInLeft 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: slideInLeft 0.4s cubic-bezier(0.33, 1, 0.68, 1) forwards;
 }
 
 .slide_details img {
@@ -1102,6 +1158,9 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
 }
 
 /* Cải thiện nút chuyển ảnh */
@@ -1190,9 +1249,10 @@
 
 /* Premium image styling */
 .premium-image {
-  transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), filter 0.5s ease;
   transform: translateZ(0);
   backface-visibility: hidden;
+  will-change: transform;
+  transition: transform 0.7s cubic-bezier(0.33, 1, 0.68, 1), filter 0.5s ease;
 }
 
 .premium-image:hover {
@@ -1451,3 +1511,204 @@
 .compare-button-overlay.active .compare-label {
   color: #fff;
 }
+
+/* CSS cho cả màu ngoại thất và nội thất */
+.color-option, .interior-option_details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+  margin: 0 8px 12px 0;
+}
+
+/* Thiết lập kích thước đồng nhất cho cả màu ngoại thất và tùy chọn nội thất */
+.color-swatch_details {
+  width: 70px;
+  height: 70px;
+  border-radius: 8px !important; /* Buộc viền bo góc giống nhau */
+  cursor: pointer;
+  margin-bottom: 6px;
+  border: 2px solid transparent;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+/* Chỉnh viền khi được chọn */
+.color-swatch_details.selected {
+  border-color: #d5001c;
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(255,255,255,0.3);
+  border-width: 2px;
+}
+
+/* CSS cho nội thất - thay đổi để khớp với màu ngoại thất */
+.interior-option_details {
+  width: 70px;
+  height: 70px;
+  position: relative;
+  border-radius: 8px !important;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  margin: 0 8px 12px 0;
+}
+
+.interior-option_details.selected {
+  border-color: #d5001c !important;
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(255,255,255,0.3);
+}
+
+.interior-option_details:hover {
+  transform: scale(1.05);
+}
+
+/* Thiết lập container chung */
+.color-swatch-container_details,
+.interior-options-container_details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+/* Thiết lập text dưới hình ảnh màu sắc */
+.color-option .color-name,
+.interior-option-name {
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 6px;
+  text-align: center;
+  color: #fff;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.color-option .color-price,
+.interior-option-price {
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  margin-top: 3px;
+}
+
+/* Add these styles to your ProductDetail.css file */
+
+.color-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.reset-color-button {
+  background-color: transparent;
+  color: white;
+  border: 1px solid white;
+  padding: 8px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.reset-color-button:hover {
+  background-color: white;
+  color: black;
+}
+
+.reset-color-button:active {
+  transform: scale(0.98);
+}
+
+.reset-color-button:disabled {
+  background-color: transparent;
+  border-color: #555;
+  color: #555;
+  cursor: not-allowed;
+}
+
+.color-swatch_details.default-color {
+  border: 2px solid white !important;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  position: relative;
+}
+
+.default-badge {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  color: #333;
+  font-size: 9px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  letter-spacing: 0.5px;
+}
+
+.color-name {
+  font-size: 12px;
+  margin-top: 5px;
+  text-align: center;
+  width: 100%;
+}
+
+/* Add to your CSS file */
+.color-option.default-color {
+  order: -1; /* Ensures the default color appears first */
+  position: relative;
+}
+
+.default-color .color-swatch_details {
+  border: 2px solid #d5001c !important; /* Audi red color */
+  box-shadow: 0 0 10px rgba(213, 0, 28, 0.5);
+}
+
+.color-swatch-container_details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+/* Ensure the selected color is always clearly indicated */
+.color-swatch_details.selected {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+  z-index: 5;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+/* Animation for image transitions */
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out forwards;
+}
+
+.fade-out {
+  animation: fadeOut 0.4s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+

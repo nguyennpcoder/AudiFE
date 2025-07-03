@@ -979,10 +979,7 @@ const ProductManagement: React.FC = () => {
           </div>
           
           <div className="admin-user-dropdown-content">
-            <a href="#profile" className="admin-user-menu-item">
-              <i className="fas fa-user"></i>
-              <span>Hồ sơ cá nhân</span>
-            </a>
+           
             <a href="#settings" className="admin-user-menu-item">
               <i className="fas fa-cog"></i>
               <span>Cài đặt</span>

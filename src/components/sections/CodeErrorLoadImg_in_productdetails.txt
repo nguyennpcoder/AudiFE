@@ -1,0 +1,173 @@
+
+  // Hàm xử lý khi người dùng chọn màu xe
+  // ------------------------------------------------------------CODE ERROR----------------------------------------------------------
+  // const handleColorSelect = async (color: MauSac) => {
+  //   console.log('Color Select - Start', {
+  //     selectedColor: selectedColor?.ten,
+  //     newColor: color.ten,
+  //     currentNoiThat: selectedNoiThat?.ten,
+  //     noiThatOptions: noiThatOptions.map(opt => opt.ten)
+  //   });
+
+  //   if (selectedColor) setPreviousColor(selectedColor);
+
+  //   setSelectedColor(color);
+
+  //   if (compareMode) setCompareMode(false);
+
+  //   // Preserve the current interior option
+  //   const currentNoiThat = selectedNoiThat;
+
+  //   // Load ảnh ngoại thất và nội thất cho màu mới
+  //   await loadColorImages(color);
+
+  //   // Nếu có option nội thất hiện tại, load ảnh nội thất theo màu mới
+  //   if (currentNoiThat) {
+  //     console.log('Color Select - Using current interior option', currentNoiThat.ten);
+  //     await handleNoiThatSelect(currentNoiThat, color.id);
+  //   } else {
+  //     // Nếu không có option nội thất, thử lấy option mặc định
+  //     const defaultNoiThat = noiThatOptions.find(opt => opt.laMacDinh);
+  //     if (defaultNoiThat) {
+  //       console.log('Color Select - Using default interior option', defaultNoiThat.ten);
+  //       await handleNoiThatSelect(defaultNoiThat, color.id);
+  //     } else {
+  //       console.log('Color Select - No interior option found');
+  //     }
+  //   }
+
+  //   console.log('Color Select - End', {
+  //     finalSelectedColor: selectedColor?.ten,
+  //     finalSelectedNoiThat: selectedNoiThat?.ten
+  //   });
+  // };
+  // ------------------------------------------------------------CODE ERROR----------------------------------------------------------
+  // const handleColorSelect = async (color: MauSac) => {
+  //   console.log('Color Select - Start', {
+  //     selectedColor: selectedColor?.ten,
+  //     newColor: color.ten,
+  //     currentNoiThat: selectedNoiThat?.ten,
+  //     noiThatOptions: noiThatOptions.map(opt => opt.ten)
+  //   });
+  
+  //   if (selectedColor) setPreviousColor(selectedColor);
+  
+  //   setSelectedColor(color);
+  
+  //   if (compareMode) setCompareMode(false);
+  
+  //   // Preserve the current interior option
+  //   const currentNoiThat = selectedNoiThat;
+  
+  //   // Load ảnh ngoại thất và nội thất cho màu mới, SKIP interior update
+  //   await loadColorImages(color, true);  // Add true here to skip interior update
+  
+  //   // Nếu có option nội thất hiện tại, load ảnh nội thất theo màu mới
+  //   if (currentNoiThat) {
+  //     console.log('Color Select - Using current interior option', currentNoiThat.ten);
+  //     await handleNoiThatSelect(currentNoiThat, color.id);
+  //   } else {
+  //     // Nếu không có option nội thất, thử lấy option mặc định
+  //     const defaultNoiThat = noiThatOptions.find(opt => opt.laMacDinh);
+  //     if (defaultNoiThat) {
+  //       console.log('Color Select - Using default interior option', defaultNoiThat.ten);
+  //       await handleNoiThatSelect(defaultNoiThat, color.id);
+  //     } else {
+  //       console.log('Color Select - No interior option found');
+  //     }
+  //   }
+  
+  //   console.log('Color Select - End', {
+  //     finalSelectedColor: selectedColor?.ten,
+  //     finalSelectedNoiThat: selectedNoiThat?.ten
+  //   });
+  // };
+  // ------------------------------------------------------------CODE ERROR----------------------------------------------------------
+  // // Hàm load ảnh cho màu được chọn
+  // const loadColorImages = async (color: MauSac, skipInteriorUpdate: boolean = false) => {
+  //   try {
+  //     // Kiểm tra xem có phải màu mặc định không
+  //     const isDefaultColor = color.id === defaultColor?.id;
+
+  //     let response;
+  //     if (isDefaultColor) {
+  //       // Nếu là màu mặc định, lấy ảnh từ hinh_anh_xe
+  //       response = await axios.get(
+  //         `${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${id}`
+  //       );
+  //     } else {
+  //       // Nếu là màu được thay đổi, lấy ảnh từ hinh_anh_xe_theo_mau
+  //       response = await axios.get(
+  //         `${BACKEND_URL}/api/v1/hinh-anh-theo-mau/mau-xe/${id}/mau-sac/${color.id}`
+  //       );
+  //     }
+      
+  //     console.log(`Loaded ${response.data.length} images for color ${color.ten} (${isDefaultColor ? 'Default' : 'Custom'})`);
+      
+  //     // Sort images by position
+  //     const sortByPosition = (a: HinhAnhXe, b: HinhAnhXe) => {
+  //       if (!a.viTri) return 1;
+  //       if (!b.viTri) return -1;
+  //       return a.viTri - b.viTri;
+  //     };
+      
+  //     // Process the images by type
+  //     const ngoaiThat = response.data
+  //       .filter((img: HinhAnhXe) => img.loaiHinh === 'ngoai_that')
+  //       .sort(sortByPosition);
+        
+  //     // Lấy cả ảnh nội thất 
+  //     const noiThat = response.data
+  //       .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
+  //       .sort(sortByPosition);
+      
+  //     const chiTiet = response.data
+  //       .filter((img: HinhAnhXe) => img.loaiHinh === 'chi_tiet')
+  //       .sort(sortByPosition);
+      
+  //     console.log(`Ngoại thất: ${ngoaiThat.length}, Nội thất: ${noiThat.length}, Chi tiết: ${chiTiet.length}`);
+      
+  //     // Chỉ update state nếu có ảnh
+  //     if (ngoaiThat.length > 0) {
+  //       setNgoaiThatImages(ngoaiThat);
+  //     }
+      
+  //     // Cập nhật noiThatImages chỉ khi không skip
+  //     if (!skipInteriorUpdate && noiThat.length > 0) {
+  //       setNoiThatImages(noiThat);
+  //     }
+      
+  //     if (chiTiet.length > 0) {
+  //       setChiTietImages(chiTiet);
+  //     }
+      
+  //     // Pre-load ảnh vào cache để chuyển đổi mượt hơn
+  //     const allImages = [...ngoaiThat, ...noiThat, ...chiTiet];
+  //     allImages.forEach(img => {
+  //       if (img.duongDanAnh) {
+  //         fetchImageAsBase64(img.duongDanAnh)
+  //           .then((base64Image) => {
+  //             setImageCache(prevCache => ({
+  //               ...prevCache,
+  //               [img.duongDanAnh]: base64Image as string
+  //             }));
+  //           })
+  //           .catch(error => {
+  //             console.error(`Failed to preload image: ${img.duongDanAnh}`, error);
+  //           });
+  //       }
+  //     });
+      
+  //     // Reset image indexes
+  //     setCurrentImageIndex(0);
+  //     setActiveInteriorTab(0);
+      
+  //   } catch (error) {
+  //     console.error(`Failed to fetch images for color ID ${color.id}:`, error);
+  //   }
+  // };
+
+  // Add a new state for loading images
+  
+  // ------------------------------------------------------------CODE ERROR----------------------------------------------------------
+  

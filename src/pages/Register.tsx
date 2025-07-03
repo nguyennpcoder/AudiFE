@@ -6,7 +6,7 @@ import { useNotification } from '../context/NotificationContext';
 import '../styles/Auth.css';
 import logo from '../assets/logo.svg';
 // Import video for background
-import backgroundVideo from '../assets/videoaudi.mp4';
+import backgroundVideo from '../assets/audivideo.mp4';
 // Import message từ antd
 import { message as antdMessage } from 'antd';
 

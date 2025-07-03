@@ -18,6 +18,7 @@ import { ConfigProvider } from 'antd';
 import { NotificationProvider } from './context/NotificationContext';
 import ProductDetail from './components/sections/ProductDetail';
 import DealershipPage from './pages/Dealership';
+import ModelsPage from './pages/models/Models';
 
 function App() {
   const location = useLocation();
@@ -160,6 +161,7 @@ function App() {
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/dealership" element={<DealershipPage />} />
               <Route path="/dealership/:id" element={<DealershipPage />} />
+              <Route path="/models" element={<ModelsPage />} />
             </Routes>
           </main>
           {shouldShowFooter && <Footer />}

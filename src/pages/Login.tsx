@@ -7,7 +7,7 @@ import '../styles/Auth.css';
 // Import logo for Audi
 import logo from '../assets/logo.svg';
 // Import video for background
-import backgroundVideo from '../assets/videoaudi.mp4';
+import backgroundVideo from '../assets/audivideo.mp4';
 // Replace antd message with our notification
 import { message as antdMessage } from 'antd';
 // Import Firebase authentication functions

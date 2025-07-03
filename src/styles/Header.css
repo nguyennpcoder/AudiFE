@@ -45,9 +45,7 @@
   .main-nav {
     display: flex;
     margin: 0 auto;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+    overflow: visible;
   }
   
   .nav-list {
@@ -680,4 +678,8 @@
   .main-nav::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0.2);
     border-radius: 20px;
+  }
+
+  .main-nav, .nav-list {
+    overflow: visible !important;
   }

@@ -166,11 +166,12 @@ const Header = () => {
                 onMouseEnter={() => setIsUserMenuOpen(true)}
                 onMouseLeave={() => setIsUserMenuOpen(false)}
               >
-                {firebaseUser?.photoURL ? (
+                {firebaseUser && firebaseUser.photoURL ? (
                   <img 
-                    src={firebaseUser.photoURL} 
-                    alt="Profile" 
+                    src={firebaseUser.photoURL}
+                    alt="Profile"
                     className="user-avatar"
+                    referrerPolicy="no-referrer"
                   />
                 ) : (
                   <div className="default-avatar">

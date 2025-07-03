@@ -39,8 +39,11 @@ interface MauSac {
 interface NoiThatOption {
   id: number;
   ten: string;
-  mauSac: string; // Hex color
+  moTa: string;
   duongDanAnh: string;
+  giaThem: number;
+  laMacDinh?: boolean;
+  mauSac?: string;
 }
 
 // Update SimilarModel interface
@@ -65,9 +68,27 @@ interface HinhAnhXeTheoMauDTO {
   viTri?: number;
 }
 
+// Define a type for the interior image response
+interface HinhAnhTheoNoiThatDTO {
+  id: number;
+  idMau: number;
+  idNoiThat: number;
+  tenNoiThat?: string;
+  duongDanAnh: string;
+  loaiHinh: string;
+  viTri?: number;
+}
+
 // const BACKEND_URL = 'https://audivn.onrender.com';
 const BACKEND_URL = 'http://localhost:8080';
 const FALLBACK_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSIgZmlsbD0iIzk5OSI+No image</dGV4dD48L3N2Zz4=";
+
+interface LegacyInteriorOption {
+  id: number;
+  ten: string;
+  mauSac: string;
+  duongDanAnh: string;
+}
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -104,8 +125,11 @@ const ProductDetail: React.FC = () => {
   const [exteriorSlideDirection, setExteriorSlideDirection] = useState<'slide-left' | 'slide-right' | null>(null);
   const [interiorSlideDirection, setInteriorSlideDirection] = useState<'slide-left' | 'slide-right' | null>(null);
   
-  // Predefined interior options (since we don't have an API for these)
-  const interiorOptions: NoiThatOption[] = [
+  // Add state for default color
+  const [defaultColor, setDefaultColor] = useState<MauSac | null>(null);
+  
+  // Define fallback options with the legacy interface
+  const interiorFallbackOptions: LegacyInteriorOption[] = [
     { id: 1, ten: 'Black', mauSac: '#1e1e1e', duongDanAnh: '' },
     { id: 2, ten: 'Brown', mauSac: '#4d3629', duongDanAnh: '' },
     { id: 3, ten: 'Gray', mauSac: '#3a3a3a', duongDanAnh: '' },
@@ -132,6 +156,30 @@ const ProductDetail: React.FC = () => {
     window.scrollTo(0, 0);
   }, []);
     
+  const [noiThatOptions, setNoiThatOptions] = useState<NoiThatOption[]>([]);
+  const [selectedNoiThat, setSelectedNoiThat] = useState<NoiThatOption | null>(null);
+
+  // Add this function to fetch interior options
+  const fetchNoiThatOptions = async (mauXeId: string) => {
+    try {
+      // Vẫn gọi API nhưng không sử dụng kết quả để hiển thị hình ảnh
+      const response = await axios.get(`${BACKEND_URL}/api/v1/noi-that/mau-xe/${mauXeId}`);
+      console.log("Nội thất data:", response.data);
+      
+      setNoiThatOptions(response.data);
+      
+      const defaultOption = response.data.find((option: NoiThatOption) => option.laMacDinh);
+      if (defaultOption) {
+        setSelectedNoiThat(defaultOption);
+      } else if (response.data.length > 0) {
+        setSelectedNoiThat(response.data[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching noi that options:', error);
+    }
+  };
+
+  // Update useEffect to select default color that matches with hinh_anh_xe images
   useEffect(() => {
     const fetchProductDetails = async () => {
       try {
@@ -142,10 +190,13 @@ const ProductDetail: React.FC = () => {
         setProduct(productResponse.data);
         setSelectedModelId(parseInt(id as string));
 
-        // Lấy thông tin dòng xe từ product
+        // Fetch interior options
+        await fetchNoiThatOptions(id as string);
+
+        // Set dong xe information
         setDongXe(productResponse.data.tenDong);
 
-        // Parse technical specifications from JSON string
+        // Parse technical specifications
         if (productResponse.data.thongSoKyThuat) {
           try {
             const specs = typeof productResponse.data.thongSoKyThuat === 'string' 
@@ -159,15 +210,12 @@ const ProductDetail: React.FC = () => {
           }
         }
 
-        // Fetch available colors for this model
-        const colorsResponse = await axios.get(`${BACKEND_URL}/api/v1/mau-sac/mau-xe/${id}`);
-        setAvailableColors(colorsResponse.data);
-        
-        // Chỉ load hình ảnh mặc định từ hinh_anh_xe
+        // Lấy ảnh chuẩn từ bảng hinh_anh_xe
         const imagesResponse = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${id}`);
+        console.log("Standard images:", imagesResponse.data);
         setProductImages(imagesResponse.data);
         
-        // Process regular images
+        // Xử lý ảnh tiêu chuẩn
         const sortByPosition = (a: HinhAnhXe, b: HinhAnhXe) => {
           if (!a.viTri) return 1;
           if (!b.viTri) return -1;
@@ -186,16 +234,123 @@ const ProductDetail: React.FC = () => {
           .filter((img: HinhAnhXe) => img.loaiHinh === 'chi_tiet')
           .sort(sortByPosition);
         
+        // Luôn hiển thị ảnh từ hinh_anh_xe trước
         setNgoaiThatImages(ngoaiThat);
         setNoiThatImages(noiThat);
         setChiTietImages(chiTiet);
 
-        // Fetch similar car models (from same series)
+        // Lấy các màu cho mẫu xe này
+        const colorsResponse = await axios.get(`${BACKEND_URL}/api/v1/mau-sac/mau-xe/${id}`);
+        console.log("Available colors for model ID", id, ":", colorsResponse.data);
+        setAvailableColors(colorsResponse.data);
+        
+        // Xác định màu mặc định dựa trên ID mẫu xe theo yêu cầu
+        let defaultColorName = "";
+        switch(id) {
+          case "1":
+            defaultColorName = "Trắng Băng";  // Giữ nguyên theo yêu cầu
+            break;
+          case "2":
+            defaultColorName = "Trắng Băng";
+            break;
+          case "3":
+            defaultColorName = "Xám Pebble";
+            break;
+          case "4":
+            defaultColorName = "Trắng Arkona";
+            break;
+          case "5":
+            defaultColorName = "Trắng Arkona";
+            break;
+          case "6":
+            defaultColorName = "Bạc Florett";
+            break;
+          case "7":
+            defaultColorName = "Bạc Florett";
+            break;
+          case "8":
+            defaultColorName = "Bạc Florett";
+            break;
+          case "9":
+            defaultColorName = "Xám Nardo";
+            break;
+          case "10":
+            defaultColorName = "Trắng Băng";
+            break;
+          case "11":
+            defaultColorName = "Bạc Florett";
+            break;
+          case "12":
+            defaultColorName = "Bạc Florett";
+            break;
+          default:
+            defaultColorName = "";
+        }
+
+        console.log("Default color name for model", id, ":", defaultColorName);
+        
+        // Tìm màu mặc định trong danh sách màu
+        let defaultColorFound = null;
+        
+        // Tìm màu theo tên chính xác
+        if (id === "1") {
+          // Cho ID 1, tìm màu "Trắng Băng" và dùng nó trực tiếp
+          defaultColorFound = colorsResponse.data.find((color: MauSac) => 
+            color.ten === "Trắng Băng");
+          console.log("Using Trắng Băng for model 1:", defaultColorFound);
+        } else {
+          defaultColorFound = colorsResponse.data.find((color: MauSac) => 
+            color.ten === defaultColorName);
+        }
+        
+        // Các màu thay thế cho từng ID khi màu chính không có sẵn
+        if (!defaultColorFound) {
+          console.log(`Default color "${defaultColorName}" not found, searching for fallback`);
+          
+          // Xử lý fallback cho từng ID cụ thể
+          if (id === "1" || id === "2" || id === "10") {
+            // Nếu không tìm thấy Trắng Băng, dùng Trắng Arkona thay thế
+            defaultColorFound = colorsResponse.data.find((color: MauSac) => 
+              color.ten === "Trắng Arkona");
+            console.log(`Using fallback color "Trắng Arkona" for model ${id}`);
+          }
+        }
+        
+        // Nếu vẫn không tìm thấy, thử tìm màu có giá trị giaThem = 0
+        if (!defaultColorFound) {
+          console.log("Fallback color not found, checking for color with giaThem = 0");
+          defaultColorFound = colorsResponse.data.find((color: MauSac) => 
+            Number(color.giaThem) === 0);
+        }
+        
+        console.log("Default color found:", defaultColorFound);
+        
+        // Nếu vẫn không tìm được màu mặc định, dùng màu đầu tiên
+        if (!defaultColorFound && colorsResponse.data.length > 0) {
+          console.log("No default color found, using first available color");
+          defaultColorFound = colorsResponse.data[0];
+        }
+        
+        // Cài đặt màu mặc định và LOAD ảnh của màu mặc định ngay
+        if (defaultColorFound) {
+          setDefaultColor(defaultColorFound);
+          setSelectedColor(defaultColorFound);
+          // Gọi loadColorImages() ngay để lấy tất cả ảnh của màu mặc định
+          loadColorImages(defaultColorFound);
+        } else if (colorsResponse.data.length > 0) {
+          setDefaultColor(colorsResponse.data[0]);
+          setSelectedColor(colorsResponse.data[0]);
+          // Gọi loadColorImages() nếu không tìm thấy màu mặc định
+          loadColorImages(colorsResponse.data[0]);
+        }
+
+        // Fetch similar car models
         if (productResponse.data.idDong) {
           try {
-            const similarModelsResponse = await axios.get(`${BACKEND_URL}/api/v1/mau-xe/dong-xe/${productResponse.data.idDong}`);
+            const similarModelsResponse = await axios.get(
+              `${BACKEND_URL}/api/v1/mau-xe/dong-xe/${productResponse.data.idDong}`
+            );
             
-            // Map models with selected status
             const mappedModels = similarModelsResponse.data.map((model: MauXe) => ({
               id: model.id,
               tenMau: model.tenMau,
@@ -302,6 +457,7 @@ const ProductDetail: React.FC = () => {
     
     // Handle regular URLs
     if (imagePath.startsWith('http')) {
+      console.log('Using direct URL:', imagePath);
       return imagePath;
     } else if (imagePath.startsWith('/')) {
       console.log('Using backend URL with provided path:', `${BACKEND_URL}${imagePath}`);
@@ -346,63 +502,76 @@ const ProductDetail: React.FC = () => {
       total += selectedColor.giaThem;
     }
     
+    // Add noi that price if selected
+    if (selectedNoiThat) {
+      total += selectedNoiThat.giaThem;
+    }
+    
     return total;
   };
 
-  // Enhanced nextExteriorImage function
+  // Enhanced nextExteriorImage function with better performance
   const nextExteriorImage = () => {
     if (ngoaiThatImages.length <= 1) return;
     
+    // Use the slide direction state for animation
     setExteriorFadeState('fade-out');
     setExteriorSlideDirection('slide-left');
     
+    // Reduced timeout for more responsiveness
     setTimeout(() => {
       const newIndex = currentImageIndex < ngoaiThatImages.length - 1 ? currentImageIndex + 1 : 0;
       setCurrentImageIndex(newIndex);
       setExteriorFadeState('fade-in');
-    }, 400);
+    }, 280); // Faster transition
   };
 
-  // Enhanced prevExteriorImage function
+  // Enhanced prevExteriorImage function with better performance
   const prevExteriorImage = () => {
     if (ngoaiThatImages.length <= 1) return;
     
+    // Use the slide direction state for animation
     setExteriorFadeState('fade-out');
     setExteriorSlideDirection('slide-right');
     
+    // Reduced timeout for more responsiveness
     setTimeout(() => {
       const newIndex = currentImageIndex > 0 ? currentImageIndex - 1 : ngoaiThatImages.length - 1;
       setCurrentImageIndex(newIndex);
       setExteriorFadeState('fade-in');
-    }, 400);
+    }, 280); // Faster transition
   };
 
-  // Enhanced nextInteriorImage function
+  // Enhanced nextInteriorImage function with better performance
   const nextInteriorImage = () => {
     if (noiThatImages.length <= 1) return;
     
+    // Use the slide direction state for animation
     setInteriorFadeState('fade-out');
     setInteriorSlideDirection('slide-left');
     
+    // Reduced timeout for more responsiveness
     setTimeout(() => {
       const newIndex = activeInteriorTab < noiThatImages.length - 1 ? activeInteriorTab + 1 : 0;
       setActiveInteriorTab(newIndex);
       setInteriorFadeState('fade-in');
-    }, 400);
+    }, 280); // Faster transition
   };
 
-  // Enhanced prevInteriorImage function
+  // Enhanced prevInteriorImage function with better performance
   const prevInteriorImage = () => {
     if (noiThatImages.length <= 1) return;
     
+    // Use the slide direction state for animation
     setInteriorFadeState('fade-out');
     setInteriorSlideDirection('slide-right');
     
+    // Reduced timeout for more responsiveness
     setTimeout(() => {
       const newIndex = activeInteriorTab > 0 ? activeInteriorTab - 1 : noiThatImages.length - 1;
       setActiveInteriorTab(newIndex);
       setInteriorFadeState('fade-in');
-    }, 400);
+    }, 280); // Faster transition
   };
 
   const changeTab = (tab: string) => {
@@ -505,65 +674,163 @@ const ProductDetail: React.FC = () => {
       document.removeEventListener('mousemove', handleMouseMove);
     };
   }, [isDragging, compareMode]);
+  
+    // Hàm xử lý khi người dùng chọn màu xe
+  const [isLoadingColorImages, setIsLoadingColorImages] = useState(false);
+  const handleColorSelect = async (color: MauSac) => {
+    console.log('Color Select - Start', {
+      selectedColor: selectedColor?.ten,
+      newColor: color.ten,
+      currentNoiThat: selectedNoiThat?.ten,
+      noiThatOptions: noiThatOptions.map(opt => opt.ten)
+    });
 
-  // Hàm xử lý khi người dùng chọn màu xe
-  const handleColorSelect = (color: MauSac) => {
-    // Lưu màu hiện tại trước khi đổi
-    if (selectedColor) {
-      setPreviousColor(selectedColor);
-    }
-    
-    // Đặt màu mới được chọn
+    // Start loading state
+    setIsLoadingColorImages(true);
+
+    if (selectedColor) setPreviousColor(selectedColor);
+
     setSelectedColor(color);
-    
-    // Tắt chế độ so sánh khi chọn màu mới
-    if (compareMode) {
-      setCompareMode(false);
-    }
-    
-    // Load ảnh cho màu mới
-    loadColorImages(color);
-  };
 
-  // Hàm load ảnh cho màu được chọn
-  const loadColorImages = async (color: MauSac) => {
+    if (compareMode) setCompareMode(false);
+
     try {
-      const response = await axios.get(
+      // 1. Load color-specific images first
+      const colorImagesResponse = await axios.get(
         `${BACKEND_URL}/api/v1/hinh-anh-theo-mau/mau-xe/${id}/mau-sac/${color.id}`
       );
-      
+
       // Sort images by position
       const sortByPosition = (a: HinhAnhXe, b: HinhAnhXe) => {
         if (!a.viTri) return 1;
         if (!b.viTri) return -1;
         return a.viTri - b.viTri;
       };
-      
+
       // Process the images by type
-      const ngoaiThat = response.data
+      const ngoaiThat = colorImagesResponse.data
         .filter((img: HinhAnhXe) => img.loaiHinh === 'ngoai_that')
         .sort(sortByPosition);
         
-      const noiThat = response.data
+      const noiThat = colorImagesResponse.data
         .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
         .sort(sortByPosition);
-        
-      const chiTiet = response.data
+      
+      const chiTiet = colorImagesResponse.data
         .filter((img: HinhAnhXe) => img.loaiHinh === 'chi_tiet')
         .sort(sortByPosition);
-      
-      // Update the state with the fetched images
-      setNgoaiThatImages(ngoaiThat);
-      setNoiThatImages(noiThat);
-      setChiTietImages(chiTiet);
-      setProductImages(response.data);
-      
+
+      // Update exterior images
+      if (ngoaiThat.length > 0) {
+        setNgoaiThatImages(ngoaiThat);
+      }
+
+      // Preserve current interior option or find a suitable one
+      const currentNoiThat = selectedNoiThat;
+
+      // 2. Handle interior images
+      if (currentNoiThat) {
+        // Try to get interior images for the current interior option and new color
+        const interiorImagesResponse = await axios.get(
+          `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${id}/noi-that/${currentNoiThat.id}?mauSacId=${color.id}`
+        );
+
+        const interiorImages = interiorImagesResponse.data
+          .filter((img: HinhAnhTheoNoiThatDTO) => img.loaiHinh === 'noi_that')
+          .sort(sortByPosition)
+          .map((img: HinhAnhTheoNoiThatDTO) => ({
+            id: img.id,
+            idMauXe: img.idMau,
+            duongDanAnh: img.duongDanAnh,
+            loaiHinh: img.loaiHinh,
+            viTri: img.viTri
+          }));
+
+        // Update interior images if found
+        if (interiorImages.length > 0) {
+          setNoiThatImages(interiorImages);
+        } else if (noiThat.length > 0) {
+          // Fallback to color-specific interior images
+          setNoiThatImages(noiThat);
+        }
+      } else {
+        // If no current interior option, use color-specific interior images
+        if (noiThat.length > 0) {
+          setNoiThatImages(noiThat);
+        }
+      }
+
+      // Update detail images
+      if (chiTiet.length > 0) {
+        setChiTietImages(chiTiet);
+      }
+
       // Reset image indexes
       setCurrentImageIndex(0);
       setActiveInteriorTab(0);
+
+      // End loading state
+      setIsLoadingColorImages(false);
+
     } catch (error) {
-      console.error("Failed to fetch color-specific images:", error);
-      // Fallback logic nếu cần
+      console.error('Error in handleColorSelect:', error);
+      // Fallback to default images if color-specific images fail
+      await loadColorImages(color);
+      
+      // End loading state
+      setIsLoadingColorImages(false);
+    }
+
+    console.log('Color Select - End', {
+      finalSelectedColor: selectedColor?.ten,
+      finalSelectedNoiThat: selectedNoiThat?.ten
+    });
+  };
+  
+  const loadColorImages = async (color: MauSac, skipInteriorUpdate: boolean = false) => {
+    try {
+      // Fallback to default images if color-specific images fail
+      const imagesResponse = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${id}`);
+  
+      const sortByPosition = (a: HinhAnhXe, b: HinhAnhXe) => {
+        if (!a.viTri) return 1;
+        if (!b.viTri) return -1;
+        return a.viTri - b.viTri;
+      };
+  
+      const ngoaiThat = imagesResponse.data
+        .filter((img: HinhAnhXe) => img.loaiHinh === 'ngoai_that')
+        .sort(sortByPosition);
+        
+      const noiThat = imagesResponse.data
+        .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
+        .sort(sortByPosition);
+      
+      const chiTiet = imagesResponse.data
+        .filter((img: HinhAnhXe) => img.loaiHinh === 'chi_tiet')
+        .sort(sortByPosition);
+  
+      // Update exterior images
+      if (ngoaiThat.length > 0) {
+        setNgoaiThatImages(ngoaiThat);
+      }
+  
+      // Update interior images only if not skipped
+      if (!skipInteriorUpdate && noiThat.length > 0) {
+        setNoiThatImages(noiThat);
+      }
+  
+      // Update detail images
+      if (chiTiet.length > 0) {
+        setChiTietImages(chiTiet);
+      }
+  
+      // Reset image indexes
+      setCurrentImageIndex(0);
+      setActiveInteriorTab(0);
+  
+    } catch (error) {
+      console.error('Error in loadColorImages:', error);
     }
   };
 
@@ -610,6 +877,110 @@ const ProductDetail: React.FC = () => {
       setCompareImages([]);
     }
   };
+
+  // Add function to handle noi that selection with image loading
+  const handleNoiThatSelect = async (noiThat: NoiThatOption, colorId?: number) => {
+    setSelectedNoiThat(noiThat);
+
+    try {
+      const currentColorId = colorId || selectedColor?.id;
+      if (!currentColorId) return;
+
+      // 1. Thử lấy ảnh theo màu sắc và option nội thất
+      const url = `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${id}/noi-that/${noiThat.id}?mauSacId=${currentColorId}`;
+      const response = await axios.get(url);
+
+      const sortByPosition = (a: HinhAnhTheoNoiThatDTO, b: HinhAnhTheoNoiThatDTO) => {
+        if (!a.viTri) return 1;
+        if (!b.viTri) return -1;
+        return a.viTri - b.viTri;
+      };
+
+      let interiorImages = response.data
+        .filter((img: HinhAnhTheoNoiThatDTO) => img.loaiHinh === 'noi_that')
+        .sort(sortByPosition)
+        .map((img: HinhAnhTheoNoiThatDTO) => ({
+          id: img.id,
+          idMauXe: img.idMau,
+          duongDanAnh: img.duongDanAnh,
+          loaiHinh: img.loaiHinh,
+          viTri: img.viTri
+        }));
+
+      // 2. Nếu không có ảnh theo màu, thử lấy ảnh mặc định theo option nội thất
+      if (interiorImages.length === 0) {
+        const defaultUrl = `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${id}/noi-that/${noiThat.id}`;
+        const defaultResponse = await axios.get(defaultUrl);
+        interiorImages = defaultResponse.data
+          .filter((img: HinhAnhTheoNoiThatDTO) => img.loaiHinh === 'noi_that')
+          .sort(sortByPosition)
+          .map((img: HinhAnhTheoNoiThatDTO) => ({
+            id: img.id,
+            idMauXe: img.idMau,
+            duongDanAnh: img.duongDanAnh,
+            loaiHinh: img.loaiHinh,
+            viTri: img.viTri
+          }));
+      }
+
+      // 3. Nếu vẫn không có ảnh, fallback về ảnh nội thất mặc định trong bảng hinh_anh_xe
+      if (interiorImages.length === 0) {
+        const fallbackResponse = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${id}`);
+        interiorImages = fallbackResponse.data
+          .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
+          .sort(sortByPosition)
+          .map((img: HinhAnhXe) => ({
+            id: img.id,
+            idMauXe: img.idMauXe,
+            duongDanAnh: img.duongDanAnh,
+            loaiHinh: img.loaiHinh,
+            viTri: img.viTri
+          }));
+      }
+
+      setNoiThatImages(interiorImages);
+      setActiveInteriorTab(0);
+
+      // Preload images
+      interiorImages.forEach((img: HinhAnhXe) => {
+        if (img.duongDanAnh) {
+          fetchImageAsBase64(img.duongDanAnh)
+            .then((base64Image) => {
+              setImageCache(prevCache => ({
+                ...prevCache,
+                [img.duongDanAnh]: base64Image as string
+              }));
+            });
+        }
+      });
+
+    } catch (error) {
+      console.error('Noi That Select - Error', error);
+    }
+  };
+
+  // Handler to reset to default color
+  // Modify the resetToDefaultColor function
+const resetToDefaultColor = async () => {
+  if (defaultColor) {
+    // Start loading state
+    setIsLoadingColorImages(true);
+
+    try {
+      // Use the existing handleColorSelect method to ensure consistent loading
+      await handleColorSelect(defaultColor);
+      
+      // If in compare mode, exit it
+      if (compareMode) {
+        setCompareMode(false);
+      }
+    } catch (error) {
+      console.error('Error resetting to default color:', error);
+      // Ensure loading state is turned off even if there's an error
+      setIsLoadingColorImages(false);
+    }
+  }
+};
 
   if (isLoading) {
     return (
@@ -698,11 +1069,18 @@ const ProductDetail: React.FC = () => {
             </div>
             
             <div className="hero-image_details">
-              <img 
-                src={imageCache[featuredImage] || getImageUrl(featuredImage)} 
-                alt={product.tenMau} 
-                onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
-              />
+              {isLoadingColorImages ? (
+                <div className="loading-container_details">
+                  <div className="spinner_details"></div>
+                  <p>Đang tải hình ảnh...</p>
+                </div>
+              ) : (
+                <img 
+                  src={imageCache[featuredImage] || getImageUrl(featuredImage)} 
+                  alt={product.tenMau} 
+                  onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -716,7 +1094,12 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
         <div className="fullwidth-image-container_details">
-          {ngoaiThatImages.length > 0 ? (
+          {isLoadingColorImages ? (
+            <div className="loading-container_details">
+              <div className="spinner_details"></div>
+              <p>Đang tải hình ảnh ngoại thất...</p>
+            </div>
+          ) : ngoaiThatImages.length > 0 ? (
             <div className="image-carousel_details">
               <button 
                 className="carousel-nav_details prev" 
@@ -823,37 +1206,81 @@ const ProductDetail: React.FC = () => {
         </div>
         <div className="container_details">
           <div className="section-content_details">
-            <h3>Màu ngoại thất</h3>
+            <div className="color-header">
+              <h3>Màu ngoại thất</h3>
+              {defaultColor && (
+                <button 
+                  className="reset-color-button"
+                  onClick={resetToDefaultColor}
+                  disabled={selectedColor?.id === defaultColor?.id}
+                  title="Quay lại màu mặc định"
+                >
+                  Màu mặc định
+                </button>
+              )}
+            </div>
             <div className="color-swatch-container_details">
-              {availableColors.map((color, index) => (
+              {/* Render default color first */}
+              {defaultColor && (
                 <div
-                  key={color.id}
-                  className={`color-option ${selectedColor?.id === color.id ? 'selected' : ''} ${compareColor?.id === color.id ? 'comparing' : ''}`}
+                  key={defaultColor.id}
+                  className={`color-option ${selectedColor?.id === defaultColor.id ? 'selected' : ''} ${compareColor?.id === defaultColor.id ? 'comparing' : ''} default-color`}
                 >
                   <button
-                    className={`color-swatch_details ${selectedColor?.id === color.id ? 'selected' : ''} ${compareColor?.id === color.id ? 'comparing' : ''}`}
+                    className={`color-swatch_details ${selectedColor?.id === defaultColor.id ? 'selected' : ''} ${compareColor?.id === defaultColor.id ? 'comparing' : ''} default-color`}
                     style={{ 
-                      backgroundColor: color.maHex,
-                      backgroundImage: color.duongDanAnh ? `url(${BACKEND_URL}${color.duongDanAnh})` : 'none',
+                      backgroundColor: defaultColor.maHex,
+                      backgroundImage: defaultColor.duongDanAnh ? `url(${BACKEND_URL}${defaultColor.duongDanAnh})` : 'none',
                       borderRadius: '15px'
                     }}
-                    onClick={() => handleColorSelect(color)}
-                    title={color.ten}
+                    onClick={() => handleColorSelect(defaultColor)}
+                    title={`${defaultColor.ten} (Màu mặc định)`}
                   >
-                    {color.laMetallic && <span className="metallic-badge_details">★</span>}
+                    {defaultColor.laMetallic && <span className="metallic-badge_details">★</span>}
+                    <span className="default-badge">Mặc định</span>
                   </button>
-                  <span className="color-name">{color.ten}</span>
-                  {color.giaThem > 0 && (
-                    <span className="color-price">+{formatPrice(color.giaThem)}</span>
+                  <span className="color-name">
+                    {defaultColor.ten}
+                    <span style={{color: '#d5001c', fontWeight: 'bold'}}> (Mặc định)</span>
+                  </span>
+                  {defaultColor.giaThem > 0 && (
+                    <span className="color-price">+{formatPrice(defaultColor.giaThem)}</span>
                   )}
                 </div>
-              ))}
+              )}
+              
+              {/* Render remaining colors */}
+              {availableColors
+                .filter(color => color.id !== defaultColor?.id) // Skip default color as it's already rendered
+                .map((color) => (
+                  <div
+                    key={color.id}
+                    className={`color-option ${selectedColor?.id === color.id ? 'selected' : ''} ${compareColor?.id === color.id ? 'comparing' : ''}`}
+                  >
+                    <button
+                      className={`color-swatch_details ${selectedColor?.id === color.id ? 'selected' : ''} ${compareColor?.id === color.id ? 'comparing' : ''}`}
+                      style={{ 
+                        backgroundColor: color.maHex,
+                        backgroundImage: color.duongDanAnh ? `url(${BACKEND_URL}${color.duongDanAnh})` : 'none',
+                        borderRadius: '15px'
+                      }}
+                      onClick={() => handleColorSelect(color)}
+                      title={color.ten}
+                    >
+                      {color.laMetallic && <span className="metallic-badge_details">★</span>}
+                    </button>
+                    <span className="color-name">{color.ten}</span>
+                    {color.giaThem > 0 && (
+                      <span className="color-price">+{formatPrice(color.giaThem)}</span>
+                    )}
+                  </div>
+                ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Updated Interior Section with enhanced transitions */}
+      {/* Updated Interior Section with NoiThat options */}
       <section className="fullwidth-section_details">
         <div className="container_details">
           <div className="section-header_details">
@@ -861,7 +1288,12 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
         <div className="fullwidth-image-container_details">
-          {noiThatImages.length > 0 ? (
+          {isLoadingColorImages ? (
+            <div className="loading-container_details">
+              <div className="spinner_details"></div>
+              <p>Đang tải hình ảnh nội thất...</p>
+            </div>
+          ) : noiThatImages.length > 0 ? (
             <div className="image-carousel_details">
               <button 
                 className="carousel-nav_details prev" 
@@ -873,14 +1305,12 @@ const ProductDetail: React.FC = () => {
               <div className="image-slideshow_details">
                 <div className="slide-container_details">
                   <div className={`slide_details ${interiorFadeState || ''} ${interiorSlideDirection || ''}`}>
-                    <div className="image-magnifier-container_details">
-                      <img 
-                        src={imageCache[noiThatImages[activeInteriorTab]?.duongDanAnh] || getImageUrl(noiThatImages[activeInteriorTab]?.duongDanAnh)} 
-                        alt={`${product.tenMau} interior`}
-                        onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
-                        className="premium-image"
-                      />
-                    </div>
+                    <img 
+                      src={imageCache[noiThatImages[activeInteriorTab]?.duongDanAnh] || getImageUrl(noiThatImages[activeInteriorTab]?.duongDanAnh)} 
+                      alt={`${product.tenMau} interior`}
+                      onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
+                      className="premium-image"
+                    />
                   </div>
                 </div>
                 
@@ -903,18 +1333,77 @@ const ProductDetail: React.FC = () => {
         <div className="container_details">
           <div className="section-content_details">
             <div className="interior-info_details">
-              <h3>Ghế: Đen, Bảng điều khiển: Đen, Thảm: Đen, Trần: Đen</h3>
+              {selectedNoiThat ? (
+                <h3>{selectedNoiThat.ten}</h3>
+              ) : (
+                <h3>Ghế: Đen, Bảng điều khiển: Đen, Thảm: Đen, Trần: Đen</h3>
+              )}
+              
               <div className="interior-options-container_details">
-                {interiorOptions.map((option, index) => (
-                  <button
-                    key={option.id}
-                    className={`interior-option_details ${selectedInteriorOption === index ? 'selected' : ''}`}
-                    style={{ backgroundColor: option.mauSac }}
-                    onClick={() => setSelectedInteriorOption(index)}
-                    title={option.ten}
-                  />
-                ))}
+                {noiThatOptions.length > 0 ? (
+                  noiThatOptions.map((option) => (
+                    <div 
+                      key={option.id}
+                      className={`interior-option_details ${selectedNoiThat?.id === option.id ? 'selected' : ''}`}
+                      onClick={() => handleNoiThatSelect(option, selectedColor?.id)}
+                      style={{ 
+                        width: '100px', 
+                        height: '100px', 
+                        position: 'relative',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        border: selectedNoiThat?.id === option.id ? '2px solid #d5001c' : '1px solid #ddd',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {/* Use thumbnail image for selection */}
+                      <img 
+                        src={getImageUrl(option.duongDanAnh)} 
+                        alt={option.ten}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                        onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
+                      />
+                      
+                      <div style={{ 
+                        position: 'absolute', 
+                        bottom: 0, 
+                        left: 0, 
+                        right: 0, 
+                        backgroundColor: 'rgba(0,0,0,0.7)', 
+                        padding: '5px',
+                        fontSize: '10px',
+                        color: 'white'
+                      }}>
+                        <p style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {option.ten.split(',')[0]}
+                        </p>
+                        {option.giaThem > 0 && (
+                          <p style={{ margin: 0, color: '#ff9999', fontSize: '9px' }}>+{formatPrice(option.giaThem)}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  // Fallback options if no interior options are available
+                  interiorFallbackOptions.map((option, index) => (
+                    <button
+                      key={option.id}
+                      className={`interior-option_details ${selectedInteriorOption === index ? 'selected' : ''}`}
+                      style={{ backgroundColor: option.mauSac }}
+                      onClick={() => setSelectedInteriorOption(index)}
+                      title={option.ten}
+                    />
+                  ))
+                )}
               </div>
+              
+              {selectedNoiThat && selectedNoiThat.moTa && (
+                <p className="interior-description">{selectedNoiThat.moTa}</p>
+              )}
             </div>
           </div>
         </div>
@@ -955,7 +1444,11 @@ const ProductDetail: React.FC = () => {
         <div className="container_details">
           <div className="summary-content_details">
             <div className="model-name_details">
-              <h3>{product.tenMau} {selectedColor && `- ${selectedColor.ten}`}</h3>
+              <h3>
+                {product.tenMau} 
+                {selectedColor && ` - ${selectedColor.ten}`}
+                {selectedNoiThat && ` + ${selectedNoiThat.ten.split(',')[0]}`}
+              </h3>
               <p>{formatPrice(calculateTotalPrice())}</p>
             </div>
             
