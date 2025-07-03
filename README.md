@@ -89,7 +89,6 @@ Designed in Audi's style:
 
 ## 📸 Demo GIF
 - Gif Demo file is in development. Please see the link 👇
-<!-- <img src="./src/assets/videoDau.gif" style="width: 100%; max-width: 1200px; height: auto;" alt="Audi Project Demo"> -->
 ## 🌐 Live Demo & Deployment
 
 ### 🚀 Web Application
