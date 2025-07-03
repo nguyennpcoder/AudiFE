@@ -88,7 +88,7 @@ Designed in Audi's style:
 - Multi-language support
 
 ## 📸 Demo
-![Audi Project Demo](./src/assets/video1.gif)
+<img src="./src/assets/videoDau.gif" style="width: 100%; max-width: 1200px; height: auto;" alt="Audi Project Demo">
 
 ## 👥 Developers
 - Nguyennpcoder - Team Lead & Lead Developer
