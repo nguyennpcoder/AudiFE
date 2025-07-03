@@ -100,4 +100,4 @@ Designed in Audi's style:
 - **Status**: Active and Fully Functional
 
 ## 👥 Developers
-- Nguyennpcoder - Team Lead & Lead Developer
+- Nguyennpcoder - Team Lead & Lead Developer.
