@@ -88,8 +88,7 @@ Designed in Audi's style:
 - Multi-language support
 
 ## 📸 Demo
-## 📸 Demo
-![Audi Project Demo](./assets/audi_demo.gif)
+![Audi Project Demo](./assets/video1.gif)
 
 ## 👥 Developers
 - Nguyennpcoder - Team Lead & Lead Developer
