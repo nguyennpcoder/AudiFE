@@ -1138,7 +1138,7 @@ const resetToDefaultColor = async () => {
                         onClick={toggleCompareMode}
                         title={compareMode ? "Hủy so sánh" : "So sánh với màu trước"}
                       >
-                        <span className="compare-label">A|B</span>
+                        <span className="compare-label">A|Bcccccc</span>
                       </button>
                     )}
                     
