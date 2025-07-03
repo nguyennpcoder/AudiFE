@@ -87,7 +87,11 @@ Designed in Audi's style:
 - Performance optimization
 - Multi-language support
 
+<<<<<<< HEAD
 ## 📸 Demo GIF
+=======
+## 📸 Demo
+>>>>>>> 09b2c107efe3fe85385ed110fc3539e357c56264
 - Gif Demo file is in development. Please see the link 👇
 ## 🌐 Live Demo & Deployment
 
@@ -100,4 +104,8 @@ Designed in Audi's style:
 - **Status**: Active and Fully Functional
 
 ## 👥 Developers
+<<<<<<< HEAD
 - Nguyennpcoder - Team Lead & Lead Developer.
+=======
+- Nguyennpcoder - Team Lead & Lead Developer
+>>>>>>> 09b2c107efe3fe85385ed110fc3539e357c56264
