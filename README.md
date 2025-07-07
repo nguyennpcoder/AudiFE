@@ -87,7 +87,7 @@ Designed in Audi's style:
 - Performance optimization
 - Multi-language support
 
-## 📸 Demo GIF
+## 📸 Demo
 - Gif Demo file is in development. Please see the link 👇
 ## 🌐 Live Demo & Deployment
 
