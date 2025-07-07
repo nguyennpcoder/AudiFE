@@ -848,8 +848,8 @@ const ProductDetail: React.FC = () => {
 
   // Add function to handle noi that selection with image loading
   const handleNoiThatSelect = async (noiThat: NoiThatOption, colorId?: number) => {
+    const exteriorColorId = colorId || selectedColor?.id;
     try {
-      // Determine the current color IDs
       const currentExteriorColorId = selectedColor?.id;
       const currentInteriorColorId = colorId;
 
@@ -868,7 +868,7 @@ const ProductDetail: React.FC = () => {
       // 1. First, try to fetch color and interior-specific images
       try {
         // Modify the URL to include both exterior and interior color IDs
-        const specificColorInteriorUrl = `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${id}/noi-that/${noiThat.id}?mauSacNgoaiId=${currentExteriorColorId}${currentInteriorColorId ? `&mauSacNoiId=${currentInteriorColorId}` : ''}`;
+        const specificColorInteriorUrl = `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${id}/noi-that/${noiThat.id}?mauSacNgoaiId=${exteriorColorId}${currentInteriorColorId ? `&mauSacNoiId=${currentInteriorColorId}` : ''}`;
         
         const specificColorResponse = await axios.get(specificColorInteriorUrl);
         
