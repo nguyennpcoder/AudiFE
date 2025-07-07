@@ -77,6 +77,7 @@ interface HinhAnhTheoNoiThatDTO {
   duongDanAnh: string;
   loaiHinh: string;
   viTri?: number;
+  idMauSac?: number;
 }
 
 // const BACKEND_URL = 'https://audivn.onrender.com';
@@ -695,7 +696,7 @@ const ProductDetail: React.FC = () => {
     if (compareMode) setCompareMode(false);
 
     try {
-      // 1. Load color-specific images first
+      // 1. Load color-specific images from hinh_anh_xe_theo_mau
       const colorImagesResponse = await axios.get(
         `${BACKEND_URL}/api/v1/hinh-anh-theo-mau/mau-xe/${id}/mau-sac/${color.id}`
       );
@@ -711,74 +712,22 @@ const ProductDetail: React.FC = () => {
       const ngoaiThat = colorImagesResponse.data
         .filter((img: HinhAnhXe) => img.loaiHinh === 'ngoai_that')
         .sort(sortByPosition);
-        
+
       const noiThat = colorImagesResponse.data
         .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
         .sort(sortByPosition);
-      
+
       const chiTiet = colorImagesResponse.data
         .filter((img: HinhAnhXe) => img.loaiHinh === 'chi_tiet')
         .sort(sortByPosition);
 
-      // Update exterior images
+      // Update exterior and interior images together
       if (ngoaiThat.length > 0) {
         setNgoaiThatImages(ngoaiThat);
       }
 
-      // Preserve current interior option or find a suitable one
-      const currentNoiThat = selectedNoiThat;
-
-      // 2. Handle interior images
-      if (currentNoiThat) {
-        // Try to get interior images for the current interior option and new color
-        const interiorImagesResponse = await axios.get(
-          `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${id}/noi-that/${currentNoiThat.id}?mauSacId=${color.id}`
-        );
-
-        const interiorImages = interiorImagesResponse.data
-          .filter((img: HinhAnhTheoNoiThatDTO) => img.loaiHinh === 'noi_that')
-          .sort(sortByPosition)
-          .map((img: HinhAnhTheoNoiThatDTO) => ({
-            id: img.id,
-            idMauXe: img.idMau,
-            duongDanAnh: img.duongDanAnh,
-            loaiHinh: img.loaiHinh,
-            viTri: img.viTri
-          }));
-
-        // Update interior images if found
-        if (interiorImages.length > 0) {
-          setNoiThatImages(interiorImages);
-        } else {
-          // If no color-specific images, try to get default interior images
-          const defaultInteriorImagesResponse = await axios.get(
-            `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${id}/noi-that/${currentNoiThat.id}`
-          );
-
-          const defaultInteriorImages = defaultInteriorImagesResponse.data
-            .filter((img: HinhAnhTheoNoiThatDTO) => img.loaiHinh === 'noi_that')
-            .sort(sortByPosition)
-            .map((img: HinhAnhTheoNoiThatDTO) => ({
-              id: img.id,
-              idMauXe: img.idMau,
-              duongDanAnh: img.duongDanAnh,
-              loaiHinh: img.loaiHinh,
-              viTri: img.viTri
-            }));
-
-          if (defaultInteriorImages.length > 0) {
-            setNoiThatImages(defaultInteriorImages);
-          } else if (noiThat.length > 0) {
-            // Fallback to color-specific interior images
-            setNoiThatImages(noiThat);
-          }
-        }
-      } else {
-        // If no current interior option, use color-specific interior images
-        if (noiThat.length > 0) {
-          setNoiThatImages(noiThat);
-        }
-      }
+      // Luôn set lại noiThatImages bằng ảnh nội thất đúng màu ngoại thất
+      setNoiThatImages(noiThat);
 
       // Update detail images
       if (chiTiet.length > 0) {
@@ -789,7 +738,6 @@ const ProductDetail: React.FC = () => {
       setCurrentImageIndex(0);
       setActiveInteriorTab(0);
 
-      // End loading state
       setIsLoadingColorImages(false);
 
     } catch (error) {
@@ -900,38 +848,39 @@ const ProductDetail: React.FC = () => {
 
   // Add function to handle noi that selection with image loading
   const handleNoiThatSelect = async (noiThat: NoiThatOption, colorId?: number) => {
-    setSelectedNoiThat(noiThat);
-
     try {
-      const currentColorId = colorId || selectedColor?.id;
-      if (!currentColorId) return;
+      // Determine the current color IDs
+      const currentExteriorColorId = selectedColor?.id;
+      const currentInteriorColorId = colorId;
 
-      // 1. Thử lấy ảnh theo màu sắc và option nội thất
-      const url = `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${id}/noi-that/${noiThat.id}?mauSacId=${currentColorId}`;
-      const response = await axios.get(url);
+      if (!currentExteriorColorId) {
+        console.error('No exterior color selected');
+        return;
+      }
 
-      const sortByPosition = (a: HinhAnhTheoNoiThatDTO, b: HinhAnhTheoNoiThatDTO) => {
-        if (!a.viTri) return 1;
-        if (!b.viTri) return -1;
-        return a.viTri - b.viTri;
-      };
+      console.log('Selecting Noi That:', {
+        noiThatId: noiThat.id,
+        exteriorColorId: currentExteriorColorId,
+        interiorColorId: currentInteriorColorId,
+        modelId: id
+      });
 
-      let interiorImages = response.data
-        .filter((img: HinhAnhTheoNoiThatDTO) => img.loaiHinh === 'noi_that')
-        .sort(sortByPosition)
-        .map((img: HinhAnhTheoNoiThatDTO) => ({
-          id: img.id,
-          idMauXe: img.idMau,
-          duongDanAnh: img.duongDanAnh,
-          loaiHinh: img.loaiHinh,
-          viTri: img.viTri
-        }));
+      // 1. First, try to fetch color and interior-specific images
+      try {
+        // Modify the URL to include both exterior and interior color IDs
+        const specificColorInteriorUrl = `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${id}/noi-that/${noiThat.id}?mauSacNgoaiId=${currentExteriorColorId}${currentInteriorColorId ? `&mauSacNoiId=${currentInteriorColorId}` : ''}`;
+        
+        const specificColorResponse = await axios.get(specificColorInteriorUrl);
+        
+        console.log('Specific Color Interior Images:', specificColorResponse.data);
 
-      // 2. Nếu không có ảnh theo màu, thử lấy ảnh mặc định theo option nội thất
-      if (interiorImages.length === 0) {
-        const defaultUrl = `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${id}/noi-that/${noiThat.id}`;
-        const defaultResponse = await axios.get(defaultUrl);
-        interiorImages = defaultResponse.data
+        const sortByPosition = (a: HinhAnhTheoNoiThatDTO, b: HinhAnhTheoNoiThatDTO) => {
+          if (!a.viTri) return 1;
+          if (!b.viTri) return -1;
+          return a.viTri - b.viTri;
+        };
+
+        const specificInteriorImages = specificColorResponse.data
           .filter((img: HinhAnhTheoNoiThatDTO) => img.loaiHinh === 'noi_that')
           .sort(sortByPosition)
           .map((img: HinhAnhTheoNoiThatDTO) => ({
@@ -941,41 +890,104 @@ const ProductDetail: React.FC = () => {
             loaiHinh: img.loaiHinh,
             viTri: img.viTri
           }));
+
+        console.log('Processed Specific Interior Images:', specificInteriorImages);
+
+        // If specific color interior images exist, use them
+        if (specificInteriorImages.length > 0) {
+          setNoiThatImages(specificInteriorImages);
+          setSelectedNoiThat(noiThat);
+          setActiveInteriorTab(0);
+          return;
+        } else {
+          // Chỉ fallback về ảnh mặc định nếu KHÔNG có ảnh cho màu ngoại thất này
+          const defaultInteriorUrl = `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${id}/noi-that/${noiThat.id}`;
+          const defaultInteriorResponse = await axios.get(defaultInteriorUrl);
+          const defaultInteriorImages = defaultInteriorResponse.data
+            .filter((img: HinhAnhTheoNoiThatDTO) => img.loaiHinh === 'noi_that')
+            .sort(sortByPosition)
+            .map((img: HinhAnhTheoNoiThatDTO) => ({
+              id: img.id,
+              idMauXe: img.idMau,
+              duongDanAnh: img.duongDanAnh,
+              loaiHinh: img.loaiHinh,
+              viTri: img.viTri
+            }));
+          setNoiThatImages(defaultInteriorImages);
+          setSelectedNoiThat(noiThat);
+          setActiveInteriorTab(0);
+        }
+      } catch (specificColorError) {
+        console.log('No specific color interior images found, trying default', specificColorError);
       }
 
-      // 3. Nếu vẫn không có ảnh, fallback về ảnh nội thất mặc định trong bảng hinh_anh_xe
-      if (interiorImages.length === 0) {
-        const fallbackResponse = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${id}`);
-        interiorImages = fallbackResponse.data
-          .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
-          .sort(sortByPosition)
-          .map((img: HinhAnhXe) => ({
+      // 2. If no specific color images, try default interior images for this interior option
+      try {
+        const defaultInteriorUrl = `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${id}/noi-that/${noiThat.id}`;
+        
+        const defaultResponse = await axios.get(defaultInteriorUrl);
+        
+        console.log('Default Interior Images:', defaultResponse.data);
+
+        const defaultInteriorImages = defaultResponse.data
+          .filter((img: HinhAnhTheoNoiThatDTO) => img.loaiHinh === 'noi_that')
+          .sort((a: HinhAnhTheoNoiThatDTO, b: HinhAnhTheoNoiThatDTO) => {
+            if (!a.viTri) return 1;
+            if (!b.viTri) return -1;
+            return a.viTri - b.viTri;
+          })
+          .map((img: HinhAnhTheoNoiThatDTO) => ({
             id: img.id,
-            idMauXe: img.idMauXe,
+            idMauXe: img.idMau,
             duongDanAnh: img.duongDanAnh,
             loaiHinh: img.loaiHinh,
             viTri: img.viTri
           }));
+
+        console.log('Processed Default Interior Images:', defaultInteriorImages);
+
+        // If default interior images exist, use them
+        if (defaultInteriorImages.length > 0) {
+          setNoiThatImages(defaultInteriorImages);
+          setSelectedNoiThat(noiThat);
+          setActiveInteriorTab(0);
+          return;
+        }
+      } catch (defaultError) {
+        console.log('No default interior images found, trying fallback', defaultError);
       }
 
-      setNoiThatImages(interiorImages);
-      setActiveInteriorTab(0);
+      // 3. Fallback to standard car images if no specific interior images found
+      try {
+        const fallbackImagesUrl = `${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${id}`;
+        
+        const fallbackResponse = await axios.get(fallbackImagesUrl);
+        
+        const fallbackInteriorImages = fallbackResponse.data
+          .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
+          .sort((a: HinhAnhXe, b: HinhAnhXe) => {
+            if (!a.viTri) return 1;
+            if (!b.viTri) return -1;
+            return a.viTri - b.viTri;
+          });
 
-      // Preload images
-      interiorImages.forEach((img: HinhAnhXe) => {
-        if (img.duongDanAnh) {
-          fetchImageAsBase64(img.duongDanAnh)
-            .then((base64Image) => {
-              setImageCache(prevCache => ({
-                ...prevCache,
-                [img.duongDanAnh]: base64Image as string
-              }));
-            });
+        console.log('Fallback Interior Images:', fallbackInteriorImages);
+
+        if (fallbackInteriorImages.length > 0) {
+          setNoiThatImages(fallbackInteriorImages);
+          setSelectedNoiThat(noiThat);
+          setActiveInteriorTab(0);
+          return;
         }
-      });
+      } catch (fallbackError) {
+        console.error('Failed to load fallback interior images', fallbackError);
+      }
 
+      // If all attempts fail, log an error
+      console.error('No interior images found for the selected option');
+      
     } catch (error) {
-      console.error('Noi That Select - Error', error);
+      console.error('Error in handleNoiThatSelect:', error);
     }
   };
 
@@ -1138,7 +1150,7 @@ const resetToDefaultColor = async () => {
                         onClick={toggleCompareMode}
                         title={compareMode ? "Hủy so sánh" : "So sánh với màu trước"}
                       >
-                        <span className="compare-label">A|Bcccccc</span>
+                        <span className="compare-label">A|B</span>
                       </button>
                     )}
                     

@@ -9,7 +9,7 @@
 }
 
 .auth-video-background {
-  width: 60%;
+  width: 70%;
   height: 100vh;
   position: fixed;
   right: 0;
@@ -76,17 +76,15 @@
 }
 
 .auth-form-section {
-  width: 40%;
+  width: 29%;
   min-height: 100vh;
   overflow-y: auto;
   background-color: #fff;
   position: relative;
   z-index: 1;
   box-shadow: 5px 0 15px rgba(0, 0, 0, 0.05);
- 
   margin-right: 20px;
-  margin-left: 20px;
-  margin-left: -20px;
+  
 }
 
 .auth-logo {
@@ -516,4 +514,120 @@
 
 .back-home-button i {
   font-size: 16px;
+}
+
+/* Responsive for iPad and iPhone */
+@media (max-width: 1024px) {
+  .auth-container {
+    flex-direction: column;
+  }
+
+  .auth-video-background {
+    position: relative;
+    width: 100%;
+    height: 40vh;
+    margin: 0;
+    border-radius: 0;
+    top: 0; /* Ensure video is at the top */
+    order: -1; /* Force video to be first in the flex order */
+  }
+
+  .auth-video-background video {
+    border-radius: 0;
+  }
+
+  .auth-video-overlay {
+    border-radius: 0;
+    padding-left: 5%;
+    align-items: center;
+    text-align: center;
+  }
+
+  .auth-video-content {
+    text-align: center;
+    max-width: 100%;
+    padding: 0 20px;
+  }
+
+  .auth-form-section {
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    order: 1; /* Ensure form section comes after video */
+  }
+
+  .auth-logo {
+    position: static;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .auth-form-container {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 0;
+    padding: 0 15px;
+  }
+}
+
+/* iPhone specific adjustments */
+@media (max-width: 768px) {
+  .auth-video-background {
+    height: 30vh;
+  }
+
+  .auth-video-content h1 {
+    font-size: 28px;
+  }
+
+  .auth-video-content p {
+    font-size: 14px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .social-buttons {
+    gap: 10px;
+  }
+
+  .social-button {
+    height: 45px;
+  }
+}
+
+/* Smaller iPhone devices */
+@media (max-width: 375px) {
+  .auth-video-background {
+    height: 25vh;
+  }
+
+  .auth-video-content h1 {
+    font-size: 24px;
+  }
+
+  .auth-video-content p {
+    font-size: 13px;
+  }
+
+  .auth-form-container h2 {
+    font-size: 24px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
 }

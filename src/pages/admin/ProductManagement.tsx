@@ -118,6 +118,9 @@ const ProductManagement: React.FC = () => {
     productImages: [],
   });
   
+  // Add a new state for tracking newly added images at the top of your component, near other state declarations
+  const [newlyAddedImages, setNewlyAddedImages] = useState<HinhAnhXe[]>([]);
+  
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -511,8 +514,38 @@ const ProductManagement: React.FC = () => {
   };
 
   // Xử lý đóng modal chỉnh sửa sản phẩm
-  const handleCloseEditModal = () => {
-    setState(prev => ({ ...prev, showEditModal: false }));
+  const handleCloseEditModal = async () => {
+    // Remove newly added images that weren't saved
+    if (newlyAddedImages.length > 0) {
+      const token = localStorage.getItem('token');
+      
+      for (const image of newlyAddedImages) {
+        try {
+          // Delete the image from the server
+          await fetch(`http://localhost:8080/api/v1/hinh-anh/${image.id}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+        } catch (error) {
+          console.error("Error deleting newly added image:", error);
+        }
+      }
+      
+      // Reset newly added images
+      setNewlyAddedImages([]);
+    }
+    
+    setState(prev => ({ 
+      ...prev, 
+      showEditModal: false,
+      // Revert to the original product images before new additions
+      productImages: prev.productImages.filter(
+        img => !newlyAddedImages.some(newImg => newImg.id === img.id)
+      )
+    }));
   };
 
   // Xử lý thay đổi thông tin sản phẩm đang chỉnh sửa
@@ -559,7 +592,8 @@ const ProductManagement: React.FC = () => {
       
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`http://localhost:8080/api/v1/mau-xe/${state.currentProduct.id}`, {
+      // First, update the product details
+      const productResponse = await fetch(`http://localhost:8080/api/v1/mau-xe/${state.currentProduct.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -568,13 +602,44 @@ const ProductManagement: React.FC = () => {
         body: JSON.stringify(state.currentProduct)
       });
       
-      if (!response.ok) {
+      if (!productResponse.ok) {
         throw new Error('Không thể cập nhật mẫu xe');
       }
+
+      // Fetch the original images before update
+      const originalImages = await fetchProductImages(state.currentProduct.id);
+
+      // Identify and delete images that are no longer in the current state
+      for (const originalImage of originalImages) {
+        const isImageStillExists = state.productImages.some(img => img.id === originalImage.id);
+        
+        if (!isImageStillExists) {
+          // If image is not in the current list, delete it from the server
+          await fetch(`http://localhost:8080/api/v1/hinh-anh/${originalImage.id}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+        }
+      }
       
+      // Refresh the product data to ensure we have the latest state
       await fetchCarModels();
-      setState(prev => ({ ...prev, showEditModal: false }));
+      const updatedImages = await fetchProductImages(state.currentProduct.id);
+      
+      // Clear newly added images
+      setNewlyAddedImages([]);
+      
+      setState(prev => ({ 
+        ...prev, 
+        showEditModal: false,
+        productImages: updatedImages || [],
+        isLoading: false 
+      }));
     } catch (error) {
+      console.error("Error updating product:", error);
       setState(prev => ({ 
         ...prev, 
         error: error instanceof Error ? error.message : 'Đã xảy ra lỗi', 
@@ -752,6 +817,12 @@ const ProductManagement: React.FC = () => {
       }
       
       const data = await response.json();
+      
+      // Track newly added images with full details
+      setNewlyAddedImages(prev => [...prev, {
+        ...data,
+        tempId: Date.now() // Add a unique identifier
+      }]);
       
       // Refresh the images
       const updatedImages = await fetchProductImages(productId);
@@ -954,10 +1025,21 @@ const ProductManagement: React.FC = () => {
     );
   };
 
+  // Modify the deleteProductImage function to be more explicit
+  const deleteProductImage = (imageId: number) => {
+    // Explicitly remove the image from productImages
+    setState(prev => ({
+      ...prev,
+      productImages: prev.productImages.filter(img => img.id !== imageId)
+    }));
+  };
+
   return (
+  
     <div className="admin-dashboard">
       <header className="admin-header">
         <div className="admin-logo">
+       
           <button 
             className="admin-toggle-menu" 
             onClick={toggleSidebar} 
@@ -1127,6 +1209,7 @@ const ProductManagement: React.FC = () => {
                   >
                     <i className="fas fa-plus"></i> Thêm mẫu xe
                   </button>
+                  <p>đang lỗi thêm mới img hủy vẫn còn lưu img data đó</p>
                 </div>
               </div>
             </div>
@@ -1633,20 +1716,23 @@ const ProductManagement: React.FC = () => {
                   <div className="product-images-container">
                     {state.productImages.length > 0 ? (
                       state.productImages.map((image, index) => {
-                        // Log thông tin cho RS model 
-                        if (state.currentProduct?.tenMau.includes('RS') || 
-                            state.currentProduct?.tenDong.includes('RS')) {
-                          console.log(`RS model image ${index}:`, image.id, image.loaiHinh, image.duongDanAnh);
-                        }
-                        
                         return (
-                          <div key={index} className="product-image-item">
-                            <ImageWithFallback 
-                              src={image.duongDanAnh}
-                              alt={`${state.currentProduct?.tenMau || 'Product'} ${index + 1}`}
-                              fallbackSrc={FALLBACK_IMAGE}
-                              imageType={image.loaiHinh}
-                            />
+                          <div key={image.id} className="product-image-item">
+                            <div className="image-wrapper">
+                              <button 
+                                className="image-delete-btn" 
+                                onClick={() => deleteProductImage(image.id)}
+                                title="Xóa hình ảnh"
+                              >
+                                <i className="fas fa-times"></i>
+                              </button>
+                              <ImageWithFallback 
+                                src={image.duongDanAnh}
+                                alt={`${state.currentProduct?.tenMau || 'Product'} ${index + 1}`}
+                                fallbackSrc={FALLBACK_IMAGE}
+                                imageType={image.loaiHinh}
+                              />
+                            </div>
                             <div className="image-type">{image.loaiHinh || 'Unknown'}</div>
                           </div>
                         );
@@ -1663,21 +1749,15 @@ const ProductManagement: React.FC = () => {
                       accept="image/*" 
                       onChange={(e) => {
                         if (e.target.files && e.target.files[0] && state.currentProduct) {
-                          // Xác định kiểu ảnh phù hợp cho từng loại xe
                           let imageType = 'noi_that';
                           
-                          // Xác định xem có phải RS model không
                           const isRSModel = state.currentProduct.tenMau.includes('RS') || 
                                             state.currentProduct.tenDong.includes('RS');
                           
-                          // Chọn loại ảnh phù hợp dựa trên model
                           imageType = isRSModel ? 'interior' : 'noi_that';
-                          
-                          console.log(`Uploading image for ${state.currentProduct.tenMau} with type: ${imageType}`);
                           
                           uploadProductImage(e.target.files[0], state.currentProduct.id, imageType)
                             .then((result) => {
-                              // Refresh the product images after upload
                               if (result && state.currentProduct) {
                                 fetchProductImages(state.currentProduct.id).then(images => {
                                   setState(prev => ({ ...prev, productImages: images || [] }));
