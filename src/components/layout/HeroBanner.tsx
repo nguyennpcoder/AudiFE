@@ -79,12 +79,12 @@ const HeroBanner = ({
       </div>
       
       <div className="hero-content">
-        <h1 className="hero-title">{title}</h1>
-        <p className="hero-subtitle">{subtitle}</p>
-        <p className="hero-price">{price}</p>
-        {description && <p className="hero-description">{description}</p>}
+        <h1 className="hero-title hero-bounce-in hero-bounce-in-1">{title}</h1>
+        <p className="hero-subtitle hero-bounce-in hero-bounce-in-2">{subtitle}</p>
+        <p className="hero-price hero-bounce-in hero-bounce-in-3">{price}</p>
+        {description && <p className="hero-description hero-bounce-in hero-bounce-in-4">{description}</p>}
         
-        <div className="hero-cta">
+        <div className="hero-cta hero-bounce-in hero-bounce-in-5">
           <a href={cta.primary.link} className="btn-primary">{cta.primary.text}</a>
           <a href={cta.secondary.link} className="btn-secondary">{cta.secondary.text}</a>
         </div>

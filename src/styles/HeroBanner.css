@@ -311,6 +311,37 @@
   animation: fadeOutDown 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 }
 
+@keyframes bounceInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-80px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(20px);
+  }
+  80% {
+    transform: translateX(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Class dùng cho từng dòng content */
+.hero-bounce-in {
+  opacity: 0;
+  animation: bounceInLeft 0.9s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Cascade delay cho từng dòng */
+.hero-bounce-in-1 { animation-delay: 0.15s; }
+.hero-bounce-in-2 { animation-delay: 0.3s; }
+.hero-bounce-in-3 { animation-delay: 0.45s; }
+.hero-bounce-in-4 { animation-delay: 0.6s; }
+.hero-bounce-in-5 { animation-delay: 0.75s; }
+
 @media (max-width: 768px) {
   .hero-banner .hero-content {
       padding: 40px 20px;

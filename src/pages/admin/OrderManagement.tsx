@@ -566,17 +566,10 @@ const OrderManagement: React.FC = () => {
 
   return (
     <div className="admin-dashboard">
-      <header className="admin-header">
+      <header className="admin-header admin-animate-center">
         <div className="admin-logo">
-          <button 
-            className="admin-toggle-menu" 
-            onClick={toggleSidebar} 
-            aria-label="Toggle sidebar"
-            title="Ẩn/Hiện menu"
-          >
-            <i className={`fas ${sidebarCollapsed ? 'fa-bars' : 'fa-times'}`}></i>
-          </button>
-          <h1>Audi Management System</h1>
+        
+          {/* <h1>Audi Management System</h1> */}
         </div>
         
         <div className="admin-user-dropdown">
@@ -602,8 +595,8 @@ const OrderManagement: React.FC = () => {
         </div>
       </header>
       
-      <div className="admin-content">
-        <aside className={`admin-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
+      <div className="admin-content ">
+        <aside className={`admin-sidebar admin-animate-left${sidebarCollapsed ? 'collapsed' : ''}`}>
           <nav className="admin-nav">
             <ul>
               <li>
@@ -670,7 +663,7 @@ const OrderManagement: React.FC = () => {
           </nav>
         </aside>
         
-        <main className="admin-main">
+        <main className="admin-main admin-animate-bottom">
           <div className="admin-section">
             <h2>
               <span className="admin-section-icon"><i className="fas fa-shopping-cart"></i></span>

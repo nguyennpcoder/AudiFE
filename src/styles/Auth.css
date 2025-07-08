@@ -631,3 +631,65 @@
     font-size: 13px;
   }
 }
+
+/* Animation xuất hiện từ trên xuống giữa */
+@keyframes slideDownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-80px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation xuất hiện từ phải qua trái */
+@keyframes slideLeftFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(80px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Animation xuất hiện từ trái qua phải */
+@keyframes slideRightFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-80px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Animation xuất hiện từ dưới lên giữa */
+@keyframes slideUpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(80px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Class dùng cho các animation */
+.auth-animate-center {
+  animation: slideDownFadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.auth-animate-right {
+  animation: slideLeftFadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.auth-animate-left {
+  animation: slideRightFadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.auth-animate-bottom {
+  animation: slideUpFadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) both;
+}

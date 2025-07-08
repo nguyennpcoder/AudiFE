@@ -123,3 +123,40 @@
     font-size: 2rem;
   }
 }
+
+@keyframes footerSlideUpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(80px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.footer-animate-up {
+  animation: footerSlideUpFadeIn 1.5s cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation-delay: 0.2s; /* Có thể tăng lên 0.3s nếu muốn trễ hơn */
+}
+
+@keyframes footerItemRiseIn {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.footer-animate-item {
+  opacity: 0;
+  animation: footerItemRiseIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.footer-animate-item-1 { animation-delay: 0.2s; }
+.footer-animate-item-2 { animation-delay: 0.4s; }
+.footer-animate-item-3 { animation-delay: 0.6s; }
+.footer-animate-item-4 { animation-delay: 0.8s; }

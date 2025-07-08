@@ -2,13 +2,35 @@ import { Link } from 'react-router-dom';
 import '../../styles/Footer.css';
 import logoAudi from '../../assets/logo.svg';
 import { FaFacebookF, FaTwitter, FaInstagram } from 'react-icons/fa';
-
+import { useEffect, useRef, useState } from 'react';
 
 const Footer = () => {
+  const footerRef = useRef<HTMLDivElement>(null);
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    const observer = new window.IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            setAnimate(true);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+    if (footerRef.current) {
+      observer.observe(footerRef.current);
+    }
+    return () => {
+      if (footerRef.current) observer.unobserve(footerRef.current);
+    };
+  }, []);
+
   return (
-    <footer className="footer">
+    <footer className={`footer${animate ? ' footer-animate-up' : ''}`} ref={footerRef}>
       <div className="footer-main">
-        <div className="footer-logo-disclaimer">
+        <div className={`footer-logo-disclaimer${animate ? ' footer-animate-item footer-animate-item-1' : ''}`}>
           <Link to="/">
             <img src={logoAudi} alt="Audi Logo" className="footer-logo" />
           </Link>
@@ -18,7 +40,7 @@ const Footer = () => {
         </div>
 
         <div className="footer-navigation">
-          <div className="footer-nav-column">
+          <div className={`footer-nav-column${animate ? ' footer-animate-item footer-animate-item-2' : ''}`}>
             <h3>Khám Phá</h3>
             <ul>
               <li><Link to="/models">Các Mẫu Xe</Link></li>
@@ -26,7 +48,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div className="footer-nav-column">
+          <div className={`footer-nav-column${animate ? ' footer-animate-item footer-animate-item-3' : ''}`}>
             <h3>Hỗ Trợ</h3>
             <ul>
               <li><Link to="/contact">Liên Hệ</Link></li>
@@ -34,7 +56,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div className="footer-nav-column">
+          <div className={`footer-nav-column${animate ? ' footer-animate-item footer-animate-item-4' : ''}`}>
             <h3>Theo Dõi Chúng Tôi</h3>
             <div className="social-icons">
               <a href="https://facebook.com/audi" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
@@ -51,7 +73,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="footer-copyright">
+      <div className={`footer-copyright${animate ? ' footer-animate-item footer-animate-item-4' : ''}`}>
         <p>© 2023 Audi Việt Nam. Đã đăng ký bản quyền.</p>
       </div>
 

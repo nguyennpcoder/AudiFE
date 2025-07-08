@@ -54,17 +54,17 @@ const Header = () => {
   };
 
   return (
-    <header className="header">
+    <header className="header header-animate-down">
       <div className="header-container">
-        <div className="logo-container">
+        <div className="logo-container header-animate-item header-animate-item-1">
           <Link to="/">
             <img src={logo} alt="Audi Logo" className="logo" />
           </Link>
         </div>
         
-        <nav className={`main-nav ${isMenuOpen ? 'active' : ''}`}>
+        <nav className={`main-nav ${isMenuOpen ? 'active' : ''} header-animate-item header-animate-item-2`}>
           <ul className="nav-list">
-            <li className="nav-item">
+            <li className="nav-item nav-animate-item nav-animate-item-1">
               <Link to="/models">Các Mẫu Xe</Link>
               <div className="dropdown-menu">
                 <div className="dropdown-column">
@@ -95,10 +95,10 @@ const Header = () => {
                 </div>
               </div>
             </li>
-            <li className="nav-item">
+            <li className="nav-item nav-animate-item nav-animate-item-2">
               <Link to="/rs-etron">RS e-tron</Link>
             </li>
-            <li className="nav-item">
+            <li className="nav-item nav-animate-item nav-animate-item-3">
               <Link to="/services">Dịch Vụ</Link>
               <div className="dropdown-menu">
                 <div className="dropdown-column">
@@ -124,7 +124,7 @@ const Header = () => {
                 </div>
               </div>
             </li>
-            <li className="nav-item">
+            <li className="nav-item nav-animate-item nav-animate-item-4">
               <Link to="/discover">Khám Phá</Link>
               <div className="dropdown-menu">
                 <div className="dropdown-column">
@@ -150,17 +150,19 @@ const Header = () => {
                 </div>
               </div>
             </li>
-            <li className="nav-item">
+            <li className="nav-item nav-animate-item nav-animate-item-5">
               <Link to="/dealership">Đại Lý</Link>
             </li>
           </ul>
         </nav>
         
-        <div className="user-actions">
-          <Link to="/test-drive" className="button-outline">Lái Thử</Link>
+        <div className="user-actions header-animate-item header-animate-item-3">
+          <Link to="/test-drive" className="button-outline user-action-animate user-action-animate-1">
+            Lái Thử
+          </Link>
           
           {isAuthenticated ? (
-            <div className="user-menu">
+            <div className="user-menu user-action-animate user-action-animate-2">
               <div 
                 className="user-info" 
                 onMouseEnter={() => setIsUserMenuOpen(true)}
@@ -200,11 +202,13 @@ const Header = () => {
               </div>
             </div>
           ) : (
-            <Link to="/login" className="login-button">Đăng Nhập myAudi</Link>
+            <Link to="/login" className="login-button user-action-animate user-action-animate-2">
+              Đăng Nhập myAudi
+            </Link>
           )}
         </div>
         
-        <button className="mobile-menu-toggle" onClick={toggleMenu}>
+        <button className="mobile-menu-toggle header-animate-item header-animate-item-3" onClick={toggleMenu}>
           <span className="toggle-icon"></span>
         </button>
       </div>

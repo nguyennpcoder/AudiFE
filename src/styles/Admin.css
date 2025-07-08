@@ -164,13 +164,13 @@
     width: 240px;
     background-color: #222;
     color: #fff;
-    min-height: calc(100vh - 64px);
+    min-height: 100vh;
     height: 100%;
     overflow-y: auto;
     transition: all 0.3s ease;
     position: fixed;
     left: 0;
-    top: 64px;
+    top: 0; /* Sửa từ 64px thành 0 để dính lên gốc trên */
     bottom: 0;
     z-index: 10;
   }
@@ -183,6 +183,7 @@
     list-style: none;
     padding: 0;
     margin: 0;
+    margin-top:70px;
   }
   
   .admin-nav li {
@@ -869,7 +870,9 @@
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s;
-  }
+    color: #222; /* Đảm bảo màu đen cho icon/text */
+    font-size: 1.5rem; /* (nếu cần) */
+}
 
   .admin-pagination button:hover:not(:disabled) {
     background-color: #f5f5f5;
@@ -1290,3 +1293,69 @@
     width: 800px;
     max-width: 90vw;
   }
+
+/* Animation xuất hiện từ trên xuống giữa */
+@keyframes slideDownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-80px); /* Chỉ dịch chuyển dọc từ trên xuống */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation xuất hiện từ phải qua trái */
+@keyframes slideLeftFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(80px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Animation xuất hiện từ trái qua phải */
+@keyframes slideRightFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-80px); /* Chỉ dịch chuyển ngang từ trái qua */
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Animation xuất hiện từ dưới lên giữa */
+@keyframes slideUpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(80px); /* Chỉ dịch chuyển dọc từ dưới lên */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Class dùng cho các animation */
+.admin-animate-center {
+  animation: slideDownFadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.admin-animate-right {
+  animation: slideLeftFadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.admin-animate-left {
+  animation: slideRightFadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.admin-animate-bottom {
+  animation: slideUpFadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.admin-pagination button i {
+    color: #222 !important;
+}

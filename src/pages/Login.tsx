@@ -294,9 +294,9 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-container ">
       {/* Left video section */}
-      <div className="auth-video-background">
+      <div className="auth-video-background auth-animate-right">
         <video autoPlay muted loop>
           <source src={backgroundVideo} type="video/mp4" />
         </video>
@@ -312,7 +312,7 @@ const Login: React.FC = () => {
       </div>
 
       {/* Form section */}
-      <div className="auth-form-section">
+      <div className="auth-form-section auth-animate-left">
         <div className="auth-logo">
           <img src={logo} alt="Audi Logo" />
         </div>
