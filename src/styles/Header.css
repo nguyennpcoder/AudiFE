@@ -685,7 +685,7 @@
   }
 
 /* Animation xuất hiện từ trên xuống */
-@keyframes headerSlideDownFadeIn {
+/* @keyframes headerSlideDownFadeIn {
   from {
     opacity: 0;
     transform: translateY(-60px);
@@ -714,10 +714,10 @@
 .header-animate-item {
   opacity: 0;
   animation: headerItemDropIn 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-}
+} */
 
 /* Delay cho từng phần */
-.header-animate-item-1 { animation-delay: 0.2s; }
+/* .header-animate-item-1 { animation-delay: 0.2s; }
 .header-animate-item-2 { animation-delay: 0.4s; }
 .header-animate-item-3 { animation-delay: 0.6s; }
 
@@ -735,12 +735,12 @@
 .nav-animate-item {
   opacity: 0;
   animation: navItemDropIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-}
+} */
 
 /* Delay cho từng item, bạn có thể thêm nhiều hơn nếu menu dài */
-.nav-animate-item-1 { animation-delay: 0.25s; }
+/* .nav-animate-item-1 { animation-delay: 0.25s; }
 .nav-animate-item-2 { animation-delay: 0.35s; }
 .nav-animate-item-3 { animation-delay: 0.45s; }
 .nav-animate-item-4 { animation-delay: 0.55s; }
-.nav-animate-item-5 { animation-delay: 0.65s; }
+.nav-animate-item-5 { animation-delay: 0.65s; } */
 

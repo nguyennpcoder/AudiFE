@@ -124,7 +124,7 @@
   }
 }
 
-@keyframes footerSlideUpFadeIn {
+/* @keyframes footerSlideUpFadeIn {
   from {
     opacity: 0;
     transform: translateY(80px);
@@ -137,7 +137,7 @@
 
 .footer-animate-up {
   animation: footerSlideUpFadeIn 1.5s cubic-bezier(0.23, 1, 0.32, 1) both;
-  animation-delay: 0.2s; /* Có thể tăng lên 0.3s nếu muốn trễ hơn */
+  animation-delay: 0.2s; 
 }
 
 @keyframes footerItemRiseIn {
@@ -159,4 +159,4 @@
 .footer-animate-item-1 { animation-delay: 0.2s; }
 .footer-animate-item-2 { animation-delay: 0.4s; }
 .footer-animate-item-3 { animation-delay: 0.6s; }
-.footer-animate-item-4 { animation-delay: 0.8s; }
+.footer-animate-item-4 { animation-delay: 0.8s; } */

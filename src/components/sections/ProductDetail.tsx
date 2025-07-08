@@ -750,6 +750,11 @@ const ProductDetail: React.FC = () => {
 
       setIsLoadingColorImages(false);
 
+      // Gọi lại handleNoiThatSelect cho option nội thất đang chọn
+      if (selectedNoiThat) {
+        await handleNoiThatSelect(selectedNoiThat, color.id);
+      }
+
     } catch (error) {
       console.error('Error in handleColorSelect:', error);
       // Fallback to default images if color-specific images fail
@@ -859,11 +864,12 @@ const ProductDetail: React.FC = () => {
   // Add function to handle noi that selection with image loading
   const handleNoiThatSelect = async (noiThat: NoiThatOption, colorId?: number) => {
     const exteriorColorId = colorId || selectedColor?.id;
+    
     // Nếu option đang chọn đã là selected, thì không làm gì cả
     if (selectedNoiThat?.id === noiThat.id) return;
 
     try {
-      // 1. Thử fetch ảnh nội thất đúng với màu ngoại thất hiện tại
+      // 1. Thử fetch ảnh nội thất đúng với màu ngoại thất hiện tại (kể cả option mặc định)
       const specificColorInteriorUrl = `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${id}/noi-that/${noiThat.id}?mauSacNgoaiId=${exteriorColorId}`;
       const specificColorResponse = await axios.get(specificColorInteriorUrl);
 
@@ -891,7 +897,7 @@ const ProductDetail: React.FC = () => {
         return;
       }
 
-      // 2. Nếu không có ảnh theo màu ngoại thất, fallback về ảnh mặc định của option nội thất này
+      // 2. Nếu không có ảnh theo màu ngoại thất, fallback về ảnh mặc định của option nội thất này (không truyền màu)
       const defaultInteriorUrl = `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${id}/noi-that/${noiThat.id}`;
       const defaultInteriorResponse = await axios.get(defaultInteriorUrl);
       const defaultInteriorImages = defaultInteriorResponse.data
@@ -912,23 +918,24 @@ const ProductDetail: React.FC = () => {
         return;
       }
 
-      // 3. Nếu không có ảnh nào cho option này, fallback về ảnh nội thất mặc định của xe
-      // (Chỉ dùng khi không có ảnh nào cho option nội thất này)
-      const fallbackImagesUrl = `${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${id}`;
-      const fallbackResponse = await axios.get(fallbackImagesUrl);
-      const fallbackInteriorImages = fallbackResponse.data
-        .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
-        .sort((a: HinhAnhXe, b: HinhAnhXe) => {
-          if (!a.viTri) return 1;
-          if (!b.viTri) return -1;
-          return a.viTri - b.viTri;
-        });
+      // 3. Nếu không, fallback về ảnh nội thất từ màu ngoại thất hiện tại
+      if (exteriorColorId) {
+        const colorInteriorUrl = `${BACKEND_URL}/api/v1/hinh-anh-theo-mau/mau-xe/${id}/mau-sac/${exteriorColorId}`;
+        const colorInteriorResponse = await axios.get(colorInteriorUrl);
+        const colorInteriorImages = colorInteriorResponse.data
+          .filter((img: HinhAnhXe) => img.loaiHinh === 'noi_that')
+          .sort((a: HinhAnhXe, b: HinhAnhXe) => {
+            if (!a.viTri) return 1;
+            if (!b.viTri) return -1;
+            return a.viTri - b.viTri;
+          });
 
-      if (fallbackInteriorImages.length > 0) {
-        setNoiThatImages(fallbackInteriorImages);
-        setSelectedNoiThat(noiThat);
-        setActiveInteriorTab(0);
-        return;
+        if (colorInteriorImages.length > 0) {
+          setNoiThatImages(colorInteriorImages);
+          setSelectedNoiThat(noiThat);
+          setActiveInteriorTab(0);
+          return;
+        }
       }
 
       // Nếu tất cả đều fail
@@ -956,6 +963,13 @@ const resetToDefaultColor = async () => {
     }
   }
 };
+
+  useEffect(() => {
+    if (selectedNoiThat && selectedColor) {
+      handleNoiThatSelect(selectedNoiThat, selectedColor.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedColor]);
 
   if (isLoading) {
     return (
@@ -1439,3 +1453,7 @@ const resetToDefaultColor = async () => {
 };
 
 export default ProductDetail;
+
+//Khi bạn chọn màu ngoại thất (ví dụ: Đỏ), ảnh nội thất và ngoại thất đều đúng với màu Đỏ.
+//Khi bạn chọn một option nội thất khác, ảnh nội thất cũng đúng với màu Đỏ.
+//Nhưng khi bạn chọn lại option nội thất mặc định (ô đầu tiên), ảnh nội thất lại nhảy về ảnh của màu mặc định (Trắng Băng), thay vì ảnh nội thất đúng với màu Đỏ.
