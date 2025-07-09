@@ -128,6 +128,7 @@ const ProductDetail: React.FC = () => {
   
   // Add state for default color
   const [defaultColor, setDefaultColor] = useState<MauSac | null>(null);
+  const [interiorError, setInteriorError] = useState<string | null>(null);
   
   // Define fallback options with the legacy interface
   const interiorFallbackOptions: LegacyInteriorOption[] = [
@@ -891,9 +892,10 @@ const ProductDetail: React.FC = () => {
         }));
 
       if (specificInteriorImages.length > 0) {
-        setNoiThatImages(specificInteriorImages);
+        setNoiThatImages(removeDuplicateImages(specificInteriorImages));
         setSelectedNoiThat(noiThat);
-        setActiveInteriorTab(0);
+        setActiveInteriorTab(0); // <-- Đảm bảo reset về 0
+        setInteriorError(null); // Clear error if successful
         return;
       }
 
@@ -912,9 +914,10 @@ const ProductDetail: React.FC = () => {
         }));
 
       if (defaultInteriorImages.length > 0) {
-        setNoiThatImages(defaultInteriorImages);
+        setNoiThatImages(removeDuplicateImages(defaultInteriorImages));
         setSelectedNoiThat(noiThat);
         setActiveInteriorTab(0);
+        setInteriorError(null); // Clear error if successful
         return;
       }
 
@@ -931,15 +934,16 @@ const ProductDetail: React.FC = () => {
           });
 
         if (colorInteriorImages.length > 0) {
-          setNoiThatImages(colorInteriorImages);
+          setNoiThatImages(removeDuplicateImages(colorInteriorImages));
           setSelectedNoiThat(noiThat);
           setActiveInteriorTab(0);
+          setInteriorError(null); // Clear error if successful
           return;
         }
       }
 
       // Nếu tất cả đều fail
-      console.error('No interior images found for the selected option');
+      setInteriorError(`Mẫu xe này không hỗ trợ màu nội thất "${noiThat.ten}". Vui lòng chọn tùy chọn khác.`);
     } catch (error) {
       console.error('Error in handleNoiThatSelect:', error);
     }
@@ -1304,7 +1308,7 @@ const resetToDefaultColor = async () => {
                 </div>
                 
                 <div className="image-counter_details">
-                  {activeInteriorTab + 1} / {noiThatImages.length}
+                  {Math.min(activeInteriorTab + 1, noiThatImages.length)} / {noiThatImages.length}
                 </div>
               </div>
               
@@ -1328,6 +1332,12 @@ const resetToDefaultColor = async () => {
                 <h3>Ghế: Đen, Bảng điều khiển: Đen, Thảm: Đen, Trần: Đen</h3>
               )}
               
+              {interiorError && (
+                <div style={{ color: "red", marginTop: 8, fontWeight: "bold" }}>
+                  {interiorError}
+                </div>
+              )}
+
               <div className="interior-options-container_details">
                 {noiThatOptions.length > 0 ? (
                   noiThatOptions.map((option) => (
@@ -1453,6 +1463,17 @@ const resetToDefaultColor = async () => {
 };
 
 export default ProductDetail;
+
+function removeDuplicateImages(images: HinhAnhXe[]): HinhAnhXe[] {
+  const seen = new Set();
+  return images.filter(img => {
+    // Ưu tiên dùng id nếu có
+    const key = img.id ? String(img.id) : (img.duongDanAnh || '').toLowerCase().split('?')[0].trim();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
 
 //Khi bạn chọn màu ngoại thất (ví dụ: Đỏ), ảnh nội thất và ngoại thất đều đúng với màu Đỏ.
 //Khi bạn chọn một option nội thất khác, ảnh nội thất cũng đúng với màu Đỏ.
