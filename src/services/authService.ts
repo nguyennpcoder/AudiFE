@@ -32,6 +32,22 @@ export interface AuthResponse {
   role?: string;
 }
 
+export interface QuenMatKhauRequest {
+  emailOrPhone: string;
+  method: 'email' | 'sms';
+}
+
+export interface ResetMatKhauRequest {
+  token: string;
+  matKhauMoi: string;
+}
+
+export interface XacThucOtpRequest {
+  soDienThoai: string;
+  otp: string;
+  matKhauMoi: string;
+}
+
 export const loginApi = async (data: LoginForm): Promise<AuthResponse> => {
   try {
     // Transform to match backend expected format
@@ -101,6 +117,82 @@ export const registerApi = async (data: RegisterForm): Promise<AuthResponse> => 
       return {
         success: false,
         message: error.response.data.message || 'Đăng ký thất bại'
+      };
+    }
+    return {
+      success: false,
+      message: 'Không thể kết nối đến máy chủ'
+    };
+  }
+};
+
+export const quenMatKhauApi = async (emailOrPhone: string, method: 'email' | 'sms'): Promise<AuthResponse> => {
+  try {
+    const response = await axios.post(`${API_URL}/quen-mat-khau`, {
+      emailOrPhone,
+      method
+    });
+    
+    return {
+      success: true,
+      message: response.data.message
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        success: false,
+        message: error.response.data.message || 'Không thể gửi mã xác thực'
+      };
+    }
+    return {
+      success: false,
+      message: 'Không thể kết nối đến máy chủ'
+    };
+  }
+};
+
+export const resetMatKhauApi = async (token: string, matKhauMoi: string): Promise<AuthResponse> => {
+  try {
+    const response = await axios.post(`${API_URL}/reset-mat-khau`, {
+      token,
+      matKhauMoi
+    });
+    
+    return {
+      success: true,
+      message: response.data.message
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        success: false,
+        message: error.response.data.message || 'Không thể đặt lại mật khẩu'
+      };
+    }
+    return {
+      success: false,
+      message: 'Không thể kết nối đến máy chủ'
+    };
+  }
+};
+
+export const xacThucOtpApi = async (soDienThoai: string, otp: string, matKhauMoi: string): Promise<AuthResponse> => {
+  try {
+    const response = await axios.post(`${API_URL}/xac-thuc-otp`, {
+      soDienThoai,
+      otp,
+      matKhauMoi
+    });
+    
+    return {
+      success: true,
+      message: response.data.message
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        success: false,
+        message: error.response.data.message || 'Không thể xác thực OTP'
       };
     }
     return {

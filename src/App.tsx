@@ -19,6 +19,7 @@ import { NotificationProvider } from './context/NotificationContext';
 import ProductDetail from './components/sections/ProductDetail';
 import DealershipPage from './pages/Dealership';
 import ModelsPage from './pages/models/Models';
+import ForgotPassword from './pages/ForgotPassword';
 
 function App() {
   const location = useLocation();
@@ -162,6 +163,7 @@ function App() {
               <Route path="/dealership" element={<DealershipPage />} />
               <Route path="/dealership/:id" element={<DealershipPage />} />
               <Route path="/models" element={<ModelsPage />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
             </Routes>
           </main>
           {shouldShowFooter && <Footer />}

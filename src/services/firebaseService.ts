@@ -12,7 +12,10 @@ import {
   fetchSignInMethodsForEmail as firebaseFetchSignInMethodsForEmail,
   signInWithCredential as firebaseSignInWithCredential,
   AuthCredential,
-  OAuthProvider
+  OAuthProvider,
+  RecaptchaVerifier,
+  PhoneAuthProvider,
+  signInWithPhoneNumber
 } from "firebase/auth";
 
 // Your web app's Firebase configuration
@@ -93,3 +96,49 @@ export const signInWithCredential = (credential: AuthCredential): Promise<UserCr
 export { GoogleAuthProvider, FacebookAuthProvider, GithubAuthProvider };
 
 export default auth;
+
+export const sendOtpViaFirebase = async (phoneNumber: string): Promise<void> => {
+  try {
+    // Tạo RecaptchaVerifier
+    const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      'size': 'invisible',
+      'callback': (response: any) => {
+        console.log('reCAPTCHA solved', response);
+      }
+    });
+
+    // Gửi OTP
+    const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+    
+    // Lưu confirmationResult để sử dụng khi xác thực OTP
+    localStorage.setItem('confirmationResult', JSON.stringify(confirmationResult));
+    
+    console.log('OTP sent successfully');
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    throw error;
+  }
+};
+
+export const verifyOtp = async (otp: string): Promise<boolean> => {
+  try {
+    const confirmationResultStr = localStorage.getItem('confirmationResult');
+    if (!confirmationResultStr) {
+      throw new Error('No confirmation result found');
+    }
+
+    const confirmationResult = JSON.parse(confirmationResultStr);
+    const result = await confirmationResult.confirm(otp);
+    
+    if (result.user) {
+      console.log('OTP verified successfully');
+      localStorage.removeItem('confirmationResult');
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error verifying OTP:', error);
+    throw error;
+  }
+};
