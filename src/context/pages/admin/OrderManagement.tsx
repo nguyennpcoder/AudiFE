@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../AuthContext';
 import { useNavigate } from 'react-router-dom';
-import '../../styles/Admin.css';
+import '../../../styles/Admin.css';
 
 import AdminHeader from './AdminHeader';
 

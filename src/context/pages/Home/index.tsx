@@ -5,17 +5,17 @@ import FeaturedProducts from '../../../components/sections/FeaturedProducts';
 import { useNotification } from '../../NotificationContext';
 
 // Import hình ảnh
-import etronGTImage from '../../assets/rs-etron-gt.jpg';
-import rsSevenImage from '../../assets/audi-rs7.jpeg';
-import rsFiveImage from '../../assets/audi-rs5.jpeg';
-import aSevenImage from '../../assets/audi-a7.jpeg';
-import qFourImage from '../../assets/audi-r8.jpg';
+import etronGTImage from '../../../assets/rs-etron-gt.jpg';
+import rsSevenImage from '../../../assets/audi-rs7.jpeg';
+import rsFiveImage from '../../../assets/audi-rs5.jpeg';
+import aSevenImage from '../../../assets/audi-a7.jpeg';
+import qFourImage from '../../../assets/audi-r8.jpg';
 
-import etronGTImage1 from '../../assets/etron.avif';
-import rsSevenImage1 from '../../assets/rs7.jpeg';
-import rsFiveImage1 from '../../assets/rs5.avif';
-import aSevenImage1 from '../../assets/a7.jpg';
-import qFourImage1 from '../../assets/r8.jpg';
+import etronGTImage1 from '../../../assets/etron.avif';
+import rsSevenImage1 from '../../../assets/rs7.jpeg';
+import rsFiveImage1 from '../../../assets/rs5.avif';
+import aSevenImage1 from '../../../assets/a7.jpg';
+import qFourImage1 from '../../../assets/r8.jpg';
 
 const Home = () => {
   const { showNotification } = useNotification();

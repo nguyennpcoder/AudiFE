@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../AuthContext';
-import '../styles/MyAudi.css';
+import '../../styles/MyAudi.css';
 
 const MyAudi: React.FC = () => {
   const { user } = useAuth();
