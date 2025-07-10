@@ -94,9 +94,9 @@ Designed in Audi's style:
 ![Audi Dashboard Demo](public/demo/model.png)
 
 ### 🚗 Vehicle
-<img src="public/demo/details_vehicle.png.png" alt="Audi Dashboard Demo" width="30%" />
-<img src="public/demo/color_vehicle.png.png" alt="Audi Dashboard Demo" width="30%" />
-<img src="public/demo/compare_vehicle.png.png" alt="Audi Dashboard Demo" width="30%" />
+<img src="public/demo/details_vehicle.png" alt="Audi Dashboard Demo" width="30%" />
+<img src="public/demo/color_vehicle.png" alt="Audi Dashboard Demo" width="30%" />
+<img src="public/demo/compare_vehicle.png" alt="Audi Dashboard Demo" width="30%" />
 
 ### 🛠️ Interior
 <img src="public/demo/interior.png" alt="Audi Dashboard Demo" width="45%" />
