@@ -92,20 +92,26 @@ Designed in Audi's style:
 ![Audi Dashboard Demo](public/demo/home.png)
 ### 🛞 Model
 ![Audi Dashboard Demo](public/demo/model.png)
+
 ### 🚗 Vehicle
-<img src="public/demo/image1.png" alt="Audi Dashboard Demo" width="30%" />
-<img src="public/demo/image2.png" alt="Audi Dashboard Demo" width="30%" />
-<img src="public/demo/image3.png" alt="Audi Dashboard Demo" width="30%" />
+<img src="public/demo/details_vehicle.png.png" alt="Audi Dashboard Demo" width="30%" />
+<img src="public/demo/color_vehicle.png.png" alt="Audi Dashboard Demo" width="30%" />
+<img src="public/demo/compare_vehicle.png.png" alt="Audi Dashboard Demo" width="30%" />
+
 ### 🛠️ Interior
 <img src="public/demo/interior.png" alt="Audi Dashboard Demo" width="45%" />
 <img src="public/demo/interior2.png" alt="Audi Dashboard Demo" width="45%" />
+
 ### 🗺️ Map
 ![Audi Dashboard Demo](public/demo/maps.png)
+
 ### 🔐 Login page
 ![Audi Dashboard Demo](public/demo/page_login.png)
+
 ### 📩 Forgot password
 <img src="public/demo/forgot_pass.png" alt="Audi Dashboard Demo" width="45%" />
 <img src="public/demo/otp_email.png" alt="Audi Dashboard Demo" width="45%" />
+
 ### 🌝 Light mode
 ![Audi Dashboard Demo](public/demo/light_mode.png)
 ### 🌚 Dark mode
