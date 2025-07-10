@@ -201,3 +201,40 @@ export const xacThucOtpApi = async (soDienThoai: string, otp: string, matKhauMoi
     };
   }
 };
+
+export interface User {
+  id: number;
+  ten: string;
+  ho?: string;
+  vai_tro: string; // hoặc role nếu backend trả về như vậy
+  avatar?: string;
+}
+
+export const fetchAllUsers = async (): Promise<User[]> => {
+  const API_USER_URL = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api/v1'}/nguoi-dung`;
+  const res = await axios.get(API_USER_URL);
+  return res.data;
+};
+
+// Lấy danh sách nhân viên bán hàng
+export const fetchSalesStaff = async (): Promise<User[]> => {
+  try {
+    const API_USER_URL = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api/v1'}/nguoi-dung`;
+    const res = await axios.get(API_USER_URL);
+    
+    // Lọc chỉ lấy nhân viên có role ban_hang
+    const salesStaff = res.data.filter((user: any) => user.vaiTro === 'ban_hang' || user.vai_tro === 'ban_hang');
+    
+    // Chuẩn hóa dữ liệu trả về
+    return salesStaff.map((user: any) => ({
+      id: user.id,
+      ten: user.ten,
+      ho: user.ho,
+      vai_tro: user.vaiTro || user.vai_tro,
+      avatar: user.avatar || '/avatar-default.png'
+    }));
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách nhân viên bán hàng:', error);
+    return [];
+  }
+};

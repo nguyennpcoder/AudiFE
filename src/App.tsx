@@ -20,6 +20,7 @@ import ProductDetail from './components/sections/ProductDetail';
 import DealershipPage from './pages/Dealership';
 import ModelsPage from './pages/models/Models';
 import ForgotPassword from './pages/ForgotPassword';
+import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
   const location = useLocation();
@@ -62,113 +63,115 @@ function App() {
         },
       }}
     >
-      <NotificationProvider>
-        <div className="app-container">
-          {shouldShowHeader && <Header />}
-          <main className={`main-content ${!shouldShowHeader ? 'auth-page' : ''}`}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/myaudi" element={
-                <ProtectedRoute>
-                  <MyAudi />
-                </ProtectedRoute>
-              } />
-              
-              {/* Admin Routes */}
-              <Route path="/admin/dashboard" element={
-                <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                  <AdminDashboard />
-                </RoleBasedRoute>
-              } />
+      <ThemeProvider>
+        <NotificationProvider>
+          <div className="app-container">
+            {shouldShowHeader && <Header />}
+            <main className={`main-content ${!shouldShowHeader ? 'auth-page' : ''}`}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/myaudi" element={
+                  <ProtectedRoute>
+                    <MyAudi />
+                  </ProtectedRoute>
+                } />
+                
+                {/* Admin Routes */}
+                <Route path="/admin/dashboard" element={
+                  <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                    <AdminDashboard />
+                  </RoleBasedRoute>
+                } />
 
-              {/* Thêm route quản lý người dùng */}
-              <Route path="/admin/users" element={
-                 <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                 <UserManagement />
-               </RoleBasedRoute>
-              } />
+                {/* Thêm route quản lý người dùng */}
+                <Route path="/admin/users" element={
+                   <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                   <UserManagement />
+                 </RoleBasedRoute>
+                } />
 
-              {/* Thêm route quản lý sản phẩm */}
-              <Route path="/admin/products" element={
-                <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                  <ProductManagement />
-                </RoleBasedRoute>
-              } />
+                {/* Thêm route quản lý sản phẩm */}
+                <Route path="/admin/products" element={
+                  <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                    <ProductManagement />
+                  </RoleBasedRoute>
+                } />
 
-              {/* Thêm các route khác */}
-              <Route path="/admin/orders" element={
-                <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                    <OrderManagement />
-                </RoleBasedRoute>
-              } />
+                {/* Thêm các route khác */}
+                <Route path="/admin/orders" element={
+                  <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                      <OrderManagement />
+                  </RoleBasedRoute>
+                } />
 
-              <Route path="/admin/dealers" element={
-                <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                  <div className="admin-placeholder">
-                    <h2>Trang quản lý đại lý đang phát triển</h2>
-                  </div>
-                </RoleBasedRoute>
-              } />
+                <Route path="/admin/dealers" element={
+                  <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                    <div className="admin-placeholder">
+                      <h2>Trang quản lý đại lý đang phát triển</h2>
+                    </div>
+                  </RoleBasedRoute>
+                } />
 
-              <Route path="/admin/inventory" element={
-                <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                  <div className="admin-placeholder">
-                    <h2>Trang quản lý tồn kho đang phát triển</h2>
-                  </div>
-                </RoleBasedRoute>
-              } />
+                <Route path="/admin/inventory" element={
+                  <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                    <div className="admin-placeholder">
+                      <h2>Trang quản lý tồn kho đang phát triển</h2>
+                    </div>
+                  </RoleBasedRoute>
+                } />
 
-              <Route path="/admin/marketing" element={
-                <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                  <div className="admin-placeholder">
-                    <h2>Trang quản lý marketing đang phát triển</h2>
-                  </div>
-                </RoleBasedRoute>
-              } />
+                <Route path="/admin/marketing" element={
+                  <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                    <div className="admin-placeholder">
+                      <h2>Trang quản lý marketing đang phát triển</h2>
+                    </div>
+                  </RoleBasedRoute>
+                } />
 
-              <Route path="/admin/blog" element={
-                <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                  <div className="admin-placeholder">
-                    <h2>Trang quản lý bài viết đang phát triển</h2>
-                  </div>
-                </RoleBasedRoute>
-              } />
+                <Route path="/admin/blog" element={
+                  <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                    <div className="admin-placeholder">
+                      <h2>Trang quản lý bài viết đang phát triển</h2>
+                    </div>
+                  </RoleBasedRoute>
+                } />
 
-              <Route path="/admin/support" element={
-                <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                  <div className="admin-placeholder">
-                    <h2>Trang quản lý hỗ trợ đang phát triển</h2>
-                  </div>
-                </RoleBasedRoute>
-              } />
+                <Route path="/admin/support" element={
+                  <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                    <div className="admin-placeholder">
+                      <h2>Trang quản lý hỗ trợ đang phát triển</h2>
+                    </div>
+                  </RoleBasedRoute>
+                } />
 
-              <Route path="/admin/settings" element={
-                <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                  <div className="admin-placeholder">
-                    <h2>Trang cài đặt hệ thống đang phát triển</h2>
-                  </div>
-                </RoleBasedRoute>
-              } />
+                <Route path="/admin/settings" element={
+                  <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                    <div className="admin-placeholder">
+                      <h2>Trang cài đặt hệ thống đang phát triển</h2>
+                    </div>
+                  </RoleBasedRoute>
+                } />
 
-              {/* Default redirect to admin dashboard for admin users */}
-              <Route path="/admin" element={
-                <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                  <AdminDashboard />
-                </RoleBasedRoute>
-              } />
+                {/* Default redirect to admin dashboard for admin users */}
+                <Route path="/admin" element={
+                  <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                    <AdminDashboard />
+                  </RoleBasedRoute>
+                } />
 
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/dealership" element={<DealershipPage />} />
-              <Route path="/dealership/:id" element={<DealershipPage />} />
-              <Route path="/models" element={<ModelsPage />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-            </Routes>
-          </main>
-          {shouldShowFooter && <Footer />}
-        </div>
-      </NotificationProvider>
+                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/dealership" element={<DealershipPage />} />
+                <Route path="/dealership/:id" element={<DealershipPage />} />
+                <Route path="/models" element={<ModelsPage />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+              </Routes>
+            </main>
+            {shouldShowFooter && <Footer />}
+          </div>
+        </NotificationProvider>
+      </ThemeProvider>
     </ConfigProvider>
   );
 }

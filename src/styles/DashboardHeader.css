@@ -1,0 +1,636 @@
+.dashboard-cards {
+  display: flex;
+  gap: 20px; /* Sửa từ 32px thành 20px */
+  margin-bottom: 20px; /* Sửa từ 24px thành 20px */
+  flex-wrap: wrap;
+  padding: 0 15px; /* Sửa từ 32px thành 20px */
+  justify-content: space-between;
+  transition: padding 0.2s;
+  margin-left: 30px;
+}
+
+.dashboard-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08);
+  padding: 20px 48px 20px 28px;
+  min-width: 280px;
+  max-width: 100%;
+  flex: 1 1 320px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: visible;
+  
+  transition: box-shadow 0.2s, transform 0.2s;
+  cursor: pointer;
+}
+
+.dashboard-card:hover {
+  box-shadow: 0 8px 32px 0 rgba(24,144,255,0.18);
+  transform: translateY(-4px) scale(1.02);
+}
+
+.dashboard-card .anticon {
+  transition: font-size 0.2s;
+}
+
+.dashboard-card .anticon {
+  font-size: 28px;
+}
+
+.dashboard-card .dashboard-card-icon {
+  background: linear-gradient(135deg, #1890ff 60%, #43a047 100%);
+  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: -26px;
+  top: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0 2px 8px 0 rgba(24,144,255,0.15);
+}
+
+/* Chart section và admin-section */
+.admin-section.chart-section {
+  margin-bottom: 20px !important;
+  padding: 20px !important;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-cards {
+    gap: 16px;
+    padding: 0 10px;
+  }
+  .dashboard-card {
+    min-width: 180px;
+    padding: 14px 10px;
+    border-radius: 14px;
+    font-size: 15px;
+    margin-bottom: 16px;
+  }
+  .dashboard-card .dashboard-card-icon {
+    width: 36px;
+    height: 36px;
+    right: -12px;
+  }
+  .dashboard-card .anticon {
+    font-size: 18px;
+  }
+  .admin-section.chart-section {
+    margin-bottom: 16px !important;
+    padding: 14px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-cards {
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 4px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .dashboard-card {
+    min-width: 0;
+    max-width: 360px;
+    width: 100%;
+    margin: 0 auto 10px auto;
+    padding: 8px 8px;
+    font-size: 13px;
+    border-radius: 14px;
+    box-sizing: border-box;
+  }
+  .dashboard-card .dashboard-card-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+  .dashboard-card .anticon {
+    font-size: 14px;
+  }
+  .admin-section.chart-section {
+    margin-bottom: 10px !important;
+    padding: 8px !important;
+  }
+}
+
+/* Nút hamburger */
+.hamburger-btn {
+  transition: all 0.2s ease;
+}
+
+.hamburger-btn:hover {
+  background: rgba(24, 144, 255, 0.1) !important;
+  color: #1890ff !important;
+}
+
+.hamburger-btn:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 1024px) {
+  .hamburger-btn {
+    padding: 8px 12px !important;
+    font-size: 28px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .hamburger-btn {
+    padding: 6px 10px !important;
+    font-size: 26px !important;
+  }
+}
+
+.audi-dashboard-bottom {
+  display: flex;
+  margin-top: -70px;
+  gap: 22px;
+  margin-left: 10px;
+  padding: 0 32px 32px 32px; /* Đổi margin thành padding */
+  flex-wrap: wrap;
+  align-items: stretch;
+  min-width: 900px; /* Thêm dòng này: đặt chiều rộng tối thiểu */
+  overflow-x: auto;  /* Thêm dòng này: cho phép cuộn ngang nếu nhỏ hơn min-width */
+}
+.audi-projects, .audi-orders-history {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08);
+  padding: 24px 24px 16px 24px;
+  flex: 2;
+  min-width: 320px;  /* Có thể tăng lên nếu muốn box không bị co nhỏ quá */
+  max-width: 1100px;
+  margin-bottom: 24px;
+}
+.audi-orders-history {
+  flex: 1.1;
+  min-width: 260px;
+  max-width: 400px;
+  padding: 24px 18px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  height: 100%; /* Đảm bảo kéo dài hết chiều cao cha */
+}
+.audi-projects-header, .audi-orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+.audi-projects-title, .audi-orders-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+.audi-projects-sub, .audi-orders-sub {
+  color: #6b7280;
+  font-size: 15px;
+  margin-top: 2px;
+}
+.audi-projects-progress, .audi-orders-progress {
+  color: #1890ff;
+  font-weight: 700;
+  margin-left: 4px;
+}
+.audi-projects-tabs {
+  display: flex;
+  gap: 8px;
+}
+.audi-projects-tabs button {
+  background: #f5f5f5;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 16px;
+  font-weight: 600;
+  color: #222;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.audi-projects-tabs button.active, .audi-projects-tabs button:hover {
+  background: #1890ff;
+  color: #fff;
+}
+.audi-projects-table {
+  width: 100%;
+  margin-top: 8px;
+}
+.audi-projects-row {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+}
+
+.audi-projects-row > div {
+  display: flex;
+  align-items: center;
+  /* Đảm bảo các cột có width nhất quán, ví dụ: */
+  min-width: 120px;
+  /* hoặc dùng flex-basis nếu muốn responsive */
+  /* flex-basis: 120px; */
+}
+
+.audi-projects-row-head {
+  font-weight: 700;
+  color: #6b7280;
+  border-bottom: 2px solid #e5e7eb;
+  background: #f9fafb;
+}
+.audi-projects-row-head {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  background: #fafbfc;
+}
+.audi-projects-row-head > div {
+  min-width: 120px;
+  text-align: center;
+}
+.audi-car-logo {
+  width: 48px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+.audi-members {
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+}
+
+.audi-members img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  margin-left: -8px;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08);
+}
+.audi-members img:first-child {
+  margin-left: 0;
+}
+
+.staff-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  margin-left: -8px;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #fff;
+}
+
+.staff-avatar:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px 0 rgba(24,144,255,0.3);
+  z-index: 10;
+  position: relative;
+}
+
+.staff-avatar:first-child {
+  margin-left: 0;
+}
+
+/* Staff Avatar Container */
+.staff-avatar-container {
+  position: relative;
+  display: inline-block;
+  z-index: 1;
+}
+
+.staff-avatar-container:hover {
+  z-index: 10;
+}
+
+.staff-avatar-container:hover .staff-avatar {
+  transform: scale(1.15);
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+}
+
+.staff-avatar-container:hover .staff-info-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-8px) translateX(-50%);
+}
+
+/* Staff Info Tooltip */
+.staff-info-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateY(-5px) translateX(-50%);
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 12px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.staff-info-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1a1a1a;
+}
+
+.staff-name {
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 2px;
+  color: #fff;
+}
+
+.staff-role {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 400;
+}
+.audi-progress-bar {
+  background: #e5e7eb;
+  border-radius: 8px;
+  width: 70px;
+  height: 8px;
+  margin-right: 8px;
+  display: inline-block;
+  vertical-align: middle;
+  overflow: hidden;
+}
+.audi-progress-bar > div {
+  background: linear-gradient(90deg, #1890ff 60%, #10b981 100%);
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.4s;
+}
+.audi-progress-cancel {
+  color: #e53935;
+  font-weight: 700;
+  font-size: 15px;
+  margin-left: 8px;
+}
+.audi-upload-row {
+  padding: 12px 0 0 0;
+  text-align: center;
+  color: #888;
+  font-size: 15px;
+  cursor: pointer;
+  border-top: 1px dashed #e5e7eb;
+  margin-top: 10px;
+}
+.audi-orders-timeline {
+  margin: 18px 0 12px 0;
+  width: 100%;
+}
+.audi-order {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.audi-order-success .audi-order-dot {
+  background: #10b981;
+}
+.audi-order-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-top: 6px;
+  background: #1890ff;
+  flex-shrink: 0;
+}
+.audi-order-dot-info {
+  background: #1890ff;
+}
+.audi-order-dot-cancel {
+  background: #e53935;
+}
+.audi-order-title {
+  font-weight: 600;
+  color: #222;
+  font-size: 15px;
+}
+.audi-order-date {
+  color: #6b7280;
+  font-size: 13px;
+  margin-top: 2px;
+}
+.audi-orders-btn {
+  width: 100%;
+  background: #1890ff;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 0;
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.audi-orders-btn:hover {
+  background: #1765ad;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .audi-dashboard-bottom {
+    flex-direction: column;
+    gap: 18px;
+    margin: 0 8px 18px 8px;
+    align-items: stretch;
+  }
+  .audi-projects, .audi-orders-history {
+    min-width: 320px; /* hoặc 400px, tuỳ ý */
+    max-width: 100%;
+    border-radius: 14px;
+    padding: 12px 8px 8px 8px;
+    height: auto !important;
+  }
+}
+@media (max-width: 600px) {
+  .audi-dashboard-bottom {
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 2px 10px 2px;
+  }
+  .audi-projects, .audi-orders-history {
+    min-width: 0;
+    max-width: 100%;
+    border-radius: 8px;
+    padding: 6px 2px 4px 2px;
+  }
+  .audi-projects-row, .audi-projects-row-head {
+    font-size: 13px;
+    padding: 6px 0;
+  }
+  .audi-members {
+    min-width: 100px;
+  }
+  .audi-members img {
+    width: 22px;
+    height: 22px;
+  }
+  .staff-avatar {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 10px !important;
+  }
+  .audi-progress-bar {
+    width: 40px;
+    height: 6px;
+  }
+  .audi-orders-btn {
+    font-size: 13px;
+    padding: 7px 0;
+  }
+  .audi-car-logo {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* DARK MODE OVERRIDE FOR DASHBOARD HEADER */
+body[data-theme='dark'] .dashboard-card,
+body[data-theme='dark'] .audi-projects,
+body[data-theme='dark'] .audi-orders-history,
+body[data-theme='dark'] .admin-section.chart-section,
+/* body[data-theme='dark'] .audi-projects-row-head, */
+body[data-theme='dark'] .audi-dashboard-bottom,
+body[data-theme='dark'] .dashboard-cards {
+  background: #23272f !important;
+  color: #FFD600 !important;
+  /* box-shadow: 0 2px 12px 0 rgba(0,0,0,0.7) !important;
+  border-color: #FFD600 !important; */
+}
+
+body[data-theme='dark'] .audi-projects-title,
+body[data-theme='dark'] .audi-orders-title,
+body[data-theme='dark'] .audi-projects-progress,
+body[data-theme='dark'] .audi-orders-progress,
+body[data-theme='dark'] .audi-order-title {
+  color: #FFD600 !important;
+}
+
+body[data-theme='dark'] .audi-projects-row-head {
+  background: #23272f !important;
+  color: #FFD600 !important;
+  border-bottom: 2px solid #396df1 !important;
+}
+
+body[data-theme='dark'] .audi-projects-tabs button {
+  background: #18191a !important;
+  color: #ffffff !important;
+  border: 1px solid #0d60c0 !important;
+}
+body[data-theme='dark'] .audi-projects-tabs button.active,
+body[data-theme='dark'] .audi-projects-tabs button:hover {
+  background: #0d60c0 !important;
+  color: #fbfdff !important;
+}
+
+body[data-theme='dark'] .audi-progress-bar {
+  background: #333 !important;
+}
+body[data-theme='dark'] .audi-progress-bar > div {
+  background: linear-gradient(90deg, #FFD600 60%, #10b981 100%) !important;
+}
+
+body[data-theme='dark'] .audi-car-logo {
+  border: 2px solid #FFD600 !important;
+}
+
+body[data-theme='dark'] .audi-upload-row {
+  color: #FFD600 !important;
+  border-top: 1px dashed #FFD600 !important;
+}
+
+body[data-theme='dark'] .audi-order-dot,
+body[data-theme='dark'] .audi-order-dot-success,
+body[data-theme='dark'] .audi-order-dot-info {
+  background: #16a2ff !important;
+}
+body[data-theme='dark'] .audi-order-dot-cancel {
+  background: #e53935 !important;
+}
+
+body[data-theme='dark'] .audi-orders-btn {
+  background: #2b82fb !important;
+  color: #23272f !important;
+}
+body[data-theme='dark'] .audi-orders-btn:hover {
+  background: #0260e4 !important;
+}
+
+body[data-theme='dark'] .audi-order-date,
+body[data-theme='dark'] .audi-orders-sub,
+body[data-theme='dark'] .audi-projects-sub {
+  color: #fff !important;
+}
+
+body[data-theme='dark'] .staff-avatar {
+  border: 2px solid #0d60c0 !important;
+  color: #FFD600 !important;
+  background: #2c3649 !important;
+}
+
+body[data-theme='dark'] .dashboard-card-title{
+  color: #00ffea !important;
+  font-weight: 700;
+}
+
+body[data-theme='dark'] .dashboard-card-value {
+  color: #FFD600 !important;
+  font-weight: 700;
+}
+body[data-theme='dark'] .dashboard-card-title1,
+body[data-theme='dark'] .dashboard-card-value1 {
+  color: #42f92a !important;
+  font-weight: 700;
+}
+body[data-theme='dark'] .dashboard-card-title2,
+body[data-theme='dark'] .dashboard-card-value2 {
+  color: #f76eee !important;
+  font-weight: 700;
+}
+body[data-theme='dark'] .dashboard-card-title3,
+body[data-theme='dark'] .dashboard-card-value3 {
+  color: #fc8a3e !important;
+  font-weight: 700;
+}
+body[data-theme='dark'] .dashboard-card-title4,
+body[data-theme='dark'] .dashboard-card-value4 {
+  color: #9d75f9 !important;
+  font-weight: 700;
+}
+body[data-theme='dark'] .dashboard-card-value111111 {
+  background: #0d60c0 !important;
+}
+
+
+

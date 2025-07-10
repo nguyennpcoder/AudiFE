@@ -3,6 +3,9 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/Admin.css';
 import axios from 'axios';
+import { Breadcrumb } from 'antd';
+
+import AdminHeader from './AdminHeader';
 
 // Khai báo kiểu dữ liệu cho người dùng
 interface User {
@@ -433,296 +436,221 @@ const UserManagement: React.FC = () => {
   };
 
   return (
-    <div className="admin-dashboard">
-      <header className="admin-header admin-animate-center">
-        <div className="admin-logo">
-          
-          {/* <h1>Audi Management System</h1> */}
-        </div>
-        
-        <div className="admin-user-dropdown">
-          <div className="admin-user-info">
-            <div className="admin-user-avatar">
-              {getInitials()}
+    <div style={{ background: '#f5f5f5', minHeight: '100vh', padding: 0 }}>
+      <AdminHeader pageTitle="Quản lý người dùng" />
+    
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 0 0 0', minHeight: '100vh' }}>
+        <div className="admin-section" style={{ background: '#fff', borderRadius: 18, boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)', padding: '32px 32px 24px 32px', marginBottom: 32 }}>
+          {/* Toolbar */}
+          <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <input
+                type="text"
+                placeholder="Tìm kiếm người dùng"
+                value={state.searchTerm}
+                onChange={handleSearchChange}
+                style={{
+                  width: '100%',
+                  padding: '10px 16px',
+                  borderRadius: 8,
+                  border: '1px solid #e5e7eb',
+                  fontSize: 15,
+                  background: '#fafbfc',
+                }}
+              />
             </div>
-            <span>Xin chào, {user?.fullName || 'Admin'}</span>
-            <i className="fas fa-chevron-down" style={{ fontSize: '0.75rem', opacity: 0.7 }}></i>
-          </div>
-          
-          <div className="admin-user-dropdown-content">
-           
-            <a href="#settings" className="admin-user-menu-item">
-              <i className="fas fa-cog"></i>
-              <span>Cài đặt</span>
-            </a>
-            <button onClick={handleLogout} className="admin-user-menu-item logout">
-              <i className="fas fa-sign-out-alt"></i>
-              <span>Đăng xuất</span>
+            <select
+              value={state.selectedRole}
+              onChange={handleRoleFilterChange}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 8,
+                border: '1px solid #e5e7eb',
+                fontSize: 15,
+                color: 'rgb(107, 114, 128)',
+                background: '#fafbfc',
+              }}
+            >
+              <option value="">Tất cả vai trò</option>
+              <option value="khach_hang">Khách hàng</option>
+              <option value="quan_tri">Quản trị</option>
+              <option value="ban_hang">Bán hàng</option>
+              <option value="ho_tro">Hỗ trợ</option>
+            </select>
+            <select
+              value={state.selectedStatus}
+              onChange={handleStatusFilterChange}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 8,
+                border: '1px solid #e5e7eb',
+                color: 'rgb(107, 114, 128)',
+                fontSize: 15,
+                background: '#fafbfc',
+              }}
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option value="active">Hoạt động</option>
+              <option value="inactive">Không hoạt động</option>
+            </select>
+            <button
+              className="btn-add"
+              onClick={handleShowAddModal}
+              style={{
+                background: '#1890ff',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                padding: '10px 20px',
+                fontWeight: 600,
+                fontSize: 15,
+                boxShadow: '0 2px 8px 0 rgba(24,144,255,0.10)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <i className="fas fa-plus"></i> Thêm mới
             </button>
           </div>
-        </div>
-      </header>
-      
-      <div className="admin-content ">
-        <aside className={`admin-sidebar admin-animate-left${sidebarCollapsed ? 'collapsed' : ''}`}>
-          <nav className="admin-nav">
-            <ul>
-              <li>
-                <a href="/admin/dashboard" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-tachometer-alt"></i></span>
-                  <span className="admin-nav-text">Tổng quan</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/users" className="admin-nav-item active">
-                  <span className="admin-nav-icon"><i className="fas fa-users"></i></span>
-                  <span className="admin-nav-text">Quản lý người dùng</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/products" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-car"></i></span>
-                  <span className="admin-nav-text">Quản lý sản phẩm</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/orders" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-shopping-cart"></i></span>
-                  <span className="admin-nav-text">Quản lý đơn hàng</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/dealers" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-store"></i></span>
-                  <span className="admin-nav-text">Quản lý đại lý</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/inventory" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-warehouse"></i></span>
-                  <span className="admin-nav-text">Quản lý tồn kho</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/marketing" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-bullhorn"></i></span>
-                  <span className="admin-nav-text">Quản lý marketing</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/blog" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-newspaper"></i></span>
-                  <span className="admin-nav-text">Quản lý bài viết</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/support" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-headset"></i></span>
-                  <span className="admin-nav-text">Quản lý hỗ trợ</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/settings" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-cog"></i></span>
-                  <span className="admin-nav-text">Cài đặt hệ thống</span>
-                </a>
-              </li>
-            </ul>
-          </nav>
-        </aside>
-        
-        <main className="admin-main admin-animate-bottom">
-          <div className="admin-section">
-            <h2>
-              <span className="admin-section-icon"><i className="fas fa-users"></i></span>
-              Quản lý người dùng
-            </h2>
-            
-            {/* Thanh công cụ và bộ lọc */}
-            <div className="admin-toolbar">
-              <div className="admin-search">
-                <input 
-                  type="text" 
-                  placeholder="Tìm kiếm người dùng" 
-                  value={state.searchTerm}
-                  onChange={handleSearchChange}
-                />
-                <i className="fas fa-search"></i>
-              </div>
-              
-              <div className="admin-filters">
-                <select 
-                  value={state.selectedRole} 
-                  onChange={handleRoleFilterChange}
-                >
-                  <option value="">Tất cả vai trò</option>
-                  <option value="khach_hang">Khách hàng</option>
-                  <option value="quan_tri">Quản trị</option>
-                  <option value="ban_hang">Bán hàng</option>
-                  <option value="ho_tro">Hỗ trợ</option>
-                </select>
-                
-                <select 
-                  value={state.selectedStatus} 
-                  onChange={handleStatusFilterChange}
-                >
-                  <option value="">Tất cả trạng thái</option>
-                  <option value="active">Hoạt động</option>
-                  <option value="inactive">Không hoạt động</option>
-                </select>
-                
-                <button 
-                  className="btn-add" 
-                  onClick={handleShowAddModal}
-                >
-                  <i className="fas fa-plus"></i> Thêm mới
-                </button>
-              </div>
-            </div>
-            
-            {/* Bảng danh sách người dùng */}
-            {state.isLoading ? (
-              <div className="loading">
-                <i className="fas fa-spinner fa-spin"></i> Đang tải...
-              </div>
-            ) : state.error ? (
-              <div className="error-message">
-                <i className="fas fa-exclamation-circle"></i> {state.error}
-              </div>
-            ) : (
-              <>
-                <div className="admin-table-container">
-                  <table className="admin-table">
-                    <thead>
-                      <tr>
-                        <th onClick={() => handleSort('id')}>
-                          ID 
-                          {state.sortField === 'id' && (
-                            <i className={`fas fa-sort-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th onClick={() => handleSort('email')}>
-                          Email
-                          {state.sortField === 'email' && (
-                            <i className={`fas fa-sort-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th onClick={() => handleSort('ten')}>
-                          Họ và tên
-                          {state.sortField === 'ten' && (
-                            <i className={`fas fa-sort-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th onClick={() => handleSort('soDienThoai')}>
-                          Số điện thoại
-                          {state.sortField === 'soDienThoai' && (
-                            <i className={`fas fa-sort-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th onClick={() => handleSort('vaiTro')}>
-                          Vai trò
-                          {state.sortField === 'vaiTro' && (
-                            <i className={`fas fa-sort-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th onClick={() => handleSort('trangThai')}>
-                          Trạng thái
-                          {state.sortField === 'trangThai' && (
-                            <i className={`fas fa-sort-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th onClick={() => handleSort('ngayTao')}>
-                          Ngày đăng ký
-                          {state.sortField === 'ngayTao' && (
-                            <i className={`fas fa-sort-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th>Thao tác</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentUsers.length === 0 ? (
-                        <tr>
-                          <td colSpan={8} className="no-data">Không có dữ liệu</td>
-                        </tr>
-                      ) : (
-                        currentUsers.map(user => (
-                          <tr key={user.id}>
-                            <td>{user.id}</td>
-                            <td>{user.email}</td>
-                            <td>{`${user.ho} ${user.ten}`}</td>
-                            <td>{user.soDienThoai || "—"}</td>
-                            <td>{renderRole(user.vaiTro)}</td>
-                            <td>{renderStatus(user.trangThai)}</td>
-                            <td>{new Date(user.ngayTao).toLocaleDateString('vi-VN')}</td>
-                            <td className="action-buttons">
-                              <button 
-                                className="btn-view" 
-                                title="Xem chi tiết"
-                                onClick={() => handleShowEditModal(user)}
-                              >
-                                <i className="fas fa-eye"></i>
-                              </button>
-                              <button 
-                                className="btn-edit" 
-                                title="Chỉnh sửa"
-                                onClick={() => handleShowEditModal(user)}
-                              >
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button 
-                                className="btn-delete" 
-                                title="Xóa"
-                                onClick={() => handleShowDeleteModal(user)}
-                              >
-                                <i className="fas fa-trash-alt"></i>
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-                
-                {/* Phân trang */}
-                {totalPages > 1 && (
-                  <div className="admin-pagination">
-                    <button 
-                      onClick={() => handlePageChange(1)}
-                      disabled={state.currentPage === 1}
-                    >
-                      <i className="fas fa-angle-double-left"></i>
-                    </button>
-                    <button 
-                      onClick={() => handlePageChange(state.currentPage - 1)}
-                      disabled={state.currentPage === 1}
-                    >
-                      <i className="fas fa-angle-left"></i>
-                    </button>
-                    
-                    <span className="page-info">
-                      Trang {state.currentPage} / {totalPages}
-                    </span>
-                    
-                    <button 
-                      onClick={() => handlePageChange(state.currentPage + 1)}
-                      disabled={state.currentPage === totalPages}
-                    >
-                      <i className="fas fa-angle-right"></i>
-                    </button>
-                    <button 
-                      onClick={() => handlePageChange(totalPages)}
-                      disabled={state.currentPage === totalPages}
-                    >
-                      <i className="fas fa-angle-double-right"></i>
-                    </button>
-                  </div>
+
+          {/* Table */}
+          <div style={{ overflowX: 'auto', borderRadius: 12, background: '#fafbfc' }}>
+            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
+              <thead>
+                <tr style={{ background: '#fafbfc', color: '#6b7280', fontWeight: 700 }}>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>ID</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Email</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Họ và tên</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Số điện thoại</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Vai trò</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Trạng thái</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Ngày đăng ký</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'center' }}>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có dữ liệu</td>
+                  </tr>
+                ) : (
+                  currentUsers.map(user => (
+                    <tr key={user.id} style={{ background: '#fff', borderBottom: '1px solid #f0f0f0' }}>
+                      <td style={{ padding: '10px 8px' }}>{user.id}</td>
+                      <td style={{ padding: '10px 8px' }}>{user.email}</td>
+                      <td style={{ padding: '10px 8px' }}>{`${user.ho} ${user.ten}`}</td>
+                      <td style={{ padding: '10px 8px' }}>{user.soDienThoai || "—"}</td>
+                      <td style={{ padding: '10px 8px' }}>{renderRole(user.vaiTro)}</td>
+                      <td style={{ padding: '10px 8px' }}>{renderStatus(user.trangThai)}</td>
+                      <td style={{ padding: '10px 8px' }}>{new Date(user.ngayTao).toLocaleDateString('vi-VN')}</td>
+                      <td
+                        style={{
+                          padding: '10px 8px',
+                          textAlign: 'center',
+                          whiteSpace: 'nowrap',
+                          minWidth: 120,
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 8,
+                        }}>
+                          <button className="btn-view" title="Xem chi tiết" onClick={() => handleShowEditModal(user)}>
+                            <i className="fas fa-eye"></i>
+                          </button>
+                          <button className="btn-edit" title="Chỉnh sửa" onClick={() => handleShowEditModal(user)}>
+                            <i className="fas fa-edit"></i>
+                          </button>
+                          <button className="btn-delete" title="Xóa" onClick={() => handleShowDeleteModal(user)}>
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
                 )}
-              </>
-            )}
+              </tbody>
+            </table>
           </div>
-        </main>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="admin-pagination" style={{ marginTop: 24, display: 'flex', justifyContent: 'center', gap: 8 }}>
+              <button 
+                onClick={() => handlePageChange(1)}
+                disabled={state.currentPage === 1}
+                style={{
+                  background: '#e0e0e0',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  fontSize: 14,
+                  cursor: state.currentPage === 1 ? 'not-allowed' : 'pointer',
+                  opacity: state.currentPage === 1 ? 0.6 : 1,
+                }}
+              >
+                <i className="fas fa-angle-double-left"></i>
+              </button>
+              <button 
+                onClick={() => handlePageChange(state.currentPage - 1)}
+                disabled={state.currentPage === 1}
+                style={{
+                  background: '#e0e0e0',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  fontSize: 14,
+                  cursor: state.currentPage === 1 ? 'not-allowed' : 'pointer',
+                  opacity: state.currentPage === 1 ? 0.6 : 1,
+                }}
+              >
+                <i className="fas fa-angle-left"></i>
+              </button>
+              
+              <span style={{ fontSize: 14, color: '#555' }}>
+                Trang {state.currentPage} / {totalPages}
+              </span>
+              
+              <button 
+                onClick={() => handlePageChange(state.currentPage + 1)}
+                disabled={state.currentPage === totalPages}
+                style={{
+                  background: '#e0e0e0',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  fontSize: 14,
+                  cursor: state.currentPage === totalPages ? 'not-allowed' : 'pointer',
+                  opacity: state.currentPage === totalPages ? 0.6 : 1,
+                }}
+              >
+                <i className="fas fa-angle-right"></i>
+              </button>
+              <button 
+                onClick={() => handlePageChange(totalPages)}
+                disabled={state.currentPage === totalPages}
+                style={{
+                  background: '#e0e0e0',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  fontSize: 14,
+                  cursor: state.currentPage === totalPages ? 'not-allowed' : 'pointer',
+                  opacity: state.currentPage === totalPages ? 0.6 : 1,
+                }}
+              >
+                <i className="fas fa-angle-double-right"></i>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       
       {/* Modal thêm người dùng */}
@@ -749,6 +677,14 @@ const UserManagement: React.FC = () => {
                     value={state.newUser.email}
                     onChange={handleNewUserChange}
                     required
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   />
                 </div>
                 
@@ -762,6 +698,14 @@ const UserManagement: React.FC = () => {
                       value={state.newUser.ho}
                       onChange={handleNewUserChange}
                       required
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
                     />
                   </div>
                   
@@ -774,6 +718,14 @@ const UserManagement: React.FC = () => {
                       value={state.newUser.ten}
                       onChange={handleNewUserChange}
                       required
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
                     />
                   </div>
                 </div>
@@ -787,6 +739,14 @@ const UserManagement: React.FC = () => {
                       name="soDienThoai"
                       value={state.newUser.soDienThoai}
                       onChange={handleNewUserChange}
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
                     />
                   </div>
                   
@@ -797,6 +757,14 @@ const UserManagement: React.FC = () => {
                       name="vaiTro"
                       value={state.newUser.vaiTro}
                       onChange={handleNewUserChange}
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
                     >
                       <option value="khach_hang">Khách hàng</option>
                       <option value="quan_tri">Quản trị</option>
@@ -814,6 +782,14 @@ const UserManagement: React.FC = () => {
                     name="matKhau"
                     onChange={handleNewUserChange}
                     required
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   />
                 </div>
                 
@@ -824,8 +800,12 @@ const UserManagement: React.FC = () => {
                     name="trangThai"
                     checked={state.newUser.trangThai}
                     onChange={handleNewUserChange}
+                    style={{
+                      width: 'auto',
+                      marginRight: 8,
+                    }}
                   />
-                  <label htmlFor="trangThai">Hoạt động</label>
+                  <label htmlFor="trangThai" style={{ fontSize: 15 }}>Hoạt động</label>
                 </div>
                 
                 <div className="form-actions">
@@ -833,12 +813,31 @@ const UserManagement: React.FC = () => {
                     type="button" 
                     className="btn-cancel"
                     onClick={handleCloseAddModal}
+                    style={{
+                      background: '#e0e0e0',
+                      color: '#333',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '10px 20px',
+                      fontSize: 15,
+                      fontWeight: 600,
+                      marginRight: 10,
+                    }}
                   >
                     Hủy bỏ
                   </button>
                   <button 
                     type="submit" 
                     className="btn-save"
+                    style={{
+                      background: '#1890ff',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '10px 20px',
+                      fontSize: 15,
+                      fontWeight: 600,
+                    }}
                   >
                     Thêm người dùng
                   </button>
@@ -873,8 +872,16 @@ const UserManagement: React.FC = () => {
                     value={state.currentUser.email}
                     onChange={handleEditUserChange}
                     readOnly
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   />
-                  <small>Email không thể thay đổi</small>
+                  <small style={{ fontSize: 13, color: '#888' }}>Email không thể thay đổi</small>
                 </div>
                 
                 <div className="form-row">
@@ -887,6 +894,14 @@ const UserManagement: React.FC = () => {
                       value={state.currentUser.ho}
                       onChange={handleEditUserChange}
                       required
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
                     />
                   </div>
                   
@@ -899,6 +914,14 @@ const UserManagement: React.FC = () => {
                       value={state.currentUser.ten}
                       onChange={handleEditUserChange}
                       required
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
                     />
                   </div>
                 </div>
@@ -912,6 +935,14 @@ const UserManagement: React.FC = () => {
                       name="soDienThoai"
                       value={state.currentUser.soDienThoai || ''}
                       onChange={handleEditUserChange}
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
                     />
                   </div>
                   
@@ -922,6 +953,14 @@ const UserManagement: React.FC = () => {
                       name="vaiTro"
                       value={state.currentUser.vaiTro}
                       onChange={handleEditUserChange}
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
                     >
                       <option value="khach_hang">Khách hàng</option>
                       <option value="quan_tri">Quản trị</option>
@@ -938,8 +977,16 @@ const UserManagement: React.FC = () => {
                     id="edit-matKhau" 
                     name="matKhau"
                     onChange={handleEditUserChange}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   />
-                  <small>Để trống nếu không muốn thay đổi mật khẩu</small>
+                  <small style={{ fontSize: 13, color: '#888' }}>Để trống nếu không muốn thay đổi mật khẩu</small>
                 </div>
                 
                 <div className="form-group checkbox-group">
@@ -949,8 +996,12 @@ const UserManagement: React.FC = () => {
                     name="trangThai"
                     checked={state.currentUser.trangThai}
                     onChange={handleEditUserChange}
+                    style={{
+                      width: 'auto',
+                      marginRight: 8,
+                    }}
                   />
-                  <label htmlFor="edit-trangThai">Hoạt động</label>
+                  <label htmlFor="edit-trangThai" style={{ fontSize: 15 }}>Hoạt động</label>
                 </div>
                 
                 <div className="user-info-section">
@@ -971,12 +1022,31 @@ const UserManagement: React.FC = () => {
                     type="button" 
                     className="btn-cancel"
                     onClick={handleCloseEditModal}
+                    style={{
+                      background: '#e0e0e0',
+                      color: '#333',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '10px 20px',
+                      fontSize: 15,
+                      fontWeight: 600,
+                      marginRight: 10,
+                    }}
                   >
                     Hủy bỏ
                   </button>
                   <button 
                     type="submit" 
                     className="btn-save"
+                    style={{
+                      background: '#1890ff',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '10px 20px',
+                      fontSize: 15,
+                      fontWeight: 600,
+                    }}
                   >
                     Cập nhật
                   </button>
@@ -1001,10 +1071,10 @@ const UserManagement: React.FC = () => {
               </button>
             </div>
             <div className="admin-modal-body">
-              <p className="confirm-message">
+              <p style={{ fontSize: 15, color: '#333', marginBottom: 10 }}>
                 Bạn có chắc chắn muốn xóa người dùng <strong>{state.currentUser.ho} {state.currentUser.ten}</strong> ({state.currentUser.email})?
               </p>
-              <p className="warning-message">
+              <p style={{ fontSize: 13, color: '#888', marginBottom: 10 }}>
                 <i className="fas fa-exclamation-triangle"></i> Lưu ý: Hành động này không thể hoàn tác!
               </p>
               
@@ -1013,6 +1083,16 @@ const UserManagement: React.FC = () => {
                   type="button" 
                   className="btn-cancel"
                   onClick={handleCloseDeleteModal}
+                  style={{
+                    background: '#e0e0e0',
+                    color: '#333',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '10px 20px',
+                    fontSize: 15,
+                    fontWeight: 600,
+                    marginRight: 10,
+                  }}
                 >
                   Hủy bỏ
                 </button>
@@ -1020,6 +1100,15 @@ const UserManagement: React.FC = () => {
                   type="button" 
                   className="btn-delete"
                   onClick={handleDeleteUser}
+                  style={{
+                    background: '#ff4d4f',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '10px 20px',
+                    fontSize: 15,
+                    fontWeight: 600,
+                  }}
                 >
                   Xóa
                 </button>

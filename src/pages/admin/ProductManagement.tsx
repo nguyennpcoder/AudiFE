@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import '../../styles/Admin.css';
 import axios from 'axios';
 
+import AdminHeader from './AdminHeader';
+
 // Backend URL constant for image paths
 const BACKEND_URL = 'http://localhost:8080';
 
@@ -1035,321 +1037,258 @@ const ProductManagement: React.FC = () => {
   };
 
   return (
-  
-    <div className="admin-dashboard">
-      <header className="admin-header admin-animate-center">
-        <div className="admin-logo">
-       
-        
-          {/* <h1>Audi Management System</h1> */}
-        </div>
-        
-        <div className="admin-user-dropdown">
-          <div className="admin-user-info">
-            <div className="admin-user-avatar">
-              {getInitials()}
+    <div style={{ background: '#f5f5f5', minHeight: '100vh', padding: 0 }}>
+      <AdminHeader pageTitle="Quản lý sản phẩm" />
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: '0 auto',
+          padding: '32px 0 0 0',
+          minHeight: '100vh',
+        }}
+      >
+        <div
+          className="admin-section"
+          style={{
+            background: '#fff',
+            borderRadius: 18,
+            boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)',
+            padding: '32px 32px 24px 32px',
+            marginBottom: 32,
+          }}
+        >
+          {/* Toolbar */}
+          <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <input
+                type="text"
+                placeholder="Tìm kiếm sản phẩm"
+                value={state.searchTerm}
+                onChange={handleSearchChange}
+                style={{
+                  width: '100%',
+                  padding: '10px 16px',
+                  borderRadius: 8,
+                  border: '1px solid #e5e7eb',
+                  fontSize: 15,
+                  background: '#fafbfc',
+                }}
+              />
             </div>
-            <span>Xin chào, {user?.fullName || 'Admin'}</span>
-            <i className="fas fa-chevron-down" style={{ fontSize: '0.75rem', opacity: 0.7 }}></i>
-          </div>
-          
-          <div className="admin-user-dropdown-content">
-           
-            <a href="#settings" className="admin-user-menu-item">
-              <i className="fas fa-cog"></i>
-              <span>Cài đặt</span>
-            </a>
-            <button onClick={handleLogout} className="admin-user-menu-item logout">
-              <i className="fas fa-sign-out-alt"></i>
-              <span>Đăng xuất</span>
+            <select
+              value={state.selectedPhanLoai}
+              onChange={handlePhanLoaiFilterChange}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 8,
+                border: '1px solid #e5e7eb',
+                color: 'rgb(107, 114, 128)',
+                fontSize: 15,
+                background: '#fafbfc',
+              }}
+            >
+              <option value="">Tất cả dòng xe</option>
+              <option value="SUV">SUV</option>
+              <option value="Sedan">Sedan</option>
+              <option value="Coupe">Coupe</option>
+              <option value="Convertible">Convertible</option>
+              <option value="Sportback">Sportback</option>
+              <option value="Dien">Xe điện</option>
+            </select>
+            <select
+              value={state.selectedYear}
+              onChange={handleYearFilterChange}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 8,
+                border: '1px solid #e5e7eb',
+                color: 'rgb(107, 114, 128)',
+                fontSize: 15,
+                background: '#fafbfc',
+              }}
+            >
+              <option value="">Tất cả năm sản xuất</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+              <option value="2020">2020</option>
+            </select>
+            <select
+              value={state.selectedStatus}
+              onChange={handleStatusFilterChange}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 8,
+                border: '1px solid #e5e7eb',
+                color: 'rgb(107, 114, 128)',
+                fontSize: 15,
+                background: '#fafbfc',
+              }}
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option value="available">Còn hàng</option>
+              <option value="unavailable">Hết hàng</option>
+            </select>
+            <button
+              className="btn-add"
+              onClick={handleShowAddModal}
+              style={{
+                background: '#1890ff',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                padding: '10px 20px',
+                fontWeight: 600,
+                fontSize: 15,
+                boxShadow: '0 2px 8px 0 rgba(24,144,255,0.10)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <i className="fas fa-plus"></i> Thêm mẫu xe
             </button>
           </div>
-        </div>
-      </header>
-      
-      <div className="admin-content ">
-        <aside className={`admin-sidebar admin-animate-left${sidebarCollapsed ? 'collapsed' : ''}`}>
-          <nav className="admin-nav">
-            <ul>
-              <li>
-                <a href="/admin/dashboard" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-tachometer-alt"></i></span>
-                  <span className="admin-nav-text">Tổng quan</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/users" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-users"></i></span>
-                  <span className="admin-nav-text">Quản lý người dùng</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/products" className="admin-nav-item active">
-                  <span className="admin-nav-icon"><i className="fas fa-car"></i></span>
-                  <span className="admin-nav-text">Quản lý sản phẩm</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/orders" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-shopping-cart"></i></span>
-                  <span className="admin-nav-text">Quản lý đơn hàng</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/dealers" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-store"></i></span>
-                  <span className="admin-nav-text">Quản lý đại lý</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/inventory" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-warehouse"></i></span>
-                  <span className="admin-nav-text">Quản lý tồn kho</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/marketing" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-bullhorn"></i></span>
-                  <span className="admin-nav-text">Quản lý marketing</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/blog" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-newspaper"></i></span>
-                  <span className="admin-nav-text">Quản lý bài viết</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/support" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-headset"></i></span>
-                  <span className="admin-nav-text">Quản lý hỗ trợ</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/settings" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-cog"></i></span>
-                  <span className="admin-nav-text">Cài đặt hệ thống</span>
-                </a>
-              </li>
-            </ul>
-          </nav>
-        </aside>
-        
-        <main className="admin-main admin-animate-bottom">
-          <div className="admin-section">
-            <h2>
-              <span className="admin-section-icon"><i className="fas fa-car"></i></span>
-              Quản lý sản phẩm
-            </h2>
-            
-            {/* Thanh công cụ và bộ lọc */}
-            <div className="admin-toolbar">
-              <div className="admin-search">
-                <input 
-                  type="text" 
-                  placeholder="Tìm kiếm sản phẩm" 
-                  value={state.searchTerm}
-                  onChange={handleSearchChange}
-                />
-                <i className="fas fa-search"></i>
-              </div>
-              
-              <div className="admin-filters">
-                <select 
-                  value={state.selectedPhanLoai} 
-                  onChange={handlePhanLoaiFilterChange}
-                >
-                  <option value="">Tất cả dòng xe</option>
-                  <option value="SUV">SUV</option>
-                  <option value="Sedan">Sedan</option>
-                  <option value="Coupe">Coupe</option>
-                  <option value="Convertible">Convertible</option>
-                  <option value="Sportback">Sportback</option>
-                  <option value="Dien">Xe điện</option>
-                </select>
-                
-                <select 
-                  value={state.selectedYear} 
-                  onChange={handleYearFilterChange}
-                >
-                  <option value="">Tất cả năm sản xuất</option>
-                  <option value="2024">2024</option>
-                  <option value="2023">2023</option>
-                  <option value="2022">2022</option>
-                  <option value="2021">2021</option>
-                  <option value="2020">2020</option>
-                </select>
-                
-                <select 
-                  value={state.selectedStatus} 
-                  onChange={handleStatusFilterChange}
-                >
-                  <option value="">Tất cả trạng thái</option>
-                  <option value="available">Còn hàng</option>
-                  <option value="unavailable">Hết hàng</option>
-                </select>
-                
-                <div className="admin-action-buttons">
-                  <button 
-                    className="btn-add btn-add-series" 
-                    onClick={handleShowAddSeriesModal}
-                  >
-                    <i className="fas fa-plus"></i> Thêm dòng xe
-                  </button>
-                  <button 
-                    className="btn-add"
-                    onClick={handleShowAddModal}
-                  >
-                    <i className="fas fa-plus"></i> Thêm mẫu xe
-                  </button>
-                  <p>đang lỗi thêm mới img hủy vẫn còn lưu img data đó</p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Bảng danh sách sản phẩm */}
-            {state.isLoading ? (
-              <div className="loading">
-                <i className="fas fa-spinner fa-spin"></i> Đang tải...
-              </div>
-            ) : state.error ? (
-              <div className="error-message">
-                <i className="fas fa-exclamation-circle"></i> {state.error}
-              </div>
-            ) : (
-              <>
-                <div className="admin-table-container">
-                  <table className="admin-table">
-                    <thead>
-                      <tr>
-                        <th onClick={() => handleSort('id')}>
-                          ID 
-                          {state.sortField === 'id' && (
-                            <i className={`fas fa-sort-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th onClick={() => handleSort('tenMau')}>
-                          Tên mẫu xe
-                          {state.sortField === 'tenMau' && (
-                            <i className={`fas fa-sort-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th onClick={() => handleSort('tenDong')}>
-                          Dòng xe
-                          {state.sortField === 'tenDong' && (
-                            <i className={`fas fa-sort-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th onClick={() => handleSort('namSanXuat')}>
-                          Năm SX
-                          {state.sortField === 'namSanXuat' && (
-                            <i className={`fas fa-sort-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th onClick={() => handleSort('giaCoban')}>
-                          Giá cơ bản
-                          {state.sortField === 'giaCoban' && (
-                            <i className={`fas fa-sort-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th onClick={() => handleSort('conHang')}>
-                          Trạng thái
-                          {state.sortField === 'conHang' && (
-                            <i className={`fas fa-sort-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th>Thao tác</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentProducts.length === 0 ? (
-                        <tr>
-                          <td colSpan={7} className="no-data">Không có dữ liệu</td>
-                        </tr>
-                      ) : (
-                        currentProducts.map((product, index) => (
-                          <tr key={product.id}>
-                            <td>{product.id}</td>
-                            <td>{product.tenMau}</td>
-                            <td>{product.tenDong}</td>
-                            <td>{product.namSanXuat}</td>
-                            <td>{formatPrice(product.giaCoban)}</td>
-                            <td>{renderStatus(product.conHang)}</td>
-                            <td className="action-buttons">
-                              <button 
-                                className="btn-view" 
-                                title="Xem chi tiết"
-                                onClick={() => handleShowEditModal(product)}
-                              >
-                                <i className="fas fa-eye"></i>
-                              </button>
-                              <button 
-                                className="btn-edit" 
-                                title="Chỉnh sửa"
-                                onClick={() => handleShowEditModal(product)}
-                              >
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button 
-                                className="btn-inventory" 
-                                title="Xem tồn kho"
-                                onClick={() => handleViewInventory(product)}
-                              >
-                                <i className="fas fa-warehouse"></i>
-                              </button>
-                              <button 
-                                className="btn-delete" 
-                                title="Xóa"
-                                onClick={() => handleShowDeleteModal(product)}
-                              >
-                                <i className="fas fa-trash-alt"></i>
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-                
-                {/* Phân trang */}
-                {totalPages > 1 && (
-                  <div className="admin-pagination">
-                    <button 
-                      onClick={() => handlePageChange(1)}
-                      disabled={state.currentPage === 1}
-                    >
-                      <i className="fas fa-angle-double-left"></i>
-                    </button>
-                    <button 
-                      onClick={() => handlePageChange(state.currentPage - 1)}
-                      disabled={state.currentPage === 1}
-                    >
-                      <i className="fas fa-angle-left"></i>
-                    </button>
-                    
-                    <span className="page-info">
-                      Trang {state.currentPage} / {totalPages}
-                    </span>
-                    
-                    <button 
-                      onClick={() => handlePageChange(state.currentPage + 1)}
-                      disabled={state.currentPage === totalPages}
-                    >
-                      <i className="fas fa-angle-right"></i>
-                    </button>
-                    <button 
-                      onClick={() => handlePageChange(totalPages)}
-                      disabled={state.currentPage === totalPages}
-                    >
-                      <i className="fas fa-angle-double-right"></i>
-                    </button>
-                  </div>
+
+          {/* Table */}
+          <div style={{ overflowX: 'auto', borderRadius: 12, background: '#fafbfc' }}>
+            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
+              <thead>
+                <tr style={{ background: '#fafbfc', color: '#6b7280', fontWeight: 700 }}>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>ID</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Tên mẫu xe</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Dòng xe</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Năm SX</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Giá cơ bản</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Trạng thái</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'center' }}>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có dữ liệu</td>
+                  </tr>
+                ) : (
+                  currentProducts.map(product => (
+                    <tr key={product.id} style={{ background: '#fff', borderBottom: '1px solid #f0f0f0' }}>
+                      <td style={{ padding: '10px 8px' }}>{product.id}</td>
+                      <td style={{ padding: '10px 8px' }}>{product.tenMau}</td>
+                      <td style={{ padding: '10px 8px' }}>{product.tenDong}</td>
+                      <td style={{ padding: '10px 8px' }}>{product.namSanXuat}</td>
+                      <td style={{ padding: '10px 8px' }}>{formatPrice(product.giaCoban)}</td>
+                      <td style={{ padding: '10px 8px' }}>{renderStatus(product.conHang)}</td>
+                      <td
+                        style={{
+                          padding: '10px 8px',
+                          textAlign: 'center',
+                          whiteSpace: 'nowrap',
+                          minWidth: 160,
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 8,
+                        }}>
+                          <button className="btn-view" title="Xem chi tiết" onClick={() => handleShowEditModal(product)}>
+                            <i className="fas fa-eye"></i>
+                          </button>
+                          <button className="btn-edit" title="Chỉnh sửa" onClick={() => handleShowEditModal(product)}>
+                            <i className="fas fa-edit"></i>
+                          </button>
+                          <button className="btn-inventory" title="Xem tồn kho" onClick={() => handleViewInventory(product)}>
+                            <i className="fas fa-warehouse"></i>
+                          </button>
+                          <button className="btn-delete" title="Xóa" onClick={() => handleShowDeleteModal(product)}>
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
                 )}
-              </>
-            )}
+              </tbody>
+            </table>
           </div>
-        </main>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="admin-pagination" style={{ marginTop: 24, display: 'flex', justifyContent: 'center', gap: 8 }}>
+              <button 
+                onClick={() => handlePageChange(1)}
+                disabled={state.currentPage === 1}
+                style={{
+                  background: '#e0e0e0',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  fontSize: 14,
+                  cursor: state.currentPage === 1 ? 'not-allowed' : 'pointer',
+                  opacity: state.currentPage === 1 ? 0.6 : 1,
+                }}
+              >
+                <i className="fas fa-angle-double-left"></i>
+              </button>
+              <button 
+                onClick={() => handlePageChange(state.currentPage - 1)}
+                disabled={state.currentPage === 1}
+                style={{
+                  background: '#e0e0e0',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  fontSize: 14,
+                  cursor: state.currentPage === 1 ? 'not-allowed' : 'pointer',
+                  opacity: state.currentPage === 1 ? 0.6 : 1,
+                }}
+              >
+                <i className="fas fa-angle-left"></i>
+              </button>
+              
+              <span style={{ fontSize: 14, color: '#555' }}>
+                Trang {state.currentPage} / {totalPages}
+              </span>
+              
+              <button 
+                onClick={() => handlePageChange(state.currentPage + 1)}
+                disabled={state.currentPage === totalPages}
+                style={{
+                  background: '#e0e0e0',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  fontSize: 14,
+                  cursor: state.currentPage === totalPages ? 'not-allowed' : 'pointer',
+                  opacity: state.currentPage === totalPages ? 0.6 : 1,
+                }}
+              >
+                <i className="fas fa-angle-right"></i>
+              </button>
+              <button 
+                onClick={() => handlePageChange(totalPages)}
+                disabled={state.currentPage === totalPages}
+                style={{
+                  background: '#e0e0e0',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  fontSize: 14,
+                  cursor: state.currentPage === totalPages ? 'not-allowed' : 'pointer',
+                  opacity: state.currentPage === totalPages ? 0.6 : 1,
+                }}
+              >
+                <i className="fas fa-angle-double-right"></i>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       
       {/* Modal thêm dòng xe */}
@@ -1376,6 +1315,14 @@ const ProductManagement: React.FC = () => {
                     value={state.newDongXe.ten}
                     onChange={handleNewDongXeChange}
                     required
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   />
                 </div>
                 
@@ -1387,6 +1334,14 @@ const ProductManagement: React.FC = () => {
                     value={state.newDongXe.phanLoai}
                     onChange={handleNewDongXeChange}
                     required
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   >
                     <option value="SUV">SUV</option>
                     <option value="Sedan">Sedan</option>
@@ -1405,6 +1360,14 @@ const ProductManagement: React.FC = () => {
                     value={state.newDongXe.moTa}
                     onChange={handleNewDongXeChange}
                     rows={4}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   />
                 </div>
                 
@@ -1416,6 +1379,14 @@ const ProductManagement: React.FC = () => {
                     name="duongDanAnh"
                     value={state.newDongXe.duongDanAnh}
                     onChange={handleNewDongXeChange}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   />
                 </div>
                 
@@ -1424,12 +1395,32 @@ const ProductManagement: React.FC = () => {
                     type="button" 
                     className="btn-cancel"
                     onClick={handleCloseAddSeriesModal}
+                    style={{
+                      background: '#e0e0e0',
+                      color: '#333',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '10px 20px',
+                      fontWeight: 600,
+                      fontSize: 15,
+                      boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)',
+                    }}
                   >
                     Hủy bỏ
                   </button>
                   <button 
                     type="submit" 
                     className="btn-save"
+                    style={{
+                      background: '#1890ff',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '10px 20px',
+                      fontWeight: 600,
+                      fontSize: 15,
+                      boxShadow: '0 2px 8px 0 rgba(24,144,255,0.10)',
+                    }}
                   >
                     Thêm dòng xe
                   </button>
@@ -1463,6 +1454,14 @@ const ProductManagement: React.FC = () => {
                     value={state.newProduct.idDong}
                     onChange={handleNewProductChange}
                     required
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   >
                     {state.dongXeList.map(dongXe => (
                       <option key={dongXe.id} value={dongXe.id}>{dongXe.ten}</option>
@@ -1479,6 +1478,14 @@ const ProductManagement: React.FC = () => {
                     value={state.newProduct.tenMau}
                     onChange={handleNewProductChange}
                     required
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   />
                 </div>
                 
@@ -1494,6 +1501,14 @@ const ProductManagement: React.FC = () => {
                       min="2000"
                       max="2050"
                       required
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
                     />
                   </div>
                   
@@ -1508,6 +1523,14 @@ const ProductManagement: React.FC = () => {
                       min="0"
                       step="1000000"
                       required
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
                     />
                   </div>
                 </div>
@@ -1520,6 +1543,14 @@ const ProductManagement: React.FC = () => {
                     value={state.newProduct.moTa}
                     onChange={handleNewProductChange}
                     rows={4}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   />
                 </div>
                 
@@ -1531,6 +1562,14 @@ const ProductManagement: React.FC = () => {
                     value={state.newProduct.thongSoKyThuat}
                     onChange={handleNewProductChange}
                     rows={5}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   />
                 </div>
                 
@@ -1543,6 +1582,14 @@ const ProductManagement: React.FC = () => {
                       name="ngayRaMat"
                       value={state.newProduct.ngayRaMat}
                       onChange={handleNewProductChange}
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
                     />
                   </div>
                   
@@ -1553,8 +1600,12 @@ const ProductManagement: React.FC = () => {
                       name="conHang"
                       checked={state.newProduct.conHang}
                       onChange={handleNewProductChange}
+                      style={{
+                        width: 'auto',
+                        marginRight: '8px',
+                      }}
                     />
-                    <label htmlFor="conHang">Còn hàng</label>
+                    <label htmlFor="conHang" style={{ fontSize: 15 }}>Còn hàng</label>
                   </div>
                 </div>
                 
@@ -1563,12 +1614,32 @@ const ProductManagement: React.FC = () => {
                     type="button" 
                     className="btn-cancel"
                     onClick={handleCloseAddModal}
+                    style={{
+                      background: '#e0e0e0',
+                      color: '#333',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '10px 20px',
+                      fontWeight: 600,
+                      fontSize: 15,
+                      boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)',
+                    }}
                   >
                     Hủy bỏ
                   </button>
                   <button 
                     type="submit" 
                     className="btn-save"
+                    style={{
+                      background: '#1890ff',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '10px 20px',
+                      fontWeight: 600,
+                      fontSize: 15,
+                      boxShadow: '0 2px 8px 0 rgba(24,144,255,0.10)',
+                    }}
                   >
                     Thêm mẫu xe
                   </button>
@@ -1602,6 +1673,14 @@ const ProductManagement: React.FC = () => {
                     value={state.currentProduct.idDong}
                     onChange={handleEditProductChange}
                     required
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   >
                     {state.dongXeList.map(dongXe => (
                       <option key={dongXe.id} value={dongXe.id}>{dongXe.ten}</option>
@@ -1618,6 +1697,14 @@ const ProductManagement: React.FC = () => {
                     value={state.currentProduct.tenMau}
                     onChange={handleEditProductChange}
                     required
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   />
                 </div>
                 
@@ -1633,6 +1720,14 @@ const ProductManagement: React.FC = () => {
                       min="2000"
                       max="2050"
                       required
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
                     />
                   </div>
                   
@@ -1647,6 +1742,14 @@ const ProductManagement: React.FC = () => {
                       min="0"
                       step="1000000"
                       required
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
                     />
                   </div>
                 </div>
@@ -1659,6 +1762,15 @@ const ProductManagement: React.FC = () => {
                     value={state.currentProduct.moTa}
                     onChange={handleEditProductChange}
                     rows={4}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      color: 'rgb(107, 114, 128)',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   />
                 </div>
                 
@@ -1670,6 +1782,15 @@ const ProductManagement: React.FC = () => {
                     value={state.currentProduct.thongSoKyThuat}
                     onChange={handleEditProductChange}
                     rows={5}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      color: 'rgb(107, 114, 128)',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
                   />
                 </div>
                 
@@ -1682,6 +1803,14 @@ const ProductManagement: React.FC = () => {
                       name="ngayRaMat"
                       value={state.currentProduct.ngayRaMat}
                       onChange={handleEditProductChange}
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
                     />
                   </div>
                   
@@ -1692,8 +1821,12 @@ const ProductManagement: React.FC = () => {
                       name="conHang"
                       checked={state.currentProduct.conHang}
                       onChange={handleEditProductChange}
+                      style={{
+                        width: 'auto',
+                        marginRight: '8px',
+                      }}
                     />
-                    <label htmlFor="edit-conHang">Còn hàng</label>
+                    <label htmlFor="edit-conHang" style={{ fontSize: 15 }}>Còn hàng</label>
                   </div>
                 </div>
                 
@@ -1771,12 +1904,32 @@ const ProductManagement: React.FC = () => {
                     type="button" 
                     className="btn-cancel"
                     onClick={handleCloseEditModal}
+                    style={{
+                      background: '#e0e0e0',
+                      color: '#333',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '10px 20px',
+                      fontWeight: 600,
+                      fontSize: 15,
+                      boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)',
+                    }}
                   >
                     Hủy bỏ
                   </button>
                   <button 
                     type="submit" 
                     className="btn-save"
+                    style={{
+                      background: '#1890ff',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '10px 20px',
+                      fontWeight: 600,
+                      fontSize: 15,
+                      boxShadow: '0 2px 8px 0 rgba(24,144,255,0.10)',
+                    }}
                   >
                     Cập nhật
                   </button>
@@ -1807,6 +1960,16 @@ const ProductManagement: React.FC = () => {
                   type="button" 
                   className="btn-cancel"
                   onClick={handleCloseDeleteModal}
+                  style={{
+                    background: '#e0e0e0',
+                    color: '#333',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '10px 20px',
+                    fontWeight: 600,
+                    fontSize: 15,
+                    boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)',
+                  }}
                 >
                   Hủy bỏ
                 </button>
@@ -1814,6 +1977,16 @@ const ProductManagement: React.FC = () => {
                   type="submit" 
                   className="btn-delete"
                   onClick={handleDeleteProduct}
+                  style={{
+                    background: '#ff4d4f',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '10px 20px',
+                    fontWeight: 600,
+                    fontSize: 15,
+                    boxShadow: '0 2px 8px 0 rgba(255,77,79,0.10)',
+                  }}
                 >
                   Xóa
                 </button>

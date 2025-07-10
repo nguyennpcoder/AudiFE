@@ -2,6 +2,40 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import '../../styles/Admin.css';
+import { Layout, Menu, Button, Typography, Badge } from 'antd';
+import {
+  AppstoreOutlined,
+  TableOutlined,
+  CreditCardOutlined,
+  FlagOutlined,
+  UserOutlined,
+  CalendarOutlined,
+  FormOutlined,
+  ShopOutlined,
+  CarOutlined,
+  ShoppingCartOutlined,
+  SettingOutlined,
+  HomeOutlined,
+  SoundOutlined,
+  FileTextOutlined,
+  CustomerServiceOutlined,
+  BellOutlined,
+  MenuOutlined,
+  EyeOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  LogoutOutlined
+} from '@ant-design/icons';
+// import './AdminSidebar.css'; // Tạo file này để custom lại style cho giống 100%
+import DashboardHeader from './DashboardHeader';
+import UserManagement from './UserManagement';
+import ProductManagement from './ProductManagement';
+import OrderManagement from './OrderManagement';
+import AnimatedPage from './AnimatedPage';
+// import các component khác nếu có...
+
+const { Sider } = Layout;
+const { Title, Text } = Typography;
 
 // Khai báo kiểu dữ liệu cho window.Recharts
 declare global {
@@ -49,10 +83,24 @@ const {
   ReferenceLine, ComposedChart, Scatter
 } = window.Recharts || {};
 
+const menuTitles: { [key: string]: string } = {
+  dashboard: 'Tổng quan',
+  users: 'Quản lý người dùng',
+  products: 'Quản lý sản phẩm',
+  orders: 'Quản lý đơn hàng',
+  dealers: 'Quản lý đại lý',
+  inventory: 'Quản lý tồn kho',
+  marketing: 'Quản lý marketing',
+  blog: 'Quản lý bài viết',
+  support: 'Quản lý hỗ trợ',
+  // ...thêm các key khác nếu có...
+};
+
 const Dashboard: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
+  const [selectedMenu, setSelectedMenu] = useState('dashboard');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   const handleLogout = () => {
@@ -68,9 +116,21 @@ const Dashboard: React.FC = () => {
     return 'A';
   };
   
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
+  const handleToggleSidebar = () => {
+    setSidebarCollapsed((prev) => !prev);
   };
+
+  // Thêm state để xác định kích thước màn hình
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+      setSidebarCollapsed(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Dữ liệu biểu đồ doanh thu theo tháng với thêm thông tin tăng giảm
   const revenueData: RevenueData[] = [
@@ -334,356 +394,498 @@ const Dashboard: React.FC = () => {
     console.log("Is authenticated:", isAuthenticated);
   }, [user, isAuthenticated]);
 
+  // Scroll lên đầu trang mỗi khi đổi menu
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, [selectedMenu]);
+
   return (
-    <div className="admin-dashboard">
-      <header className="admin-header admin-animate-center">
-        <div className="admin-logo">
-          {/* <h1>Audi Management System</h1> */}
-        </div>
-        
-        <div className="admin-user-dropdown">
-          <div className="admin-user-info">
-            <div className="admin-user-avatar">
-              {getInitials()}
+    <Layout>
+      {isMobile && !sidebarCollapsed && (
+        <div
+          onClick={() => setSidebarCollapsed(true)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(0,0,0,0.3)',
+            zIndex: 99,
+          }}
+        />
+      )}
+      <Sider
+        width={280}
+        collapsed={sidebarCollapsed}
+        collapsible
+        trigger={null}
+        style={{
+          background: '#f5f5f5',
+          minHeight: '100vh',
+          paddingTop: 32,
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          zIndex: 100,
+          transition: 'transform 0.3s, visibility 0.3s',
+          transform: isMobile
+            ? (sidebarCollapsed ? 'translateX(-100%)' : 'translateX(0)')
+            : 'translateX(0)',
+          visibility: isMobile && sidebarCollapsed ? 'hidden' : 'visible',
+          boxShadow: !sidebarCollapsed && isMobile ? '2px 0 8px rgba(0,0,0,0.08)' : 'none',
+        }}
+        onCollapse={(collapsed) => setSidebarCollapsed(collapsed)}
+        className="admin-animate-left"
+      >
+        {/* Nút đóng sidebar ở mobile */}
+        {isMobile && !sidebarCollapsed && (
+          <button
+            onClick={() => setSidebarCollapsed(true)}
+            style={{
+              position: 'absolute',
+              top: 10,
+              left: 10,
+              zIndex: 101,
+              background: 'none',
+              border: 'none',
+              fontSize: 28,
+              color: '#222',
+              cursor: 'pointer',
+            }}
+            aria-label="Đóng sidebar"
+          >
+            ×
+          </button>
+        )}
+        {/* Chỉ render nội dung khi sidebar mở */}
+        {!sidebarCollapsed && (
+          <>
+            <div style={{ padding: '0 32px 24px 32px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between' }}>
+                <Title level={3} style={{ margin: 0, fontWeight: 700, fontSize: 24, color: '#222', whiteSpace: 'nowrap' }}>
+                  Audi Dashboard
+                </Title>
+              </div>
             </div>
-            <span>Xin chào, {user?.fullName || 'Admin'}</span>
-            <i className="fas fa-chevron-down" style={{ fontSize: '0.75rem', opacity: 0.7 }}></i>
-          </div>
-          
-          <div className="admin-user-dropdown-content">
-         
-            <Link to="/admin/settings" className="admin-user-menu-item">
-              <i className="fas fa-cog"></i>
-              <span>Cài đặt</span>
-            </Link>
-            <button onClick={handleLogout} className="admin-user-menu-item logout">
-              <i className="fas fa-sign-out-alt"></i>
-              <span>Đăng xuất</span>
-              <span className="logout-arrow">→</span>
-            </button>
-          </div>
-        </div>
-      </header>
+            <Menu
+              mode="inline"
+              selectedKeys={[selectedMenu]}
+              onClick={e => setSelectedMenu(e.key as string)}
+              style={{ border: 'none', fontSize: 18, fontWeight: 500 }}
+            >
+              <Menu.Item key="dashboard" icon={<AppstoreOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
+                Tổng quan
+              </Menu.Item>
+              <Menu.Item key="users" icon={<UserOutlined style={{ fontSize: 24 }} />}>
+                Quản lý người dùng
+              </Menu.Item>
+              <Menu.Item key="products" icon={<CarOutlined style={{ fontSize: 24 }} />}>
+                Quản lý sản phẩm
+              </Menu.Item>
+              <Menu.Item key="orders" icon={<ShoppingCartOutlined style={{ fontSize: 24 }} />}>
+                Quản lý đơn hàng
+              </Menu.Item>
+              <Menu.Item key="dealers" icon={<ShopOutlined style={{ fontSize: 24 }} />}>
+                Quản lý đại lý
+              </Menu.Item>
+              <Menu.Item key="inventory" icon={<HomeOutlined style={{ fontSize: 24 }} />}>
+                Quản lý tồn kho
+              </Menu.Item>
+              <Menu.Item key="marketing" icon={<SoundOutlined style={{ fontSize: 24 }} />}>
+                Quản lý marketing
+              </Menu.Item>
+              <Menu.Item key="blog" icon={<FileTextOutlined style={{ fontSize: 24 }} />}>
+                Quản lý bài viết
+              </Menu.Item>
+              <Menu.Item key="support" icon={<CustomerServiceOutlined style={{ fontSize: 24 }} />}>
+                Quản lý hỗ trợ
+              </Menu.Item>
+            </Menu>
+            <div style={{ borderTop: '1px solid #eee', margin: '24px 0 0 0' }} />
+            <div style={{ padding: '0 32px', margin: '16px 0 8px', color: '#888', fontWeight: 700, fontSize: 15 }}>
+              ACCOUNT PAGES
+            </div>
+            <Menu mode="inline" style={{ border: 'none', fontSize: 18, fontWeight: 500 }}>
+              <Menu.Item
+                key="profile"
+                icon={<UserOutlined style={{ fontSize: 24 }} />}
+                style={{ display: 'flex', alignItems: 'center' }}
+              >
+                {user?.fullName || 'Profile'}
+              </Menu.Item>
+              <Menu.Item key="profile-settings" icon={<SettingOutlined style={{ fontSize: 24 }} />}>
+                Cài đặt
+              </Menu.Item>
+              <Menu.Item
+                key="profile-logout"
+                icon={<LogoutOutlined style={{ fontSize: 24 }} />}
+                onClick={handleLogout}
+              >
+                Đăng xuất
+              </Menu.Item>
+            </Menu>
+            <div style={{ position: 'absolute', bottom: 40, left: 0, width: '100%', padding: '0 32px' }}>
+              <div className="dashboard-card-value111111"
+                style={{
+                  background: '#1890ff',
+                  borderRadius: 16,
+                  padding: 24,
+                  color: '#fff',
+                  textAlign: 'left',
+                  boxShadow: '0 4px 24px rgba(24,144,255,0.15)',
+                }}
+              >
+                <AppstoreOutlined style={{ fontSize: 32, color: '#fff', marginBottom: 1 }} />
+                <Text style={{ color: '#fff', fontSize: 16 }}>Please check our docs</Text>
+                <Button className="dashboard-card-value1111111"
+                  type="default"
+                  style={{
+                    marginTop: 10,
+                    width: '100%',
+                    background: '#fff',
+                    color: '#222',
+                    fontWeight: 600,
+                    borderRadius: 8,
+                    border: 'none',
+                    height: 30,
+                    fontSize: 16,
+                  }}
+                >
+                  DOCUMENTATION
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
+      </Sider>
       
-      <div className="admin-content ">
-        <aside className={`admin-sidebar admin-animate-left${sidebarCollapsed ? 'collapsed' : ''}`}>
-          <nav className="admin-nav">
-            <ul>
-              <li>
-                <Link to="/admin/dashboard" className="admin-nav-item active">
-                  <span className="admin-nav-icon"><i className="fas fa-tachometer-alt"></i></span>
-                  <span className="admin-nav-text">Tổng quan</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/admin/users" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-users"></i></span>
-                  <span className="admin-nav-text">Quản lý người dùng</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/admin/products" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-car"></i></span>
-                  <span className="admin-nav-text">Quản lý sản phẩm</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/admin/orders" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-shopping-cart"></i></span>
-                  <span className="admin-nav-text">Quản lý đơn hàng</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/admin/dealers" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-store"></i></span>
-                  <span className="admin-nav-text">Quản lý đại lý</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/admin/inventory" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-warehouse"></i></span>
-                  <span className="admin-nav-text">Quản lý tồn kho</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/admin/marketing" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-bullhorn"></i></span>
-                  <span className="admin-nav-text">Quản lý marketing</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/admin/blog" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-newspaper"></i></span>
-                  <span className="admin-nav-text">Quản lý bài viết</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/admin/support" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-headset"></i></span>
-                  <span className="admin-nav-text">Quản lý hỗ trợ</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/admin/settings" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-cog"></i></span>
-                  <span className="admin-nav-text">Cài đặt hệ thống</span>
-                </Link>
-              </li>
-            </ul>
-          </nav>
-        </aside>
-        
-        <main className="admin-main admin-animate-bottom">
-          <div className="admin-stats">
-            {statsData.map((stat, index) => (
-              <div className="stat-card" key={index}>
-                <div className="stat-header">
-                  <h3>{stat.name}</h3>
-                  <i className={stat.icon} style={{ color: stat.color }}></i>
+      <Layout
+        style={{
+          marginLeft: !isMobile && !sidebarCollapsed ? 280 : 0,
+          background: '#f5f5f5',
+          transition: 'margin-left 0.3s',
+        }}
+      >
+        {/* Render content theo selectedMenu */}
+        {selectedMenu === 'dashboard' && (
+          <AnimatedPage animation="center">
+            <DashboardHeader
+              pageTitle={menuTitles[selectedMenu] || 'Dashboard'}
+              onToggleSidebar={handleToggleSidebar}
+              isSidebarCollapsed={sidebarCollapsed}
+            >
+              <div className="admin-animate-bottom">
+                {/* --- TOÀN BỘ NỘI DUNG DASHBOARD ĐƯỢC ĐƯA VÀO ĐÂY --- */}
+                <div className="dashboard-cards" style={{
+                  display: 'flex',
+                  gap: 20, // Sửa từ 32 thành 20
+                  marginBottom: 20, // Sửa từ 32 thành 20
+                  flexWrap: 'wrap',
+                  justifyContent: 'space-between'
+                }}>
+                  {/* Card 1 */}
+                  <div style={{
+                    background: '#fff',
+                    borderRadius: 24,
+                    boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)',
+                    padding: 32,
+                    minWidth: 260,
+                    flex: 1,
+                    maxWidth: 340,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    marginBottom: 20 // Thêm margin dưới cho đều
+                  }}>
+                    <div style={{ color: '#888', fontWeight: 600, marginBottom: 12 }}>NGƯỜI DÙNG</div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+                      <div style={{
+                        background: '#1890ff',
+                        borderRadius: '50%',
+                        width: 40,
+                        height: 40,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginRight: 16
+                      }}>
+                        <i className="anticon anticon-team" style={{ color: '#fff', fontSize: 22 }} />
+                      </div>
+                      <span style={{ fontSize: 36, fontWeight: 700, color: '#1890ff' }}>128</span>
+                    </div>
+                    <div style={{ color: '#888', fontSize: 16 }}>12 mới trong tháng</div>
+                  </div>
+                  {/* ...Các card khác tương tự, đổi màu và icon cho từng loại... */}
                 </div>
-                <p className="stat-number" style={{ color: stat.color }}>{stat.name === 'Doanh thu' ? `${stat.value} tỷ` : stat.value}</p>
-                <p className="stat-detail">
-                  <span className="stat-change-value">{stat.changeValue}</span> {stat.changeText}
-                </p>
-              </div>
-            ))}
-          </div>
-          
-          {window.Recharts ? (
-            <>
-              {/* Biểu đồ 1: Doanh thu */}
-              <div className="admin-section chart-section">
-                <h2>
-                  <span className="admin-section-icon"><i className="fas fa-chart-line"></i></span>
-                  Biểu đồ doanh thu năm 2023
-                </h2>
-                <div className="chart-container">
-                  <ResponsiveContainer width="100%" height={300}>
-                    <ComposedChart
-                      data={revenueData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis yAxisId="left" orientation="left" tickFormatter={(value: number) => `${value} tỷ`} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend />
-                      <ReferenceLine y={0} stroke="#000" />
-                      <Bar 
-                        yAxisId="left" 
-                        dataKey="value" 
-                        name="Doanh thu (tỷ)" 
-                        fill={TREND_COLORS.increase} 
-                        barSize={25}
-                      >
-                        {revenueData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={getBarColor(entry)} />
-                        ))}
-                      </Bar>
-                      <Line 
-                        yAxisId="left" 
-                        type="monotone" 
-                        dataKey="value" 
-                        name="Xu hướng doanh thu" 
-                        stroke="#333" 
-                        dot={false} 
-                        activeDot={{ r: 8 }}
-                      />
-                    </ComposedChart>
-                  </ResponsiveContainer>
+                
+                {window.Recharts ? (
+                  <>
+                    {/* Biểu đồ 1: Doanh thu */}
+                    <div className="admin-section chart-section" style={{ marginBottom: 20 }}>
+                      <h2>
+                        <span className="admin-section-icon"><i className="fas fa-chart-line"></i></span>
+                        Biểu đồ doanh thu năm 2023
+                      </h2>
+                      <div className="chart-container">
+                        <ResponsiveContainer width="100%" height={300}>
+                          <ComposedChart
+                            data={revenueData}
+                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="month" />
+                            <YAxis yAxisId="left" orientation="left" tickFormatter={(value: number) => `${value} tỷ`} />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Legend />
+                            <ReferenceLine y={0} stroke="#000" />
+                            <Bar 
+                              yAxisId="left" 
+                              dataKey="value" 
+                              name="Doanh thu (tỷ)" 
+                              fill={TREND_COLORS.increase} 
+                              barSize={25}
+                            >
+                              {revenueData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={getBarColor(entry)} />
+                              ))}
+                            </Bar>
+                            <Line 
+                              yAxisId="left" 
+                              type="monotone" 
+                              dataKey="value" 
+                              name="Xu hướng doanh thu" 
+                              stroke="#333" 
+                              dot={false} 
+                              activeDot={{ r: 8 }}
+                            />
+                          </ComposedChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                    
+                    {/* Biểu đồ 2: Người dùng */}
+                    <div className="admin-section chart-section" style={{ marginBottom: 20 }}>
+                      <h2>
+                        <span className="admin-section-icon"><i className="fas fa-users"></i></span>
+                        Biểu đồ người dùng năm 2023
+                      </h2>
+                      <div className="chart-container">
+                        <ResponsiveContainer width="100%" height={300}>
+                          <AreaChart
+                            data={monthlyData}
+                            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="month" />
+                            <YAxis tickFormatter={(value: number) => `${value}`} />
+                            <Tooltip formatter={(value: number, name: string) => [`${value} người`, 'Người dùng']} />
+                            <Legend />
+                            <Area 
+                              type="monotone" 
+                              dataKey="users" 
+                              name="Người dùng" 
+                              stroke={statsData[0].color} 
+                              fill={`${statsData[0].color}33`} 
+                              activeDot={{ r: 8 }}
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                    
+                    {/* Biểu đồ 3: Đơn hàng */}
+                    <div className="admin-section chart-section" style={{ marginBottom: 20 }}>
+                      <h2>
+                        <span className="admin-section-icon"><i className="fas fa-shopping-cart"></i></span>
+                        Biểu đồ đơn hàng năm 2023
+                      </h2>
+                      <div className="chart-container">
+                        <ResponsiveContainer width="100%" height={300}>
+                          <BarChart
+                            data={monthlyData}
+                            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="month" />
+                            <YAxis tickFormatter={(value: number) => `${value}`} />
+                            <Tooltip formatter={(value: number, name: string) => [`${value} đơn`, 'Đơn hàng']} />
+                            <Legend />
+                            <Bar 
+                              dataKey="orders" 
+                              name="Đơn hàng" 
+                              fill={statsData[1].color} 
+                              barSize={25}
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                    
+                    {/* Biểu đồ 4: Lái thử */}
+                    <div className="admin-section chart-section" style={{ marginBottom: 20 }}>
+                      <h2>
+                        <span className="admin-section-icon"><i className="fas fa-car"></i></span>
+                        Biểu đồ lái thử năm 2023
+                      </h2>
+                      <div className="chart-container">
+                        <ResponsiveContainer width="100%" height={300}>
+                          <LineChart
+                            data={monthlyData}
+                            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="month" />
+                            <YAxis tickFormatter={(value: number) => `${value}`} />
+                            <Tooltip formatter={(value: number, name: string) => [`${value} lượt`, 'Lái thử']} />
+                            <Legend />
+                            <Line 
+                              type="monotone" 
+                              dataKey="testdrives" 
+                              name="Lái thử" 
+                              stroke={statsData[3].color} 
+                              fill={statsData[3].color}
+                              strokeWidth={2}
+                              dot={{ r: 5 }}
+                              activeDot={{ r: 8 }}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="admin-section chart-section" style={{ marginBottom: 20 }}>
+                    <h2>
+                      <span className="admin-section-icon"><i className="fas fa-chart-bar"></i></span>
+                      Biểu đồ doanh thu năm 2023
+                    </h2>
+                    <div className="chart-container">
+                      <canvas ref={canvasRef} className="revenue-chart" height="300"></canvas>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="admin-recent" style={{ gap: 20 }}>
+                  <div className="admin-section">
+                    <h2>
+                      <span className="admin-section-icon"><i className="fas fa-shopping-cart"></i></span>
+                      Đơn hàng gần đây
+                    </h2>
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Khách hàng</th>
+                          <th>Sản phẩm</th>
+                          <th>Giá trị</th>
+                          <th>Trạng thái</th>
+                          <th>Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>#12345</td>
+                          <td>Nguyễn Văn A</td>
+                          <td>Audi A4 2023</td>
+                          <td>1.45 tỷ</td>
+                          <td><span className="status pending">Đang xử lý</span></td>
+                          <td><Button className="btn-view">
+                            <EyeOutlined style={{ color: '#1976d2' }} />
+                          </Button></td>
+                        </tr>
+                        <tr>
+                          <td>#12344</td>
+                          <td>Trần Thị B</td>
+                          <td>Audi Q5 2023</td>
+                          <td>1.85 tỷ</td>
+                          <td><span className="status completed">Đã thanh toán</span></td>
+                          <td><Button className="btn-view">
+                            <EyeOutlined style={{ color: '#1976d2' }} />
+                          </Button></td>
+                        </tr>
+                        <tr>
+                          <td>#12343</td>
+                          <td>Lê Văn C</td>
+                          <td>Audi e-tron GT</td>
+                          <td>3.25 tỷ</td>
+                          <td><span className="status pending">Đang xử lý</span></td>
+                          <td><Button className="btn-view">
+                            <EyeOutlined style={{ color: '#1976d2' }} />
+                          </Button></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <a href="#all-orders" className="view-all-link">Xem tất cả đơn hàng <i className="fas fa-arrow-right"></i></a>
+                  </div>
+                  
+                  <div className="admin-section">
+                    <h2>
+                      <span className="admin-section-icon"><i className="fas fa-headset"></i></span>
+                      Yêu cầu hỗ trợ gần đây
+                    </h2>
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Khách hàng</th>
+                          <th>Tiêu đề</th>
+                          <th>Ưu tiên</th>
+                          <th>Trạng thái</th>
+                          <th>Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>#S-156</td>
+                          <td>Phạm Thị D</td>
+                          <td>Vấn đề đặt lịch lái thử</td>
+                          <td><span className="priority high">Cao</span></td>
+                          <td><span className="status new">Mới</span></td>
+                          <td><Button className="btn-view">
+                            <EyeOutlined style={{ color: '#1976d2' }} />
+                          </Button></td>
+                        </tr>
+                        <tr>
+                          <td>#S-155</td>
+                          <td>Hoàng Văn E</td>
+                          <td>Câu hỏi về bảo dưỡng</td>
+                          <td><span className="priority medium">Trung bình</span></td>
+                          <td><span className="status in-progress">Đang xử lý</span></td>
+                          <td><Button className="btn-view">
+                            <EyeOutlined style={{ color: '#1976d2' }} />
+                          </Button></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <a href="#all-support" className="view-all-link">Xem tất cả yêu cầu <i className="fas fa-arrow-right"></i></a>
+                  </div>
                 </div>
               </div>
-              
-              {/* Biểu đồ 2: Người dùng */}
-              <div className="admin-section chart-section">
-                <h2>
-                  <span className="admin-section-icon"><i className="fas fa-users"></i></span>
-                  Biểu đồ người dùng năm 2023
-                </h2>
-                <div className="chart-container">
-                  <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart
-                      data={monthlyData}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis tickFormatter={(value: number) => `${value}`} />
-                      <Tooltip formatter={(value: number, name: string) => [`${value} người`, 'Người dùng']} />
-                      <Legend />
-                      <Area 
-                        type="monotone" 
-                        dataKey="users" 
-                        name="Người dùng" 
-                        stroke={statsData[0].color} 
-                        fill={`${statsData[0].color}33`} 
-                        activeDot={{ r: 8 }}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-              
-              {/* Biểu đồ 3: Đơn hàng */}
-              <div className="admin-section chart-section">
-                <h2>
-                  <span className="admin-section-icon"><i className="fas fa-shopping-cart"></i></span>
-                  Biểu đồ đơn hàng năm 2023
-                </h2>
-                <div className="chart-container">
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart
-                      data={monthlyData}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis tickFormatter={(value: number) => `${value}`} />
-                      <Tooltip formatter={(value: number, name: string) => [`${value} đơn`, 'Đơn hàng']} />
-                      <Legend />
-                      <Bar 
-                        dataKey="orders" 
-                        name="Đơn hàng" 
-                        fill={statsData[1].color} 
-                        barSize={25}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-              
-              {/* Biểu đồ 4: Lái thử */}
-              <div className="admin-section chart-section">
-                <h2>
-                  <span className="admin-section-icon"><i className="fas fa-car"></i></span>
-                  Biểu đồ lái thử năm 2023
-                </h2>
-                <div className="chart-container">
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart
-                      data={monthlyData}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis tickFormatter={(value: number) => `${value}`} />
-                      <Tooltip formatter={(value: number, name: string) => [`${value} lượt`, 'Lái thử']} />
-                      <Legend />
-                      <Line 
-                        type="monotone" 
-                        dataKey="testdrives" 
-                        name="Lái thử" 
-                        stroke={statsData[3].color} 
-                        fill={statsData[3].color}
-                        strokeWidth={2}
-                        dot={{ r: 5 }}
-                        activeDot={{ r: 8 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="admin-section chart-section">
-              <h2>
-                <span className="admin-section-icon"><i className="fas fa-chart-bar"></i></span>
-                Biểu đồ doanh thu năm 2023
-              </h2>
-              <div className="chart-container">
-                <canvas ref={canvasRef} className="revenue-chart" height="300"></canvas>
-              </div>
-            </div>
-          )}
-          
-          <div className="admin-recent">
-            <div className="admin-section">
-              <h2>
-                <span className="admin-section-icon"><i className="fas fa-shopping-cart"></i></span>
-                Đơn hàng gần đây
-              </h2>
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Khách hàng</th>
-                    <th>Sản phẩm</th>
-                    <th>Giá trị</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>#12345</td>
-                    <td>Nguyễn Văn A</td>
-                    <td>Audi A4 2023</td>
-                    <td>1.45 tỷ</td>
-                    <td><span className="status pending">Đang xử lý</span></td>
-                    <td><a href="#view">Xem</a></td>
-                  </tr>
-                  <tr>
-                    <td>#12344</td>
-                    <td>Trần Thị B</td>
-                    <td>Audi Q5 2023</td>
-                    <td>1.85 tỷ</td>
-                    <td><span className="status completed">Đã thanh toán</span></td>
-                    <td><a href="#view">Xem</a></td>
-                  </tr>
-                  <tr>
-                    <td>#12343</td>
-                    <td>Lê Văn C</td>
-                    <td>Audi e-tron GT</td>
-                    <td>3.25 tỷ</td>
-                    <td><span className="status pending">Đang xử lý</span></td>
-                    <td><a href="#view">Xem</a></td>
-                  </tr>
-                </tbody>
-              </table>
-              <a href="#all-orders" className="view-all-link">Xem tất cả đơn hàng <i className="fas fa-arrow-right"></i></a>
-            </div>
-            
-            <div className="admin-section">
-              <h2>
-                <span className="admin-section-icon"><i className="fas fa-headset"></i></span>
-                Yêu cầu hỗ trợ gần đây
-              </h2>
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Khách hàng</th>
-                    <th>Tiêu đề</th>
-                    <th>Ưu tiên</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>#S-156</td>
-                    <td>Phạm Thị D</td>
-                    <td>Vấn đề đặt lịch lái thử</td>
-                    <td><span className="priority high">Cao</span></td>
-                    <td><span className="status new">Mới</span></td>
-                    <td><a href="#view">Xem</a></td>
-                  </tr>
-                  <tr>
-                    <td>#S-155</td>
-                    <td>Hoàng Văn E</td>
-                    <td>Câu hỏi về bảo dưỡng</td>
-                    <td><span className="priority medium">Trung bình</span></td>
-                    <td><span className="status in-progress">Đang xử lý</span></td>
-                    <td><a href="#view">Xem</a></td>
-                  </tr>
-                </tbody>
-              </table>
-              <a href="#all-support" className="view-all-link">Xem tất cả yêu cầu <i className="fas fa-arrow-right"></i></a>
-            </div>
-          </div>
-        </main>
-      </div>
-    </div>
+            </DashboardHeader>
+          </AnimatedPage>
+        )}
+        {selectedMenu === 'users' && (
+          <AnimatedPage animation="left">
+            <UserManagement />
+          </AnimatedPage>
+        )}
+        {selectedMenu === 'products' && (
+          <AnimatedPage animation="right">
+            <ProductManagement />
+          </AnimatedPage>
+        )}
+        {selectedMenu === 'orders' && (
+          <AnimatedPage animation="bottom">
+            <OrderManagement />
+          </AnimatedPage>
+        )}
+        {/* Thêm các mục khác nếu có, ví dụ: */}
+        {/* {selectedMenu === 'dealers' && <DealerManagement />} */}
+        {/* {selectedMenu === 'inventory' && <InventoryManagement />} */}
+        {/* ... */}
+      </Layout>
+    </Layout>
   );
 };
 

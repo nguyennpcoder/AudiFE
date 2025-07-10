@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/Admin.css';
 
+import AdminHeader from './AdminHeader';
+
 // Khai báo kiểu dữ liệu cho đơn hàng
 interface DonHang {
   id: number;
@@ -565,313 +567,234 @@ const OrderManagement: React.FC = () => {
     });
 
   return (
-    <div className="admin-dashboard">
-      <header className="admin-header admin-animate-center">
-        <div className="admin-logo">
-        
-          {/* <h1>Audi Management System</h1> */}
-        </div>
-        
-        <div className="admin-user-dropdown">
-          <div className="admin-user-info">
-            <div className="admin-user-avatar">
-              {getInitials()}
+    <div style={{ background: '#f5f5f5', minHeight: '100vh', padding: 0 }}>
+      <AdminHeader pageTitle="Quản lý đơn hàng" />
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 0 0 0', minHeight: '100vh' }}>
+        <div
+          className="admin-section"
+          style={{
+            background: '#fff',
+            borderRadius: 18,
+            boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)',
+            padding: '32px 32px 24px 32px',
+            marginBottom: 32,
+          }}
+        >
+          
+          {/* Thanh công cụ và bộ lọc */}
+          <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <input
+                type="text"
+                placeholder="Tìm kiếm đơn hàng"
+                value={state.searchTerm}
+                onChange={handleSearchChange}
+                style={{
+                  width: '100%',
+                  padding: '10px 16px',
+                  borderRadius: 8,
+                  border: '1px solid #e5e7eb',
+                  fontSize: 15,
+                  background: '#fafbfc',
+                }}
+              />
             </div>
-            <span>Xin chào, {user?.fullName || 'Admin'}</span>
-            <i className="fas fa-chevron-down" style={{ fontSize: '0.75rem', opacity: 0.7 }}></i>
+            
+            <select 
+              value={state.selectedTrangThai} 
+              onChange={handleTrangThaiFilterChange}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 8,
+                border: '1px solid #e5e7eb',
+                color: 'rgb(107, 114, 128)',
+                fontSize: 15,
+                background: '#fafbfc',
+              }}
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option value="cho_xu_ly">Chờ xử lý</option>
+              <option value="dang_xu_ly">Đang xử lý</option>
+              <option value="da_thanh_toan">Đã thanh toán</option>
+              <option value="da_giao">Đã giao</option>
+              <option value="da_huy">Đã hủy</option>
+            </select>
+            
+            <select 
+              value={state.selectedDaiLy} 
+              onChange={handleDaiLyFilterChange}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 8,
+                border: '1px solid #e5e7eb',
+                color: 'rgb(107, 114, 128)',
+                fontSize: 15,
+                background: '#fafbfc',
+              }}
+            >
+              <option value="">Tất cả đại lý</option>
+              {daiLyList.map(daiLy => (
+                <option key={daiLy.id} value={daiLy.id.toString()}>
+                  {daiLy.ten}
+                </option>
+              ))}
+            </select>
+            
+            <select 
+              value={state.selectedMonth} 
+              onChange={handleMonthFilterChange}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 8,
+                border: '1px solid #e5e7eb',
+                color: 'rgb(107, 114, 128)',
+                fontSize: 15,
+                background: '#fafbfc',
+              }}
+            >
+              <option value="">Tất cả thời gian</option>
+              <option value="2023-12">Tháng 12/2023</option>
+              <option value="2024-01">Tháng 01/2024</option>
+              <option value="2024-02">Tháng 02/2024</option>
+              <option value="2024-03">Tháng 03/2024</option>
+              <option value="2024-04">Tháng 04/2024</option>
+              <option value="2024-05">Tháng 05/2024</option>
+            </select>
           </div>
           
-          <div className="admin-user-dropdown-content">
-            
-            <a href="#settings" className="admin-user-menu-item">
-              <i className="fas fa-cog"></i>
-              <span>Cài đặt</span>
-            </a>
-            <button onClick={handleLogout} className="admin-user-menu-item logout">
-              <i className="fas fa-sign-out-alt"></i>
-              <span>Đăng xuất</span>
-            </button>
-          </div>
-        </div>
-      </header>
-      
-      <div className="admin-content ">
-        <aside className={`admin-sidebar admin-animate-left${sidebarCollapsed ? 'collapsed' : ''}`}>
-          <nav className="admin-nav">
-            <ul>
-              <li>
-                <a href="/admin/dashboard" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-tachometer-alt"></i></span>
-                  <span className="admin-nav-text">Tổng quan</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/users" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-users"></i></span>
-                  <span className="admin-nav-text">Quản lý người dùng</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/products" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-car"></i></span>
-                  <span className="admin-nav-text">Quản lý sản phẩm</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/orders" className="admin-nav-item active">
-                  <span className="admin-nav-icon"><i className="fas fa-shopping-cart"></i></span>
-                  <span className="admin-nav-text">Quản lý đơn hàng</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/dealers" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-store"></i></span>
-                  <span className="admin-nav-text">Quản lý đại lý</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/inventory" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-warehouse"></i></span>
-                  <span className="admin-nav-text">Quản lý tồn kho</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/marketing" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-bullhorn"></i></span>
-                  <span className="admin-nav-text">Quản lý marketing</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/blog" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-newspaper"></i></span>
-                  <span className="admin-nav-text">Quản lý bài viết</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/support" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-headset"></i></span>
-                  <span className="admin-nav-text">Quản lý hỗ trợ</span>
-                </a>
-              </li>
-              <li>
-                <a href="/admin/settings" className="admin-nav-item">
-                  <span className="admin-nav-icon"><i className="fas fa-cog"></i></span>
-                  <span className="admin-nav-text">Cài đặt hệ thống</span>
-                </a>
-              </li>
-            </ul>
-          </nav>
-        </aside>
-        
-        <main className="admin-main admin-animate-bottom">
-          <div className="admin-section">
-            <h2>
-              <span className="admin-section-icon"><i className="fas fa-shopping-cart"></i></span>
-              Quản lý đơn hàng
-            </h2>
-            
-            {/* Thanh công cụ và bộ lọc */}
-            <div className="admin-toolbar">
-              <div className="admin-search">
-                <input 
-                  type="text" 
-                  placeholder="Tìm kiếm đơn hàng" 
-                  value={state.searchTerm}
-                  onChange={handleSearchChange}
-                />
-                <i className="fas fa-search"></i>
-              </div>
-              
-              <div className="admin-filters">
-                <select 
-                  value={state.selectedTrangThai} 
-                  onChange={handleTrangThaiFilterChange}
-                >
-                  <option value="">Tất cả trạng thái</option>
-                  <option value="cho_xu_ly">Chờ xử lý</option>
-                  <option value="dang_xu_ly">Đang xử lý</option>
-                  <option value="da_thanh_toan">Đã thanh toán</option>
-                  <option value="da_giao">Đã giao</option>
-                  <option value="da_huy">Đã hủy</option>
-                </select>
-                
-                <select 
-                  value={state.selectedDaiLy} 
-                  onChange={handleDaiLyFilterChange}
-                >
-                  <option value="">Tất cả đại lý</option>
-                  {daiLyList.map(daiLy => (
-                    <option key={daiLy.id} value={daiLy.id.toString()}>
-                      {daiLy.ten}
-                    </option>
-                  ))}
-                </select>
-                
-                <select 
-                  value={state.selectedMonth} 
-                  onChange={handleMonthFilterChange}
-                >
-                  <option value="">Tất cả thời gian</option>
-                  <option value="2023-12">Tháng 12/2023</option>
-                  <option value="2024-01">Tháng 01/2024</option>
-                  <option value="2024-02">Tháng 02/2024</option>
-                  <option value="2024-03">Tháng 03/2024</option>
-                  <option value="2024-04">Tháng 04/2024</option>
-                  <option value="2024-05">Tháng 05/2024</option>
-                </select>
-              </div>
+          {/* Bảng danh sách đơn hàng */}
+          {state.isLoading ? (
+            <div className="loading">
+              <i className="fas fa-spinner fa-spin"></i> Đang tải...
             </div>
-            
-            {/* Bảng danh sách đơn hàng */}
-            {state.isLoading ? (
-              <div className="loading">
-                <i className="fas fa-spinner fa-spin"></i> Đang tải...
-              </div>
-            ) : state.error ? (
-              <div className="error-message">
-                <i className="fas fa-exclamation-circle"></i> {state.error}
-              </div>
-            ) : state.filteredOrders.length === 0 ? (
-              <div className="no-data">
-                <i className="fas fa-inbox"></i>
-                <p>Không tìm thấy đơn hàng nào</p>
-              </div>
-            ) : (
-              <div className="admin-table-container">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th onClick={() => handleSort('id')}>
-                        Mã đơn hàng
-                        {state.sortField === 'id' && (
-                          <i className={`fas fa-chevron-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                        )}
-                      </th>
-                      <th onClick={() => handleSort('tenNguoiDung')}>
-                        Khách hàng
-                        {state.sortField === 'tenNguoiDung' && (
-                          <i className={`fas fa-chevron-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                        )}
-                      </th>
-                      <th onClick={() => handleSort('tenDaiLy')}>
-                        Đại lý
-                        {state.sortField === 'tenDaiLy' && (
-                          <i className={`fas fa-chevron-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                        )}
-                      </th>
-                      <th onClick={() => handleSort('ngayDat')}>
-                        Ngày đặt
-                        {state.sortField === 'ngayDat' && (
-                          <i className={`fas fa-chevron-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                        )}
-                      </th>
-                      <th onClick={() => handleSort('tongTien')}>
-                        Tổng tiền
-                        {state.sortField === 'tongTien' && (
-                          <i className={`fas fa-chevron-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                        )}
-                      </th>
-                      <th onClick={() => handleSort('trangThai')}>
-                        Trạng thái
-                        {state.sortField === 'trangThai' && (
-                          <i className={`fas fa-chevron-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
-                        )}
-                      </th>
-                      <th>Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentOrders.map(order => (
-                      <tr key={order.id}>
-                        <td>{order.id}</td>
-                        <td>{order.tenNguoiDung}</td>
-                        <td>{order.tenDaiLy}</td>
-                        <td>{formatDate(order.ngayDat)}</td>
-                        <td>{formatPrice(order.tongTien)}</td>
-                        <td>{renderOrderStatus(order.trangThai)}</td>
-                        <td>
-                          <div className="admin-action-buttons">
-                            <button 
-                              onClick={() => handleShowViewModal(order)} 
-                              className="admin-action-btn view"
-                              title="Xem chi tiết"
-                            >
-                              <i className="fas fa-eye"></i>
-                            </button>
-                            <button 
-                              onClick={() => handleShowUpdateModal(order)} 
-                              className="admin-action-btn edit"
-                              title="Cập nhật trạng thái"
-                            >
-                              <i className="fas fa-edit"></i>
-                            </button>
-                            {order.phuongThucThanhToan === 'tra_gop' && (
-                              <button 
-                                onClick={() => fetchHoSoTraGopByDonHang(order.id)} 
-                                className="admin-action-btn loan"
-                                title="Xem hồ sơ trả góp"
-                              >
-                                <i className="fas fa-file-invoice-dollar"></i>
-                              </button>
-                            )}
-                            <button 
-                              onClick={() => handleShowDeleteModal(order)} 
-                              className="admin-action-btn delete"
-                              title="Xóa đơn hàng"
-                            >
-                              <i className="fas fa-trash-alt"></i>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            
-            {/* Phân trang */}
-            {!state.isLoading && state.filteredOrders.length > 0 && (
-              <div className="admin-pagination">
-                <button 
-                  className="admin-pagination-btn"
-                  disabled={state.currentPage === 1}
-                  onClick={() => handlePageChange(state.currentPage - 1)}
-                >
-                  <i className="fas fa-chevron-left"></i>
-                </button>
-                
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter(page => (
-                    page === 1 || 
-                    page === totalPages || 
-                    (page >= state.currentPage - 1 && page <= state.currentPage + 1)
-                  ))
-                  .map((page, index, array) => (
-                    <React.Fragment key={page}>
-                      {index > 0 && array[index - 1] !== page - 1 && (
-                        <span className="admin-pagination-ellipsis">...</span>
+          ) : state.error ? (
+            <div className="error-message">
+              <i className="fas fa-exclamation-circle"></i> {state.error}
+            </div>
+          ) : state.filteredOrders.length === 0 ? (
+            <div className="no-data">
+              <i className="fas fa-inbox"></i>
+              <p>Không tìm thấy đơn hàng nào</p>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto', borderRadius: 12, background: '#fafbfc' }}>
+              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
+                <thead>
+                  <tr style={{ background: '#fafbfc', color: '#6b7280', fontWeight: 700 }}>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }} onClick={() => handleSort('id')}>
+                      Mã đơn hàng
+                      {state.sortField === 'id' && (
+                        <i className={`fas fa-chevron-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
                       )}
-                      <button 
-                        className={`admin-pagination-btn ${state.currentPage === page ? 'active' : ''}`}
-                        onClick={() => handlePageChange(page)}
-                      >
-                        {page}
-                      </button>
-                    </React.Fragment>
+                    </th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }} onClick={() => handleSort('tenNguoiDung')}>
+                      Khách hàng
+                      {state.sortField === 'tenNguoiDung' && (
+                        <i className={`fas fa-chevron-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
+                      )}
+                    </th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }} onClick={() => handleSort('tenDaiLy')}>
+                      Đại lý
+                      {state.sortField === 'tenDaiLy' && (
+                        <i className={`fas fa-chevron-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
+                      )}
+                    </th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }} onClick={() => handleSort('ngayDat')}>
+                      Ngày đặt
+                      {state.sortField === 'ngayDat' && (
+                        <i className={`fas fa-chevron-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
+                      )}
+                    </th>
+                    <th style={{ padding: '12px 8px', textAlign: 'right' }} onClick={() => handleSort('tongTien')}>
+                      Tổng tiền
+                      {state.sortField === 'tongTien' && (
+                        <i className={`fas fa-chevron-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
+                      )}
+                    </th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }} onClick={() => handleSort('trangThai')}>
+                      Trạng thái
+                      {state.sortField === 'trangThai' && (
+                        <i className={`fas fa-chevron-${state.sortDirection === 'asc' ? 'up' : 'down'}`}></i>
+                      )}
+                    </th>
+                    <th style={{ padding: '12px 8px', textAlign: 'center' }}>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentOrders.map(order => (
+                    <tr key={order.id} style={{ background: '#fff', borderBottom: '1px solid #f0f0f0' }}>
+                      <td style={{ padding: '10px 8px' }}>{order.id}</td>
+                      <td style={{ padding: '10px 8px' }}>{order.tenNguoiDung}</td>
+                      <td style={{ padding: '10px 8px' }}>{order.tenDaiLy}</td>
+                      <td style={{ padding: '10px 8px' }}>{formatDate(order.ngayDat)}</td>
+                      <td style={{ padding: '10px 8px', textAlign: 'right' }}>{formatPrice(order.tongTien)}</td>
+                      <td style={{ padding: '10px 8px' }}>{renderOrderStatus(order.trangThai)}</td>
+                      <td style={{ padding: '10px 8px', textAlign: 'center', whiteSpace: 'nowrap', minWidth: 160 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                          <button className="btn-view" title="Xem chi tiết" onClick={() => handleShowViewModal(order)}>
+                            <i className="fas fa-eye"></i>
+                          </button>
+                          <button className="btn-edit" title="Cập nhật trạng thái" onClick={() => handleShowUpdateModal(order)}>
+                            <i className="fas fa-edit"></i>
+                          </button>
+                          {order.phuongThucThanhToan === 'tra_gop' && (
+                            <button className="btn-loan" title="Xem hồ sơ trả góp" onClick={() => fetchHoSoTraGopByDonHang(order.id)}>
+                              <i className="fas fa-file-invoice-dollar"></i>
+                            </button>
+                          )}
+                          <button className="btn-delete" title="Xóa đơn hàng" onClick={() => handleShowDeleteModal(order)}>
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
                   ))}
-                
-                <button 
-                  className="admin-pagination-btn"
-                  disabled={state.currentPage === totalPages}
-                  onClick={() => handlePageChange(state.currentPage + 1)}
-                >
-                  <i className="fas fa-chevron-right"></i>
-                </button>
-              </div>
-            )}
-          </div>
-        </main>
+                </tbody>
+              </table>
+            </div>
+          )}
+          
+          {/* Phân trang */}
+          {!state.isLoading && state.filteredOrders.length > 0 && (
+            <div className="admin-pagination" style={{ marginTop: 24, display: 'flex', justifyContent: 'center', gap: 8 }}>
+              <button 
+                className="admin-pagination-btn"
+                disabled={state.currentPage === 1}
+                onClick={() => handlePageChange(state.currentPage - 1)}
+              >
+                <i className="fas fa-chevron-left"></i>
+              </button>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(page => (
+                  page === 1 || 
+                  page === totalPages || 
+                  (page >= state.currentPage - 1 && page <= state.currentPage + 1)
+                ))
+                .map((page, index, array) => (
+                  <React.Fragment key={page}>
+                    {index > 0 && array[index - 1] !== page - 1 && (
+                      <span className="admin-pagination-ellipsis">...</span>
+                    )}
+                    <button 
+                      className={`admin-pagination-btn ${state.currentPage === page ? 'active' : ''}`}
+                      onClick={() => handlePageChange(page)}
+                    >
+                      {page}
+                    </button>
+                  </React.Fragment>
+                ))}
+              
+              <button 
+                className="admin-pagination-btn"
+                disabled={state.currentPage === totalPages}
+                onClick={() => handlePageChange(state.currentPage + 1)}
+              >
+                <i className="fas fa-chevron-right"></i>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       
       {/* Modal xem chi tiết đơn hàng */}
