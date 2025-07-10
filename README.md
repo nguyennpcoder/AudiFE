@@ -87,31 +87,28 @@ Designed in Audi's style:
 - Performance optimization
 - Multi-language support
 
+
 ## 📸 Demo
 ### 🏠 Home
 ![Audi Dashboard Demo](public/demo/home.png)
 ### 🛞 Model
 ![Audi Dashboard Demo](public/demo/model.png)
-
-### 🚗 Vehicle
-<img src="public/demo/details_vehicle.png" alt="Audi Dashboard Demo" width="30%" />
-<img src="public/demo/color_vehicle.png" alt="Audi Dashboard Demo" width="30%" />
-<img src="public/demo/compare_vehicle.png" alt="Audi Dashboard Demo" width="30%" />
-
+### 🚘 Details vehicle
+![Audi Dashboard Demo](public/demo/details_vehicle.png)
+### 🚗 Color vehicle
+![Audi Dashboard Demo](public/demo/color_vehicle.png)
+### 🌈 Compare vehicle
+![Audi Dashboard Demo](public/demo/compare_vehicle.png)
 ### 🛠️ Interior
-<img src="public/demo/interior.png" alt="Audi Dashboard Demo" width="45%" />
-<img src="public/demo/interior2.png" alt="Audi Dashboard Demo" width="45%" />
-
+![Audi Dashboard Demo](public/demo/interior.png)
+### 🪐 Interior color
+![Audi Dashboard Demo](public/demo/interior2.png)
 ### 🗺️ Map
 ![Audi Dashboard Demo](public/demo/maps.png)
-
 ### 🔐 Login page
 ![Audi Dashboard Demo](public/demo/page_login.png)
-
-### 📩 Forgot password
-<img src="public/demo/forgot_pass.png" alt="Audi Dashboard Demo" width="45%" />
-<img src="public/demo/otp_email.png" alt="Audi Dashboard Demo" width="45%" />
-
+### 📩 Forgot password OTP to email
+![Audi Dashboard Demo](public/demo/forgot_pass.png)
 ### 🌝 Light mode
 ![Audi Dashboard Demo](public/demo/light_mode.png)
 ### 🌚 Dark mode
