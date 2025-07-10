@@ -93,11 +93,11 @@ Designed in Audi's style:
 ![Audi Dashboard Demo](public/demo/home.png)
 ### 🛞 Model
 ![Audi Dashboard Demo](public/demo/model.png)
-### 🚘 Details vehicle
+### 🚘 Details exterior
 ![Audi Dashboard Demo](public/demo/details_vehicle.png)
-### 🚗 Color vehicle
+### 🚗 Color exterior
 ![Audi Dashboard Demo](public/demo/color_vehicle.png)
-### 🌈 Compare vehicle
+### 🌈 Compare exterior
 ![Audi Dashboard Demo](public/demo/compare_vehicle.png)
 ### 🛠️ Interior
 ![Audi Dashboard Demo](public/demo/interior.png)
