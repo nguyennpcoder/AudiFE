@@ -92,7 +92,6 @@ Designed in Audi's style:
 ![Audi Dashboard Demo](public/demo/light_mode.png)
 ### 🌚 Dark mode
 ![Audi Dashboard Demo](public/demo/dark_mode.png)
-
 ## 🌐 Live Demo & Deployment
 
 ### 🚀 Web Application
