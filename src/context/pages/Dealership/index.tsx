@@ -1,12 +1,12 @@
 // frontend/audi/src/pages/Dealership/index.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getAllDealerships, getDealershipById, Dealership } from '../../services/dealershipService';
-import DealershipMap from '../../components/sections/DealershipMap';
-import DealershipDetail from '../../components/sections/DealershipDetail';
-import TestDriveForm from '../../components/sections/TestDriveForm';
-import MaintenanceForm from '../../components/sections/MaintenanceForm';
-import { useNotification } from '../../context/NotificationContext';
+import { getAllDealerships, getDealershipById, Dealership } from '../../../services/dealershipService';
+import DealershipMap from '../../../components/sections/DealershipMap';
+import DealershipDetail from '../../../components/sections/DealershipDetail';
+import TestDriveForm from '../../../components/sections/TestDriveForm';
+import MaintenanceForm from '../../../components/sections/MaintenanceForm';
+import { useNotification } from '../../NotificationContext';
 
 const DealershipPage: React.FC = () => {
   const [dealerships, setDealerships] = useState<Dealership[]>([]);

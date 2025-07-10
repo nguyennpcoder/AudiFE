@@ -88,7 +88,11 @@ Designed in Audi's style:
 - Multi-language support
 
 ## 📸 Demo
-- Gif Demo file is in development. Please see the link 👇
+### 🌝 Light mode
+![Audi Dashboard Demo](public/demo/light_mode.png)
+### 🌚 Dark mode
+![Audi Dashboard Demo](public/demo/dark_mode.png)
+
 ## 🌐 Live Demo & Deployment
 
 ### 🚀 Web Application

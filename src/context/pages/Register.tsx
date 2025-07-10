@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { registerApi, RegisterForm } from '../services/authService';
-import { useAuth } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { registerApi, RegisterForm } from '../../services/authService';
+import { useAuth } from '../AuthContext';
+import { useNotification } from '../NotificationContext';
 import '../styles/Auth.css';
 import logo from '../assets/logo.svg';
 // Import video for background
@@ -15,7 +15,7 @@ import {
   signInWithGoogle, 
   signInWithFacebook, 
   signInWithGithub 
-} from '../services/firebaseService';
+} from '../../services/firebaseService';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState<RegisterForm>({

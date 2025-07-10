@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { loginApi, LoginForm } from '../services/authService';
-import { useAuth } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import { loginApi, LoginForm } from '../../services/authService';
+import { useAuth } from '../AuthContext';
+import { useNotification } from '../NotificationContext';
 import '../styles/Auth.css';
 // Import logo for Audi
 import logo from '../assets/logo.svg';
@@ -20,7 +20,7 @@ import {
   FacebookAuthProvider,
   GithubAuthProvider,
   signInWithCredential
-} from '../services/firebaseService';
+} from '../../services/firebaseService';
 // Import linkWithCredential function
 import { linkWithCredential } from 'firebase/auth';
 
