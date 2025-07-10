@@ -107,7 +107,7 @@ Designed in Audi's style:
 ![Audi Dashboard Demo](public/demo/maps.png)
 ### 🔐 Login page
 ![Audi Dashboard Demo](public/demo/page_login.png)
-### 📩 Forgot password OTP to email
+### 📩 Forgot password send OTP to email
 ![Audi Dashboard Demo](public/demo/forgot_pass.png)
 ### 🌝 Light mode
 ![Audi Dashboard Demo](public/demo/light_mode.png)
