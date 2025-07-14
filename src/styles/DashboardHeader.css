@@ -516,121 +516,121 @@
 }
 
 /* DARK MODE OVERRIDE FOR DASHBOARD HEADER */
-body[data-theme='dark'] .dashboard-card,
-body[data-theme='dark'] .audi-projects,
-body[data-theme='dark'] .audi-orders-history,
-body[data-theme='dark'] .admin-section.chart-section,
-/* body[data-theme='dark'] .audi-projects-row-head, */
-body[data-theme='dark'] .audi-dashboard-bottom,
-body[data-theme='dark'] .dashboard-cards {
+.admin-theme-root[data-theme='dark'] .dashboard-card,
+.admin-theme-root[data-theme='dark'] .audi-projects,
+.admin-theme-root[data-theme='dark'] .audi-orders-history,
+.admin-theme-root[data-theme='dark'] .admin-section.chart-section,
+/* .admin-theme-root[data-theme='dark'] .audi-projects-row-head, */
+.admin-theme-root[data-theme='dark'] .audi-dashboard-bottom,
+.admin-theme-root[data-theme='dark'] .dashboard-cards {
   background: #23272f !important;
   color: #FFD600 !important;
   /* box-shadow: 0 2px 12px 0 rgba(0,0,0,0.7) !important;
   border-color: #FFD600 !important; */
 }
 
-body[data-theme='dark'] .audi-projects-title,
-body[data-theme='dark'] .audi-orders-title,
-body[data-theme='dark'] .audi-projects-progress,
-body[data-theme='dark'] .audi-orders-progress,
-body[data-theme='dark'] .audi-order-title {
+.admin-theme-root[data-theme='dark'] .audi-projects-title,
+.admin-theme-root[data-theme='dark'] .audi-orders-title,
+.admin-theme-root[data-theme='dark'] .audi-projects-progress,
+.admin-theme-root[data-theme='dark'] .audi-orders-progress,
+.admin-theme-root[data-theme='dark'] .audi-order-title {
   color: #FFD600 !important;
 }
 
-body[data-theme='dark'] .audi-projects-row-head {
+.admin-theme-root[data-theme='dark'] .audi-projects-row-head {
   background: #23272f !important;
   color: #FFD600 !important;
   border-bottom: 2px solid #396df1 !important;
 }
 
-body[data-theme='dark'] .audi-projects-tabs button {
+.admin-theme-root[data-theme='dark'] .audi-projects-tabs button {
   background: #18191a !important;
   color: #ffffff !important;
   border: 1px solid #0d60c0 !important;
 }
-body[data-theme='dark'] .audi-projects-tabs button.active,
-body[data-theme='dark'] .audi-projects-tabs button:hover {
+.admin-theme-root[data-theme='dark'] .audi-projects-tabs button.active,
+.admin-theme-root[data-theme='dark'] .audi-projects-tabs button:hover {
   background: #0d60c0 !important;
   color: #fbfdff !important;
 }
 
-body[data-theme='dark'] .audi-progress-bar {
+.admin-theme-root[data-theme='dark'] .audi-progress-bar {
   background: #333 !important;
 }
-body[data-theme='dark'] .audi-progress-bar > div {
+.admin-theme-root[data-theme='dark'] .audi-progress-bar > div {
   background: linear-gradient(90deg, #FFD600 60%, #10b981 100%) !important;
 }
 
-body[data-theme='dark'] .audi-car-logo {
+.admin-theme-root[data-theme='dark'] .audi-car-logo {
   border: 2px solid #FFD600 !important;
 }
 
-body[data-theme='dark'] .audi-upload-row {
+.admin-theme-root[data-theme='dark'] .audi-upload-row {
   color: #FFD600 !important;
   border-top: 1px dashed #FFD600 !important;
 }
 
-body[data-theme='dark'] .audi-order-dot,
-body[data-theme='dark'] .audi-order-dot-success,
-body[data-theme='dark'] .audi-order-dot-info {
+.admin-theme-root[data-theme='dark'] .audi-order-dot,
+.admin-theme-root[data-theme='dark'] .audi-order-dot-success,
+.admin-theme-root[data-theme='dark'] .audi-order-dot-info {
   background: #16a2ff !important;
 }
-body[data-theme='dark'] .audi-order-dot-cancel {
+.admin-theme-root[data-theme='dark'] .audi-order-dot-cancel {
   background: #e53935 !important;
 }
 
-body[data-theme='dark'] .audi-orders-btn {
+.admin-theme-root[data-theme='dark'] .audi-orders-btn {
   background: #2b82fb !important;
   color: #23272f !important;
 }
-body[data-theme='dark'] .audi-orders-btn:hover {
+.admin-theme-root[data-theme='dark'] .audi-orders-btn:hover {
   background: #0260e4 !important;
 }
 
-body[data-theme='dark'] .audi-order-date,
-body[data-theme='dark'] .audi-orders-sub,
-body[data-theme='dark'] .audi-projects-sub {
+.admin-theme-root[data-theme='dark'] .audi-order-date,
+.admin-theme-root[data-theme='dark'] .audi-orders-sub,
+.admin-theme-root[data-theme='dark'] .audi-projects-sub {
   color: #fff !important;
 }
 
-body[data-theme='dark'] .staff-avatar {
+.admin-theme-root[data-theme='dark'] .staff-avatar {
   border: 2px solid #0d60c0 !important;
   color: #FFD600 !important;
   background: #2c3649 !important;
 }
 
-body[data-theme='dark'] .dashboard-card-title{
+.admin-theme-root[data-theme='dark'] .dashboard-card-title{
   color: #00ffea !important;
   font-weight: 700;
 }
 
-body[data-theme='dark'] .dashboard-card-value {
+.admin-theme-root[data-theme='dark'] .dashboard-card-value {
   color: #FFD600 !important;
   font-weight: 700;
 }
-body[data-theme='dark'] .dashboard-card-title1,
-body[data-theme='dark'] .dashboard-card-value1 {
+.admin-theme-root[data-theme='dark'] .dashboard-card-title1,
+.admin-theme-root[data-theme='dark'] .dashboard-card-value1 {
   color: #42f92a !important;
   font-weight: 700;
 }
-body[data-theme='dark'] .dashboard-card-title2,
-body[data-theme='dark'] .dashboard-card-value2 {
+.admin-theme-root[data-theme='dark'] .dashboard-card-title2,
+.admin-theme-root[data-theme='dark'] .dashboard-card-value2 {
   color: #f76eee !important;
   font-weight: 700;
 }
-body[data-theme='dark'] .dashboard-card-title3,
-body[data-theme='dark'] .dashboard-card-value3 {
+.admin-theme-root[data-theme='dark'] .dashboard-card-title3,
+.admin-theme-root[data-theme='dark'] .dashboard-card-value3 {
   color: #fc8a3e !important;
   font-weight: 700;
 }
-body[data-theme='dark'] .dashboard-card-title4,
-body[data-theme='dark'] .dashboard-card-value4 {
+.admin-theme-root[data-theme='dark'] .dashboard-card-title4,
+.admin-theme-root[data-theme='dark'] .dashboard-card-value4 {
   color: #9d75f9 !important;
   font-weight: 700;
 }
-body[data-theme='dark'] .dashboard-card-value111111 {
+.admin-theme-root[data-theme='dark'] .dashboard-card-value111111 {
   background: #0d60c0 !important;
 }
-
-
-
+.admin-theme-root[data-theme='dark'] .anticon-bulb svg {
+  fill: #FFD600 !important;
+}

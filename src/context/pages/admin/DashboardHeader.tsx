@@ -235,10 +235,18 @@ const DashboardHeader: React.FC<any> = ({
           <div style={{ fontWeight: 700, fontSize: 22, marginTop: 2 }}>{pageTitle}</div>
         </div>
       </div>
-      <div className="admin-header-actions ">
+      <div className="admin-header-actions">
         <Button
           type="text"
-          icon={theme === 'dark' ? <BulbFilled style={{ color: '#FFD600', fontSize: 22 }} /> : <BulbOutlined style={{ fontSize: 22 }} />}
+          icon={
+            theme === 'dark'
+              ? <BulbFilled style={{
+                  color: '#FFD600',
+                  fontSize: 22,
+                  filter: 'drop-shadow(0 0 4px #FFD600) brightness(1.5) saturate(2)'
+                }} />
+              : <BulbOutlined style={{ color: '#222', fontSize: 22 }} />
+          }
           onClick={toggleTheme}
           aria-label="Đổi giao diện sáng/tối"
           style={{ marginRight: 12 }}

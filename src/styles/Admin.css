@@ -1695,317 +1695,318 @@
 .btn-inventory:hover { background: #b2ebf2; }
 
 /* Dark mode styles */
-body[data-theme='dark'] {
+.admin-theme-root[data-theme='dark'] {
   background: #18191a !important;
   color: #e4e6eb !important;
 }
-body[data-theme='dark'] .admin-header,
-body[data-theme='dark'] .ant-layout-sider,
-body[data-theme='dark'] .ant-menu,
-body[data-theme='dark'] .admin-section,
-body[data-theme='dark'] .stat-card,
-body[data-theme='dark'] .admin-table,
-body[data-theme='dark'] .admin-modal-content {
+.admin-theme-root[data-theme='dark'] .admin-header,
+.admin-theme-root[data-theme='dark'] .ant-layout-sider,
+.admin-theme-root[data-theme='dark'] .ant-menu,
+.admin-theme-root[data-theme='dark'] .admin-section,
+.admin-theme-root[data-theme='dark'] .stat-card,
+.admin-theme-root[data-theme='dark'] .admin-table,
+.admin-theme-root[data-theme='dark'] .admin-modal-content {
   background: #242526 !important;
   color: #e4e6eb !important;
 }
-body[data-theme='dark'] .ant-menu-item,
-body[data-theme='dark'] .ant-menu-submenu-title {
+.admin-theme-root[data-theme='dark'] .ant-menu-item,
+.admin-theme-root[data-theme='dark'] .ant-menu-submenu-title {
   color: #e4e6eb !important;
 }
-body[data-theme='dark'] .ant-menu-item-selected,
-body[data-theme='dark'] .ant-menu-item-active,
-body[data-theme='dark'] .ant-menu-item:hover {
+.admin-theme-root[data-theme='dark'] .ant-menu-item-selected,
+.admin-theme-root[data-theme='dark'] .ant-menu-item-active,
+.admin-theme-root[data-theme='dark'] .ant-menu-item:hover {
   background: #3a3b3c !important;
   color: #FFD600 !important;
 }
-body[data-theme='dark'] .dashboard-card {
+.admin-theme-root[data-theme='dark'] .dashboard-card {
   background: #242526 !important;
   color: #e4e6eb !important;
 }
-body[data-theme='dark'] .admin-table th,
-body[data-theme='dark'] .admin-table td {
+.admin-theme-root[data-theme='dark'] .admin-table th,
+.admin-theme-root[data-theme='dark'] .admin-table td {
   color: #e4e6eb !important;
   border-color: #333 !important;
 }
-body[data-theme='dark'] .admin-table tbody tr:hover {
+.admin-theme-root[data-theme='dark'] .admin-table tbody tr:hover {
   background-color: #333 !important;
 }
-body[data-theme='dark'] .ant-layout-header {
+.admin-theme-root[data-theme='dark'] .ant-layout-header {
   background: #242526 !important;
 }
-body[data-theme='dark'] .view-all-link {
+.admin-theme-root[data-theme='dark'] .view-all-link {
   color: #FFD600 !important;
 }
 
 /* --- DARK MODE OVERRIDE --- */
-body[data-theme='dark'] {
+.admin-theme-root[data-theme='dark'] {
   background: #18191a !important;
   color: #e4e6eb !important;
 }
 
-body[data-theme='dark'] .ant-layout,
-body[data-theme='dark'] .ant-layout-sider,
-body[data-theme='dark'] .ant-menu,
-body[data-theme='dark'] .ant-layout-header,
-body[data-theme='dark'] .admin-header,
-body[data-theme='dark'] .admin-sidebar,
-body[data-theme='dark'] .admin-section,
-body[data-theme='dark'] .stat-card,
-body[data-theme='dark'] .dashboard-card,
-body[data-theme='dark'] .admin-table,
-body[data-theme='dark'] .admin-modal-content,
-body[data-theme='dark'] .admin-main,
-body[data-theme='dark'] .admin-content,
-body[data-theme='dark'] .admin-recent,
-body[data-theme='dark'] .admin-charts,
-body[data-theme='dark'] .chart-section,
-body[data-theme='dark'] .chart-container,
-body[data-theme='dark'] .ant-card,
-body[data-theme='dark'] .ant-card-body,
-body[data-theme='dark'] .ant-table,
-body[data-theme='dark'] .ant-table-content,
-body[data-theme='dark'] .ant-table-thead > tr > th,
-body[data-theme='dark'] .ant-table-tbody > tr > td,
-body[data-theme='dark'] .ant-table-thead,
-body[data-theme='dark'] .ant-table-tbody,
-body[data-theme='dark'] .ant-table-cell,
-body[data-theme='dark'] .ant-table-row,
-body[data-theme='dark'] .ant-table-wrapper,
-body[data-theme='dark'] .ant-table-container,
-body[data-theme='dark'] .ant-table-content,
-body[data-theme='dark'] .ant-table-summary,
-body[data-theme='dark'] .ant-table-footer,
-body[data-theme='dark'] .ant-table-title,
-body[data-theme='dark'] .ant-table-header,
-body[data-theme='dark'] .ant-table-body,
-body[data-theme='dark'] .ant-table-placeholder,
-body[data-theme='dark'] .ant-table-row-level-0,
-body[data-theme='dark'] .ant-table-row-level-1,
-body[data-theme='dark'] .ant-table-row-level-2,
-body[data-theme='dark'] .ant-table-row-level-3,
-body[data-theme='dark'] .ant-table-row-level-4,
-body[data-theme='dark'] .ant-table-row-level-5,
-body[data-theme='dark'] .ant-table-row-level-6,
-body[data-theme='dark'] .ant-table-row-level-7,
-body[data-theme='dark'] .ant-table-row-level-8,
-body[data-theme='dark'] .ant-table-row-level-9,
-body[data-theme='dark'] .ant-table-row-level-10,
-body[data-theme='dark'] .ant-table-row-level-11,
-body[data-theme='dark'] .ant-table-row-level-12,
-body[data-theme='dark'] .ant-table-row-level-13,
-body[data-theme='dark'] .ant-table-row-level-14,
-body[data-theme='dark'] .ant-table-row-level-15,
-body[data-theme='dark'] .ant-table-row-level-16,
-body[data-theme='dark'] .ant-table-row-level-17,
-body[data-theme='dark'] .ant-table-row-level-18,
-body[data-theme='dark'] .ant-table-row-level-19,
-body[data-theme='dark'] .ant-table-row-level-20,
-body[data-theme='dark'] .ant-table-row-level-21,
-body[data-theme='dark'] .ant-table-row-level-22,
-body[data-theme='dark'] .ant-table-row-level-23,
-body[data-theme='dark'] .ant-table-row-level-24,
-body[data-theme='dark'] .ant-table-row-level-25,
-body[data-theme='dark'] .ant-table-row-level-26,
-body[data-theme='dark'] .ant-table-row-level-27,
-body[data-theme='dark'] .ant-table-row-level-28,
-body[data-theme='dark'] .ant-table-row-level-29,
-body[data-theme='dark'] .ant-table-row-level-30,
-body[data-theme='dark'] .ant-table-row-level-31,
-body[data-theme='dark'] .ant-table-row-level-32,
-body[data-theme='dark'] .ant-table-row-level-33,
-body[data-theme='dark'] .ant-table-row-level-34,
-body[data-theme='dark'] .ant-table-row-level-35,
-body[data-theme='dark'] .ant-table-row-level-36,
-body[data-theme='dark'] .ant-table-row-level-37,
-body[data-theme='dark'] .ant-table-row-level-38,
-body[data-theme='dark'] .ant-table-row-level-39,
-body[data-theme='dark'] .ant-table-row-level-40,
-body[data-theme='dark'] .ant-table-row-level-41,
-body[data-theme='dark'] .ant-table-row-level-42,
-body[data-theme='dark'] .ant-table-row-level-43,
-body[data-theme='dark'] .ant-table-row-level-44,
-body[data-theme='dark'] .ant-table-row-level-45,
-body[data-theme='dark'] .ant-table-row-level-46,
-body[data-theme='dark'] .ant-table-row-level-47,
-body[data-theme='dark'] .ant-table-row-level-48,
-body[data-theme='dark'] .ant-table-row-level-49,
-body[data-theme='dark'] .ant-table-row-level-50,
-body[data-theme='dark'] .ant-table-row-level-51,
-body[data-theme='dark'] .ant-table-row-level-52,
-body[data-theme='dark'] .ant-table-row-level-53,
-body[data-theme='dark'] .ant-table-row-level-54,
-body[data-theme='dark'] .ant-table-row-level-55,
-body[data-theme='dark'] .ant-table-row-level-56,
-body[data-theme='dark'] .ant-table-row-level-57,
-body[data-theme='dark'] .ant-table-row-level-58,
-body[data-theme='dark'] .ant-table-row-level-59,
-body[data-theme='dark'] .ant-table-row-level-60,
-body[data-theme='dark'] .ant-table-row-level-61,
-body[data-theme='dark'] .ant-table-row-level-62,
-body[data-theme='dark'] .ant-table-row-level-63,
-body[data-theme='dark'] .ant-table-row-level-64,
-body[data-theme='dark'] .ant-table-row-level-65,
-body[data-theme='dark'] .ant-table-row-level-66,
-body[data-theme='dark'] .ant-table-row-level-67,
-body[data-theme='dark'] .ant-table-row-level-68,
-body[data-theme='dark'] .ant-table-row-level-69,
-body[data-theme='dark'] .ant-table-row-level-70,
-body[data-theme='dark'] .ant-table-row-level-71,
-body[data-theme='dark'] .ant-table-row-level-72,
-body[data-theme='dark'] .ant-table-row-level-73,
-body[data-theme='dark'] .ant-table-row-level-74,
-body[data-theme='dark'] .ant-table-row-level-75,
-body[data-theme='dark'] .ant-table-row-level-76,
-body[data-theme='dark'] .ant-table-row-level-77,
-body[data-theme='dark'] .ant-table-row-level-78,
-body[data-theme='dark'] .ant-table-row-level-79,
-body[data-theme='dark'] .ant-table-row-level-80,
-body[data-theme='dark'] .ant-table-row-level-81,
-body[data-theme='dark'] .ant-table-row-level-82,
-body[data-theme='dark'] .ant-table-row-level-83,
-body[data-theme='dark'] .ant-table-row-level-84,
-body[data-theme='dark'] .ant-table-row-level-85,
-body[data-theme='dark'] .ant-table-row-level-86,
-body[data-theme='dark'] .ant-table-row-level-87,
-body[data-theme='dark'] .ant-table-row-level-88,
-body[data-theme='dark'] .ant-table-row-level-89,
-body[data-theme='dark'] .ant-table-row-level-90,
-body[data-theme='dark'] .ant-table-row-level-91,
-body[data-theme='dark'] .ant-table-row-level-92,
-body[data-theme='dark'] .ant-table-row-level-93,
-body[data-theme='dark'] .ant-table-row-level-94,
-body[data-theme='dark'] .ant-table-row-level-95,
-body[data-theme='dark'] .ant-table-row-level-96,
-body[data-theme='dark'] .ant-table-row-level-97,
-body[data-theme='dark'] .ant-table-row-level-98,
-body[data-theme='dark'] .ant-table-row-level-99,
-body[data-theme='dark'] .ant-card,
-body[data-theme='dark'] .ant-card-body,
-body[data-theme='dark'] .ant-card-bordered,
-body[data-theme='dark'] .ant-card-head,
-body[data-theme='dark'] .ant-card-meta,
-body[data-theme='dark'] .ant-card-meta-title,
-body[data-theme='dark'] .ant-card-meta-description,
-body[data-theme='dark'] .ant-card-actions,
-body[data-theme='dark'] .ant-card-extra,
-body[data-theme='dark'] .ant-card-cover,
-body[data-theme='dark'] .ant-card-grid,
-body[data-theme='dark'] .ant-card-loading-block,
-body[data-theme='dark'] .ant-card-loading-content,
-body[data-theme='dark'] .ant-card-loading {
+.admin-theme-root[data-theme='dark'] .ant-layout,
+.admin-theme-root[data-theme='dark'] .ant-layout-sider,
+.admin-theme-root[data-theme='dark'] .ant-menu,
+.admin-theme-root[data-theme='dark'] .ant-layout-header,
+.admin-theme-root[data-theme='dark'] .admin-header,
+.admin-theme-root[data-theme='dark'] .admin-sidebar,
+.admin-theme-root[data-theme='dark'] .admin-section,
+.admin-theme-root[data-theme='dark'] .stat-card,
+.admin-theme-root[data-theme='dark'] .dashboard-card,
+.admin-theme-root[data-theme='dark'] .admin-table,
+.admin-theme-root[data-theme='dark'] .admin-modal-content,
+.admin-theme-root[data-theme='dark'] .admin-main,
+.admin-theme-root[data-theme='dark'] .admin-content,
+.admin-theme-root[data-theme='dark'] .admin-recent,
+.admin-theme-root[data-theme='dark'] .admin-charts,
+.admin-theme-root[data-theme='dark'] .chart-section,
+.admin-theme-root[data-theme='dark'] .chart-container,
+.admin-theme-root[data-theme='dark'] .ant-card,
+.admin-theme-root[data-theme='dark'] .ant-card-body,
+.admin-theme-root[data-theme='dark'] .ant-table,
+.admin-theme-root[data-theme='dark'] .ant-table-content,
+.admin-theme-root[data-theme='dark'] .ant-table-thead > tr > th,
+.admin-theme-root[data-theme='dark'] .ant-table-tbody > tr > td,
+.admin-theme-root[data-theme='dark'] .ant-table-thead,
+.admin-theme-root[data-theme='dark'] .ant-table-tbody,
+.admin-theme-root[data-theme='dark'] .ant-table-cell,
+.admin-theme-root[data-theme='dark'] .ant-table-row,
+.admin-theme-root[data-theme='dark'] .ant-table-wrapper,
+.admin-theme-root[data-theme='dark'] .ant-table-container,
+.admin-theme-root[data-theme='dark'] .ant-table-content,
+.admin-theme-root[data-theme='dark'] .ant-table-summary,
+.admin-theme-root[data-theme='dark'] .ant-table-footer,
+.admin-theme-root[data-theme='dark'] .ant-table-title,
+.admin-theme-root[data-theme='dark'] .ant-table-header,
+.admin-theme-root[data-theme='dark'] .ant-table-body,
+.admin-theme-root[data-theme='dark'] .ant-table-placeholder,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-0,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-1,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-2,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-3,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-4,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-5,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-6,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-7,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-8,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-9,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-10,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-11,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-12,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-13,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-14,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-15,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-16,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-17,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-18,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-19,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-20,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-21,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-22,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-23,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-24,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-25,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-26,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-27,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-28,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-29,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-30,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-31,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-32,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-33,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-34,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-35,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-36,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-37,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-38,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-39,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-40,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-41,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-42,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-43,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-44,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-45,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-46,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-47,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-48,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-49,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-50,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-51,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-52,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-53,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-54,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-55,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-56,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-57,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-58,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-59,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-60,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-61,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-62,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-63,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-64,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-65,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-66,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-67,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-68,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-69,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-70,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-71,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-72,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-73,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-74,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-75,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-76,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-77,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-78,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-79,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-80,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-81,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-82,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-83,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-84,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-85,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-86,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-87,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-88,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-89,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-90,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-91,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-92,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-93,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-94,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-95,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-96,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-97,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-98,
+.admin-theme-root[data-theme='dark'] .ant-table-row-level-99,
+.admin-theme-root[data-theme='dark'] .ant-card,
+.admin-theme-root[data-theme='dark'] .ant-card-body,
+.admin-theme-root[data-theme='dark'] .ant-card-bordered,
+.admin-theme-root[data-theme='dark'] .ant-card-head,
+.admin-theme-root[data-theme='dark'] .ant-card-meta,
+.admin-theme-root[data-theme='dark'] .ant-card-meta-title,
+.admin-theme-root[data-theme='dark'] .ant-card-meta-description,
+.admin-theme-root[data-theme='dark'] .ant-card-actions,
+.admin-theme-root[data-theme='dark'] .ant-card-extra,
+.admin-theme-root[data-theme='dark'] .ant-card-cover,
+.admin-theme-root[data-theme='dark'] .ant-card-grid,
+.admin-theme-root[data-theme='dark'] .ant-card-loading-block,
+.admin-theme-root[data-theme='dark'] .ant-card-loading-content,
+.admin-theme-root[data-theme='dark'] .ant-card-loading {
   background: #23272f !important;
   color: #e4e6eb !important;
   box-shadow: none !important;
   border-color: #333 !important;
 }
 
-body[data-theme='dark'] .ant-btn,
-body[data-theme='dark'] .ant-btn-text,
-body[data-theme='dark'] .ant-btn-default {
+.admin-theme-root[data-theme='dark'] .ant-btn,
+.admin-theme-root[data-theme='dark'] .ant-btn-text,
+.admin-theme-root[data-theme='dark'] .ant-btn-default {
   background: #333 !important;
   color: #FFD600 !important;
   border: none !important;
 }
 
-body[data-theme='dark'] input,
-body[data-theme='dark'] select,
-body[data-theme='dark'] textarea {
+.admin-theme-root[data-theme='dark'] input,
+.admin-theme-root[data-theme='dark'] select,
+.admin-theme-root[data-theme='dark'] textarea {
   background: #18191a !important;
   color: #e4e6eb !important;
   border: 1px solid #333 !important;
 }
 
-body[data-theme='dark'] .anticon {
+.admin-theme-root[data-theme='dark'] .anticon {
   color: #FFD600 !important;
 }
 
-body[data-theme='dark'] .status,
-body[data-theme='dark'] .priority {
+.admin-theme-root[data-theme='dark'] .status,
+.admin-theme-root[data-theme='dark'] .priority {
   color: #fff !important;
 }
 
-body[data-theme='dark'] .recharts-wrapper,
-body[data-theme='dark'] .recharts-surface {
+.admin-theme-root[data-theme='dark'] .recharts-wrapper,
+.admin-theme-root[data-theme='dark'] .recharts-surface {
   /* background: #23272f !important; */
 }
 
-body[data-theme='dark'] .recharts-cartesian-axis-tick-value,
-body[data-theme='dark'] .recharts-legend-item-text,
-body[data-theme='dark'] .recharts-tooltip-label,
-body[data-theme='dark'] .recharts-tooltip-item-list,
-body[data-theme='dark'] .recharts-default-tooltip {
+.admin-theme-root[data-theme='dark'] .recharts-cartesian-axis-tick-value,
+.admin-theme-root[data-theme='dark'] .recharts-legend-item-text,
+.admin-theme-root[data-theme='dark'] .recharts-tooltip-label,
+.admin-theme-root[data-theme='dark'] .recharts-tooltip-item-list,
+.admin-theme-root[data-theme='dark'] .recharts-default-tooltip {
   color: #FFD600 !important;
   background: #23272f !important;
   border-color: #333 !important;
 }
 
-body[data-theme='dark'] .admin-placeholder {
+.admin-theme-root[data-theme='dark'] .admin-placeholder {
   background: #23272f !important;
   color: #e4e6eb !important;
 }
 
-body[data-theme='dark'] .view-all-link {
+.admin-theme-root[data-theme='dark'] .view-all-link {
   color: #FFD600 !important;
 }
 
 /* DARK MODE - FORCE ALL WHITE AREAS TO DARK */
-body[data-theme='dark'] * {
+.admin-theme-root[data-theme='dark'] * {
   /* Đảm bảo chữ sáng mặc định */
   color: #e4e6eb !important;
   border-color: #333 !important;
 }
 
-body[data-theme='dark'] .dashboard-card,
-body[data-theme='dark'] .admin-section,
-body[data-theme='dark'] .stat-card,
-body[data-theme='dark'] .admin-table,
-body[data-theme='dark'] .admin-modal-content,
-body[data-theme='dark'] .admin-main,
-body[data-theme='dark'] .admin-content,
-body[data-theme='dark'] .admin-recent,
-body[data-theme='dark'] .admin-charts,
-body[data-theme='dark'] .chart-section,
-body[data-theme='dark'] .chart-container,
-body[data-theme='dark'] .ant-card,
-body[data-theme='dark'] .ant-card-body,
-body[data-theme='dark'] .ant-table,
-body[data-theme='dark'] .ant-table-content,
-body[data-theme='dark'] .ant-table-thead > tr > th,
-body[data-theme='dark'] .ant-table-tbody > tr > td,
-body[data-theme='dark'] .ant-table-thead,
-body[data-theme='dark'] .ant-table-tbody,
-body[data-theme='dark'] .ant-table-cell,
-body[data-theme='dark'] .ant-table-row,
-body[data-theme='dark'] .ant-table-wrapper,
-body[data-theme='dark'] .ant-table-container,
-body[data-theme='dark'] .ant-table-content,
-body[data-theme='dark'] .ant-table-summary,
-body[data-theme='dark'] .ant-table-footer,
-body[data-theme='dark'] .ant-table-title,
-body[data-theme='dark'] .ant-table-header,
-body[data-theme='dark'] .ant-table-body,
-body[data-theme='dark'] .ant-table-placeholder,
-body[data-theme='dark'] .ant-card-bordered,
-body[data-theme='dark'] .ant-card-head,
-body[data-theme='dark'] .ant-card-meta,
-body[data-theme='dark'] .ant-card-meta-title,
-body[data-theme='dark'] .ant-card-meta-description,
-body[data-theme='dark'] .ant-card-actions,
-body[data-theme='dark'] .ant-card-extra,
-body[data-theme='dark'] .ant-card-cover,
-body[data-theme='dark'] .ant-card-grid,
-body[data-theme='dark'] .ant-card-loading-block,
-body[data-theme='dark'] .ant-card-loading-content,
-body[data-theme='dark'] .ant-card-loading,
-body[data-theme='dark'] .dashboard-cards,
-body[data-theme='dark'] .admin-section.chart-section,
-body[data-theme='dark'] .dashboard-card,
-body[data-theme='dark'] .audi-projects,
-body[data-theme='dark'] .audi-orders-history,
-body[data-theme='dark'] .audi-dashboard-bottom,
-body[data-theme='dark'] .recharts-wrapper,
-body[data-theme='dark'] .recharts-surface {
+
+.admin-theme-root[data-theme='dark'] .dashboard-card,
+.admin-theme-root[data-theme='dark'] .admin-section,
+.admin-theme-root[data-theme='dark'] .stat-card,
+.admin-theme-root[data-theme='dark'] .admin-table,
+.admin-theme-root[data-theme='dark'] .admin-modal-content,
+.admin-theme-root[data-theme='dark'] .admin-main,
+.admin-theme-root[data-theme='dark'] .admin-content,
+.admin-theme-root[data-theme='dark'] .admin-recent,
+.admin-theme-root[data-theme='dark'] .admin-charts,
+.admin-theme-root[data-theme='dark'] .chart-section,
+.admin-theme-root[data-theme='dark'] .chart-container,
+.admin-theme-root[data-theme='dark'] .ant-card,
+.admin-theme-root[data-theme='dark'] .ant-card-body,
+.admin-theme-root[data-theme='dark'] .ant-table,
+.admin-theme-root[data-theme='dark'] .ant-table-content,
+.admin-theme-root[data-theme='dark'] .ant-table-thead > tr > th,
+.admin-theme-root[data-theme='dark'] .ant-table-tbody > tr > td,
+.admin-theme-root[data-theme='dark'] .ant-table-thead,
+.admin-theme-root[data-theme='dark'] .ant-table-tbody,
+.admin-theme-root[data-theme='dark'] .ant-table-cell,
+.admin-theme-root[data-theme='dark'] .ant-table-row,
+.admin-theme-root[data-theme='dark'] .ant-table-wrapper,
+.admin-theme-root[data-theme='dark'] .ant-table-container,
+.admin-theme-root[data-theme='dark'] .ant-table-content,
+.admin-theme-root[data-theme='dark'] .ant-table-summary,
+.admin-theme-root[data-theme='dark'] .ant-table-footer,
+.admin-theme-root[data-theme='dark'] .ant-table-title,
+.admin-theme-root[data-theme='dark'] .ant-table-header,
+.admin-theme-root[data-theme='dark'] .ant-table-body,
+.admin-theme-root[data-theme='dark'] .ant-table-placeholder,
+.admin-theme-root[data-theme='dark'] .ant-card-bordered,
+.admin-theme-root[data-theme='dark'] .ant-card-head,
+.admin-theme-root[data-theme='dark'] .ant-card-meta,
+.admin-theme-root[data-theme='dark'] .ant-card-meta-title,
+.admin-theme-root[data-theme='dark'] .ant-card-meta-description,
+.admin-theme-root[data-theme='dark'] .ant-card-actions,
+.admin-theme-root[data-theme='dark'] .ant-card-extra,
+.admin-theme-root[data-theme='dark'] .ant-card-cover,
+.admin-theme-root[data-theme='dark'] .ant-card-grid,
+.admin-theme-root[data-theme='dark'] .ant-card-loading-block,
+.admin-theme-root[data-theme='dark'] .ant-card-loading-content,
+.admin-theme-root[data-theme='dark'] .ant-card-loading,
+.admin-theme-root[data-theme='dark'] .dashboard-cards,
+.admin-theme-root[data-theme='dark'] .admin-section.chart-section,
+.admin-theme-root[data-theme='dark'] .dashboard-card,
+.admin-theme-root[data-theme='dark'] .audi-projects,
+.admin-theme-root[data-theme='dark'] .audi-orders-history,
+.admin-theme-root[data-theme='dark'] .audi-dashboard-bottom,
+.admin-theme-root[data-theme='dark'] .recharts-wrapper,
+.admin-theme-root[data-theme='dark'] .recharts-surface {
   background: #18191a !important;
   color: #e4e6eb !important;
   /* box-shadow: 0 2px 12px 0 rgba(0,0,0,0.4) !important; */
@@ -2013,60 +2014,60 @@ body[data-theme='dark'] .recharts-surface {
 }
 
 /* Đảm bảo các border, shadow, outline đều tối */
-body[data-theme='dark'] .dashboard-card,
-body[data-theme='dark'] .admin-section,
-body[data-theme='dark'] .chart-section,
-body[data-theme='dark'] .chart-container {
+.admin-theme-root[data-theme='dark'] .dashboard-card,
+.admin-theme-root[data-theme='dark'] .admin-section,
+.admin-theme-root[data-theme='dark'] .chart-section,
+.admin-theme-root[data-theme='dark'] .chart-container {
   border: 1px solid #23272f !important;
   box-shadow: 0 2px 12px 0 rgba(0,0,0,0.4) !important;
 }
 
 /* Đảm bảo các vùng input, select, button đều tối */
-body[data-theme='dark'] input,
-body[data-theme='dark'] select,
-body[data-theme='dark'] textarea,
-body[data-theme='dark'] .ant-input,
-body[data-theme='dark'] .ant-select-selector {
+.admin-theme-root[data-theme='dark'] input,
+.admin-theme-root[data-theme='dark'] select,
+.admin-theme-root[data-theme='dark'] textarea,
+.admin-theme-root[data-theme='dark'] .ant-input,
+.admin-theme-root[data-theme='dark'] .ant-select-selector {
   background: #23272f !important;
   color: #e4e6eb !important;
   border: 1px solid #333 !important;
 }
 
 /* Đảm bảo các vùng chart, recharts cũng tối */
-body[data-theme='dark'] .recharts-wrapper,
-body[data-theme='dark'] .recharts-surface,
-body[data-theme='dark'] .recharts-tooltip-wrapper,
-body[data-theme='dark'] .recharts-default-tooltip {
+.admin-theme-root[data-theme='dark'] .recharts-wrapper,
+.admin-theme-root[data-theme='dark'] .recharts-surface,
+.admin-theme-root[data-theme='dark'] .recharts-tooltip-wrapper,
+.admin-theme-root[data-theme='dark'] .recharts-default-tooltip {
   background: #23272f !important;
   color: #FFD600 !important;
   /* border-color: #333 !important; */
 }
 
 /* Đảm bảo các vùng link, icon nổi bật */
-body[data-theme='dark'] a,
-body[data-theme='dark'] .anticon {
+.admin-theme-root[data-theme='dark'] a,
+.admin-theme-root[data-theme='dark'] .anticon {
   color: #FFD600 !important;
 }
 
 /* Đảm bảo các vùng có border-radius lớn cũng tối */
-body[data-theme='dark'] .dashboard-card,
-body[data-theme='dark'] .admin-section,
-body[data-theme='dark'] .chart-section,
-body[data-theme='dark'] .chart-container {
+.admin-theme-root[data-theme='dark'] .dashboard-card,
+.admin-theme-root[data-theme='dark'] .admin-section,
+.admin-theme-root[data-theme='dark'] .chart-section,
+.admin-theme-root[data-theme='dark'] .chart-container {
   border-radius: 18px !important;
 }
 
 /* Đảm bảo các vùng có màu nền trắng cứng */
-body[data-theme='dark'] [style*="background: #fff"],
-body[data-theme='dark'] [style*="background-color: #fff"],
-body[data-theme='dark'] [style*="background: rgb(255,255,255)"],
-body[data-theme='dark'] [style*="background-color: rgb(255,255,255)"] {
+.admin-theme-root[data-theme='dark'] [style*="background: #fff"],
+.admin-theme-root[data-theme='dark'] [style*="background-color: #fff"],
+.admin-theme-root[data-theme='dark'] [style*="background: rgb(255,255,255)"],
+.admin-theme-root[data-theme='dark'] [style*="background-color: rgb(255,255,255)"] {
   background: #18191a !important;
   color: #e4e6eb !important;
 }
 
 /* Đè mạnh tất cả vùng trắng khi dark mode */
-body[data-theme='dark'] * {
+.admin-theme-root[data-theme='dark'] * {
   background: transparent !important;
   background-color: transparent !important;
   /* color: #e4e6eb !important;
@@ -2075,56 +2076,56 @@ body[data-theme='dark'] * {
 }
 
 /* Đè riêng các vùng card, section, bảng, chart, container, ... */
-body[data-theme='dark'] .dashboard-card,
-body[data-theme='dark'] .admin-section,
-body[data-theme='dark'] .stat-card,
-body[data-theme='dark'] .admin-table,
-body[data-theme='dark'] .admin-modal-content,
-body[data-theme='dark'] .admin-main,
-body[data-theme='dark'] .admin-content,
-body[data-theme='dark'] .admin-recent,
-body[data-theme='dark'] .admin-charts,
-body[data-theme='dark'] .chart-section,
-body[data-theme='dark'] .chart-container,
-body[data-theme='dark'] .ant-card,
-body[data-theme='dark'] .ant-card-body,
-body[data-theme='dark'] .ant-table,
-body[data-theme='dark'] .ant-table-content,
-body[data-theme='dark'] .ant-table-thead > tr > th,
-body[data-theme='dark'] .ant-table-tbody > tr > td,
-body[data-theme='dark'] .ant-table-thead,
-body[data-theme='dark'] .ant-table-tbody,
-body[data-theme='dark'] .ant-table-cell,
-body[data-theme='dark'] .ant-table-row,
-body[data-theme='dark'] .ant-table-wrapper,
-body[data-theme='dark'] .ant-table-container,
-body[data-theme='dark'] .ant-table-content,
-body[data-theme='dark'] .ant-table-summary,
-body[data-theme='dark'] .ant-table-footer,
-body[data-theme='dark'] .ant-table-title,
-body[data-theme='dark'] .ant-table-header,
-body[data-theme='dark'] .ant-table-body,
-body[data-theme='dark'] .ant-table-placeholder,
-body[data-theme='dark'] .ant-card-bordered,
-body[data-theme='dark'] .ant-card-head,
-body[data-theme='dark'] .ant-card-meta,
-body[data-theme='dark'] .ant-card-meta-title,
-body[data-theme='dark'] .ant-card-meta-description,
-body[data-theme='dark'] .ant-card-actions,
-body[data-theme='dark'] .ant-card-extra,
-body[data-theme='dark'] .ant-card-cover,
-body[data-theme='dark'] .ant-card-grid,
-body[data-theme='dark'] .ant-card-loading-block,
-body[data-theme='dark'] .ant-card-loading-content,
-body[data-theme='dark'] .ant-card-loading,
-body[data-theme='dark'] .dashboard-cards,
-body[data-theme='dark'] .admin-section.chart-section,
-body[data-theme='dark'] .dashboard-card,
-body[data-theme='dark'] .audi-projects,
-body[data-theme='dark'] .audi-orders-history,
-body[data-theme='dark'] .audi-dashboard-bottom,
-body[data-theme='dark'] .recharts-wrapper,
-body[data-theme='dark'] .recharts-surface {
+.admin-theme-root[data-theme='dark'] .dashboard-card,
+.admin-theme-root[data-theme='dark'] .admin-section,
+.admin-theme-root[data-theme='dark'] .stat-card,
+.admin-theme-root[data-theme='dark'] .admin-table,
+.admin-theme-root[data-theme='dark'] .admin-modal-content,
+.admin-theme-root[data-theme='dark'] .admin-main,
+.admin-theme-root[data-theme='dark'] .admin-content,
+.admin-theme-root[data-theme='dark'] .admin-recent,
+.admin-theme-root[data-theme='dark'] .admin-charts,
+.admin-theme-root[data-theme='dark'] .chart-section,
+.admin-theme-root[data-theme='dark'] .chart-container,
+.admin-theme-root[data-theme='dark'] .ant-card,
+.admin-theme-root[data-theme='dark'] .ant-card-body,
+.admin-theme-root[data-theme='dark'] .ant-table,
+.admin-theme-root[data-theme='dark'] .ant-table-content,
+.admin-theme-root[data-theme='dark'] .ant-table-thead > tr > th,
+.admin-theme-root[data-theme='dark'] .ant-table-tbody > tr > td,
+.admin-theme-root[data-theme='dark'] .ant-table-thead,
+.admin-theme-root[data-theme='dark'] .ant-table-tbody,
+.admin-theme-root[data-theme='dark'] .ant-table-cell,
+.admin-theme-root[data-theme='dark'] .ant-table-row,
+.admin-theme-root[data-theme='dark'] .ant-table-wrapper,
+.admin-theme-root[data-theme='dark'] .ant-table-container,
+.admin-theme-root[data-theme='dark'] .ant-table-content,
+.admin-theme-root[data-theme='dark'] .ant-table-summary,
+.admin-theme-root[data-theme='dark'] .ant-table-footer,
+.admin-theme-root[data-theme='dark'] .ant-table-title,
+.admin-theme-root[data-theme='dark'] .ant-table-header,
+.admin-theme-root[data-theme='dark'] .ant-table-body,
+.admin-theme-root[data-theme='dark'] .ant-table-placeholder,
+.admin-theme-root[data-theme='dark'] .ant-card-bordered,
+.admin-theme-root[data-theme='dark'] .ant-card-head,
+.admin-theme-root[data-theme='dark'] .ant-card-meta,
+.admin-theme-root[data-theme='dark'] .ant-card-meta-title,
+.admin-theme-root[data-theme='dark'] .ant-card-meta-description,
+.admin-theme-root[data-theme='dark'] .ant-card-actions,
+.admin-theme-root[data-theme='dark'] .ant-card-extra,
+.admin-theme-root[data-theme='dark'] .ant-card-cover,
+.admin-theme-root[data-theme='dark'] .ant-card-grid,
+.admin-theme-root[data-theme='dark'] .ant-card-loading-block,
+.admin-theme-root[data-theme='dark'] .ant-card-loading-content,
+.admin-theme-root[data-theme='dark'] .ant-card-loading,
+.admin-theme-root[data-theme='dark'] .dashboard-cards,
+.admin-theme-root[data-theme='dark'] .admin-section.chart-section,
+.admin-theme-root[data-theme='dark'] .dashboard-card,
+.admin-theme-root[data-theme='dark'] .audi-projects,
+.admin-theme-root[data-theme='dark'] .audi-orders-history,
+.admin-theme-root[data-theme='dark'] .audi-dashboard-bottom,
+.admin-theme-root[data-theme='dark'] .recharts-wrapper,
+.admin-theme-root[data-theme='dark'] .recharts-surface {
   background: #18191a !important;
   color: #e4e6eb !important;
   /* border-color: #333 !important;
@@ -2132,10 +2133,10 @@ body[data-theme='dark'] .recharts-surface {
 }
 
 /* Đè các vùng có background trắng cứng hoặc inline style */
-body[data-theme='dark'] [style*="background: #fff"],
-body[data-theme='dark'] [style*="background-color: #fff"],
-body[data-theme='dark'] [style*="background: rgb(255,255,255)"],
-body[data-theme='dark'] [style*="background-color: rgb(255,255,255)"] {
+.admin-theme-root[data-theme='dark'] [style*="background: #fff"],
+.admin-theme-root[data-theme='dark'] [style*="background-color: #fff"],
+.admin-theme-root[data-theme='dark'] [style*="background: rgb(255,255,255)"],
+.admin-theme-root[data-theme='dark'] [style*="background-color: rgb(255,255,255)"] {
   background: #18191a !important;
   background-color: #18191a !important;
   color: #e4e6eb !important;
@@ -2143,148 +2144,148 @@ body[data-theme='dark'] [style*="background-color: rgb(255,255,255)"] {
 }
 
 /* Đè các vùng có border-radius lớn */
-body[data-theme='dark'] .dashboard-card,
-body[data-theme='dark'] .admin-section,
-body[data-theme='dark'] .chart-section,
-body[data-theme='dark'] .chart-container {
+.admin-theme-root[data-theme='dark'] .dashboard-card,
+.admin-theme-root[data-theme='dark'] .admin-section,
+.admin-theme-root[data-theme='dark'] .chart-section,
+.admin-theme-root[data-theme='dark'] .chart-container {
   border-radius: 18px !important;
 }
 
 /* Đè các vùng input, select, button */
-body[data-theme='dark'] input,
-body[data-theme='dark'] select,
-body[data-theme='dark'] textarea,
-body[data-theme='dark'] .ant-input,
-body[data-theme='dark'] .ant-select-selector {
+.admin-theme-root[data-theme='dark'] input,
+.admin-theme-root[data-theme='dark'] select,
+.admin-theme-root[data-theme='dark'] textarea,
+.admin-theme-root[data-theme='dark'] .ant-input,
+.admin-theme-root[data-theme='dark'] .ant-select-selector {
   background: #23272f !important;
   color: #e4e6eb !important;
   border: 1px solid #333 !important;
 }
 
 /* Đè các vùng chart, recharts */
-body[data-theme='dark'] .recharts-wrapper,
-body[data-theme='dark'] .recharts-surface,
-body[data-theme='dark'] .recharts-tooltip-wrapper,
-body[data-theme='dark'] .recharts-default-tooltip {
+.admin-theme-root[data-theme='dark'] .recharts-wrapper,
+.admin-theme-root[data-theme='dark'] .recharts-surface,
+.admin-theme-root[data-theme='dark'] .recharts-tooltip-wrapper,
+.admin-theme-root[data-theme='dark'] .recharts-default-tooltip {
   background: #23272f !important;
   color: #FFD600 !important;
   /* border-color: #333 !important; */
 }
 
 /* Đè các vùng link, icon nổi bật */
-body[data-theme='dark'] a,
-body[data-theme='dark'] .anticon {
+.admin-theme-root[data-theme='dark'] a,
+.admin-theme-root[data-theme='dark'] .anticon {
   color: #FFD600 !important;
 }
 
 /* DARK MODE: Tiêu đề, nhấn mạnh, số liệu, trạng thái dùng màu vàng/cam */
-body[data-theme='dark'] .highlight,
-body[data-theme='dark'] .admin-section h2,
-body[data-theme='dark'] .dashboard-card .dashboard-card-label,
-body[data-theme='dark'] .dashboard-card .dashboard-card-value,
-body[data-theme='dark'] .admin-table th,
-body[data-theme='dark'] .stat-number,
-body[data-theme='dark'] .audi-orders-title,
-body[data-theme='dark'] .audi-projects-title,
-body[data-theme='dark'] .audi-orders-sub,
-body[data-theme='dark'] .audi-projects-sub,
-body[data-theme='dark'] .view-all-link,
-body[data-theme='dark'] .status,
-body[data-theme='dark'] .priority,
-body[data-theme='dark'] .admin-section .section-title,
-body[data-theme='dark'] .admin-section .section-header,
-body[data-theme='dark'] .admin-section .section-label,
-body[data-theme='dark'] .admin-section .section-highlight,
-body[data-theme='dark'] .admin-section .highlight,
-body[data-theme='dark'] .admin-section .yellow,
-body[data-theme='dark'] .admin-section .orange,
-body[data-theme='dark'] .admin-section .gold,
-body[data-theme='dark'] .admin-section .important,
-body[data-theme='dark'] .admin-section .title,
-body[data-theme='dark'] .admin-section .subtitle,
-body[data-theme='dark'] .admin-section .number,
-body[data-theme='dark'] .admin-section .value,
-body[data-theme='dark'] .admin-section .amount,
-body[data-theme='dark'] .admin-section .percent,
-body[data-theme='dark'] .admin-section .order-history-title,
-body[data-theme='dark'] .admin-section .order-history-item,
-body[data-theme='dark'] .admin-section .order-history-status,
-body[data-theme='dark'] .admin-section .order-history-date {
+.admin-theme-root[data-theme='dark'] .highlight,
+.admin-theme-root[data-theme='dark'] .admin-section h2,
+.admin-theme-root[data-theme='dark'] .dashboard-card .dashboard-card-label,
+.admin-theme-root[data-theme='dark'] .dashboard-card .dashboard-card-value,
+.admin-theme-root[data-theme='dark'] .admin-table th,
+.admin-theme-root[data-theme='dark'] .stat-number,
+.admin-theme-root[data-theme='dark'] .audi-orders-title,
+.admin-theme-root[data-theme='dark'] .audi-projects-title,
+.admin-theme-root[data-theme='dark'] .audi-orders-sub,
+.admin-theme-root[data-theme='dark'] .audi-projects-sub,
+.admin-theme-root[data-theme='dark'] .view-all-link,
+.admin-theme-root[data-theme='dark'] .status,
+.admin-theme-root[data-theme='dark'] .priority,
+.admin-theme-root[data-theme='dark'] .admin-section .section-title,
+.admin-theme-root[data-theme='dark'] .admin-section .section-header,
+.admin-theme-root[data-theme='dark'] .admin-section .section-label,
+.admin-theme-root[data-theme='dark'] .admin-section .section-highlight,
+.admin-theme-root[data-theme='dark'] .admin-section .highlight,
+.admin-theme-root[data-theme='dark'] .admin-section .yellow,
+.admin-theme-root[data-theme='dark'] .admin-section .orange,
+.admin-theme-root[data-theme='dark'] .admin-section .gold,
+.admin-theme-root[data-theme='dark'] .admin-section .important,
+.admin-theme-root[data-theme='dark'] .admin-section .title,
+.admin-theme-root[data-theme='dark'] .admin-section .subtitle,
+.admin-theme-root[data-theme='dark'] .admin-section .number,
+.admin-theme-root[data-theme='dark'] .admin-section .value,
+.admin-theme-root[data-theme='dark'] .admin-section .amount,
+.admin-theme-root[data-theme='dark'] .admin-section .percent,
+.admin-theme-root[data-theme='dark'] .admin-section .order-history-title,
+.admin-theme-root[data-theme='dark'] .admin-section .order-history-item,
+.admin-theme-root[data-theme='dark'] .admin-section .order-history-status,
+.admin-theme-root[data-theme='dark'] .admin-section .order-history-date {
   color: #FFD600 !important; /* vàng tươi */
 }
 
 /* Nếu muốn một số vùng dùng cam thay vì vàng */
-body[data-theme='dark'] .admin-section .orange,
-body[data-theme='dark'] .admin-section .important,
-body[data-theme='dark'] .admin-section .subtitle,
-body[data-theme='dark'] .admin-section .percent {
+.admin-theme-root[data-theme='dark'] .admin-section .orange,
+.admin-theme-root[data-theme='dark'] .admin-section .important,
+.admin-theme-root[data-theme='dark'] .admin-section .subtitle,
+.admin-theme-root[data-theme='dark'] .admin-section .percent {
   color: #FFA726 !important; /* cam nhẹ */
 }
 
 /* Đảm bảo các thẻ <th> bảng, tiêu đề card, ... đều vàng */
-body[data-theme='dark'] th,
-body[data-theme='dark'] .admin-table th {
+.admin-theme-root[data-theme='dark'] th,
+.admin-theme-root[data-theme='dark'] .admin-table th {
   color: #FFD600 !important;
 }
 
 /* Đảm bảo các số liệu, giá trị lớn, trạng thái nổi bật */
-body[data-theme='dark'] .dashboard-card-value,
-body[data-theme='dark'] .stat-number,
-body[data-theme='dark'] .admin-section .number,
-body[data-theme='dark'] .admin-section .value,
-body[data-theme='dark'] .admin-section .amount {
+.admin-theme-root[data-theme='dark'] .dashboard-card-value,
+.admin-theme-root[data-theme='dark'] .stat-number,
+.admin-theme-root[data-theme='dark'] .admin-section .number,
+.admin-theme-root[data-theme='dark'] .admin-section .value,
+.admin-theme-root[data-theme='dark'] .admin-section .amount {
   color: #FFD600 !important;
 }
 
 /* Đảm bảo các trạng thái, badge, label nổi bật */
-body[data-theme='dark'] .status,
-body[data-theme='dark'] .priority,
-body[data-theme='dark'] .badge,
-body[data-theme='dark'] .label {
+.admin-theme-root[data-theme='dark'] .status,
+.admin-theme-root[data-theme='dark'] .priority,
+.admin-theme-root[data-theme='dark'] .badge,
+.admin-theme-root[data-theme='dark'] .label {
   color: #FFD600 !important;
 }
 
 /* Đảm bảo link nổi bật */
-body[data-theme='dark'] a,
-body[data-theme='dark'] .view-all-link {
+.admin-theme-root[data-theme='dark'] a,
+.admin-theme-root[data-theme='dark'] .view-all-link {
   color: #FFD600 !important;
 }
 
 /* DARK MODE OVERRIDE FOR SIDEBAR MENU */
-body[data-theme='dark'] .ant-menu-item,
-body[data-theme='dark'] .ant-menu-submenu-title {
+.admin-theme-root[data-theme='dark'] .ant-menu-item,
+.admin-theme-root[data-theme='dark'] .ant-menu-submenu-title {
   color: #FFD600 !important; /* vàng tươi */
 }
 
-body[data-theme='dark'] .ant-menu-item-selected,
-body[data-theme='dark'] .ant-menu-item-active,
-body[data-theme='dark'] .ant-menu-item:hover {
+.admin-theme-root[data-theme='dark'] .ant-menu-item-selected,
+.admin-theme-root[data-theme='dark'] .ant-menu-item-active,
+.admin-theme-root[data-theme='dark'] .ant-menu-item:hover {
   background: #23272f !important;
   color: #FFD600 !important;
   font-weight: 600 !important;
   border-radius: 16px !important;
 }
 
-body[data-theme='dark'] .ant-menu-item-selected .anticon,
-body[data-theme='dark'] .ant-menu-item-active .anticon,
-body[data-theme='dark'] .ant-menu-item:hover .anticon {
+.admin-theme-root[data-theme='dark'] .ant-menu-item-selected .anticon,
+.admin-theme-root[data-theme='dark'] .ant-menu-item-active .anticon,
+.admin-theme-root[data-theme='dark'] .ant-menu-item:hover .anticon {
   color: #FFD600 !important;
 }
 
-body[data-theme='dark'] .ant-menu-item-selected span,
-body[data-theme='dark'] .ant-menu-item-active span,
-body[data-theme='dark'] .ant-menu-item:hover span {
+.admin-theme-root[data-theme='dark'] .ant-menu-item-selected span,
+.admin-theme-root[data-theme='dark'] .ant-menu-item-active span,
+.admin-theme-root[data-theme='dark'] .ant-menu-item:hover span {
   color: #FFD600 !important;
 }
 
-body[data-theme='dark'] .ant-menu-item,
-body[data-theme='dark'] .ant-menu-submenu-title {
+.admin-theme-root[data-theme='dark'] .ant-menu-item,
+.admin-theme-root[data-theme='dark'] .ant-menu-submenu-title {
   background: #23272f !important;
   color: #FFD600 !important;
   border-color: #FFD600 !important;
 }
 
-body[data-theme='dark'] .admin-docs-box {
+.admin-theme-root[data-theme='dark'] .admin-docs-box {
   background: #FFD600 !important;
   color: #23272f !important;
   border-radius: 12px;
@@ -2292,13 +2293,13 @@ body[data-theme='dark'] .admin-docs-box {
   text-align: center;
 }
 
-body[data-theme='dark'] .admin-docs-box .anticon,
-body[data-theme='dark'] .admin-docs-box span,
-body[data-theme='dark'] .admin-docs-box .ant-typography {
+.admin-theme-root[data-theme='dark'] .admin-docs-box .anticon,
+.admin-theme-root[data-theme='dark'] .admin-docs-box span,
+.admin-theme-root[data-theme='dark'] .admin-docs-box .ant-typography {
   color: #23272f !important;
 }
 
-body[data-theme='dark'] .admin-docs-box button {
+.admin-theme-root[data-theme='dark'] .admin-docs-box button {
   background: #fff !important;
   color: #23272f !important;
   font-weight: 700;
@@ -2306,47 +2307,48 @@ body[data-theme='dark'] .admin-docs-box button {
 }
 
 /* GIỮ NGUYÊN MÀU ICON THAO TÁC KHI DARK MODE */
-body[data-theme='dark'] .btn-view,
-body[data-theme='dark'] .btn-edit,
-body[data-theme='dark'] .btn-delete,
-body[data-theme='dark'] .btn-inventory,
-body[data-theme='dark'] .btn-view .anticon,
-body[data-theme='dark'] .btn-edit .anticon,
-body[data-theme='dark'] .btn-delete .anticon,
-body[data-theme='dark'] .btn-inventory .anticon {
+.admin-theme-root[data-theme='dark'] .btn-view,
+.admin-theme-root[data-theme='dark'] .btn-edit,
+.admin-theme-root[data-theme='dark'] .btn-delete,
+.admin-theme-root[data-theme='dark'] .btn-inventory,
+.admin-theme-root[data-theme='dark'] .btn-view .anticon,
+.admin-theme-root[data-theme='dark'] .btn-edit .anticon,
+.admin-theme-root[data-theme='dark'] .btn-delete .anticon,
+.admin-theme-root[data-theme='dark'] .btn-inventory .anticon {
   color: inherit !important;
 }
 
-body[data-theme='dark'] .admin-table,
-body[data-theme='dark'] .admin-section,
-body[data-theme='dark'] .admin-header {
+.admin-theme-root[data-theme='dark'] .admin-table,
+.admin-theme-root[data-theme='dark'] .admin-section,
+.admin-theme-root[data-theme='dark'] .admin-header {
   color: #e4e6eb !important;
 }
 
-body[data-theme='dark'] .btn-view .anticon,
-body[data-theme='dark'] .btn-edit .anticon,
-body[data-theme='dark'] .btn-delete .anticon,
-body[data-theme='dark'] .btn-inventory .anticon {
+.admin-theme-root[data-theme='dark'] .btn-view .anticon,
+.admin-theme-root[data-theme='dark'] .btn-edit .anticon,
+.admin-theme-root[data-theme='dark'] .btn-delete .anticon,
+.admin-theme-root[data-theme='dark'] .btn-inventory .anticon {
   color: #1976d2 !important; /* btn-view */
 }
-body[data-theme='dark'] .btn-edit .anticon {
+.admin-theme-root[data-theme='dark'] .btn-edit .anticon {
   color: #ffa000 !important;
 }
-body[data-theme='dark'] .btn-delete .anticon {
+.admin-theme-root[data-theme='dark'] .btn-delete .anticon {
   color: #d50000 !important;
 }
-body[data-theme='dark'] .btn-inventory .anticon {
+.admin-theme-root[data-theme='dark'] .btn-inventory .anticon {
   color: #1976d2 !important;
 }
 
-body[data-theme='dark'] .btn-view .anticon { color: #1976d2 !important; }
-body[data-theme='dark'] .btn-edit .anticon { color: #ffa000 !important; }
-body[data-theme='dark'] .btn-delete .anticon { color: #d50000 !important; }
-body[data-theme='dark'] .btn-inventory .anticon { color: #1976d2 !important; }
-body[data-theme='dark'] .dashboard-card-value111111 {
+.admin-theme-root[data-theme='dark'] .btn-view .anticon { color: #1976d2 !important; }
+.admin-theme-root[data-theme='dark'] .btn-edit .anticon { color: #ffa000 !important; }
+.admin-theme-root[data-theme='dark'] .btn-delete .anticon { color: #d50000 !important; }
+.admin-theme-root[data-theme='dark'] .btn-inventory .anticon { color: #1976d2 !important; }
+.admin-theme-root[data-theme='dark'] .dashboard-card-value111111 {
   background: #0d60c0 !important;
 }
-body[data-theme='dark'] .dashboard-card-value1111111 {
+
+.admin-theme-root[data-theme='dark'] .dashboard-card-value1111111 {
   background: #2b364e !important;
 }
 

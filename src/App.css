@@ -15,3 +15,25 @@ body {
 }
 
 /* Loại bỏ padding-top vì chúng ta đã xử lý trong HeroBanner */
+
+.app-container {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Fade in cho nội dung chính */
+.app-container .main-content {
+  opacity: 1;
+  transition: opacity 0.8s ease-in-out 0.6s;
+}
+
+.app-container.blurred {
+  filter: blur(16px);
+  transition: filter 0.4s cubic-bezier(0.4,0,0.2,1);
+  pointer-events: none;
+  user-select: none;
+}
+.app-container {
+  transition: filter 0.4s cubic-bezier(0.4,0,0.2,1);
+}
