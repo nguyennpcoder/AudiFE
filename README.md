@@ -87,17 +87,16 @@ Designed in Audi's style:
 - Performance optimization
 - Multi-language support
 
+
 ## 📸 Demo
 ### 🏠 Home
 ![Audi Dashboard Demo](public/demo/home.png)
 ### 🛞 Model
 ![Audi Dashboard Demo](public/demo/model.png)
-### 🚘 Details vehicle
-![Audi Dashboard Demo](public/demo/details_vehicle.png)
-### 🚗 Color vehicle
-![Audi Dashboard Demo](public/demo/color_vehicle.png)
-### 🌈 Compare vehicle
-![Audi Dashboard Demo](public/demo/compare_vehicle.png)
+### 🚗 Vehicle
+<img src="public/demo/image1.png" alt="Audi Dashboard Demo" width="30%" />
+<img src="public/demo/image2.png" alt="Audi Dashboard Demo" width="30%" />
+<img src="public/demo/image3.png" alt="Audi Dashboard Demo" width="30%" />
 ### 🛠️ Interior
 ![Audi Dashboard Demo](public/demo/interior.png)
 ### 🪐 Interior color
@@ -106,8 +105,9 @@ Designed in Audi's style:
 ![Audi Dashboard Demo](public/demo/maps.png)
 ### 🔐 Login page
 ![Audi Dashboard Demo](public/demo/page_login.png)
-### 📩 Forgot password OTP to email
-![Audi Dashboard Demo](public/demo/forgot_pass.png)
+### 📩 Forgot password
+<img src="public/demo/forgot_pass.png" alt="Audi Dashboard Demo" width="45%" />
+<img src="public/demo/otp_email.png" alt="Audi Dashboard Demo" width="45%" />
 ### 🌝 Light mode
 ![Audi Dashboard Demo](public/demo/light_mode.png)
 ### 🌚 Dark mode
