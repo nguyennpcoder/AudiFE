@@ -57,6 +57,16 @@ export const loginApi = async (data: LoginForm): Promise<AuthResponse> => {
     };
 
     const response = await axios.post(`${API_URL}/dang-nhap`, backendData);
+    const user = response.data;
+
+    // Nếu tài khoản bị block
+    if (user.trangThai === false) {
+      return {
+        success: false,
+        message: `Tài khoản của ${user.ho || ''} ${user.ten || ''} đã bị admin khóa do hành vi bất thường, vui lòng liên hệ đội ngũ admin audi để hỗ trợ`
+      };
+    }
+
     console.log("Raw backend response:", response.data);
     
     // Transform backend response to match frontend expected format
@@ -74,6 +84,20 @@ export const loginApi = async (data: LoginForm): Promise<AuthResponse> => {
     return result;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
+      // Nếu backend trả về trạng thái bị block khi sai pass
+      if (error.response.data.trangThai === false) {
+        return {
+          success: false,
+          message: `Tài khoản của ${error.response.data.ho || ''} ${error.response.data.ten || ''} đã bị admin khóa do hành vi bất thường, vui lòng liên hệ đội ngũ admin audi để hỗ trợ`
+        };
+      }
+      // Nếu message là "User account is locked" thì trả về message tiếng Việt
+      if (error.response.data.message === 'User account is locked') {
+        return {
+          success: false,
+          message: 'Tài khoản của bạn đã bị admin khóa do hành vi bất thường, vui lòng liên hệ đội ngũ Admin Audi để hỗ trợ'
+        };
+      }
       return {
         success: false,
         message: error.response.data.message || 'Đăng nhập thất bại'
@@ -237,4 +261,14 @@ export const fetchSalesStaff = async (): Promise<User[]> => {
     console.error('Lỗi khi lấy danh sách nhân viên bán hàng:', error);
     return [];
   }
+};
+
+export const updateUser = async (id: number, data: any, token: string) => {
+  const API_USER_URL = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api/v1'}/nguoi-dung/${id}`;
+  return axios.put(API_USER_URL, data, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
 };

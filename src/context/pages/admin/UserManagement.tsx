@@ -18,6 +18,12 @@ interface User {
   trangThai: boolean;
   ngayTao: string;
   ngayCapNhat: string;
+  dia_chi?: string;
+  thanh_pho?: string;
+  tinh?: string;
+  ma_buu_dien?: string;
+  quoc_gia?: string;
+  matKhau?: string;
 }
 
 // Khai báo kiểu dữ liệu cho màn hình
@@ -75,6 +81,8 @@ const UserManagement: React.FC = () => {
     }
   });
   
+  const [isEditMode, setIsEditMode] = useState(false);
+  
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -124,10 +132,20 @@ const UserManagement: React.FC = () => {
       const data = await response.json();
       console.log("Received data:", data);
       
+      // Map các trường từ camelCase sang snake_case
+      const mappedData = data.map((user: any) => ({
+        ...user,
+        dia_chi: user.diaChi,
+        thanh_pho: user.thanhPho,
+        tinh: user.tinh,
+        ma_buu_dien: user.maBuuDien,
+        quoc_gia: user.quocGia,
+      }));
+
       setState(prev => ({ 
         ...prev, 
-        users: data, 
-        filteredUsers: data,
+        users: mappedData, 
+        filteredUsers: mappedData,
         isLoading: false 
       }));
     } catch (error) {
@@ -347,29 +365,57 @@ const UserManagement: React.FC = () => {
   const handleUpdateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!state.currentUser) return;
-    
+
+    setState(prev => ({ ...prev, isLoading: true }));
+    const token = localStorage.getItem('token');
+
+    // Map các trường sang camelCase cho backend
+    const userToUpdate: any = {
+      ...state.currentUser,
+      diaChi: state.currentUser.dia_chi,
+      thanhPho: state.currentUser.thanh_pho,
+      tinh: state.currentUser.tinh,
+      maBuuDien: state.currentUser.ma_buu_dien,
+      quocGia: state.currentUser.quoc_gia,
+      trangThai: state.currentUser.trangThai,
+    };
+    // Xóa các trường snake_case để tránh gửi thừa
+    delete userToUpdate.dia_chi;
+    delete userToUpdate.thanh_pho;
+    delete userToUpdate.ma_buu_dien;
+    delete userToUpdate.quoc_gia;
+
+    // Không cho phép cập nhật vai trò sang "quan_tri"
+    if (userToUpdate.vaiTro === 'quan_tri' && state.currentUser.vaiTro !== 'quan_tri') {
+      setState(prev => ({
+        ...prev,
+        error: 'Không được phép cập nhật quyền quản trị',
+        isLoading: false
+      }));
+      return;
+    }
+
     try {
-      setState(prev => ({ ...prev, isLoading: true }));
-      
       const response = await fetch(`/api/v1/nguoi-dung/${state.currentUser.id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(state.currentUser)
+        body: JSON.stringify(userToUpdate)
       });
-      
+
       if (!response.ok) {
         throw new Error('Không thể cập nhật người dùng');
       }
-      
+
       await fetchUsers();
       setState(prev => ({ ...prev, showEditModal: false }));
     } catch (error) {
-      setState(prev => ({ 
-        ...prev, 
-        error: error instanceof Error ? error.message : 'Đã xảy ra lỗi', 
-        isLoading: false 
+      setState(prev => ({
+        ...prev,
+        error: error instanceof Error ? error.message : 'Đã xảy ra lỗi',
+        isLoading: false
       }));
     }
   };
@@ -558,15 +604,15 @@ const UserManagement: React.FC = () => {
                           justifyContent: 'center',
                           gap: 8,
                         }}>
-                          <button className="btn-view" title="Xem chi tiết" onClick={() => handleShowEditModal(user)}>
+                          <button className="btn-view" title="Xem chi tiết" onClick={() => { setIsEditMode(false); handleShowEditModal(user); }}>
                             <i className="fas fa-eye"></i>
                           </button>
-                          <button className="btn-edit" title="Chỉnh sửa" onClick={() => handleShowEditModal(user)}>
+                          <button className="btn-edit" title="Chỉnh sửa" onClick={() => { setIsEditMode(true); handleShowEditModal(user); }}>
                             <i className="fas fa-edit"></i>
                           </button>
-                          <button className="btn-delete" title="Xóa" onClick={() => handleShowDeleteModal(user)}>
+                          {/* <button className="btn-delete" title="Xóa" onClick={() => handleShowDeleteModal(user)}>
                             <i className="fas fa-trash-alt"></i>
-                          </button>
+                          </button> */}
                         </div>
                       </td>
                     </tr>
@@ -767,45 +813,10 @@ const UserManagement: React.FC = () => {
                       }}
                     >
                       <option value="khach_hang">Khách hàng</option>
-                      <option value="quan_tri">Quản trị</option>
                       <option value="ban_hang">Bán hàng</option>
                       <option value="ho_tro">Hỗ trợ</option>
                     </select>
                   </div>
-                </div>
-                
-                <div className="form-group">
-                  <label htmlFor="matKhau">Mật khẩu <span className="required">*</span></label>
-                  <input 
-                    type="password" 
-                    id="matKhau" 
-                    name="matKhau"
-                    onChange={handleNewUserChange}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '10px 16px',
-                      borderRadius: 8,
-                      border: '1px solid #e5e7eb',
-                      fontSize: 15,
-                      background: '#fafbfc',
-                    }}
-                  />
-                </div>
-                
-                <div className="form-group checkbox-group">
-                  <input 
-                    type="checkbox" 
-                    id="trangThai" 
-                    name="trangThai"
-                    checked={state.newUser.trangThai}
-                    onChange={handleNewUserChange}
-                    style={{
-                      width: 'auto',
-                      marginRight: 8,
-                    }}
-                  />
-                  <label htmlFor="trangThai" style={{ fontSize: 15 }}>Hoạt động</label>
                 </div>
                 
                 <div className="form-actions">
@@ -853,7 +864,7 @@ const UserManagement: React.FC = () => {
         <div className="admin-modal">
           <div className="admin-modal-content">
             <div className="admin-modal-header">
-              <h2>Chỉnh sửa người dùng</h2>
+              <h2>{isEditMode ? 'Chỉnh sửa người dùng' : 'Xem chi tiết người dùng'}</h2>
               <button 
                 className="admin-modal-close"
                 onClick={handleCloseEditModal}
@@ -871,7 +882,7 @@ const UserManagement: React.FC = () => {
                     name="email"
                     value={state.currentUser.email}
                     onChange={handleEditUserChange}
-                    readOnly
+                    readOnly={!isEditMode}
                     style={{
                       width: '100%',
                       padding: '10px 16px',
@@ -894,6 +905,7 @@ const UserManagement: React.FC = () => {
                       value={state.currentUser.ho}
                       onChange={handleEditUserChange}
                       required
+                      readOnly={!isEditMode}
                       style={{
                         width: '100%',
                         padding: '10px 16px',
@@ -914,6 +926,7 @@ const UserManagement: React.FC = () => {
                       value={state.currentUser.ten}
                       onChange={handleEditUserChange}
                       required
+                      readOnly={!isEditMode}
                       style={{
                         width: '100%',
                         padding: '10px 16px',
@@ -935,6 +948,7 @@ const UserManagement: React.FC = () => {
                       name="soDienThoai"
                       value={state.currentUser.soDienThoai || ''}
                       onChange={handleEditUserChange}
+                      readOnly={!isEditMode}
                       style={{
                         width: '100%',
                         padding: '10px 16px',
@@ -953,6 +967,7 @@ const UserManagement: React.FC = () => {
                       name="vaiTro"
                       value={state.currentUser.vaiTro}
                       onChange={handleEditUserChange}
+                      disabled
                       style={{
                         width: '100%',
                         padding: '10px 16px',
@@ -963,30 +978,13 @@ const UserManagement: React.FC = () => {
                       }}
                     >
                       <option value="khach_hang">Khách hàng</option>
-                      <option value="quan_tri">Quản trị</option>
                       <option value="ban_hang">Bán hàng</option>
                       <option value="ho_tro">Hỗ trợ</option>
+                      {state.currentUser.vaiTro === 'quan_tri' && (
+                        <option value="quan_tri">Quản trị</option>
+                      )}
                     </select>
                   </div>
-                </div>
-                
-                <div className="form-group">
-                  <label htmlFor="edit-matKhau">Mật khẩu mới</label>
-                  <input 
-                    type="password" 
-                    id="edit-matKhau" 
-                    name="matKhau"
-                    onChange={handleEditUserChange}
-                    style={{
-                      width: '100%',
-                      padding: '10px 16px',
-                      borderRadius: 8,
-                      border: '1px solid #e5e7eb',
-                      fontSize: 15,
-                      background: '#fafbfc',
-                    }}
-                  />
-                  <small style={{ fontSize: 13, color: '#888' }}>Để trống nếu không muốn thay đổi mật khẩu</small>
                 </div>
                 
                 <div className="form-group checkbox-group">
@@ -996,25 +994,126 @@ const UserManagement: React.FC = () => {
                     name="trangThai"
                     checked={state.currentUser.trangThai}
                     onChange={handleEditUserChange}
+                    disabled={!isEditMode}
                     style={{
                       width: 'auto',
                       marginRight: 8,
                     }}
                   />
-                  <label htmlFor="edit-trangThai" style={{ fontSize: 15 }}>Hoạt động</label>
+                  <label htmlFor="edit-trangThai" style={{ fontSize: 15 }}>
+                    Hoạt động
+                  </label>
+                </div>
+                
+                {/* BỎ điều kiện isEditMode, luôn render các trường này */}
+                <div className="form-group">
+                  <label htmlFor="edit-dia_chi">Địa chỉ</label>
+                  <input
+                    type="text"
+                    id="edit-dia_chi"
+                    name="dia_chi"
+                    value={state.currentUser.dia_chi || ''}
+                    onChange={handleEditUserChange}
+                    readOnly={!isEditMode}
+                    style={{
+                      width: '100%',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
+                  />
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="edit-thanh_pho">Thành phố</label>
+                    <input
+                      type="text"
+                      id="edit-thanh_pho"
+                      name="thanh_pho"
+                      value={state.currentUser.thanh_pho || ''}
+                      onChange={handleEditUserChange}
+                      readOnly={!isEditMode}
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="edit-tinh">Tỉnh</label>
+                    <input
+                      type="text"
+                      id="edit-tinh"
+                      name="tinh"
+                      value={state.currentUser.tinh || ''}
+                      onChange={handleEditUserChange}
+                      readOnly={!isEditMode}
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="edit-ma_buu_dien">Mã bưu điện</label>
+                    <input
+                      type="text"
+                      id="edit-ma_buu_dien"
+                      name="ma_buu_dien"
+                      value={state.currentUser.ma_buu_dien || ''}
+                      onChange={handleEditUserChange}
+                      readOnly={!isEditMode}
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="edit-quoc_gia">Quốc gia</label>
+                    <input
+                      type="text"
+                      id="edit-quoc_gia"
+                      name="quoc_gia"
+                      value={state.currentUser.quoc_gia || ''}
+                      onChange={handleEditUserChange}
+                      readOnly={!isEditMode}
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: 8,
+                        border: '1px solid #e5e7eb',
+                        fontSize: 15,
+                        background: '#fafbfc',
+                      }}
+                    />
+                  </div>
                 </div>
                 
                 <div className="user-info-section">
                   <h3>Thông tin bổ sung</h3>
-                  <p>
-                    <strong>ID:</strong> {state.currentUser.id}
-                  </p>
-                  <p>
-                    <strong>Ngày đăng ký:</strong> {new Date(state.currentUser.ngayTao).toLocaleString('vi-VN')}
-                  </p>
-                  <p>
-                    <strong>Cập nhật lần cuối:</strong> {new Date(state.currentUser.ngayCapNhat).toLocaleString('vi-VN')}
-                  </p>
+                  <p><strong>ID:</strong> {state.currentUser.id}</p>
+                  <p><strong>Ngày đăng ký:</strong> {new Date(state.currentUser.ngayTao).toLocaleString('vi-VN')}</p>
+                  <p><strong>Cập nhật lần cuối:</strong> {new Date(state.currentUser.ngayCapNhat).toLocaleString('vi-VN')}</p>
+                  <p><strong>Email:</strong> {state.currentUser.email}</p>
+                  <p><strong>Vai trò:</strong> {renderRole(state.currentUser.vaiTro)}</p>
+                  <p><strong>Trạng thái:</strong> {renderStatus(state.currentUser.trangThai)}</p>
                 </div>
                 
                 <div className="form-actions">
@@ -1035,21 +1134,23 @@ const UserManagement: React.FC = () => {
                   >
                     Hủy bỏ
                   </button>
-                  <button 
-                    type="submit" 
-                    className="btn-save"
-                    style={{
-                      background: '#1890ff',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: 8,
-                      padding: '10px 20px',
-                      fontSize: 15,
-                      fontWeight: 600,
-                    }}
-                  >
-                    Cập nhật
-                  </button>
+                  {isEditMode && (
+                    <button 
+                      type="submit" 
+                      className="btn-save"
+                      style={{
+                        background: '#1890ff',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 8,
+                        padding: '10px 20px',
+                        fontSize: 15,
+                        fontWeight: 600,
+                      }}
+                    >
+                      Cập nhật
+                    </button>
+                  )}
                 </div>
               </form>
             </div>
@@ -1117,6 +1218,11 @@ const UserManagement: React.FC = () => {
           </div>
         </div>
       )}
+      <span>Khi admin muốn mở lại user:
+KHÔNG cho phép user tự đăng nhập lại ngay lập tức.
+Admin phải chuyển user cho đội hỗ trợ.
+Đội hỗ trợ sẽ đặt lại mật khẩu mới (random) cho user và gửi mật khẩu mới qua email cho user.
+Sau khi user nhận được mật khẩu mới, user mới có thể đăng nhập lại.</span>
     </div>
   );
 };

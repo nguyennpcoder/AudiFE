@@ -1,8 +1,19 @@
 // frontend/audi/src/pages/Models.tsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
+import '../../../styles/Models.css';
 const BACKEND_URL = 'http://localhost:8080';
+import rs7Image from '../../../assets/rs7.jpeg'; // Đường dẫn đúng với project bạn
+
+const FALLBACK_IMAGE = rs7Image;
+
+interface HinhAnhXe {
+  id: number;
+  idMauXe: number;
+  duongDanAnh: string;
+  loaiHinh: string;
+  viTri?: number;
+}
 
 interface DongXe {
   id: number;
@@ -23,71 +34,281 @@ interface MauXe {
   thongSoKyThuat: string;
   conHang: boolean;
   ngayRaMat: string;
+  duongDanAnh?: string; // Thêm nếu có ảnh
 }
+
+// Từ điển dịch tiếng Việt
+const translations = {
+  'All models': 'Tất cả mẫu xe',
+  'Models': 'Mẫu xe',
+  'Body type': 'Kiểu dáng',
+  'All': 'Tất cả',
+  'Sportback': 'Sportback',
+  'SUV': 'SUV',
+  'Sedan': 'Sedan',
+  'Starting at': 'Bắt đầu từ',
+  'Explore': 'Khám phá',
+  'Build': 'Tùy chỉnh',
+  'Available': 'Có sẵn',
+  'Coming Soon': 'Sắp ra mắt',
+  'New': 'Mới'
+};
+
+const translate = (key: string): string => {
+  return translations[key as keyof typeof translations] || key;
+};
+
+// Hàm format giá tiền
+const formatPrice = (price: number): string => {
+  return new Intl.NumberFormat('vi-VN').format(price);
+};
+
+// Hàm animation cho cards
+const useCardAnimation = (isVisible: boolean) => {
+  const [animationClass, setAnimationClass] = useState('');
+  
+  useEffect(() => {
+    if (isVisible) {
+      setAnimationClass('car-card');
+    }
+  }, [isVisible]);
+  
+  return animationClass;
+};
 
 const ModelsPage: React.FC = () => {
   const [dongXeList, setDongXeList] = useState<DongXe[]>([]);
   const [mauXeMap, setMauXeMap] = useState<Record<number, MauXe[]>>({});
   const [loading, setLoading] = useState(true);
+  const [productImagesMap, setProductImagesMap] = useState<Record<number, HinhAnhXe[]>>({});
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [selectedBodyType, setSelectedBodyType] = useState<string | null>(null);
+  const [bodyTypeFilters, setBodyTypeFilters] = useState<string[]>([]);
+  const [filteredData, setFilteredData] = useState<DongXe[]>([]);
+  const [isFilterAnimating, setIsFilterAnimating] = useState(false);
 
   useEffect(() => {
     const fetchDongXeAndMauXe = async () => {
       setLoading(true);
       try {
-        // Lấy danh sách dòng xe
         const dongXeRes = await axios.get(`${BACKEND_URL}/api/v1/dong-xe`);
         setDongXeList(dongXeRes.data);
+        setFilteredData(dongXeRes.data);
 
-        // Lấy mẫu xe cho từng dòng xe
+        // Lấy các giá trị phan_loai duy nhất
+        const uniqueBodyTypes = Array.from(new Set(dongXeRes.data.map((item: DongXe) => item.phanLoai))) as string[];
+        setBodyTypeFilters(uniqueBodyTypes);
+
         const mauXeMapTemp: Record<number, MauXe[]> = {};
+        const imagesMap: Record<number, HinhAnhXe[]> = {};
+
         for (const dongXe of dongXeRes.data) {
           const mauXeRes = await axios.get(`${BACKEND_URL}/api/v1/mau-xe/dong-xe/${dongXe.id}`);
-          mauXeMapTemp[dongXe.id] = mauXeRes.data;
+          const mauXeList = mauXeRes.data;
+
+          // Lấy ảnh cho từng mẫu xe (dùng API giống FeaturedProducts)
+          await Promise.all(
+            mauXeList.map(async (mauXe: MauXe) => {
+              try {
+                const imgRes = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${mauXe.id}`);
+                imagesMap[mauXe.id] = imgRes.data || [];
+              } catch {
+                imagesMap[mauXe.id] = [];
+              }
+            })
+          );
+
+          mauXeMapTemp[dongXe.id] = mauXeList;
         }
         setMauXeMap(mauXeMapTemp);
+        setProductImagesMap(imagesMap);
       } catch (err) {
-        // Xử lý lỗi
+        console.error('Lỗi khi tải dữ liệu:', err);
       }
       setLoading(false);
     };
     fetchDongXeAndMauXe();
   }, []);
 
-  if (loading) return <div>Đang tải dữ liệu...</div>;
+  // Effect để xử lý filter với animation
+  useEffect(() => {
+    setIsFilterAnimating(true);
+    
+    const timer = setTimeout(() => {
+      const filtered = dongXeList.filter(dongXe => {
+        if (selectedModel) return dongXe.ten === selectedModel;
+        if (selectedBodyType) return dongXe.phanLoai === selectedBodyType;
+        return true;
+      });
+      setFilteredData(filtered);
+      setIsFilterAnimating(false);
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [selectedModel, selectedBodyType, dongXeList]);
+
+  // Hàm lấy url ảnh giống FeaturedProducts
+  const getProductImageUrl = (productId: number): string => {
+    try {
+      const productImages = productImagesMap[productId];
+      if (productImages && productImages.length > 0) {
+        const exteriorImages = productImages.filter(img => img.loaiHinh === 'ngoai_that');
+        const targetImage = exteriorImages.length > 0 ? exteriorImages[0] : productImages[0];
+        if (targetImage && targetImage.duongDanAnh) {
+          return `${BACKEND_URL}${targetImage.duongDanAnh}`;
+        }
+      }
+      return FALLBACK_IMAGE;
+    } catch {
+      return FALLBACK_IMAGE;
+    }
+  };
+
+  // Hàm xử lý click filter
+  const handleModelFilter = (model: string | null) => {
+    setSelectedModel(selectedModel === model ? null : model);
+    setSelectedBodyType(null);
+  };
+
+  const handleBodyTypeFilter = (bodyType: string | null) => {
+    setSelectedBodyType(selectedBodyType === bodyType ? null : bodyType);
+    setSelectedModel(null);
+  };
+
+  // Kiểm tra trạng thái xe
+  const getCarStatus = (mauXe: MauXe): string => {
+    if (!mauXe.conHang) return translate('Coming Soon');
+    const currentYear = new Date().getFullYear();
+    if (mauXe.namSanXuat === currentYear) return translate('New');
+    return translate('Available');
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div>
+          <div className="loading-spinner"></div>
+          <div className="loading-text">Đang tải dữ liệu...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="models-page" style={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Sidebar filter (có thể mở rộng sau) */}
-      <aside style={{ width: 260, background: '#f5f5f5', padding: 24 }}>
-        <h3>All models</h3>
-        {/* Thêm filter body type, loại xe... nếu muốn */}
+    <div className="models-container">
+      {/* Sidebar filter */}
+      <aside className="models-sidebar">
+        <h3>{translate('All models')}</h3>
+        
+        {/* Models Filter */}
+        <div className="filter-section">
+          <div className="filter-title">{translate('Models')}</div>
+          <div className="filter-grid">
+            {dongXeList.map(dongXe => (
+              <button
+                key={dongXe.id}
+                className={`filter-button ${selectedModel === dongXe.ten ? 'active' : ''}`}
+                onClick={() => handleModelFilter(dongXe.ten)}
+              >
+                {dongXe.ten}
+              </button>
+            ))}
+            <button
+              className={`filter-button ${!selectedModel ? 'active' : ''}`}
+              onClick={() => handleModelFilter(null)}
+            >
+              {translate('All')}
+            </button>
+          </div>
+        </div>
+
+        {/* Body Type Filter */}
+        <div className="filter-section">
+          <div className="filter-title">{translate('Body type')}</div>
+          <div className="filter-grid">
+            {bodyTypeFilters.map(type => (
+              <button
+                key={type}
+                className={`filter-button ${selectedBodyType === type ? 'active' : ''}`}
+                onClick={() => handleBodyTypeFilter(type)}
+              >
+                {translate(type)}
+              </button>
+            ))}
+            <button
+              className={`filter-button ${!selectedBodyType ? 'active' : ''}`}
+              onClick={() => handleBodyTypeFilter(null)}
+            >
+              {translate('All')}
+            </button>
+          </div>
+        </div>
       </aside>
       {/* Main content */}
-      <main style={{ flex: 1, padding: 32 }}>
-        <h2>All models</h2>
-        {dongXeList.map(dongXe => (
-          <section key={dongXe.id} style={{ marginBottom: 48 }}>
-            <h3 style={{ margin: '24px 0 16px' }}>{dongXe.ten}</h3>
-            <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
-              {(mauXeMap[dongXe.id] || []).map(mauXe => (
-                <div key={mauXe.id} style={{
-                  width: 320, background: '#fff', borderRadius: 8, boxShadow: '0 2px 8px #eee', padding: 16
-                }}>
-                  {/* Ảnh mẫu xe: có thể lấy từ API khác nếu có */}
-                  <div style={{ height: 180, background: '#eee', marginBottom: 12 }} />
-                  <div style={{ fontWeight: 600, fontSize: 18 }}>{mauXe.tenMau}</div>
-                  <div style={{ color: '#888', fontSize: 14 }}>{dongXe.ten}</div>
-                  <div style={{ margin: '8px 0', color: '#d50000', fontWeight: 700 }}>
-                    {mauXe.giaCoban.toLocaleString('vi-VN')} VNĐ
+      <main className="models-main">
+        {isFilterAnimating && (
+          <div className="loading-container" style={{ minHeight: '200px' }}>
+            <div className="loading-spinner"></div>
+          </div>
+        )}
+        
+        {!isFilterAnimating && filteredData.map(dongXe => (
+          <section key={dongXe.id} className="models-section">
+            <h2 className="section-title">{dongXe.ten}</h2>
+            <div className="models-grid">
+              {(mauXeMap[dongXe.id] || []).map((mauXe, index) => {
+                const status = getCarStatus(mauXe);
+                return (
+                  <div key={mauXe.id} className="car-card" style={{
+                    animationDelay: `${index * 0.1}s`
+                  }}>
+                    <div className="car-image-container">
+                      <img
+                        src={getProductImageUrl(mauXe.id)}
+                        alt={mauXe.tenMau}
+                        className="car-image"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = FALLBACK_IMAGE;
+                        }}
+                      />
+                      {status === translate('New') && (
+                        <div className="car-badge">{status}</div>
+                      )}
+                    </div>
+                    
+                    <div className="car-content">
+                      <div className="car-title">{mauXe.tenMau}</div>
+                      <div className="car-subtitle">{dongXe.ten}</div>
+                      <div className="car-price">
+                        {translate('Starting at')} {formatPrice(mauXe.giaCoban)} VNĐ
+                      </div>
+                      
+                      <div className="car-buttons">
+                        <button className="btn-primary">
+                          {translate('Explore')}
+                        </button>
+                        <button className="btn-secondary">
+                          {translate('Build')}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <button style={{
-                    width: '100%', background: '#000', color: '#fff', border: 'none', padding: 10, borderRadius: 4, marginTop: 8
-                  }}>Discover</button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         ))}
+        
+        {!isFilterAnimating && filteredData.length === 0 && (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '4rem 2rem', 
+            color: '#666',
+            fontSize: '1.2rem'
+          }}>
+            Không tìm thấy mẫu xe nào phù hợp với bộ lọc của bạn.
+          </div>
+        )}
       </main>
     </div>
   );

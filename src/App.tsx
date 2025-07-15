@@ -66,7 +66,7 @@ function App() {
   };
 
   // Chỉ hiện animation khi KHÔNG phải admin
-  if (isLoading && !isAdminRoute) {
+  if (isLoading && location.pathname === "/" && !isAdminRoute) {
     return <LoadingAnimation onAnimationComplete={handleAnimationComplete} />;
   }
 

@@ -122,11 +122,9 @@ const Login: React.FC = () => {
           navigate('/', { replace: true });
         }
       } else {
-        // Thay đổi ở đây: Hiển thị thông báo lỗi thân thiện hơn
-        const errorMessage = 'Đăng nhập thất bại, hãy kiểm tra lại thông tin email hoặc mật khẩu';
-        setError(errorMessage);
-        // Show error notification
-        antdMessage.error(errorMessage);
+        // SỬA Ở ĐÂY: lấy message từ response
+        setError(response.message || 'Đăng nhập thất bại, hãy kiểm tra lại thông tin email hoặc mật khẩu');
+        antdMessage.error(response.message || 'Đăng nhập thất bại, hãy kiểm tra lại thông tin email hoặc mật khẩu');
       }
     } catch (err) {
       setError('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.');
