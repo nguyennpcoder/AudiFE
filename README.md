@@ -93,6 +93,8 @@ Designed in Audi's style:
 ![Audi Dashboard Demo](public/demo/home.png)
 ### 🛞 Model
 ![Audi Dashboard Demo](public/demo/model.png)
+### ✅ All model
+![Audi Dashboard Demo](public/demo/all_models.png)
 ### 🚘 Details vehicle
 ![Audi Dashboard Demo](public/demo/details_vehicle.png)
 ### 🚗 Color vehicle
