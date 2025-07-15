@@ -7,8 +7,8 @@ import '../../styles/FeaturedProducts.css';
 // Import hình ảnh từ thư mục assets (fallback images)
 import rs7Image from '../../assets/rs7.jpeg';
 import q4Image from '../../assets/audi-q4.jpg';
-import a7Image from '../../assets/audi-a7.jpeg';
-import rs5Image from '../../assets/audi-rs5.jpeg';
+import a7Image from '../../assets/audi-a7l.jpg';
+import rs5Image from '../../assets/audi-rs5.jpg';
 import etronImage from '../../assets/rs-etron-gt.jpg';
 import r8Image from '../../assets/audi-r8.jpg';
 

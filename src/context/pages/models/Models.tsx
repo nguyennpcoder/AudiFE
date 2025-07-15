@@ -1,5 +1,5 @@
 // frontend/audi/src/pages/Models.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import '../../../styles/Models.css';
 const BACKEND_URL = 'http://localhost:8080';
@@ -86,6 +86,7 @@ const ModelsPage: React.FC = () => {
   const [bodyTypeFilters, setBodyTypeFilters] = useState<string[]>([]);
   const [filteredData, setFilteredData] = useState<DongXe[]>([]);
   const [isFilterAnimating, setIsFilterAnimating] = useState(false);
+  const mainRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchDongXeAndMauXe = async () => {
@@ -168,11 +169,21 @@ const ModelsPage: React.FC = () => {
   const handleModelFilter = (model: string | null) => {
     setSelectedModel(selectedModel === model ? null : model);
     setSelectedBodyType(null);
+
+    // Scroll lên đầu phần main
+    setTimeout(() => {
+      mainRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100); // delay nhỏ để đảm bảo render xong
   };
 
   const handleBodyTypeFilter = (bodyType: string | null) => {
     setSelectedBodyType(selectedBodyType === bodyType ? null : bodyType);
     setSelectedModel(null);
+
+    // Scroll lên đầu phần main
+    setTimeout(() => {
+      mainRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   // Kiểm tra trạng thái xe
@@ -204,17 +215,23 @@ const ModelsPage: React.FC = () => {
         <div className="filter-section">
           <div className="filter-title">{translate('Models')}</div>
           <div className="filter-grid">
-            {dongXeList.map(dongXe => (
-              <button
-                key={dongXe.id}
-                className={`filter-button ${selectedModel === dongXe.ten ? 'active' : ''}`}
-                onClick={() => handleModelFilter(dongXe.ten)}
-              >
-                {dongXe.ten}
-              </button>
-            ))}
+            {dongXeList.map(dongXe => {
+              // Nếu đã chọn body type, chỉ các model thuộc body type đó sáng
+              const isDisabled = selectedBodyType && dongXe.phanLoai !== selectedBodyType;
+              const isActive = selectedModel === dongXe.ten;
+              return (
+                <button
+                  key={dongXe.id}
+                  className={`filter-button${isActive ? ' active' : ''}${isDisabled ? ' disabled' : ''}`}
+                  onClick={() => handleModelFilter(dongXe.ten)}
+                  disabled={!!isDisabled}
+                >
+                  {dongXe.ten}
+                </button>
+              );
+            })}
             <button
-              className={`filter-button ${!selectedModel ? 'active' : ''}`}
+              className={`filter-button${!selectedModel ? ' active' : ''}`}
               onClick={() => handleModelFilter(null)}
             >
               {translate('All')}
@@ -226,17 +243,28 @@ const ModelsPage: React.FC = () => {
         <div className="filter-section">
           <div className="filter-title">{translate('Body type')}</div>
           <div className="filter-grid">
-            {bodyTypeFilters.map(type => (
-              <button
-                key={type}
-                className={`filter-button ${selectedBodyType === type ? 'active' : ''}`}
-                onClick={() => handleBodyTypeFilter(type)}
-              >
-                {translate(type)}
-              </button>
-            ))}
+            {bodyTypeFilters.map(type => {
+              // Nếu đã chọn model, chỉ body type của model đó sáng
+              let isDisabled = false;
+              if (selectedModel) {
+                // Tìm model đã chọn
+                const selectedDongXe = dongXeList.find(d => d.ten === selectedModel);
+                isDisabled = selectedDongXe ? selectedDongXe.phanLoai !== type : false;
+              }
+              const isActive = selectedBodyType === type;
+              return (
+                <button
+                  key={type}
+                  className={`filter-button${isActive ? ' active' : ''}${isDisabled ? ' disabled' : ''}`}
+                  onClick={() => handleBodyTypeFilter(type)}
+                  disabled={!!isDisabled}
+                >
+                  {translate(type)}
+                </button>
+              );
+            })}
             <button
-              className={`filter-button ${!selectedBodyType ? 'active' : ''}`}
+              className={`filter-button${!selectedBodyType ? ' active' : ''}`}
               onClick={() => handleBodyTypeFilter(null)}
             >
               {translate('All')}
@@ -245,7 +273,7 @@ const ModelsPage: React.FC = () => {
         </div>
       </aside>
       {/* Main content */}
-      <main className="models-main">
+      <main className="models-main" ref={mainRef}>
         {isFilterAnimating && (
           <div className="loading-container" style={{ minHeight: '200px' }}>
             <div className="loading-spinner"></div>
@@ -278,16 +306,16 @@ const ModelsPage: React.FC = () => {
                     
                     <div className="car-content">
                       <div className="car-title">{mauXe.tenMau}</div>
-                      <div className="car-subtitle">{dongXe.ten}</div>
+                      {/* <div className="car-subtitle">{dongXe.ten}</div> */}
                       <div className="car-price">
                         {translate('Starting at')} {formatPrice(mauXe.giaCoban)} VNĐ
                       </div>
                       
                       <div className="car-buttons">
-                        <button className="btn-primary">
+                        <button className="models-btn-primary">
                           {translate('Explore')}
                         </button>
-                        <button className="btn-secondary">
+                        <button className="models-btn-secondary">
                           {translate('Build')}
                         </button>
                       </div>
@@ -295,6 +323,14 @@ const ModelsPage: React.FC = () => {
                   </div>
                 );
               })}
+              {/* Thêm placeholder nếu không đủ 3 xe */}
+              {(() => {
+                const cars = mauXeMap[dongXe.id] || [];
+                const placeholders = (3 - (cars.length % 3)) % 3;
+                return Array.from({ length: placeholders }).map((_, idx) => (
+                  <div className="card-placeholder" key={`placeholder-${idx}`}></div>
+                ));
+              })()}
             </div>
           </section>
         ))}

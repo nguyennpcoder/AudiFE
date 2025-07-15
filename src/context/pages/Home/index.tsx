@@ -6,16 +6,18 @@ import { useNotification } from '../../NotificationContext';
 
 // Import hình ảnh
 import etronGTImage from '../../../assets/rs-etron-gt.jpg';
-import rsSevenImage from '../../../assets/audi-rs7.jpeg';
-import rsFiveImage from '../../../assets/audi-rs5.jpeg';
-import aSevenImage from '../../../assets/audi-a7.jpeg';
+import rsSevenImage from '../../../assets/audi-rs7.jpg';
+import rsFiveImage from '../../../assets/audi-rs5.jpg';
+import aSevenImage from '../../../assets/audi-a7.jpg';
 import qFourImage from '../../../assets/audi-r8.jpg';
+import rs6Image from '../../../assets/audi-rs6.jpg';
 
 import etronGTImage1 from '../../../assets/etron.avif';
 import rsSevenImage1 from '../../../assets/rs7.jpeg';
 import rsFiveImage1 from '../../../assets/rs5.avif';
 import aSevenImage1 from '../../../assets/a7.jpg';
 import qFourImage1 from '../../../assets/r8.jpg';
+import rs6Image1 from '../../../assets/rs6.jpg';
 
 const Home = () => {
   const { showNotification } = useNotification();
@@ -116,7 +118,25 @@ const Home = () => {
         battery: { value: "5.2L V10", subtext: "Naturally Aspirated" },
         acceleration: { value: "3.1 giây", subtext: "0-100 km/h" }
       }
+    },
+    {
+      id: 5,
+      backgroundImage: rs6Image,
+      title: "2023 Audi RS6",
+      subtitle: "Đỉnh cao hiệu suất và phong cách wagon",
+      price: "Giá từ 4.500.000.000 VNĐ",
+      description: "Audi RS6 Avant là sự kết hợp hoàn hảo giữa hiệu suất mạnh mẽ của dòng RS và sự tiện nghi, đa dụng của một chiếc wagon. Động cơ V8 tăng áp kép, hệ dẫn động quattro và thiết kế thể thao đặc trưng giúp RS6 trở thành lựa chọn lý tưởng cho những ai yêu thích tốc độ và sự khác biệt.",
+      cta: {
+        primary: { text: "Xây dựng & Báo giá", link: "/configure/rs6" },
+        secondary: { text: "Nhận tin tức & cập nhật Audi", link: "/news" }
+      },
+      specs: {
+        power: { value: "591 HP", subtext: "Động cơ V8 TFSI®" },
+        battery: { value: "4.0L V8", subtext: "Twin-Turbo TFSI" },
+        acceleration: { value: "3.6 giây", subtext: "0-100 km/h" }
+      }
     }
+    
   ];
 
   const featureModels = [
@@ -144,6 +164,11 @@ const Home = () => {
       backgroundImage: qFourImage1,
       featureTitle: "Hiệu suất đỉnh cao.",
       featureDescription: "Được trang bị động cơ V10 5.2L FSI® mạnh mẽ, Audi R8 mang đến trải nghiệm lái xe thuần túy đầy phấn khích. Vận hành linh hoạt cùng hệ thống quattro® cải tiến, chiếc siêu xe này luôn sẵn sàng cho mọi cung đường, mang đến cảm giác lái xe đúng nghĩa đua.",
+    },
+    {
+      backgroundImage: rs6Image1,
+      featureTitle: "Sự kết hợp hoàn hảo.",
+      featureDescription: "Audi RS6 Avant không chỉ mạnh mẽ với động cơ V8 tăng áp kép mà còn mang lại sự tiện nghi và đa dụng của một chiếc wagon. Thiết kế thể thao, nội thất sang trọng và công nghệ hiện đại giúp RS6 trở thành lựa chọn lý tưởng cho những ai yêu thích tốc độ và sự khác biệt."
     }
   ];
 
