@@ -90,7 +90,7 @@ const HeroBanner = ({
         </div>
       </div>
       
-      <div className="hero-specs">
+      <div className="hero-specs" key={backgroundImage + currentIndex}>
         <div className="spec-item">
           <h3>Công Suất</h3>
           <div className="spec-value">{specs.power.value}</div>
