@@ -33,6 +33,7 @@ import ProductManagement from './ProductManagement';
 import OrderManagement from './OrderManagement';
 import AnimatedPage from './AnimatedPage';
 import MarketingManagement from './MarketingManagement';
+import Profile from './Profile';
 // import các component khác nếu có...
 
 const { Sider } = Layout;
@@ -76,10 +77,10 @@ interface MonthlyData {
 }
 
 // Lấy các component từ Recharts
-const { 
-  LineChart, Line, AreaChart, Area, 
-  BarChart, Bar, XAxis, YAxis, 
-  CartesianGrid, Tooltip, Legend, 
+const {
+  LineChart, Line, AreaChart, Area,
+  BarChart, Bar, XAxis, YAxis,
+  CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, PieChart, Pie, Cell,
   ReferenceLine, ComposedChart, Scatter
 } = window.Recharts || {};
@@ -103,12 +104,12 @@ const Dashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
   const [selectedMenu, setSelectedMenu] = useState('dashboard');
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  
+
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
-  
+
   // Lấy chữ cái đầu làm avatar
   const getInitials = () => {
     if (user?.fullName) {
@@ -116,7 +117,7 @@ const Dashboard: React.FC = () => {
     }
     return 'A';
   };
-  
+
   const handleToggleSidebar = () => {
     setSidebarCollapsed((prev) => !prev);
   };
@@ -151,35 +152,35 @@ const Dashboard: React.FC = () => {
 
   // Dữ liệu thống kê cho users, orders và test drives
   const statsData: StatsData[] = [
-    { 
-      name: 'Người dùng', 
-      value: 128, 
-      icon: 'fas fa-users', 
-      changeValue: 12, 
+    {
+      name: 'Người dùng',
+      value: 128,
+      icon: 'fas fa-users',
+      changeValue: 12,
       changeText: 'mới trong tháng',
       color: '#1976d2'
     },
-    { 
-      name: 'Đơn hàng', 
-      value: 43, 
-      icon: 'fas fa-shopping-cart', 
-      changeValue: 8, 
+    {
+      name: 'Đơn hàng',
+      value: 43,
+      icon: 'fas fa-shopping-cart',
+      changeValue: 8,
       changeText: 'đang xử lý',
-      color: '#d50000'  
+      color: '#d50000'
     },
-    { 
-      name: 'Doanh thu', 
-      value: 12.5, 
-      icon: 'fas fa-dollar-sign', 
-      changeValue: 18, 
+    {
+      name: 'Doanh thu',
+      value: 12.5,
+      icon: 'fas fa-dollar-sign',
+      changeValue: 18,
       changeText: 'tăng so với tháng trước',
       color: '#43a047'
     },
-    { 
-      name: 'Lái thử', 
-      value: 26, 
-      icon: 'fas fa-car', 
-      changeValue: 5, 
+    {
+      name: 'Lái thử',
+      value: 26,
+      icon: 'fas fa-car',
+      changeValue: 5,
       changeText: 'đang chờ xác nhận',
       color: '#ff9800'
     },
@@ -222,21 +223,21 @@ const Dashboard: React.FC = () => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
-      
+
       if (ctx) {
         // Thiết lập kích thước canvas
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
-        
+
         const width = canvas.width;
         const height = canvas.height;
         const padding = 40;
         const chartWidth = width - 2 * padding;
         const chartHeight = height - 2 * padding;
-        
+
         // Xóa canvas
         ctx.clearRect(0, 0, width, height);
-        
+
         // Vẽ trục tọa độ
         ctx.beginPath();
         ctx.moveTo(padding, padding);
@@ -244,18 +245,18 @@ const Dashboard: React.FC = () => {
         ctx.lineTo(width - padding, height - padding);
         ctx.strokeStyle = '#ccc';
         ctx.stroke();
-        
+
         // Tìm giá trị lớn nhất
         const maxValue = Math.max(...revenueData.map(item => item.value));
-        
+
         // Vẽ thanh dữ liệu
         const barWidth = chartWidth / revenueData.length - 10;
-        
+
         revenueData.forEach((item, index) => {
           const x = padding + index * (chartWidth / revenueData.length) + 5;
           const barHeight = (item.value / maxValue) * chartHeight;
           const y = height - padding - barHeight;
-          
+
           // Xác định màu dựa trên sự thay đổi
           let barColor;
           if (item.change && item.change > 0) {
@@ -265,29 +266,29 @@ const Dashboard: React.FC = () => {
           } else {
             barColor = TREND_COLORS.neutral;
           }
-          
+
           // Vẽ thanh với màu thể hiện tăng/giảm
           ctx.fillStyle = barColor;
           ctx.fillRect(x, y, barWidth, barHeight);
-          
+
           // Thêm biểu tượng mũi tên
           const arrow = item.change && item.change > 0 ? '▲' : item.change && item.change < 0 ? '▼' : '■';
           ctx.fillStyle = barColor;
           ctx.font = 'bold 12px Arial';
           ctx.textAlign = 'center';
           ctx.fillText(arrow, x + barWidth / 2, y - 15);
-          
+
           // Vẽ nhãn
           ctx.fillStyle = '#333';
           ctx.font = '10px Arial';
           ctx.textAlign = 'center';
           ctx.fillText(item.month, x + barWidth / 2, height - padding + 15);
-          
+
           // Vẽ giá trị
           ctx.fillStyle = '#333';
           ctx.font = 'bold 10px Arial';
           ctx.fillText(item.value.toString() + ' tỷ', x + barWidth / 2, y - 5);
-          
+
           // Vẽ phần trăm thay đổi
           if (item.changePercent) {
             const changeText = `${item.changePercent > 0 ? '+' : ''}${item.changePercent.toFixed(1)}%`;
@@ -296,25 +297,25 @@ const Dashboard: React.FC = () => {
             ctx.fillText(changeText, x + barWidth / 2, y - 25);
           }
         });
-        
+
         // Vẽ tiêu đề
         ctx.fillStyle = '#333';
         ctx.font = 'bold 14px Arial';
         ctx.textAlign = 'center';
         ctx.fillText('Biểu đồ doanh thu năm 2023 (tỷ VNĐ)', width / 2, 20);
-        
+
         // Vẽ chú thích
         const legendX = width - 180;
         const legendY = padding;
         ctx.font = '10px Arial';
-        
+
         // Chú thích tăng
         ctx.fillStyle = TREND_COLORS.increase;
         ctx.fillRect(legendX, legendY, 12, 12);
         ctx.fillStyle = '#333';
         ctx.textAlign = 'left';
         ctx.fillText('Tăng', legendX + 18, legendY + 10);
-        
+
         // Chú thích giảm
         ctx.fillStyle = TREND_COLORS.decrease;
         ctx.fillRect(legendX, legendY + 20, 12, 12);
@@ -344,10 +345,10 @@ const Dashboard: React.FC = () => {
     if (name === 'users') return [`${value} người`, 'Người dùng'];
     if (name === 'orders') return [`${value} đơn`, 'Đơn hàng'];
     if (name === 'testdrives') return [`${value} lượt`, 'Lái thử'];
-    
+
     return [`${value} xe`, 'Số lượng'];
   };
-  
+
   // Custom renderer cho tooltip
   interface TooltipProps {
     active?: boolean;
@@ -366,7 +367,7 @@ const Dashboard: React.FC = () => {
       const data = payload[0].payload;
       const isIncreasing = data.change > 0;
       const changeColor = isIncreasing ? TREND_COLORS.increase : TREND_COLORS.decrease;
-      
+
       return (
         <div className="custom-tooltip">
           <p className="tooltip-label">{`Tháng: ${label}`}</p>
@@ -496,9 +497,9 @@ const Dashboard: React.FC = () => {
                 Quản lý tồn kho
               </Menu.Item>
               <Menu.Item key="marketing" icon={<SoundOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
-                
-                  Quản lý marketing
-                
+
+                Quản lý marketing
+
               </Menu.Item>
               <Menu.Item key="blog" icon={<FileTextOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
                 Quản lý bài viết
@@ -506,18 +507,23 @@ const Dashboard: React.FC = () => {
               <Menu.Item key="support" icon={<CustomerServiceOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
                 Quản lý hỗ trợ
               </Menu.Item>
+            
             </Menu>
             <div style={{ borderTop: '1px solid #eee', margin: '24px 0 0 0' }} />
             <div style={{ padding: '0 32px', margin: '16px 0 8px', color: '#888', fontWeight: 700, fontSize: 15 }}>
               ACCOUNT PAGES
             </div>
-            <Menu mode="inline" style={{ border: 'none', fontSize: 18, fontWeight: 500 }}>
+            <Menu
+              mode="inline"
+              selectedKeys={[selectedMenu]}
+              onClick={e => setSelectedMenu(e.key as string)}
+              style={{ border: 'none', fontSize: 18, fontWeight: 500 }}
+            >
               <Menu.Item
                 key="profile"
-                icon={<UserOutlined style={{ fontSize: 24 }} />}
-                style={{ display: 'flex', alignItems: 'center' }}
+                icon={<UserOutlined style={{ fontSize: 24, color: '#1890ff' }} />}
               >
-                {user?.fullName || 'Profile'}
+                Hồ sơ
               </Menu.Item>
               <Menu.Item key="profile-settings" icon={<SettingOutlined style={{ fontSize: 24 }} />}>
                 Cài đặt
@@ -561,7 +567,7 @@ const Dashboard: React.FC = () => {
                   <AppstoreOutlined style={{ fontSize: 28, color: '#fff' }} />
                   <span>Tài liệu hướng dẫn</span>
                 </div>
-                
+
                 <Button
                   type="default"
                   style={{
@@ -593,7 +599,7 @@ const Dashboard: React.FC = () => {
           </>
         )}
       </Sider>
-      
+
       <Layout
         style={{
           marginLeft: !isMobile && !sidebarCollapsed ? 280 : 0,
@@ -652,7 +658,7 @@ const Dashboard: React.FC = () => {
                   </div>
                   {/* ...Các card khác tương tự, đổi màu và icon cho từng loại... */}
                 </div>
-                
+
                 {window.Recharts ? (
                   <>
                     {/* Biểu đồ 1: Doanh thu */}
@@ -673,31 +679,31 @@ const Dashboard: React.FC = () => {
                             <Tooltip content={<CustomTooltip />} />
                             <Legend />
                             <ReferenceLine y={0} stroke="#000" />
-                            <Bar 
-                              yAxisId="left" 
-                              dataKey="value" 
-                              name="Doanh thu (tỷ)" 
-                              fill={TREND_COLORS.increase} 
+                            <Bar
+                              yAxisId="left"
+                              dataKey="value"
+                              name="Doanh thu (tỷ)"
+                              fill={TREND_COLORS.increase}
                               barSize={25}
                             >
                               {revenueData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={getBarColor(entry)} />
                               ))}
                             </Bar>
-                            <Line 
-                              yAxisId="left" 
-                              type="monotone" 
-                              dataKey="value" 
-                              name="Xu hướng doanh thu" 
-                              stroke="#333" 
-                              dot={false} 
+                            <Line
+                              yAxisId="left"
+                              type="monotone"
+                              dataKey="value"
+                              name="Xu hướng doanh thu"
+                              stroke="#333"
+                              dot={false}
                               activeDot={{ r: 8 }}
                             />
                           </ComposedChart>
                         </ResponsiveContainer>
                       </div>
                     </div>
-                    
+
                     {/* Biểu đồ 2: Người dùng */}
                     <div className="admin-section chart-section" style={{ marginBottom: 20 }}>
                       <h2>
@@ -715,19 +721,19 @@ const Dashboard: React.FC = () => {
                             <YAxis tickFormatter={(value: number) => `${value}`} />
                             <Tooltip formatter={(value: number, name: string) => [`${value} người`, 'Người dùng']} />
                             <Legend />
-                            <Area 
-                              type="monotone" 
-                              dataKey="users" 
-                              name="Người dùng" 
-                              stroke={statsData[0].color} 
-                              fill={`${statsData[0].color}33`} 
+                            <Area
+                              type="monotone"
+                              dataKey="users"
+                              name="Người dùng"
+                              stroke={statsData[0].color}
+                              fill={`${statsData[0].color}33`}
                               activeDot={{ r: 8 }}
                             />
                           </AreaChart>
                         </ResponsiveContainer>
                       </div>
                     </div>
-                    
+
                     {/* Biểu đồ 3: Đơn hàng */}
                     <div className="admin-section chart-section" style={{ marginBottom: 20 }}>
                       <h2>
@@ -745,17 +751,17 @@ const Dashboard: React.FC = () => {
                             <YAxis tickFormatter={(value: number) => `${value}`} />
                             <Tooltip formatter={(value: number, name: string) => [`${value} đơn`, 'Đơn hàng']} />
                             <Legend />
-                            <Bar 
-                              dataKey="orders" 
-                              name="Đơn hàng" 
-                              fill={statsData[1].color} 
+                            <Bar
+                              dataKey="orders"
+                              name="Đơn hàng"
+                              fill={statsData[1].color}
                               barSize={25}
                             />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
                     </div>
-                    
+
                     {/* Biểu đồ 4: Lái thử */}
                     <div className="admin-section chart-section" style={{ marginBottom: 20 }}>
                       <h2>
@@ -773,11 +779,11 @@ const Dashboard: React.FC = () => {
                             <YAxis tickFormatter={(value: number) => `${value}`} />
                             <Tooltip formatter={(value: number, name: string) => [`${value} lượt`, 'Lái thử']} />
                             <Legend />
-                            <Line 
-                              type="monotone" 
-                              dataKey="testdrives" 
-                              name="Lái thử" 
-                              stroke={statsData[3].color} 
+                            <Line
+                              type="monotone"
+                              dataKey="testdrives"
+                              name="Lái thử"
+                              stroke={statsData[3].color}
                               fill={statsData[3].color}
                               strokeWidth={2}
                               dot={{ r: 5 }}
@@ -799,7 +805,7 @@ const Dashboard: React.FC = () => {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="admin-recent" style={{ gap: 20 }}>
                   <div className="admin-section">
                     <h2>
@@ -852,7 +858,7 @@ const Dashboard: React.FC = () => {
                     </table>
                     <a href="#all-orders" className="view-all-link">Xem tất cả đơn hàng <i className="fas fa-arrow-right"></i></a>
                   </div>
-                  
+
                   <div className="admin-section">
                     <h2>
                       <span className="admin-section-icon"><i className="fas fa-headset"></i></span>
@@ -900,12 +906,12 @@ const Dashboard: React.FC = () => {
           </AnimatedPage>
         )}
         {selectedMenu === 'users' && (
-          <AnimatedPage animation="left">
+          <AnimatedPage animation="right">
             <UserManagement />
           </AnimatedPage>
         )}
         {selectedMenu === 'products' && (
-          <AnimatedPage animation="right">
+          <AnimatedPage animation="left">
             <ProductManagement />
           </AnimatedPage>
         )}
@@ -917,6 +923,11 @@ const Dashboard: React.FC = () => {
         {selectedMenu === 'marketing' && (
           <AnimatedPage animation="right">
             <MarketingManagement />
+          </AnimatedPage>
+        )}
+        {selectedMenu === 'profile' && (
+          <AnimatedPage animation="center">
+            <Profile />
           </AnimatedPage>
         )}
         {/* Thêm các mục khác nếu có, ví dụ: */}

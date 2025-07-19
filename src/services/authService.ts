@@ -25,6 +25,7 @@ export interface RegisterForm {
 // AuthResponse interface
 export interface AuthResponse {
   success: boolean;
+  phone?: string; // Đổi từ number sang string cho phù hợp
   message: string;
   userId?: number;
   fullName?: string;
@@ -32,6 +33,7 @@ export interface AuthResponse {
   role?: string;
   avatar?: string;
   token?: string;
+  trangThai?: boolean;
 }
 
 export interface QuenMatKhauRequest {
@@ -81,7 +83,9 @@ export const loginApi = async (data: LoginForm): Promise<AuthResponse> => {
       email: response.data.email,
       role: response.data.vaiTro,
       fullName: `${response.data.ho || ''} ${response.data.ten || ''}`.trim(),
-      avatar: response.data.avatar || response.data.anhDaiDien || response.data.anh_dai_dien || null
+      avatar: response.data.avatar || response.data.anhDaiDien || response.data.anh_dai_dien || null,
+      phone: response.data.soDienThoai || response.data.so_dien_thoai || response.data.phone || '',
+      trangThai: response.data.trangThai // Đảm bảo trạng thái cũng được map
     };
     
     console.log("Raw backend avatar data:", {
@@ -299,4 +303,12 @@ export const buildAvatarUrl = (avatar?: string): string => {
   const url = `http://localhost:8080/uploads/images/avatar_user/${fileName}`;
   console.log('buildAvatarUrl output:', url);
   return url;
+};
+
+export const fetchUserProfile = async (token: string) => {
+  const API_URL = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api/v1'}/nguoi-dung/profile`;
+  const res = await axios.get(API_URL, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.data;
 };

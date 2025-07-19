@@ -24,6 +24,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import LoadingAnimation from './components/common/LoadingAnimation';
 import AdminLayout from './context/pages/admin/AdminLayout';
 import MarketingManagement from './context/pages/admin/MarketingManagement';
+import Profile from './context/pages/admin/Profile';
 
 function App() {
   const location = useLocation();
@@ -203,6 +204,16 @@ function App() {
                         <div className="admin-placeholder">
                           <h2>Trang cài đặt hệ thống đang phát triển</h2>
                         </div>
+                      </RoleBasedRoute>
+                    </AdminLayout>
+                  </ThemeProvider>
+                } />
+
+                <Route path="/admin/profile" element={
+                  <ThemeProvider>
+                    <AdminLayout>
+                      <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                        <Profile />
                       </RoleBasedRoute>
                     </AdminLayout>
                   </ThemeProvider>
