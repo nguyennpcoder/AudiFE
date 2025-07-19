@@ -22,14 +22,16 @@ export interface RegisterForm {
   role?: string;
 }
 
+// AuthResponse interface
 export interface AuthResponse {
   success: boolean;
   message: string;
-  token?: string;
   userId?: number;
   fullName?: string;
   email?: string;
   role?: string;
+  avatar?: string;
+  token?: string;
 }
 
 export interface QuenMatKhauRequest {
@@ -77,8 +79,17 @@ export const loginApi = async (data: LoginForm): Promise<AuthResponse> => {
       token: response.data.token,
       userId: response.data.id,
       email: response.data.email,
-      role: response.data.vaiTro
+      role: response.data.vaiTro,
+      fullName: `${response.data.ho || ''} ${response.data.ten || ''}`.trim(),
+      avatar: response.data.avatar || response.data.anhDaiDien || response.data.anh_dai_dien || null
     };
+    
+    console.log("Raw backend avatar data:", {
+      avatar: response.data.avatar,
+      anhDaiDien: response.data.anhDaiDien,
+      anh_dai_dien: response.data.anh_dai_dien,
+      finalAvatar: result.avatar
+    });
     
     console.log("Transformed auth response:", result);
     return result;
@@ -231,6 +242,7 @@ export interface User {
   ten: string;
   ho?: string;
   vai_tro: string; // hoặc role nếu backend trả về như vậy
+  email: string;
   avatar?: string;
 }
 
@@ -249,13 +261,14 @@ export const fetchSalesStaff = async (): Promise<User[]> => {
     // Lọc chỉ lấy nhân viên có role ban_hang
     const salesStaff = res.data.filter((user: any) => user.vaiTro === 'ban_hang' || user.vai_tro === 'ban_hang');
     
-    // Chuẩn hóa dữ liệu trả về
+    // Chuẩn hóa dữ liệu trả về và sử dụng buildAvatarUrl helper
     return salesStaff.map((user: any) => ({
       id: user.id,
       ten: user.ten,
       ho: user.ho,
       vai_tro: user.vaiTro || user.vai_tro,
-      avatar: user.avatar || '/avatar-default.png'
+      email: user.email,
+      avatar: user.avatar || user.anhDaiDien // fallback nếu backend trả về trường khác
     }));
   } catch (error) {
     console.error('Lỗi khi lấy danh sách nhân viên bán hàng:', error);
@@ -271,4 +284,19 @@ export const updateUser = async (id: number, data: any, token: string) => {
       'Content-Type': 'application/json'
     }
   });
+};
+
+// Utility function to build avatar URL
+export const buildAvatarUrl = (avatar?: string): string => {
+  console.log('buildAvatarUrl input:', avatar);
+  if (!avatar) {
+    return '/avatar-default.png';
+  }
+  if (/^https?:\/\//.test(avatar)) {
+    return avatar;
+  }
+  const fileName = avatar.split('/').pop();
+  const url = `http://localhost:8080/uploads/images/avatar_user/${fileName}`;
+  console.log('buildAvatarUrl output:', url);
+  return url;
 };

@@ -4,6 +4,9 @@ import logo from '../../assets/logo.svg';
 import '../../styles/Header.css';
 import { useAuth } from '../../context/AuthContext';
 
+import { FaUserCircle } from 'react-icons/fa';
+import { buildAvatarUrl } from '../../services/authService';
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -13,7 +16,6 @@ const Header = () => {
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-
   const toggleUserMenu = () => {
     setIsUserMenuOpen(!isUserMenuOpen);
   };
@@ -52,6 +54,43 @@ const Header = () => {
     // Otherwise, show email or fallback to "Tài khoản"
     return user?.email || 'Tài khoản';
   };
+
+  // Get avatar URL with improved logic
+  const getAvatarUrl = () => {
+    console.log('=== Avatar Debug Info ===');
+    console.log('firebaseUser:', firebaseUser);
+    console.log('firebaseUser?.photoURL:', firebaseUser?.photoURL);
+    console.log('user:', user);
+    console.log('user?.avatar:', user?.avatar);
+    
+    // First check if Firebase user has a photo URL (for social login)
+    if (firebaseUser?.photoURL && firebaseUser.photoURL.trim() !== '') {
+      console.log('Using Firebase photoURL:', firebaseUser.photoURL);
+      return firebaseUser.photoURL;
+    }
+    
+    // Then check if local user has an avatar (for regular login)
+    if (user?.avatar && user.avatar.trim() !== '') {
+      // If user.avatar is already processed by buildAvatarUrl during login, use it directly
+      // If it's a full URL, use it as is
+      if (/^https?:\/\//.test(user.avatar) || user.avatar.startsWith('/')) {
+        console.log('Using user avatar directly:', user.avatar);
+        return user.avatar;
+      } else {
+        // Otherwise, process it through buildAvatarUrl
+        const builtUrl = buildAvatarUrl(user.avatar);
+        console.log('Using buildAvatarUrl result:', builtUrl);
+        return builtUrl;
+      }
+    }
+    
+    // Fallback to default avatar
+    console.log('Using default avatar');
+    return '/avatar-default.png';
+  };
+
+  const avatarUrl = getAvatarUrl();
+  console.log('=== Final avatar URL ===:', avatarUrl);
 
   return (
     <header className="header header-animate-down">
@@ -168,18 +207,28 @@ const Header = () => {
                 onMouseEnter={() => setIsUserMenuOpen(true)}
                 onMouseLeave={() => setIsUserMenuOpen(false)}
               >
-                {firebaseUser && firebaseUser.photoURL ? (
-                  <img 
-                    src={firebaseUser.photoURL}
-                    alt="Profile"
-                    className="user-avatar"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <div className="default-avatar">
-                    {getDisplayName().charAt(0)}
-                  </div>
-                )}
+                <img
+                  src={avatarUrl}
+                  alt="Profile"
+                  className="user-avatar"
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '2px solid #ccc'
+                  }}
+                  onError={(e) => {
+                    console.log('Avatar failed to load, using default');
+                    const target = e.currentTarget;
+                    if (target.src !== '/avatar-default.png') {
+                      target.src = '/avatar-default.png';
+                    }
+                  }}
+                  onLoad={() => {
+                    console.log('Avatar loaded successfully:', avatarUrl);
+                  }}
+                />
                 <span className="user-name">
                   {getDisplayName()} <span className="dropdown-arrow">▼</span>
                 </span>
@@ -213,6 +262,7 @@ const Header = () => {
         </button>
       </div>
     </header>
+    
   );
 };
 

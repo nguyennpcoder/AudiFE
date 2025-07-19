@@ -4,7 +4,7 @@ import { BellOutlined, DollarOutlined, UsergroupAddOutlined, HeartOutlined, Lock
 import '../../../styles/DashboardHeader.css';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { fetchSampleCarModels, CarModel } from '../../../services/carModelService';
-import { fetchSalesStaff, User } from '../../../services/authService';
+import { fetchSalesStaff, User, buildAvatarUrl } from '../../../services/authService';
 import { useTheme } from '../../ThemeContext';
 
 const { Header, Content } = Layout;
@@ -1366,7 +1366,6 @@ const DashboardHeader: React.FC<any> = ({
                     salesStaff.slice(0, 3).map((staff, index) => {
                       const colors = ['#d50000', '#1890ff', '#43a047', '#ff9800', '#9c27b0'];
                       const bgColor = colors[index % colors.length];
-                      
                       return (
                         <div 
                           key={staff.id}
@@ -1376,7 +1375,27 @@ const DashboardHeader: React.FC<any> = ({
                             display: 'inline-block',
                             marginLeft: index === 0 ? 0 : -6,
                           }}
+                          title={`${staff.ho} ${staff.ten}`}
                         >
+                          {staff.avatar && !buildAvatarUrl(staff.avatar).includes('avatar-default.png') ? (
+                            <img
+                              src={buildAvatarUrl(staff.avatar)}
+                              alt={`${staff.ho} ${staff.ten}`}
+                              style={{
+                                width: 28,
+                                height: 28,
+                                borderRadius: '50%',
+                                border: '2px solid #fff',
+                                boxShadow: `0 4px 12px rgba(0, 0, 0, 0.2)`,
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                objectFit: 'cover'
+                              }}
+                              onError={(e) => {
+                                e.currentTarget.src = '/avatar-default.png';
+                              }}
+                            />
+                          ) : (
                             <div
                               style={{
                                 background: `linear-gradient(135deg, ${bgColor} 0%, ${bgColor}dd 100%)`,
@@ -1404,8 +1423,9 @@ const DashboardHeader: React.FC<any> = ({
                                 e.currentTarget.style.boxShadow = `0 4px 12px ${bgColor}40`;
                               }}
                             >
-                            {staff.ten.charAt(0)}
-                          </div>
+                              {staff.ten.charAt(0)}
+                            </div>
+                          )}
                         </div>
                       );
                     })

@@ -82,7 +82,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           userId: parseInt(authUser.uid.slice(0, 8), 16) || 1000,
           fullName: displayName,
           email: email,
-          role: role // Use the determined role
+          role: role,
+          avatar: authUser.photoURL || undefined // Thêm dòng này!
         };
         
         // Get Firebase ID token to use for API authorization
