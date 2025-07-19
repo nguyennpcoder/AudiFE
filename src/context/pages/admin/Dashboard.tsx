@@ -400,6 +400,8 @@ const Dashboard: React.FC = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   }, [selectedMenu]);
 
+  const [isDocCardHovered, setIsDocCardHovered] = useState(false);
+
   return (
     <Layout>
       {isMobile && !sidebarCollapsed && (
@@ -478,30 +480,30 @@ const Dashboard: React.FC = () => {
               <Menu.Item key="dashboard" icon={<AppstoreOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
                 Tổng quan
               </Menu.Item>
-              <Menu.Item key="users" icon={<UserOutlined style={{ fontSize: 24 }} />}>
+              <Menu.Item key="users" icon={<UserOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
                 Quản lý người dùng
               </Menu.Item>
-              <Menu.Item key="products" icon={<CarOutlined style={{ fontSize: 24 }} />}>
+              <Menu.Item key="products" icon={<CarOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
                 Quản lý sản phẩm
               </Menu.Item>
-              <Menu.Item key="orders" icon={<ShoppingCartOutlined style={{ fontSize: 24 }} />}>
+              <Menu.Item key="orders" icon={<ShoppingCartOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
                 Quản lý đơn hàng
               </Menu.Item>
-              <Menu.Item key="dealers" icon={<ShopOutlined style={{ fontSize: 24 }} />}>
+              <Menu.Item key="dealers" icon={<ShopOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
                 Quản lý đại lý
               </Menu.Item>
-              <Menu.Item key="inventory" icon={<HomeOutlined style={{ fontSize: 24 }} />}>
+              <Menu.Item key="inventory" icon={<HomeOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
                 Quản lý tồn kho
               </Menu.Item>
-              <Menu.Item key="marketing" icon={<SoundOutlined style={{ fontSize: 24 }} />}>
+              <Menu.Item key="marketing" icon={<SoundOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
                 
                   Quản lý marketing
                 
               </Menu.Item>
-              <Menu.Item key="blog" icon={<FileTextOutlined style={{ fontSize: 24 }} />}>
+              <Menu.Item key="blog" icon={<FileTextOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
                 Quản lý bài viết
               </Menu.Item>
-              <Menu.Item key="support" icon={<CustomerServiceOutlined style={{ fontSize: 24 }} />}>
+              <Menu.Item key="support" icon={<CustomerServiceOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
                 Quản lý hỗ trợ
               </Menu.Item>
             </Menu>
@@ -529,33 +531,62 @@ const Dashboard: React.FC = () => {
               </Menu.Item>
             </Menu>
             <div style={{ position: 'absolute', bottom: 40, left: 0, width: '100%', padding: '0 32px' }}>
-              <div className="dashboard-card-value111111"
+              <div
                 style={{
-                  background: '#1890ff',
-                  borderRadius: 16,
-                  padding: 24,
+                  width: '100%',
+                  maxWidth: 220,
+                  margin: '32px auto 0 auto', // Cách menu phía trên
+                  borderRadius: 20,
+                  background: 'linear-gradient(135deg, #1890ff 0%, #43a047 100%)',
                   color: '#fff',
-                  textAlign: 'left',
-                  boxShadow: '0 4px 24px rgba(24,144,255,0.15)',
+                  boxShadow: isDocCardHovered
+                    ? '0 16px 48px rgba(24,144,255,0.18)'
+                    : '0 8px 32px 0 rgba(24,144,255,0.12)',
+                  padding: 20,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 10,
+                  position: 'relative',
+                  zIndex: 1,
+                  transform: isDocCardHovered ? 'translateY(-4px)' : 'translateY(0)',
+                  transition: 'box-shadow 0.3s cubic-bezier(.4,2,.3,1), transform 0.3s cubic-bezier(.4,2,.3,1)',
+                  cursor: 'pointer',
                 }}
+                className="hover-card"
+                onMouseEnter={() => setIsDocCardHovered(true)}
+                onMouseLeave={() => setIsDocCardHovered(false)}
               >
-                <AppstoreOutlined style={{ fontSize: 32, color: '#fff', marginBottom: 1 }} />
-                <Text style={{ color: '#fff', fontSize: 16 }}>Please check our docs</Text>
-                <Button className="dashboard-card-value1111111"
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, fontSize: 17, marginBottom: 2, justifyContent: 'center' }}>
+                  <AppstoreOutlined style={{ fontSize: 28, color: '#fff' }} />
+                  <span>Tài liệu hướng dẫn</span>
+                </div>
+                
+                <Button
                   type="default"
                   style={{
-                    marginTop: 10,
                     width: '100%',
                     background: '#fff',
-                    color: '#222',
-                    fontWeight: 600,
-                    borderRadius: 8,
+                    color: '#1890ff',
+                    fontWeight: 700,
+                    borderRadius: 10,
                     border: 'none',
-                    height: 30,
-                    fontSize: 16,
+                    height: 36,
+                    fontSize: 15,
+                    marginTop: 10,
+                    boxShadow: '0 2px 8px rgba(24,144,255,0.08)',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = '#e3f2fd';
+                    e.currentTarget.style.color = '#1976d2';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = '#fff';
+                    e.currentTarget.style.color = '#1890ff';
                   }}
                 >
-                  DOCUMENTATION
+                  Xem tài liệu
                 </Button>
               </div>
             </div>
