@@ -5,7 +5,7 @@ import { BellOutlined } from '@ant-design/icons';
 interface AdminHeaderProps {
   pageTitle: string;
 }
-
+// animation 
 const AdminHeader: React.FC<AdminHeaderProps> = ({ pageTitle }) => (
   <div
     style={{

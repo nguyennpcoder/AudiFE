@@ -2352,5 +2352,21 @@
   background: #2b364e !important;
 }
 
+/* Promotion chart styles */
+.admin-section-icon .fas.fa-gift {
+  color: #e91e63;
+}
+
+.admin-section-icon .fas.fa-chart-line {
+  color: #4caf50;
+}
+
+/* Responsive adjustments for promotion charts */
+@media (max-width: 768px) {
+  .chart-container {
+    height: 250px;
+  }
+}
+
 
 

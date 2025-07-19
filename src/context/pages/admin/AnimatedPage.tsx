@@ -5,7 +5,7 @@ interface AnimatedPageProps {
   animation?: 'center' | 'bottom' | 'left' | 'right';
   children: React.ReactNode;
 }
-
+// các animation xuất hiện khi click các menu nav
 const animationClass = {
   center: 'admin-animate-center',
   bottom: 'admin-animate-bottom',

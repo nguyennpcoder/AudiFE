@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import '../../styles/ProductDetail.css';
+import PromotionBanner from './PromotionBanner';
+import { KhuyenMai } from '../../services/marketingService';
 
 // Define interfaces for our data types
 interface MauXe {
@@ -152,6 +154,9 @@ const ProductDetail: React.FC = () => {
   const [previousColor, setPreviousColor] = useState<MauSac | null>(null);
   // State cho nút A|B
   const [showCompareButton, setShowCompareButton] = useState<boolean>(true);
+
+  // Thêm state cho khuyến mãi
+  const [selectedPromotion, setSelectedPromotion] = useState<KhuyenMai | null>(null);
 
   // Đưa trang về đầu khi mới vào
   useEffect(() => {
@@ -975,6 +980,30 @@ const resetToDefaultColor = async () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedColor]);
 
+  // Calculate discounted price
+  const calculateDiscountedPrice = () => {
+    if (!product || !selectedPromotion) return calculateTotalPrice();
+    
+    let discountedPrice = calculateTotalPrice();
+    
+    switch (selectedPromotion.loaiGiamGia) {
+      case 'phan_tram':
+        discountedPrice = discountedPrice * (1 - selectedPromotion.giaTriGiam / 100);
+        break;
+      case 'so_tien_co_dinh':
+        discountedPrice = Math.max(0, discountedPrice - selectedPromotion.giaTriGiam);
+        break;
+      case 'tuy_chon_mien_phi':
+        // For free options, subtract the option price if applicable
+        if (selectedNoiThat && selectedNoiThat.giaThem > 0) {
+          discountedPrice -= selectedNoiThat.giaThem;
+        }
+        break;
+    }
+    
+    return Math.max(0, discountedPrice);
+  };
+
   if (isLoading) {
     return (
       <div className="loading-container_details">
@@ -1458,6 +1487,30 @@ const resetToDefaultColor = async () => {
           </div>
         </div>
       </section>
+
+      {product && (
+        <PromotionBanner
+          mauXeId={product.id}
+          tongGiaTri={product.giaCoban}
+          onSelectPromotion={setSelectedPromotion}
+        />
+      )}
+
+      {selectedPromotion && (
+        <div style={{ 
+          background: '#f6ffed', 
+          padding: '16px', 
+          borderRadius: '8px', 
+          marginTop: '16px' 
+        }}>
+          <div style={{ fontWeight: 600, color: '#52c41a' }}>
+            Giá sau khuyến mãi: {formatPrice(calculateDiscountedPrice())}
+          </div>
+          <div style={{ fontSize: '14px', color: '#666' }}>
+            Tiết kiệm: {formatPrice(product.giaCoban - calculateDiscountedPrice())}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

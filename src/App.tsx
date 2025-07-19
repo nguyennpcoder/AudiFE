@@ -23,6 +23,7 @@ import ForgotPassword from './context/pages/ForgotPassword';
 import { ThemeProvider } from './context/ThemeContext';
 import LoadingAnimation from './components/common/LoadingAnimation';
 import AdminLayout from './context/pages/admin/AdminLayout';
+import MarketingManagement from './context/pages/admin/MarketingManagement';
 
 function App() {
   const location = useLocation();
@@ -165,9 +166,7 @@ function App() {
                   <ThemeProvider>
                     <AdminLayout>
                       <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                        <div className="admin-placeholder">
-                          <h2>Trang quản lý marketing đang phát triển</h2>
-                        </div>
+                        <MarketingManagement />
                       </RoleBasedRoute>
                     </AdminLayout>
                   </ThemeProvider>

@@ -32,6 +32,7 @@ import UserManagement from './UserManagement';
 import ProductManagement from './ProductManagement';
 import OrderManagement from './OrderManagement';
 import AnimatedPage from './AnimatedPage';
+import MarketingManagement from './MarketingManagement';
 // import các component khác nếu có...
 
 const { Sider } = Layout;
@@ -493,7 +494,9 @@ const Dashboard: React.FC = () => {
                 Quản lý tồn kho
               </Menu.Item>
               <Menu.Item key="marketing" icon={<SoundOutlined style={{ fontSize: 24 }} />}>
-                Quản lý marketing
+                
+                  Quản lý marketing
+                
               </Menu.Item>
               <Menu.Item key="blog" icon={<FileTextOutlined style={{ fontSize: 24 }} />}>
                 Quản lý bài viết
@@ -878,6 +881,11 @@ const Dashboard: React.FC = () => {
         {selectedMenu === 'orders' && (
           <AnimatedPage animation="bottom">
             <OrderManagement />
+          </AnimatedPage>
+        )}
+        {selectedMenu === 'marketing' && (
+          <AnimatedPage animation="right">
+            <MarketingManagement />
           </AnimatedPage>
         )}
         {/* Thêm các mục khác nếu có, ví dụ: */}
