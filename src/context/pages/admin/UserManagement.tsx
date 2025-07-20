@@ -6,6 +6,7 @@ import axios from 'axios';
 import { Breadcrumb } from 'antd';
 
 import AdminHeader from './AdminHeader';
+import { buildAvatarUrl } from '../../../services/authService';
 
 // Khai báo kiểu dữ liệu cho người dùng
 interface User {
@@ -24,6 +25,10 @@ interface User {
   ma_buu_dien?: string;
   quoc_gia?: string;
   matKhau?: string;
+  avatarUrl?: string; // Thêm trường avatarUrl
+  avatar?: string; // Thêm trường avatar
+  anhDaiDien?: string; // Thêm trường anhDaiDien
+  anh_dai_dien?: string; // Thêm trường anh_dai_dien
 }
 
 // Khai báo kiểu dữ liệu cho màn hình
@@ -82,6 +87,9 @@ const UserManagement: React.FC = () => {
   });
   
   const [isEditMode, setIsEditMode] = useState(false);
+  const [userAvatarMap, setUserAvatarMap] = useState<Record<number, string>>({});
+  const [hoveredUserId, setHoveredUserId] = useState<number | null>(null);
+  const [hoveredUserImgPos, setHoveredUserImgPos] = useState<{ x: number; y: number } | null>(null);
   
   const handleLogout = () => {
     logout();
@@ -140,14 +148,16 @@ const UserManagement: React.FC = () => {
         tinh: user.tinh,
         ma_buu_dien: user.maBuuDien,
         quoc_gia: user.quocGia,
+        avatar: user.avatar || user.anhDaiDien || user.anh_dai_dien || '', // Thêm dòng này!
       }));
 
       setState(prev => ({ 
         ...prev, 
         users: mappedData, 
-        filteredUsers: mappedData,
+        filteredUsers: mappedData.filter((user: User) => user.vaiTro !== 'quan_tri'), // Loại bỏ user admin
         isLoading: false 
       }));
+      preloadUserAvatars(mappedData);
     } catch (error) {
       console.error("API call error:", error);
       setState(prev => ({ 
@@ -156,6 +166,20 @@ const UserManagement: React.FC = () => {
         isLoading: false 
       }));
     }
+  };
+
+  const preloadUserAvatars = async (users: User[]) => {
+    const map: Record<number, string> = {};
+    for (const user of users) {
+      const avatarRaw = user.avatarUrl || user.avatar || user.anhDaiDien || user.anh_dai_dien;
+      if (avatarRaw) {
+        map[user.id] = buildAvatarUrl(avatarRaw);
+      } else {
+        // Tạo avatar mặc định (ví dụ dùng dịch vụ avatar online hoặc ảnh local)
+        map[user.id] = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.ho + ' ' + user.ten)}&background=0D8ABC&color=fff`;
+      }
+    }
+    setUserAvatarMap(map);
   };
 
   // Xử lý thay đổi trường tìm kiếm
@@ -204,6 +228,9 @@ const UserManagement: React.FC = () => {
       filtered = filtered.filter(user => user.trangThai === isActive);
     }
     
+    // Loại bỏ user có vai trò "quan_tri"
+    filtered = filtered.filter(user => user.vaiTro !== 'quan_tri');
+
     setState(prev => ({ 
       ...prev, 
       filteredUsers: filtered,
@@ -254,11 +281,13 @@ const UserManagement: React.FC = () => {
   // Tổng số trang
   const totalPages = Math.ceil(state.filteredUsers.length / state.itemsPerPage);
   
-  // Lấy danh sách người dùng của trang hiện tại
-  const currentUsers = state.filteredUsers.slice(
-    (state.currentPage - 1) * state.itemsPerPage,
-    state.currentPage * state.itemsPerPage
-  );
+  // Lấy danh sách người dùng của trang hiện tại, loại bỏ admin
+  const currentUsers = state.filteredUsers
+    .filter(user => user.vaiTro !== 'quan_tri')
+    .slice(
+      (state.currentPage - 1) * state.itemsPerPage,
+      state.currentPage * state.itemsPerPage
+    );
 
   // Xử lý hiển thị modal thêm người dùng
   const handleShowAddModal = () => {
@@ -581,8 +610,27 @@ const UserManagement: React.FC = () => {
                     <td colSpan={8} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có dữ liệu</td>
                   </tr>
                 ) : (
-                  currentUsers.map(user => (
-                    <tr key={user.id} style={{ background: '#fff', borderBottom: '1px solid #f0f0f0' }}>
+                  currentUsers.map((user, idx) => (
+                    <tr
+                      key={user.id}
+                      className="table-row-fadein"
+                      style={{
+                        animationDelay: `${idx * 120}ms`, // mỗi dòng hiện ra sau dòng trước 120ms
+                        background: '#fff',
+                        borderBottom: '1px solid #f0f0f0'
+                      }}
+                      onMouseEnter={e => {
+                        setHoveredUserId(user.id);
+                        setHoveredUserImgPos({ x: e.clientX, y: e.clientY });
+                      }}
+                      onMouseMove={e => {
+                        setHoveredUserImgPos({ x: e.clientX, y: e.clientY });
+                      }}
+                      onMouseLeave={() => {
+                        setHoveredUserId(null);
+                        setHoveredUserImgPos(null);
+                      }}
+                    >
                       <td style={{ padding: '10px 8px' }}>{user.id}</td>
                       <td style={{ padding: '10px 8px' }}>{user.email}</td>
                       <td style={{ padding: '10px 8px' }}>{`${user.ho} ${user.ten}`}</td>
@@ -604,10 +652,31 @@ const UserManagement: React.FC = () => {
                           justifyContent: 'center',
                           gap: 8,
                         }}>
-                          <button className="btn-view" title="Xem chi tiết" onClick={() => { setIsEditMode(false); handleShowEditModal(user); }}>
+                          <button
+                            className="btn-view"
+                            title="Xem chi tiết"
+                            onClick={() => { setIsEditMode(false); handleShowEditModal(user); }}
+                            onMouseEnter={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                            onMouseMove={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                            onMouseLeave={e => {
+                              // Nếu chuột vẫn nằm trên dòng <tr> thì set lại hover
+                              const tr = e.currentTarget.closest('tr');
+                              if (tr && tr.matches(':hover')) {
+                                setHoveredUserId(user.id);
+                                setHoveredUserImgPos({ x: e.clientX, y: e.clientY });
+                              }
+                            }}
+                          >
                             <i className="fas fa-eye"></i>
                           </button>
-                          <button className="btn-edit" title="Chỉnh sửa" onClick={() => { setIsEditMode(true); handleShowEditModal(user); }}>
+                          <button
+                            className="btn-edit"
+                            title="Chỉnh sửa"
+                            onClick={() => { setIsEditMode(true); handleShowEditModal(user); }}
+                            onMouseEnter={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                            onMouseMove={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                            onMouseLeave={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                          >
                             <i className="fas fa-edit"></i>
                           </button>
                           {/* <button className="btn-delete" title="Xóa" onClick={() => handleShowDeleteModal(user)}>
@@ -874,25 +943,37 @@ const UserManagement: React.FC = () => {
             </div>
             <div className="admin-modal-body">
               <form onSubmit={handleUpdateUser}>
-                <div className="form-group">
-                  <label htmlFor="edit-email">Email</label>
-                  <input 
-                    type="email" 
-                    id="edit-email" 
-                    name="email"
-                    value={state.currentUser.email}
-                    onChange={handleEditUserChange}
-                    readOnly={!isEditMode}
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    marginBottom: 24,
+                    marginTop: 8
+                  }}
+                >
+                  <img
+                    src={buildAvatarUrl(
+                      state.currentUser.avatar ||
+                      state.currentUser.avatarUrl ||
+                      state.currentUser.anhDaiDien ||
+                      state.currentUser.anh_dai_dien
+                    )}
+                    alt="avatar"
                     style={{
-                      width: '100%',
-                      padding: '10px 16px',
-                      borderRadius: 8,
-                      border: '1px solid #e5e7eb',
-                      fontSize: 15,
-                      background: '#fafbfc',
+                      width: 96,
+                      height: 96,
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '4px solid #fff',
+                      boxShadow: '0 2px 12px 0 rgba(24,144,255,0.10)',
+                      marginBottom: 12,
+                      background: '#f5f5f5'
                     }}
                   />
-                  <small style={{ fontSize: 13, color: '#888' }}>Email không thể thay đổi</small>
+                  <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 4 }}>
+                    {state.currentUser.email}
+                  </div>
                 </div>
                 
                 <div className="form-row">
@@ -1218,11 +1299,40 @@ const UserManagement: React.FC = () => {
           </div>
         </div>
       )}
-      <span>Khi admin muốn mở lại user:
-KHÔNG cho phép user tự đăng nhập lại ngay lập tức.
-Admin phải chuyển user cho đội hỗ trợ.
-Đội hỗ trợ sẽ đặt lại mật khẩu mới (random) cho user và gửi mật khẩu mới qua email cho user.
-Sau khi user nhận được mật khẩu mới, user mới có thể đăng nhập lại.</span>
+      {hoveredUserId && hoveredUserImgPos && (() => {
+        const imgUrl = userAvatarMap[hoveredUserId];
+        if (!imgUrl) return null;
+        const offsetX = -320;
+        const offsetY = -100;
+        return (
+          <div
+            className="product-hover-image"
+            style={{
+              position: 'fixed',
+              left: hoveredUserImgPos.x + offsetX,
+              top: hoveredUserImgPos.y + offsetY,
+              zIndex: 9999,
+              pointerEvents: 'none',
+              background: 'transparent', // Đảm bảo không có nền
+              boxShadow: 'none',         // Không bóng nền
+              borderRadius: 0            // Không bo tròn khung ngoài
+            }}
+          >
+            <img
+              src={imgUrl}
+              alt="avatar"
+              style={{
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '4px solid #fff', // Viền trắng mỏng
+                boxShadow: '0 2px 12px 0 rgba(24,144,255,0.10)' // (tùy chọn, bóng nhẹ)
+              }}
+            />
+          </div>
+        );
+      })()}
     </div>
   );
 };

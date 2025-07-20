@@ -721,8 +721,16 @@ const OrderManagement: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentOrders.map(order => (
-                    <tr key={order.id} style={{ background: '#fff', borderBottom: '1px solid #f0f0f0' }}>
+                  {currentOrders.map((order, idx) => (
+                    <tr
+                      key={order.id}
+                      className="table-row-fadein"
+                      style={{
+                        animationDelay: `${idx * 120}ms`,
+                        background: '#fff',
+                        borderBottom: '1px solid #f0f0f0'
+                      }}
+                    >
                       <td style={{ padding: '10px 8px' }}>{order.id}</td>
                       <td style={{ padding: '10px 8px' }}>{order.tenNguoiDung}</td>
                       <td style={{ padding: '10px 8px' }}>{order.tenDaiLy}</td>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import '../../../styles/Admin.css';
@@ -122,7 +122,13 @@ const ProductManagement: React.FC = () => {
   
   // Add a new state for tracking newly added images at the top of your component, near other state declarations
   const [newlyAddedImages, setNewlyAddedImages] = useState<HinhAnhXe[]>([]);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [hoveredImgPos, setHoveredImgPos] = useState<{ x: number; y: number } | null>(null);
   
+  // 1. Thêm state mới để lưu ảnh đại diện từng sản phẩm
+  const [productThumbnailMap, setProductThumbnailMap] = useState<Record<number, string>>({});
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -182,13 +188,46 @@ const ProductManagement: React.FC = () => {
     }
   };
 
-  // API call để lấy danh sách mẫu xe
+  // 2. Hàm lấy ảnh đại diện cho tất cả sản phẩm
+  const preloadProductThumbnails = async (products: MauXe[]) => {
+    const token = localStorage.getItem('token');
+    const map: Record<number, string> = {};
+
+    // Duyệt từng sản phẩm, lấy ảnh ngoại thất
+    await Promise.all(products.map(async (product) => {
+      try {
+        const res = await fetch(`http://localhost:8080/api/v1/hinh-anh/mau-xe/${product.id}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!res.ok) return;
+        const images = await res.json();
+        // Ưu tiên ảnh ngoại thất, nếu không có thì lấy ảnh đầu tiên
+        const exteriorImg = images.find((img: any) => img.loaiHinh === 'ngoai_that') || images[0];
+        if (exteriorImg) {
+          // Nếu đường dẫn là /src/assets thì bỏ qua (ảnh demo)
+          if (!exteriorImg.duongDanAnh.startsWith('/src/assets/')) {
+            map[product.id] = exteriorImg.duongDanAnh.startsWith('http')
+              ? exteriorImg.duongDanAnh
+              : `${BACKEND_URL}${exteriorImg.duongDanAnh.startsWith('/') ? '' : '/'}${exteriorImg.duongDanAnh}`;
+          }
+        }
+      } catch (e) {
+        // Bỏ qua lỗi từng sản phẩm
+      }
+    }));
+
+    setProductThumbnailMap(map);
+  };
+
+  // 3. Khi fetchCarModels xong thì preload thumbnail
   const fetchCarModels = async () => {
     try {
       setState(prev => ({ ...prev, isLoading: true }));
-      
       const token = localStorage.getItem('token');
-      
       const response = await fetch('http://localhost:8080/api/v1/mau-xe', {
         method: 'GET',
         headers: {
@@ -196,24 +235,21 @@ const ProductManagement: React.FC = () => {
           'Content-Type': 'application/json'
         }
       });
-      
-      if (!response.ok) {
-        throw new Error(`Không thể tải danh sách mẫu xe: ${response.status}`);
-      }
-      
+      if (!response.ok) throw new Error(`Không thể tải danh sách mẫu xe: ${response.status}`);
       const data = await response.json();
-      
-      setState(prev => ({ 
-        ...prev, 
+      setState(prev => ({
+        ...prev,
         mauXeList: data,
         filteredProducts: data,
-        isLoading: false 
+        isLoading: false
       }));
+      // Preload thumbnail cho tất cả sản phẩm
+      preloadProductThumbnails(data);
     } catch (error) {
-      setState(prev => ({ 
-        ...prev, 
-        error: error instanceof Error ? error.message : 'Đã xảy ra lỗi', 
-        isLoading: false 
+      setState(prev => ({
+        ...prev,
+        error: error instanceof Error ? error.message : 'Đã xảy ra lỗi',
+        isLoading: false
       }));
     }
   };
@@ -492,7 +528,7 @@ const ProductManagement: React.FC = () => {
   };
 
   // Xử lý hiển thị modal chỉnh sửa sản phẩm
-  const handleShowEditModal = async (product: MauXe) => {
+  const handleShowEditModal = async (product: MauXe, edit: boolean) => {
     try {
       setState(prev => ({ ...prev, isLoading: true }));
       
@@ -506,6 +542,7 @@ const ProductManagement: React.FC = () => {
         productImages: productImages || [],
         isLoading: false
       }));
+      setIsEditMode(edit);
     } catch (error) {
       setState(prev => ({ 
         ...prev, 
@@ -1036,6 +1073,8 @@ const ProductManagement: React.FC = () => {
     }));
   };
 
+  const mouseMoveTimeout = useRef<NodeJS.Timeout | null>(null);
+
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh', padding: 0 }}>
       <AdminHeader pageTitle="Quản lý sản phẩm" />
@@ -1171,8 +1210,31 @@ const ProductManagement: React.FC = () => {
                     <td colSpan={7} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có dữ liệu</td>
                   </tr>
                 ) : (
-                  currentProducts.map(product => (
-                    <tr key={product.id} style={{ background: '#fff', borderBottom: '1px solid #f0f0f0' }}>
+                  currentProducts.map((product, idx) => (
+                    <tr
+                      key={product.id}
+                      className="table-row-fadein"
+                      style={{
+                        animationDelay: `${idx * 120}ms`, // mỗi dòng hiện ra sau dòng trước 120ms
+                        background: '#fff',
+                        borderBottom: '1px solid #f0f0f0'
+                      }}
+                      onMouseEnter={e => {
+                        setHoveredRow(product.id);
+                        setHoveredImgPos({ x: e.clientX, y: e.clientY });
+                      }}
+                      onMouseMove={e => {
+                        if (mouseMoveTimeout.current) return;
+                        mouseMoveTimeout.current = setTimeout(() => {
+                          setHoveredImgPos({ x: e.clientX, y: e.clientY });
+                          mouseMoveTimeout.current = null;
+                        }, 16); // ~60fps
+                      }}
+                      onMouseLeave={() => {
+                        setHoveredRow(null);
+                        setHoveredImgPos(null);
+                      }}
+                    >
                       <td style={{ padding: '10px 8px' }}>{product.id}</td>
                       <td style={{ padding: '10px 8px' }}>{product.tenMau}</td>
                       <td style={{ padding: '10px 8px' }}>{product.tenDong}</td>
@@ -1193,16 +1255,50 @@ const ProductManagement: React.FC = () => {
                           justifyContent: 'center',
                           gap: 8,
                         }}>
-                          <button className="btn-view" title="Xem chi tiết" onClick={() => handleShowEditModal(product)}>
+                          <button
+                            className="btn-view"
+                            title="Xem chi tiết"
+                            onClick={() => handleShowEditModal(product, false)}
+                            onMouseEnter={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                            onMouseMove={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                            onMouseLeave={e => {
+                              const tr = e.currentTarget.closest('tr');
+                              if (tr && tr.matches(':hover')) {
+                                setHoveredRow(product.id);
+                                setHoveredImgPos({ x: e.clientX, y: e.clientY });
+                              }
+                            }}
+                          >
                             <i className="fas fa-eye"></i>
                           </button>
-                          <button className="btn-edit" title="Chỉnh sửa" onClick={() => handleShowEditModal(product)}>
+                          <button
+                            className="btn-edit"
+                            title="Chỉnh sửa"
+                            onClick={() => handleShowEditModal(product, true)}
+                            onMouseEnter={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                            onMouseMove={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                            onMouseLeave={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                          >
                             <i className="fas fa-edit"></i>
                           </button>
-                          <button className="btn-inventory" title="Xem tồn kho" onClick={() => handleViewInventory(product)}>
+                          <button
+                            className="btn-inventory"
+                            title="Xem tồn kho"
+                            onClick={() => handleViewInventory(product)}
+                            onMouseEnter={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                            onMouseMove={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                            onMouseLeave={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                          >
                             <i className="fas fa-warehouse"></i>
                           </button>
-                          <button className="btn-delete" title="Xóa" onClick={() => handleShowDeleteModal(product)}>
+                          <button
+                            className="btn-delete"
+                            title="Xóa"
+                            onClick={() => handleShowDeleteModal(product)}
+                            onMouseEnter={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                            onMouseMove={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                            onMouseLeave={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                          >
                             <i className="fas fa-trash-alt"></i>
                           </button>
                         </div>
@@ -1655,7 +1751,7 @@ const ProductManagement: React.FC = () => {
         <div className="admin-modal">
           <div className="admin-modal-content admin-modal-large">
             <div className="admin-modal-header">
-              <h2>Chỉnh sửa mẫu xe</h2>
+              <h2>{isEditMode ? 'Chỉnh sửa mẫu xe' : 'Xem chi tiết mẫu xe'}</h2>
               <button 
                 className="admin-modal-close"
                 onClick={handleCloseEditModal}
@@ -1673,6 +1769,7 @@ const ProductManagement: React.FC = () => {
                     value={state.currentProduct.idDong}
                     onChange={handleEditProductChange}
                     required
+                    disabled={!isEditMode}
                     style={{
                       width: '100%',
                       padding: '10px 16px',
@@ -1697,6 +1794,7 @@ const ProductManagement: React.FC = () => {
                     value={state.currentProduct.tenMau}
                     onChange={handleEditProductChange}
                     required
+                    readOnly={!isEditMode}
                     style={{
                       width: '100%',
                       padding: '10px 16px',
@@ -1720,6 +1818,7 @@ const ProductManagement: React.FC = () => {
                       min="2000"
                       max="2050"
                       required
+                      disabled={!isEditMode}
                       style={{
                         width: '100%',
                         padding: '10px 16px',
@@ -1742,6 +1841,7 @@ const ProductManagement: React.FC = () => {
                       min="0"
                       step="1000000"
                       required
+                      disabled={!isEditMode}
                       style={{
                         width: '100%',
                         padding: '10px 16px',
@@ -1762,6 +1862,7 @@ const ProductManagement: React.FC = () => {
                     value={state.currentProduct.moTa}
                     onChange={handleEditProductChange}
                     rows={4}
+                    readOnly={!isEditMode}
                     style={{
                       width: '100%',
                       padding: '10px 16px',
@@ -1782,6 +1883,7 @@ const ProductManagement: React.FC = () => {
                     value={state.currentProduct.thongSoKyThuat}
                     onChange={handleEditProductChange}
                     rows={5}
+                    readOnly={!isEditMode}
                     style={{
                       width: '100%',
                       padding: '10px 16px',
@@ -1803,6 +1905,7 @@ const ProductManagement: React.FC = () => {
                       name="ngayRaMat"
                       value={state.currentProduct.ngayRaMat}
                       onChange={handleEditProductChange}
+                      disabled={!isEditMode}
                       style={{
                         width: '100%',
                         padding: '10px 16px',
@@ -1821,6 +1924,7 @@ const ProductManagement: React.FC = () => {
                       name="conHang"
                       checked={state.currentProduct.conHang}
                       onChange={handleEditProductChange}
+                      disabled={!isEditMode}
                       style={{
                         width: 'auto',
                         marginRight: '8px',
@@ -1845,13 +1949,16 @@ const ProductManagement: React.FC = () => {
                         return (
                           <div key={image.id} className="product-image-item">
                             <div className="image-wrapper">
-                              <button 
-                                className="image-delete-btn" 
-                                onClick={() => deleteProductImage(image.id)}
-                                title="Xóa hình ảnh"
-                              >
-                                <i className="fas fa-times"></i>
-                              </button>
+                              {/* Nút xóa ảnh chỉ hiển thị khi edit */}
+                              {isEditMode && (
+                                <button 
+                                  className="image-delete-btn" 
+                                  onClick={() => deleteProductImage(image.id)}
+                                  title="Xóa hình ảnh"
+                                >
+                                  <i className="fas fa-times"></i>
+                                </button>
+                              )}
                               <ImageWithFallback 
                                 src={image.duongDanAnh}
                                 alt={`${state.currentProduct?.tenMau || 'Product'} ${index + 1}`}
@@ -1868,35 +1975,35 @@ const ProductManagement: React.FC = () => {
                     )}
                   </div>
                   
-                  <div className="upload-image-section">
-                    <input 
-                      type="file" 
-                      id="image-upload" 
-                      accept="image/*" 
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0] && state.currentProduct) {
-                          let imageType = 'noi_that';
-                          
-                          const isRSModel = state.currentProduct.tenMau.includes('RS') || 
-                                            state.currentProduct.tenDong.includes('RS');
-                          
-                          imageType = isRSModel ? 'interior' : 'noi_that';
-                          
-                          uploadProductImage(e.target.files[0], state.currentProduct.id, imageType)
-                            .then((result) => {
-                              if (result && state.currentProduct) {
-                                fetchProductImages(state.currentProduct.id).then(images => {
-                                  setState(prev => ({ ...prev, productImages: images || [] }));
-                                });
-                              }
-                            });
-                        }
-                      }} 
-                    />
-                    <label htmlFor="image-upload" className="btn-upload">
-                      <i className="fas fa-upload"></i> Tải lên hình ảnh mới
-                    </label>
-                  </div>
+                  {/* CHỈ HIỂN THỊ KHI EDIT */}
+                  {isEditMode && (
+                    <div className="upload-image-section">
+                      <input 
+                        type="file" 
+                        id="image-upload" 
+                        accept="image/*" 
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0] && state.currentProduct) {
+                            let imageType = 'noi_that';
+                            const isRSModel = state.currentProduct.tenMau.includes('RS') || 
+                                              state.currentProduct.tenDong.includes('RS');
+                            imageType = isRSModel ? 'interior' : 'noi_that';
+                            uploadProductImage(e.target.files[0], state.currentProduct.id, imageType)
+                              .then((result) => {
+                                if (result && state.currentProduct) {
+                                  fetchProductImages(state.currentProduct.id).then(images => {
+                                    setState(prev => ({ ...prev, productImages: images || [] }));
+                                  });
+                                }
+                              });
+                          }
+                        }} 
+                      />
+                      <label htmlFor="image-upload" className="btn-upload">
+                        <i className="fas fa-upload"></i> Tải lên hình ảnh mới
+                      </label>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="form-actions">
@@ -1917,22 +2024,24 @@ const ProductManagement: React.FC = () => {
                   >
                     Hủy bỏ
                   </button>
-                  <button 
-                    type="submit" 
-                    className="btn-save"
-                    style={{
-                      background: '#1890ff',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: 8,
-                      padding: '10px 20px',
-                      fontWeight: 600,
-                      fontSize: 15,
-                      boxShadow: '0 2px 8px 0 rgba(24,144,255,0.10)',
-                    }}
-                  >
-                    Cập nhật
-                  </button>
+                  {isEditMode && (
+                    <button 
+                      type="submit" 
+                      className="btn-save"
+                      style={{
+                        background: '#1890ff',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 8,
+                        padding: '10px 20px',
+                        fontWeight: 600,
+                        fontSize: 15,
+                        boxShadow: '0 2px 8px 0 rgba(24,144,255,0.10)',
+                      }}
+                    >
+                      Cập nhật
+                    </button>
+                  )}
                 </div>
               </form>
             </div>
@@ -1995,6 +2104,30 @@ const ProductManagement: React.FC = () => {
           </div>
         </div>
       )}
+
+      {hoveredRow && hoveredImgPos && (() => {
+        const imgUrl = productThumbnailMap[hoveredRow];
+        if (!imgUrl) return null;
+        // Điều chỉnh offset cho hợp lý
+        const offsetX = -350; // lệch phải nhẹ
+        const offsetY = -130; // lên trên một nửa chiều cao ảnh (90px/2)
+        return (
+          <div
+            className="product-hover-image"
+            style={{
+              position: 'fixed',
+              left: hoveredImgPos.x + offsetX,
+              top: hoveredImgPos.y + offsetY,
+              zIndex: 9999,
+              pointerEvents: 'none',
+              transform: `translate3d(0,0,0)`,
+              transition: 'transform 0.08s cubic-bezier(0.4,0,0.2,1)'
+            }}
+          >
+            <img src={imgUrl} alt="" />
+          </div>
+        );
+      })()}
     </div>
   );
 };

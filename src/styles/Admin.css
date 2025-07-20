@@ -842,28 +842,42 @@
   }
 
   .admin-pagination button {
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #ddd;
-    background-color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: #222; /* Đảm bảo màu đen cho icon/text */
-    font-size: 1.5rem; /* (nếu cần) */
-}
+    transition:
+      background 0.22s cubic-bezier(0.4,0,0.2,1),
+      color 0.22s cubic-bezier(0.4,0,0.2,1),
+      box-shadow 0.22s cubic-bezier(0.4,0,0.2,1),
+      transform 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+    box-shadow: 0 1px 4px 0 rgba(24,144,255,0.06);
+    will-change: transform, box-shadow;
+    background: #e0e0e0;
+    color: #1976d2;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+  }
 
   .admin-pagination button:hover:not(:disabled) {
-    background-color: #f5f5f5;
-    border-color: #bbb;
+    background: #1976d2;
+    color: #fff;
+    box-shadow: 0 4px 16px 0 rgba(24,144,255,0.13);
+    transform: translateY(-2px) scale(1.08);
+    z-index: 1;
+  }
+
+  .admin-pagination button:active:not(:disabled) {
+    background: #1565c0;
+    color: #fff;
+    transform: scale(0.96);
+    box-shadow: 0 2px 8px 0 rgba(24,144,255,0.10);
   }
 
   .admin-pagination button:disabled {
-    cursor: not-allowed;
     opacity: 0.5;
+    cursor: not-allowed;
+    background: #e0e0e0;
+    color: #888;
+    box-shadow: none;
+    transform: none;
   }
 
   .page-info {
@@ -1259,15 +1273,18 @@
     gap: 5px;
     padding: 8px 12px;
     background-color: #1976d2;
-    color: white;
+    color: #fff !important; /* Đảm bảo chữ trắng luôn luôn */
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
     transition: background-color 0.2s;
   }
-
+  .btn-upload * {
+    color: #fff !important; /* Đảm bảo mọi thẻ con cũng trắng */
+  }
   .btn-upload:hover {
     background-color: #1565c0;
+    color: #fff !important;
   }
 
   /* Make modal larger for product details */
@@ -2372,6 +2389,245 @@
 .ant-menu-item:hover .anticon,
 .ant-menu-item-selected .anticon {
   color: #43a047 !important;
+}
+
+/* ====== PROFESSIONAL UI ENHANCEMENTS FOR USER MANAGEMENT ====== */
+
+/* Table row hover effect */
+.admin-section table tbody tr {
+  transition:
+    background 0.32s cubic-bezier(0.4,0,0.2,1),
+    color 0.32s cubic-bezier(0.4,0,0.2,1),
+    box-shadow 0.32s cubic-bezier(0.4,0,0.2,1),
+    border-radius 0.32s cubic-bezier(0.4,0,0.2,1),
+    margin 0.32s cubic-bezier(0.4,0,0.2,1);
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: none;
+  z-index: 1;
+  position: relative;
+}
+
+/* Tạo khoảng cách giữa các dòng */
+.admin-section table tbody tr:not(:last-child) {
+  margin-bottom: 12px;
+  /* Để margin hoạt động, cần display: block hoặc flex */
+  display: table-row;
+}
+
+/* Hover/active giống menu nav */
+.admin-section table tbody tr:hover,
+.admin-section table tbody tr:focus,
+.admin-section table tbody tr.active {
+  background: #fff !important;
+  color: #222 !important;
+  box-shadow: 0 4px 24px 0 rgba(24,144,255,0.08);
+  border-radius: 28px;
+  z-index: 2;
+  /* Không scale, không outline, không filter */
+}
+
+/* Table header style */
+.admin-section table thead th {
+  background: #f5f7fa;
+  color: #1976d2;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border-bottom: 2px solid #e3e8ee;
+  font-size: 15px;
+}
+
+/* Input, select, button focus effect */
+.admin-section input:focus,
+.admin-section select:focus {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24,144,255,0.12);
+  outline: none;
+  background: #f0f7ff;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+/* Button animation */
+.btn-add, .btn-save, .btn-cancel, .btn-delete {
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.18s;
+  box-shadow: 0 2px 8px 0 rgba(24,144,255,0.08);
+}
+.btn-add:active, .btn-save:active, .btn-cancel:active, .btn-delete:active {
+  transform: scale(0.97);
+}
+
+/* Modal animation */
+.admin-modal .admin-modal-content {
+  animation: modalPopIn 0.45s cubic-bezier(0.23, 1, 0.32, 1);
+}
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modal header style */
+.admin-modal-header {
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(90deg, #1890ff 0%, #43a047 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px 0 rgba(24,144,255,0.08);
+}
+.admin-modal-header h2 {
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* Modal close button hover */
+.admin-modal-close {
+  transition: color 0.2s, transform 0.18s;
+}
+.admin-modal-close:hover {
+  color: #ff4d4f;
+  transform: rotate(90deg) scale(1.2);
+}
+
+/* Form group label */
+.form-group label, .form-row .form-group label {
+  font-weight: 600;
+  color: #1976d2;
+  letter-spacing: 0.01em;
+}
+
+/* Form actions button spacing */
+.form-actions button {
+  margin-right: 8px;
+}
+
+/* Pagination button animation */
+.admin-pagination button {
+  transition: background 0.18s, color 0.18s, transform 0.18s;
+}
+.admin-pagination button:active {
+  transform: scale(0.95);
+}
+
+/* Add subtle shadow to modal overlay */
+.admin-modal {
+  box-shadow: 0 8px 32px 0 rgba(24,144,255,0.12);
+  backdrop-filter: blur(2px);
+}
+
+/* Add a subtle fade-in for the whole admin-section */
+.admin-section {
+  animation: fadeInSection 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+@keyframes fadeInSection {
+  from { opacity: 0; transform: translateY(30px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
+/* Custom scrollbar for table */
+.admin-section table {
+  scrollbar-width: thin;
+  scrollbar-color: #1890ff #f5f7fa;
+}
+.admin-section table::-webkit-scrollbar {
+  height: 8px;
+  background: #f5f7fa;
+}
+.admin-section table::-webkit-scrollbar-thumb {
+  background: #1890ff;
+  border-radius: 4px;
+}
+
+/* Subtle highlight for selected row (if needed in the future) */
+.admin-section table tbody tr.selected {
+  background: #e3f2fd !important;
+  box-shadow: 0 2px 12px 0 rgba(24,144,255,0.12);
+}
+
+/* End of professional UI enhancements */
+
+@keyframes tableRowFadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-32px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.table-row-animate {
+  animation: tableRowFadeInDown 0.55s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes tableRowFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.table-row-fadein {
+  animation: tableRowFadeIn 0.45s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* Tạo khoảng cách giữa các dòng như menu nav */
+.admin-section table {
+  border-collapse: separate;
+  border-spacing: 0 12px; /* khoảng cách giữa các dòng */
+}
+
+.admin-section table tbody tr {
+  transition:
+    background 0.3s cubic-bezier(0.4,0,0.2,1),
+    color 0.3s cubic-bezier(0.4,0,0.2,1),
+    box-shadow 0.3s cubic-bezier(0.4,0,0.2,1),
+    border-radius 0.3s cubic-bezier(0.4,0,0.2,1);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: none;
+  z-index: 1;
+  position: relative;
+}
+
+.admin-section table tbody tr:hover,
+.admin-section table tbody tr:focus,
+.admin-section table tbody tr.active {
+  background: #fff !important;
+  color: #222 !important;
+  box-shadow: 0 4px 24px 0 rgba(24,144,255,0.08);
+  border-radius: 24px;
+  z-index: 2;
+  /* Không scale, không outline, không filter */
+}
+
+.product-hover-image {
+  background: #fff;
+  box-shadow: 0 8px 32px 0 rgba(24,144,255,0.18);
+  border-radius: 16px;
+  padding: 8px;
+  animation: fadeInImg 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform;
+}
+.product-hover-image img {
+  width: 140px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+}
+@keyframes fadeInImg {
+  from { opacity: 0; transform: scale(0.95);}
+  to { opacity: 1; transform: scale(1);}
 }
 
 

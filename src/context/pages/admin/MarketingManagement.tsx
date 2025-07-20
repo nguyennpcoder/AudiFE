@@ -422,8 +422,16 @@ const MarketingManagement: React.FC = () => {
                     <td colSpan={7} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có dữ liệu</td>
                   </tr>
                 ) : (
-                  currentKhuyenMai.map((khuyenMai) => (
-                    <tr key={khuyenMai.id} style={{ background: '#fff', borderBottom: '1px solid #f0f0f0' }}>
+                  currentKhuyenMai.map((khuyenMai, idx) => (
+                    <tr
+                      key={khuyenMai.id}
+                      className="table-row-fadein"
+                      style={{
+                        animationDelay: `${idx * 120}ms`,
+                        background: '#fff',
+                        borderBottom: '1px solid #f0f0f0'
+                      }}
+                    >
                       <td style={{ padding: '10px 8px' }}>
                         <div>
                           <div style={{ fontWeight: 500, marginBottom: '4px' }}>{khuyenMai.ten}</div>
