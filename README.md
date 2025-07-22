@@ -110,7 +110,7 @@ Designed in Audi's style:
 ### 🔐 Login page
 ![Audi Dashboard Demo](public/demo/page_login.png)
 ### 📩 Forgot password OTP to email
-![Audi Dashboard Demo](public/demo/forgot_pass.png)
+![Audi Dashboard Demo](public/demo/otp_email.png)
 ### 🌝 Light mode
 ![Audi Dashboard Demo](public/demo/light_mode1.png)
 ![Audi Dashboard Demo](public/demo/light_mode2.png)
