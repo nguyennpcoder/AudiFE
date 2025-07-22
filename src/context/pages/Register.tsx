@@ -9,6 +9,7 @@ import logo from '../../assets/logo.svg';
 import backgroundVideo from '../../assets/audivideo.mp4';
 // Import message từ antd
 import { message as antdMessage } from 'antd';
+import { CameraOutlined } from '@ant-design/icons';
 
 // Import Firebase authentication functions
 import { 
@@ -36,6 +37,9 @@ const Register: React.FC = () => {
   const navigate = useNavigate();
   const { setFirebaseUser } = useAuth();
   const { setPendingMessage } = useNotification();
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [isAvatarHover, setIsAvatarHover] = useState(false);
 
   // Khởi tạo message config khi component mount
   useEffect(() => {
@@ -52,6 +56,14 @@ const Register: React.FC = () => {
       setConfirmPassword(value);
     } else {
       setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
     }
   };
 
@@ -75,7 +87,12 @@ const Register: React.FC = () => {
     setError('');
 
     try {
-      const response = await registerApi(formData);
+      // Không upload avatar trước!
+      // Chỉ truyền file avatar vào payload đăng ký:
+      const registerPayload = { ...formData, avatar: avatarFile }; // avatarFile là File object
+      console.log('Register payload:', registerPayload); // PHẢI có avatar
+
+      const response = await registerApi(registerPayload);
       
       if (response.success) {
         // Hiển thị thông báo ngay tại trang hiện tại
@@ -186,6 +203,58 @@ const Register: React.FC = () => {
           <h2>Đăng Ký Tài Khoản</h2>
           <p>Tạo tài khoản để khám phá thế giới Audi</p>
           
+          {/* Avatar Upload UI đặt ở đây */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
+            <label
+              htmlFor="avatar"
+              className={`avatar-upload-label${avatarPreview ? ' has-avatar' : ''}${isAvatarHover ? ' hover' : ''}`}
+              onMouseEnter={() => setIsAvatarHover(true)}
+              onMouseLeave={() => setIsAvatarHover(false)}
+              style={{
+                position: 'relative',
+                width: 100,
+                height: 100,
+                borderRadius: '50%',
+                overflow: 'hidden',
+                cursor: 'pointer',
+                boxShadow: '0 2px 12px 0 rgba(24,144,255,0.10)',
+                background: '#f5f5f5',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <img
+                src={avatarPreview || '/avatar-default.png'}
+                alt=""
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  borderRadius: '50%',
+                  display: 'block',
+                  transition: 'filter 0.2s',
+                  filter: avatarPreview ? 'none' : 'grayscale(1) opacity(0.7)',
+                }}
+              />
+              {(!avatarPreview || isAvatarHover) && (
+                <div className={`avatar-upload-overlay`}>
+                  <CameraOutlined className={`avatar-upload-icon${isAvatarHover ? ' show' : ''}`} />
+                </div>
+              )}
+              <input
+                type="file"
+                id="avatar"
+                name="avatar"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                style={{ display: 'none' }}
+              />
+            </label>
+            <div style={{ marginTop: 8, color: '#888', fontSize: 13 }}>Chọn ảnh đại diện</div>
+          </div>
+          {/* Kết thúc avatar upload UI */}
+
           {error && <div className="auth-error">{error}</div>}
           
           <form onSubmit={handleSubmit} className="auth-form">

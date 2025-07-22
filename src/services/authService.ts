@@ -20,6 +20,8 @@ export interface RegisterForm {
   postalCode?: string;
   country?: string;
   role?: string;
+
+  avatar?: string | File | null;
 }
 
 // AuthResponse interface
@@ -127,24 +129,31 @@ export const loginApi = async (data: LoginForm): Promise<AuthResponse> => {
 
 export const registerApi = async (data: RegisterForm): Promise<AuthResponse> => {
   try {
-    // Transform to match backend expected format
-    const backendData = {
-      email: data.email,
-      matKhau: data.password,
-      ho: data.lastName,
-      ten: data.firstName,
-      soDienThoai: data.phone,
-      diaChi: data.address || '',
-      thanhPho: data.city || '',
-      tinh: data.province || '',
-      maBuuDien: data.postalCode || '',
-      quocGia: data.country || 'Việt Nam',
-      vaiTro: data.role || 'khach_hang'
-    };
+    const formData = new FormData();
+    formData.append('email', data.email);
+    formData.append('matKhau', data.password);
+    formData.append('ho', data.lastName);
+    formData.append('ten', data.firstName);
+    formData.append('soDienThoai', data.phone);
+    formData.append('diaChi', data.address || '');
+    formData.append('thanhPho', data.city || '');
+    formData.append('tinh', data.province || '');
 
-    console.log('Sending registration data:', backendData);
-    const response = await axios.post(`${API_URL}/dang-ky`, backendData);
-    
+    // BỔ SUNG 2 DÒNG NÀY:
+    formData.append('maBuuDien', data.postalCode || '');
+    formData.append('quocGia', data.country || 'Việt Nam');
+
+    // avatar
+    if (data.avatar && (data.avatar as any) instanceof File) {
+      formData.append('avatar', data.avatar);
+    } else {
+      // Nếu không có file, backend sẽ dùng avatar mặc định
+    }
+
+    const response = await axios.post(`${API_URL}/dang-ky`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
     return {
       success: true,
       message: response.data.message || 'Đăng ký thành công',
@@ -153,6 +162,8 @@ export const registerApi = async (data: RegisterForm): Promise<AuthResponse> => 
   } catch (error) {
     console.error('Registration error:', error);
     if (axios.isAxiosError(error) && error.response) {
+      // Thêm log chi tiết
+      console.error('Backend error response:', error.response.data);
       return {
         success: false,
         message: error.response.data.message || 'Đăng ký thất bại'
