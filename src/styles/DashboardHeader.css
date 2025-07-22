@@ -60,6 +60,284 @@
   padding: 20px !important;
 }
 
+/* 4-Chart Grid Responsive Styles */
+.dashboard-charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+  height: 1200px;
+  padding: 0 32px;
+}
+
+.dashboard-chart-item {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.dashboard-chart-item:hover {
+  box-shadow: 0 8px 24px 0 rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+}
+
+.dashboard-chart-content {
+  padding: 32px 40px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-chart-footer {
+  padding: 28px 40px 36px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-chart-title {
+  font-weight: 700;
+  fontSize: 24px;
+  color: #1e293b;
+  margin: 0;
+  letterSpacing: -0.5px;
+}
+
+.dashboard-chart-subtitle {
+  color: #64748b;
+  fontSize: 15px;
+  margin: 0;
+  lineHeight: 1.5;
+}
+
+/* iPad Landscape (1024px - 1366px) */
+@media (max-width: 1366px) and (min-width: 1025px) {
+  .dashboard-charts-grid {
+    height: 1000px;
+    gap: 20px;
+    padding: 0 24px;
+  }
+  
+  .dashboard-chart-content {
+    padding: 28px 32px;
+  }
+  
+  .dashboard-chart-footer {
+    padding: 24px 32px 28px 32px;
+  }
+  
+  .dashboard-chart-title {
+    fontSize: 20px;
+  }
+  
+  .dashboard-chart-subtitle {
+    fontSize: 14px;
+  }
+}
+
+/* iPad Portrait (768px - 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .dashboard-charts-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    height: auto;
+    gap: 18px;
+    padding: 0 20px;
+  }
+  
+  .dashboard-chart-item {
+    min-height: 400px;
+    border-radius: 14px;
+  }
+  
+  .dashboard-chart-content {
+    padding: 24px 28px;
+    min-height: 200px;
+  }
+  
+  .dashboard-chart-footer {
+    padding: 20px 28px 24px 28px;
+  }
+  
+  .dashboard-chart-title {
+    fontSize: 18px;
+  }
+  
+  .dashboard-chart-subtitle {
+    fontSize: 13px;
+  }
+  
+  /* Stats grid adjustments for iPad */
+  .dashboard-chart-footer .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
+    gap: 12px !important;
+  }
+  
+  .dashboard-chart-footer .stats-item {
+    padding: 12px 8px !important;
+    font-size: 18px !important;
+  }
+  
+  .dashboard-chart-footer .stats-label {
+    fontSize: 11px !important;
+  }
+}
+
+/* iPhone and small tablets (max-width: 768px) */
+@media (max-width: 768px) {
+  .dashboard-charts-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, auto);
+    height: auto;
+    gap: 16px;
+    padding: 0 16px;
+    margin-bottom: 24px;
+  }
+  
+  .dashboard-chart-item {
+    min-height: 350px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.08);
+  }
+  
+  .dashboard-chart-content {
+    padding: 20px 24px;
+    min-height: 180px;
+  }
+  
+  .dashboard-chart-footer {
+    padding: 16px 24px 20px 24px;
+  }
+  
+  .dashboard-chart-title {
+    fontSize: 16px;
+    marginBottom: 4px;
+  }
+  
+  .dashboard-chart-subtitle {
+    fontSize: 12px;
+    lineHeight: 1.4;
+  }
+  
+  /* Stats grid for mobile */
+  .dashboard-chart-footer .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  .dashboard-chart-footer .stats-item {
+    padding: 10px 8px !important;
+    text-align: center !important;
+    border-radius: 12px !important;
+  }
+  
+  .dashboard-chart-footer .stats-value {
+    fontSize: 16px !important;
+    font-weight: 700 !important;
+    margin-bottom: 2px !important;
+  }
+  
+  .dashboard-chart-footer .stats-label {
+    fontSize: 10px !important;
+    font-weight: 500 !important;
+  }
+  
+  /* Legend adjustments for mobile */
+  .dashboard-chart-footer .legend-container {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    justify-content: center !important;
+  }
+  
+  .dashboard-chart-footer .legend-item {
+    fontSize: 11px !important;
+  }
+  
+  .dashboard-chart-footer .legend-dot {
+    width: 8px !important;
+    height: 8px !important;
+  }
+  
+  /* Badge adjustments for mobile */
+  .dashboard-chart-footer .chart-badge {
+    padding: 4px 8px !important;
+    fontSize: 10px !important;
+    border-radius: 12px !important;
+  }
+  
+  /* Header section adjustments */
+  .dashboard-chart-footer .chart-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  .dashboard-chart-footer .chart-header-left {
+    width: 100% !important;
+  }
+  
+  .dashboard-chart-footer .chart-header-right {
+    align-self: flex-end !important;
+  }
+}
+
+/* iPhone SE and very small screens (max-width: 480px) */
+@media (max-width: 480px) {
+  .dashboard-charts-grid {
+    padding: 0 12px;
+    gap: 12px;
+  }
+  
+  .dashboard-chart-item {
+    min-height: 320px;
+    border-radius: 10px;
+  }
+  
+  .dashboard-chart-content {
+    padding: 16px 20px;
+    min-height: 160px;
+  }
+  
+  .dashboard-chart-footer {
+    padding: 12px 20px 16px 20px;
+  }
+  
+  .dashboard-chart-title {
+    fontSize: 14px;
+  }
+  
+  .dashboard-chart-subtitle {
+    fontSize: 11px;
+  }
+  
+  /* Very compact stats for small phones */
+  .dashboard-chart-footer .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  
+  .dashboard-chart-footer .stats-item {
+    padding: 8px 6px !important;
+  }
+  
+  .dashboard-chart-footer .stats-value {
+    fontSize: 14px !important;
+  }
+  
+  .dashboard-chart-footer .stats-label {
+    fontSize: 9px !important;
+  }
+}
+
+/* Responsive adjustments for existing styles */
 @media (max-width: 1024px) {
   .dashboard-cards {
     gap: 16px;
@@ -522,7 +800,8 @@
 .admin-theme-root[data-theme='dark'] .admin-section.chart-section,
 /* .admin-theme-root[data-theme='dark'] .audi-projects-row-head, */
 .admin-theme-root[data-theme='dark'] .audi-dashboard-bottom,
-.admin-theme-root[data-theme='dark'] .dashboard-cards {
+.admin-theme-root[data-theme='dark'] .dashboard-cards,
+.admin-theme-root[data-theme='dark'] .dashboard-chart-item {
   background: #23272f !important;
   color: #FFD600 !important;
   /* box-shadow: 0 2px 12px 0 rgba(0,0,0,0.7) !important;
@@ -533,8 +812,13 @@
 .admin-theme-root[data-theme='dark'] .audi-orders-title,
 .admin-theme-root[data-theme='dark'] .audi-projects-progress,
 .admin-theme-root[data-theme='dark'] .audi-orders-progress,
-.admin-theme-root[data-theme='dark'] .audi-order-title {
+.admin-theme-root[data-theme='dark'] .audi-order-title,
+.admin-theme-root[data-theme='dark'] .dashboard-chart-title {
   color: #FFD600 !important;
+}
+
+.admin-theme-root[data-theme='dark'] .dashboard-chart-subtitle {
+  color: #fff !important;
 }
 
 .admin-theme-root[data-theme='dark'] .audi-projects-row-head {
@@ -633,4 +917,32 @@
 }
 .admin-theme-root[data-theme='dark'] .anticon-bulb svg {
   fill: #FFD600 !important;
+}
+
+/* Responsive grid for dashboard charts */
+.dashboard-grid {
+  transition: all 0.3s ease;
+}
+
+/* Stack charts in a single column on smaller screens */
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Adjust chart spacing on mobile */
+  .dashboard-grid > div {
+    margin-bottom: 16px;
+  }
+}
+
+/* Ensure charts take full width on mobile */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    padding: 0 16px !important;
+  }
+  
+  .dashboard-grid > div {
+    min-width: 100%;
+  }
 }

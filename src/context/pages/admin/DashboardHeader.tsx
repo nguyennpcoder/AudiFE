@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Layout, Breadcrumb, Badge, Button } from 'antd';
 import { BellOutlined, DollarOutlined, UsergroupAddOutlined, HeartOutlined, LockOutlined, MenuOutlined, BulbOutlined, BulbFilled } from '@ant-design/icons';
 import '../../../styles/DashboardHeader.css';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ComposedChart, Line, LineChart } from 'recharts';
 import { fetchSampleCarModels, CarModel } from '../../../services/carModelService';
 import { fetchSalesStaff, User, buildAvatarUrl } from '../../../services/authService';
 import { useTheme } from '../../ThemeContext';
@@ -167,8 +167,8 @@ const DashboardHeader: React.FC<any> = ({
         className="dashboard-cards"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 16,
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', // Giảm minmax từ 200px xuống 160px
+          gap: 10, // Giảm gap từ 16 xuống 10
           marginBottom: 32,
         }}
       >
@@ -176,7 +176,7 @@ const DashboardHeader: React.FC<any> = ({
         <div style={{
           background: 'linear-gradient(135deg, #ffffff 0%, #f8faff 100%)',
           borderRadius: 16,
-          padding: '20px',
+          padding: '12px', // Giảm padding từ 20px xuống 12px
           position: 'relative',
           overflow: 'hidden',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
@@ -258,7 +258,7 @@ const DashboardHeader: React.FC<any> = ({
         <div style={{
           background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)',
           borderRadius: 16,
-          padding: '20px',
+          padding: '12px', // Giảm padding
           position: 'relative',
           overflow: 'hidden',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
@@ -342,7 +342,7 @@ const DashboardHeader: React.FC<any> = ({
         <div style={{
           background: 'linear-gradient(135deg, #ffffff 0%, #fef7ff 100%)',
           borderRadius: 16,
-          padding: '20px',
+          padding: '12px', // Giảm padding
           position: 'relative',
           overflow: 'hidden',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
@@ -424,7 +424,7 @@ const DashboardHeader: React.FC<any> = ({
         <div style={{
           background: 'linear-gradient(135deg, #ffffff 0%, #fffbeb 100%)',
           borderRadius: 16,
-          padding: '20px',
+          padding: '12px', // Giảm padding
           position: 'relative',
           overflow: 'hidden',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
@@ -502,668 +502,740 @@ const DashboardHeader: React.FC<any> = ({
           </div>
         </div>
       </div>
-      {/* 2 biểu đồ bên dưới */}
-      <div style={{
-        display: 'flex',
-        gap: 10,
-        flexWrap: 'wrap',
-        padding: '0 32px',
-        marginBottom: 32,
-        marginTop: -20,
-      }}>
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          flex: 0.8,
-          gap: 10
-        }}>
-          {/* Biểu đồ Bar */}
-          <div style={{
-            minWidth: 340,
-            borderRadius: 24,
-            padding: '10px',
-            marginBottom: 24,
-          }}>
-          <div style={{
-            background: '#fff',
-            borderRadius: 16,
-            overflow: 'hidden',
-            boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
-            height: '95%',
-            display: 'flex',
-            flexDirection: 'column'
-          }}>
-            {/* Phần biểu đồ Bar hiện đại */}
-            <div style={{
-              padding: '32px 40px',
-              background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={data}>
-                  <defs>
-                    <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.9}/>
-                      <stop offset="95%" stopColor="#16a34a" stopOpacity={0.6}/>
-                    </linearGradient>
-                    <filter id="barShadow" x="-50%" y="-50%" width="200%" height="200%">
-                      <feDropShadow dx="3" dy="4" stdDeviation="5" floodOpacity="0.12"/>
-                    </filter>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(34, 197, 94, 0.1)" />
-                  <XAxis 
-                    dataKey="name" 
-                    stroke="#6b7280" 
-                    fontSize={12}
-                    fontWeight={500}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis 
-                    stroke="#6b7280" 
-                    fontSize={12}
-                    fontWeight={500}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar 
-                    dataKey="users" 
-                    fill="url(#colorUsers)" 
-                    radius={[8, 8, 0, 0]}
-                    filter="url(#barShadow)"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            
-            {/* Phần content Bar Chart hiện đại */}
-            <div style={{ 
-              padding: '28px 40px 36px 40px',
-              background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
-              borderTop: 'none',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
-              {/* Decorative elements */}
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                right: 0,
-                width: '100px',
-                height: '100px',
-                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(22, 163, 74, 0.04) 100%)',
-                borderRadius: '50%',
-                transform: 'translate(30px, -30px)',
-                zIndex: 1
-              }} />
-              <div style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                width: '60px',
-                height: '60px',
-                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(5, 150, 105, 0.04) 100%)',
-                borderRadius: '50%',
-                transform: 'translate(-15px, 15px)',
-                zIndex: 1
-              }} />
-              
-              <div style={{ position: 'relative', zIndex: 2 }}>
-                {/* Header section */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
-                  <div>
-                    <div style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: 12, 
-                      marginBottom: 8 
-                    }}>
-                      <div style={{
-                        width: 4,
-                        height: 24,
-                        background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                        borderRadius: 2
-                      }} />
-                      <h3 style={{ 
-                        fontWeight: 700, 
-                        fontSize: 24, 
-                        color: '#1e293b', 
-                        margin: 0,
-                        letterSpacing: '-0.5px'
-                      }}>Doanh số theo dòng xe</h3>
-                    </div>
-                    <p style={{ 
-                      color: '#64748b', 
-                      fontSize: 15, 
-                      margin: 0,
-                      lineHeight: 1.5
-                    }}>
-                      Phân tích hiệu suất các dòng xe hàng đầu
-                    </p>
-                  </div>
-                  <div style={{
-                    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                    color: '#fff',
-                    padding: '8px 16px',
-                    borderRadius: 20,
-                    fontSize: 13,
-                    fontWeight: 600,
-                    boxShadow: '0 4px 12px rgba(34, 197, 94, 0.25)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4
-                  }}>
-                    <span>🚗</span> +24% tăng trưởng
-                  </div>
-                </div>
-                
-                {/* Stats grid */}
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
-                  gap: 20,
-                  marginBottom: 20
-                }}>
-                  <div style={{
-                    textAlign: 'center',
-                    padding: '16px 12px',
-                    background: 'rgba(34, 197, 94, 0.08)',
-                    borderRadius: 16,
-                    border: '1px solid rgba(34, 197, 94, 0.12)'
-                  }}>
-                    <div style={{ fontSize: 22, fontWeight: 700, color: '#22c55e', marginBottom: 4 }}>2,458</div>
-                    <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Tổng xe bán</div>
-                  </div>
-                  <div style={{
-                    textAlign: 'center',
-                    padding: '16px 12px',
-                    background: 'rgba(16, 185, 129, 0.08)',
-                    borderRadius: 16,
-                    border: '1px solid rgba(16, 185, 129, 0.12)'
-                  }}>
-                    <div style={{ fontSize: 22, fontWeight: 700, color: '#10b981', marginBottom: 4 }}>+327</div>
-                    <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Đơn hàng mới</div>
-                  </div>
-                  <div style={{
-                    textAlign: 'center',
-                    padding: '16px 12px',
-                    background: 'rgba(5, 150, 105, 0.08)',
-                    borderRadius: 16,
-                    border: '1px solid rgba(5, 150, 105, 0.12)'
-                  }}>
-                    <div style={{ fontSize: 22, fontWeight: 700, color: '#059669', marginBottom: 4 }}>82%</div>
-                    <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Tỷ lệ hoàn thành</div>
-                  </div>
-                </div>
-                
-                {/* Performance indicators */}
-                <div style={{ 
-                  display: 'flex', 
-                  flexWrap: 'wrap', 
-                  gap: 16, 
-                  marginTop: 16,
-                  paddingTop: 16,
-                  borderTop: '1px solid rgba(0,0,0,0.06)', marginBottom:20
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{
-                      width: 12,
-                      height: 12,
-                      backgroundColor: '#22c55e',
-                      borderRadius: '50%',
-                      boxShadow: '0 2px 4px rgba(34, 197, 94, 0.3)'
-                    }} />
-                    <span style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>Doanh số hiện tại</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{
-                      width: 12,
-                      height: 12,
-                      backgroundColor: '#16a34a',
-                      borderRadius: '50%',
-                      boxShadow: '0 2px 4px rgba(22, 163, 74, 0.3)'
-                    }} />
-                    <span style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>Mục tiêu tháng</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          </div>
 
-          {/* Biểu đồ Pie cho khuyến mãi */}
-          <div style={{
-            minWidth: 400,
-            borderRadius: 24,
-            padding: '10px',
-            marginBottom: 24,
-            marginTop: -70,
-          }}>
-            <div style={{
-              background: '#fff',
-              borderRadius: 16,
-              overflow: 'hidden',
-              boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
-              height: '95%',
-              display: 'flex',
-              flexDirection: 'column'
+      {/* 4 biểu đồ với layout 2x2 cân đối - GIỮ NGUYÊN TẤT CẢ CONTENT */}
+     {/* 4 biểu đồ với layout 2x2 cân đối - ĐÃ ĐỔI VỊ TRÍ */}
+<div
+  style={{
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gridTemplateRows: '1fr 1fr',
+    gap: 24,
+    marginLeft: '45px',
+    marginBottom: 32,
+    height: '1200px',
+  }}
+>
+  {/* Biểu đồ Bar - Vị trí 1 (trên trái) - GIỮ NGUYÊN */}
+  <div style={{
+    background: '#fff',
+    borderRadius: 16,
+    overflow: 'hidden',
+    boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+    display: 'flex',
+    flexDirection: 'column'
+  }}>
+    {/* Phần biểu đồ Bar hiện đại */}
+    <div style={{
+      padding: '32px 40px',
+      background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
+      flex: 1,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data}>
+          <defs>
+            <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#22c55e" stopOpacity={0.9}/>
+              <stop offset="95%" stopColor="#16a34a" stopOpacity={0.6}/>
+            </linearGradient>
+            <filter id="barShadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="3" dy="4" stdDeviation="5" floodOpacity="0.12"/>
+            </filter>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(34, 197, 94, 0.1)" />
+          <XAxis 
+            dataKey="name" 
+            stroke="#6b7280" 
+            fontSize={12}
+            fontWeight={500}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis 
+            stroke="#6b7280" 
+            fontSize={12}
+            fontWeight={500}
+            tickLine={false}
+            axisLine={false}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Bar 
+            dataKey="users" 
+            fill="url(#colorUsers)" 
+            radius={[8, 8, 0, 0]}
+            filter="url(#barShadow)"
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+    
+    {/* Phần content Bar Chart hiện đại */}
+    <div style={{ 
+      padding: '28px 40px 36px 40px',
+      background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
+      borderTop: 'none',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Decorative elements */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: '100px',
+        height: '100px',
+        background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(22, 163, 74, 0.04) 100%)',
+        borderRadius: '50%',
+        transform: 'translate(30px, -30px)',
+        zIndex: 1
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        width: '60px',
+        height: '60px',
+        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(5, 150, 105, 0.04) 100%)',
+        borderRadius: '50%',
+        transform: 'translate(-15px, 15px)',
+        zIndex: 1
+      }} />
+      
+      <div style={{ position: 'relative', zIndex: 2 }}>
+        {/* Header section */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+          <div>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 12, 
+              marginBottom: 8 
             }}>
-              {/* Phần biểu đồ pie */}
               <div style={{
-                padding: '32px 40px',
-                background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <ResponsiveContainer width="100%" height={350}>
-                  <PieChart>
-                    <defs>
-                      <filter id="pieShade" x="-50%" y="-50%" width="200%" height="200%">
-                        <feDropShadow dx="4" dy="4" stdDeviation="6" floodOpacity="0.15"/>
-                      </filter>
-                    </defs>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={120}
-                      innerRadius={50}
-                      paddingAngle={8}
-                      dataKey="value"
-                      filter="url(#pieShade)"
-                    >
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              
-              {/* Phần content hiện đại */}
-              <div style={{ 
-                padding: '28px 40px 36px 40px',
-                background: 'linear-gradient(135deg, #ffffff 0%, #fafbff 100%)',
-                borderTop: 'none',
-                position: 'relative',
-                overflow: 'hidden',
-                marginBottom:20
-              }}>
-                {/* Decorative elements */}
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  width: '120px',
-                  height: '120px',
-                  background: 'linear-gradient(135deg, rgba(136, 132, 216, 0.08) 0%, rgba(130, 202, 157, 0.05) 100%)',
-                  borderRadius: '50%',
-                  transform: 'translate(40px, -40px)',
-                  zIndex: 1
-                }} />
-                <div style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  width: '80px',
-                  height: '80px',
-                  background: 'linear-gradient(135deg, rgba(255, 198, 88, 0.06) 0%, rgba(255, 124, 124, 0.04) 100%)',
-                  borderRadius: '50%',
-                  transform: 'translate(-20px, 20px)',
-                  zIndex: 1
-                }} />
-                
-                <div style={{ position: 'relative', zIndex: 2 }}>
-                  {/* Header section */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
-                    <div>
-                      <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: 12, 
-                        marginBottom: 8 
-                      }}>
-                        <div style={{
-                          width: 4,
-                          height: 24,
-                          background: 'linear-gradient(135deg, #8884d8 0%, #82ca9d 100%)',
-                          borderRadius: 2
-                        }} />
-                        <h3 style={{ 
-                          fontWeight: 700, 
-                          fontSize: 24, 
-                          color: '#1e293b', 
-                          margin: 0,
-                          letterSpacing: '-0.5px'
-                        }}>Chương trình khuyến mãi</h3>
-                      </div>
-                      <p style={{ 
-                        color: '#64748b', 
-                        fontSize: 15, 
-                        margin: 0,
-                        lineHeight: 1.5
-                      }}>
-                        Theo dõi hiệu quả các chiến dịch marketing
-                      </p>
-                    </div>
-                    <div style={{
-                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                      color: '#fff',
-                      padding: '8px 16px',
-                      borderRadius: 20,
-                      fontSize: 13,
-                      fontWeight: 600,
-                      boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 4
-                    }}>
-                      <span>📈</span> +15% tăng trưởng
-                    </div>
-                  </div>
-                  
-                  {/* Stats grid */}
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
-                    gap: 20,
-                    marginBottom: 20
-                  }}>
-                    <div style={{
-                      textAlign: 'center',
-                      padding: '16px 12px',
-                      background: 'rgba(136, 132, 216, 0.08)',
-                      borderRadius: 16,
-                      border: '1px solid rgba(136, 132, 216, 0.12)'
-                    }}>
-                      <div style={{ fontSize: 22, fontWeight: 700, color: '#8884d8', marginBottom: 4 }}>1,000</div>
-                      <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Tổng lượt tham gia</div>
-                    </div>
-                    <div style={{
-                      textAlign: 'center',
-                      padding: '16px 12px',
-                      background: 'rgba(130, 202, 157, 0.08)',
-                      borderRadius: 16,
-                      border: '1px solid rgba(130, 202, 157, 0.12)'
-                    }}>
-                      <div style={{ fontSize: 22, fontWeight: 700, color: '#82ca9d', marginBottom: 4 }}>+120</div>
-                      <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Khách hàng mới</div>
-                    </div>
-                    <div style={{
-                      textAlign: 'center',
-                      padding: '16px 12px',
-                      background: 'rgba(255, 198, 88, 0.08)',
-                      borderRadius: 16,
-                      border: '1px solid rgba(255, 198, 88, 0.12)'
-                    }}>
-                      <div style={{ fontSize: 22, fontWeight: 700, color: '#ffc658', marginBottom: 4 }}>75%</div>
-                      <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Tỷ lệ chuyển đổi</div>
-                    </div>
-                  </div>
-                  
-                  {/* Legend */}
-                  <div style={{ 
-                    display: 'flex', 
-                    flexWrap: 'wrap', 
-                    gap: 16, 
-                    marginTop: 16,
-                    paddingTop: 16,
-                    borderTop: '1px solid rgba(0,0,0,0.06)'
-                  }}>
-                    {pieData.map((entry, index) => (
-                      <div key={index} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{
-                          width: 12,
-                          height: 12,
-                          backgroundColor: entry.color,
-                          borderRadius: '50%',
-                          boxShadow: `0 2px 4px ${entry.color}40`
-                        }} />
-                        <span style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>{entry.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+                width: 4,
+                height: 24,
+                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                borderRadius: 2
+              }} />
+              <h3 style={{ 
+                fontWeight: 700, 
+                fontSize: 18, // Đồng bộ font size
+                color: '#1e293b', 
+                margin: 0,
+                letterSpacing: '-0.5px'
+              }}>Doanh số theo dòng xe</h3>
             </div>
+            <p style={{ 
+              color: '#64748b', 
+              fontSize: 15, 
+              margin: 0,
+              lineHeight: 1.5
+            }}>
+              Phân tích hiệu suất các dòng xe hàng đầu
+            </p>
+          </div>
+          <div style={{
+            background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+            color: '#fff',
+            padding: '8px 16px',
+            borderRadius: 20,
+            fontSize: 13,
+            fontWeight: 600,
+            boxShadow: '0 4px 12px rgba(34, 197, 94, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4
+          }}>
+            <span>🚗</span> +24% Tăng trưởng
           </div>
         </div>
-        {/* Biểu đồ Area với thiết kế hiện đại */}
-        <div style={{
-          flex: 1,
-          minWidth: 400,
-          background: '#fff',
-          borderRadius: 24,
-          padding: 0,
-          marginBottom: 60,
-          marginTop: 10,
-          boxShadow: '0 8px 32px 0 rgba(0,0,0,0.08)',
-          border: '1px solid rgba(0,0,0,0.04)',
-          position: 'relative',
-          overflow: 'hidden'
+        
+        {/* Stats grid */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
+          gap: 20,
+          marginBottom: 20
         }}>
-          {/* Area Chart Header */}
           <div style={{
-            padding: '32px 40px 0 40px',
-            background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
-            position: 'relative',
-            overflow: 'hidden'
+            textAlign: 'center',
+            padding: '16px 12px',
+            background: 'rgba(34, 197, 94, 0.08)',
+            borderRadius: 16,
+            border: '1px solid rgba(34, 197, 94, 0.12)'
           }}>
-            {/* Decorative elements */}
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#22c55e', marginBottom: 4 }}>2,458</div>
+            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Tổng xe bán</div>
+          </div>
+          <div style={{
+            textAlign: 'center',
+            padding: '16px 12px',
+            background: 'rgba(16, 185, 129, 0.08)',
+            borderRadius: 16,
+            border: '1px solid rgba(16, 185, 129, 0.12)'
+          }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#10b981', marginBottom: 4 }}>+327</div>
+            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Đơn hàng mới</div>
+          </div>
+          <div style={{
+            textAlign: 'center',
+            padding: '16px 12px',
+            background: 'rgba(5, 150, 105, 0.08)',
+            borderRadius: 16,
+            border: '1px solid rgba(5, 150, 105, 0.12)'
+          }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#059669', marginBottom: 4 }}>82%</div>
+            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Tỷ lệ hoàn thành</div>
+          </div>
+        </div>
+        
+        {/* Performance indicators */}
+        <div style={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: 16, 
+          marginTop: 16,
+          paddingTop: 16,
+          borderTop: '1px solid rgba(0,0,0,0.06)', 
+          marginBottom: -5
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              width: '120px',
-              height: '120px',
-              background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.08) 0%, rgba(124, 58, 237, 0.05) 100%)',
+              width: 12,
+              height: 12,
+              backgroundColor: '#22c55e',
               borderRadius: '50%',
-              transform: 'translate(40px, -40px)',
-              zIndex: 1
+              boxShadow: '0 2px 4px rgba(34, 197, 94, 0.3)'
             }} />
-            
-            <div style={{ position: 'relative', zIndex: 2 }}>
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'flex-start', 
-                marginBottom: 24 
-              }}>
-                <div>
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 12, 
-                    marginBottom: 8 
-                  }}>
-                    <div style={{
-                      width: 4,
-                      height: 24,
-                      background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                      borderRadius: 2
-                    }} />
-                    <h3 style={{ 
-                      fontWeight: 700, 
-                      fontSize: 24, 
-                      color: '#1e293b', 
-                      margin: 0,
-                      letterSpacing: '-0.5px'
-                    }}>Doanh thu tháng</h3>
-                  </div>
-                  <p style={{ 
-                    color: '#64748b', 
-                    fontSize: 15, 
-                    margin: 0,
-                    lineHeight: 1.5
-                  }}>
-                    Theo dõi xu hướng doanh thu theo thời gian
-                  </p>
-                </div>
-                <div style={{
-                  background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                  color: '#fff',
-                  padding: '8px 16px',
-                  borderRadius: 20,
-                  fontSize: 13,
-                  fontWeight: 600,
-                  boxShadow: '0 4px 12px rgba(139, 92, 246, 0.25)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 4
-                }}>
-                  <span>💰</span> +$15,230
-                </div>
-              </div>
+            <span style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>Doanh số hiện tại</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{
+              width: 12,
+              height: 12,
+              backgroundColor: '#16a34a',
+              borderRadius: '50%',
+              boxShadow: '0 2px 4px rgba(22, 163, 74, 0.3)'
+            }} />
+            <span style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>Mục tiêu tháng</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Biểu đồ Area - Vị trí 2 (trên phải) - ĐÃ CHUYỂN LÊN */}
+  <div style={{
+    background: '#fff',
+    borderRadius: 16,
+    overflow: 'hidden',
+    boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+    display: 'flex',
+    flexDirection: 'column'
+  }}>
+    {/* Area Chart Header */}
+    <div style={{
+      padding: '32px 40px',
+      background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
+      flex: 1,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data}>
+          <defs>
+            <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="#7c3aed" stopOpacity={0.1}/>
+            </linearGradient>
+            <filter id="areaShadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="3" dy="4" stdDeviation="5" floodOpacity="0.15"/>
+            </filter>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(139, 92, 246, 0.1)" />
+          <XAxis 
+            dataKey="name" 
+            stroke="#6b7280"
+            fontSize={12}
+            fontWeight={500}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis 
+            stroke="#6b7280"
+            fontSize={12}
+            fontWeight={500}
+            tickLine={false}
+            axisLine={false}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Area 
+            type="monotone" 
+            dataKey="revenue" 
+            stroke="#8b5cf6" 
+            fillOpacity={1} 
+            fill="url(#colorRevenue)"
+            filter="url(#areaShadow)"
+            strokeWidth={3}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+    
+    {/* Area Chart Footer */}
+    <div style={{
+      padding: '24px 40px 32px 40px',
+      background: 'linear-gradient(135deg, #ffffff 0%, #fefbff 100%)',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Decorative element */}
+      <div style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        width: '80px',
+        height: '80px',
+        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.06) 0%, rgba(124, 58, 237, 0.04) 100%)',
+        borderRadius: '50%',
+        transform: 'translate(-20px, 20px)',
+        zIndex: 1
+      }} />
+      
+      <div style={{ position: 'relative', zIndex: 2 }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'flex-start', 
+          marginBottom: 16 
+        }}>
+          <div>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 12, 
+              marginBottom: 4 
+            }}>
+              <div style={{
+                width: 4,
+                height: 20,
+                background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                borderRadius: 2
+              }} />
+              <h3 style={{ 
+                fontWeight: 700, 
+                fontSize: 18, 
+                color: '#1e293b', 
+                margin: 0,
+                letterSpacing: '-0.5px'
+              }}>Doanh thu tháng</h3>
             </div>
+            <p style={{ 
+              color: '#64748b', 
+              fontSize: 13, 
+              margin: 0,
+              lineHeight: 1.5
+            }}>
+              Theo dõi xu hướng doanh thu theo thời gian
+            </p>
           </div>
-          
-          {/* Area Chart */}
           <div style={{
-            padding: '20px 40px',
-            background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)'
+            background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+            color: '#fff',
+            padding: '6px 12px',
+            borderRadius: 16,
+            fontSize: 13,
+            fontWeight: 600,
+            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4
           }}>
-            <ResponsiveContainer width="100%" height={320}>
-              <AreaChart data={data}>
-                <defs>
-                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#7c3aed" stopOpacity={0.1}/>
-                  </linearGradient>
-                  <filter id="areaShadow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow dx="3" dy="4" stdDeviation="5" floodOpacity="0.15"/>
-                  </filter>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(139, 92, 246, 0.1)" />
-                <XAxis 
-                  dataKey="name" 
-                  stroke="#6b7280"
-                  fontSize={12}
-                  fontWeight={500}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis 
-                  stroke="#6b7280"
-                  fontSize={12}
-                  fontWeight={500}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Area 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  stroke="#8b5cf6" 
-                  fillOpacity={1} 
-                  fill="url(#colorRevenue)"
-                  filter="url(#areaShadow)"
-                  strokeWidth={3}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            <span>💰</span> +$15,230
           </div>
-          
-          {/* Area Chart Footer */}
+        </div>
+        
+        {/* Stats grid */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', 
+          gap: 16,
+          marginBottom: 20
+        }}>
           <div style={{
-            padding: '24px 40px 32px 40px',
-            background: 'linear-gradient(135deg, #ffffff 0%, #fefbff 100%)',
-            position: 'relative',
-            overflow: 'hidden'
+            textAlign: 'center',
+            padding: '16px 12px',
+            background: 'rgba(139, 92, 246, 0.08)',
+            borderRadius: 16,
+            border: '1px solid rgba(139, 92, 246, 0.12)'
           }}>
-            {/* Decorative element */}
-            <div style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              width: '80px',
-              height: '80px',
-              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.06) 0%, rgba(124, 58, 237, 0.04) 100%)',
-              borderRadius: '50%',
-              transform: 'translate(-20px, 20px)',
-              zIndex: 1
-            }} />
-            
-            <div style={{ position: 'relative', zIndex: 2 }}>
-              {/* Stats grid */}
-              <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', 
-                gap: 16,
-                marginBottom: 20
-              }}>
-                <div style={{
-                  textAlign: 'center',
-                  padding: '16px 12px',
-                  background: 'rgba(139, 92, 246, 0.08)',
-                  borderRadius: 16,
-                  border: '1px solid rgba(139, 92, 246, 0.12)'
-                }}>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: '#8b5cf6', marginBottom: 4 }}>$2.4M</div>
-                  <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Doanh thu tháng</div>
-                </div>
-                <div style={{
-                  textAlign: 'center',
-                  padding: '16px 12px',
-                  background: 'rgba(124, 58, 237, 0.08)',
-                  borderRadius: 16,
-                  border: '1px solid rgba(124, 58, 237, 0.12)'
-                }}>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: '#7c3aed', marginBottom: 4 }}>+24%</div>
-                  <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Tăng trưởng</div>
-                </div>
-              </div>
-              
-              {/* Legend and update info */}
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                paddingTop: 16,
-                borderTop: '1px solid rgba(0,0,0,0.06)'
-              }}>
-                <div style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>
-                  Cập nhật lần cuối: 2 phút trước
-                </div>
-                <div style={{ display: 'flex', gap: 16, fontSize: 13 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <div style={{
-                      width: 10,
-                      height: 10,
-                      backgroundColor: '#8b5cf6',
-                      borderRadius: '50%',
-                      boxShadow: '0 2px 4px rgba(139, 92, 246, 0.3)'
-                    }} />
-                    <span style={{ color: '#64748b', fontWeight: 500 }}>Doanh thu</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <div style={{
-                      width: 10,
-                      height: 10,
-                      backgroundColor: '#7c3aed',
-                      borderRadius: '50%',
-                      boxShadow: '0 2px 4px rgba(124, 58, 237, 0.3)'
-                    }} />
-                    <span style={{ color: '#64748b', fontWeight: 500 }}>Mục tiêu</span>
-                  </div>
-                </div>
-              </div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#8b5cf6', marginBottom: 4 }}>$2.4M</div>
+            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Doanh thu tháng</div>
+          </div>
+          <div style={{
+            textAlign: 'center',
+            padding: '16px 12px',
+            background: 'rgba(124, 58, 237, 0.08)',
+            borderRadius: 16,
+            border: '1px solid rgba(124, 58, 237, 0.12)'
+          }}>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#7c3aed', marginBottom: 4 }}>+24%</div>
+            <div style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>Tăng trưởng</div>
+          </div>
+        </div>
+        
+        {/* Legend and update info */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingTop: 16,
+          borderTop: '1px solid rgba(0,0,0,0.06)'
+        }}>
+          <div style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>
+            Cập nhật lần cuối: 2 phút trước
+          </div>
+          <div style={{ display: 'flex', gap: 16, fontSize: 13 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{
+                width: 10,
+                height: 10,
+                backgroundColor: '#8b5cf6',
+                borderRadius: '50%',
+                boxShadow: '0 2px 4px rgba(139, 92, 246, 0.3)'
+              }} />
+              <span style={{ color: '#64748b', fontWeight: 500 }}>Doanh thu</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{
+                width: 10,
+                height: 10,
+                backgroundColor: '#7c3aed',
+                borderRadius: '50%',
+                boxShadow: '0 2px 4px rgba(124, 58, 237, 0.3)'
+              }} />
+              <span style={{ color: '#64748b', fontWeight: 500 }}>Mục tiêu</span>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  {/* Biểu đồ Pie - Vị trí 3 (dưới trái) - ĐÃ CHUYỂN XUỐNG */}
+  <div style={{
+    background: '#fff',
+    borderRadius: 16,
+    overflow: 'hidden',
+    boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+    display: 'flex',
+    flexDirection: 'column'
+  }}>
+    {/* Phần biểu đồ pie */}
+    <div style={{
+      padding: '32px 40px',
+      background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+      flex: 1,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <defs>
+            <filter id="pieShade" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="4" dy="4" stdDeviation="6" floodOpacity="0.15"/>
+            </filter>
+          </defs>
+          <Pie
+            data={pieData}
+            cx="50%"
+            cy="50%"
+            outerRadius={80}
+            innerRadius={40}
+            paddingAngle={8}
+            dataKey="value"
+            filter="url(#pieShade)"
+          >
+            {pieData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color} />
+            ))}
+          </Pie>
+          <Tooltip />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+    
+    {/* Phần content hiện đại */}
+    <div style={{ 
+      padding: '28px 40px 36px 40px',
+      background: 'linear-gradient(135deg, #ffffff 0%, #fafbff 100%)',
+      borderTop: 'none',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Decorative elements */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: '120px',
+        height: '120px',
+        background: 'linear-gradient(135deg, rgba(136, 132, 216, 0.08) 0%, rgba(130, 202, 157, 0.05) 100%)',
+        borderRadius: '50%',
+        transform: 'translate(40px, -40px)',
+        zIndex: 1
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        width: '80px',
+        height: '80px',
+        background: 'linear-gradient(135deg, rgba(255, 198, 88, 0.06) 0%, rgba(255, 124, 124, 0.04) 100%)',
+        borderRadius: '50%',
+        transform: 'translate(-20px, 20px)',
+        zIndex: 1
+      }} />
+      
+      <div style={{ position: 'relative', zIndex: 2 }}>
+        {/* Header section */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+          <div>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 12, 
+              marginBottom: 8 
+            }}>
+              <div style={{
+                width: 4,
+                height: 24,
+                background: 'linear-gradient(135deg, #8884d8 0%, #82ca9d 100%)',
+                borderRadius: 2
+              }} />
+              <h3 style={{ 
+                fontWeight: 700, 
+                fontSize: 18, // Đồng bộ font size
+                color: '#1e293b', 
+                margin: 0,
+                letterSpacing: '-0.5px'
+              }}>Chương trình khuyến mãi</h3>
+            </div>
+            <p style={{ 
+              color: '#64748b', 
+              fontSize: 15, 
+              margin: 0,
+              lineHeight: 1.5
+            }}>
+              Theo dõi hiệu quả các chiến dịch marketing
+            </p>
+          </div>
+          <div style={{
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            color: '#fff',
+            padding: '8px 16px',
+            borderRadius: 20,
+            fontSize: 13,
+            fontWeight: 600,
+            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4
+          }}>
+            <span>📈</span> +15% Tăng trưởng
+          </div>
+        </div>
+        
+        {/* Stats grid */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
+          gap: 20,
+          marginBottom: 20
+        }}>
+          <div style={{
+            textAlign: 'center',
+            padding: '16px 12px',
+            background: 'rgba(136, 132, 216, 0.08)',
+            borderRadius: 16,
+            border: '1px solid rgba(136, 132, 216, 0.12)'
+          }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#8884d8', marginBottom: 4 }}>1,000</div>
+            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Tổng lượt tham gia</div>
+          </div>
+          <div style={{
+            textAlign: 'center',
+            padding: '16px 12px',
+            background: 'rgba(130, 202, 157, 0.08)',
+            borderRadius: 16,
+            border: '1px solid rgba(130, 202, 157, 0.12)'
+          }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#82ca9d', marginBottom: 4 }}>+120</div>
+            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Khách hàng mới</div>
+          </div>
+          <div style={{
+            textAlign: 'center',
+            padding: '16px 12px',
+            background: 'rgba(255, 198, 88, 0.08)',
+            borderRadius: 16,
+            border: '1px solid rgba(255, 198, 88, 0.12)'
+          }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#ffc658', marginBottom: 4 }}>75%</div>
+            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Tỷ lệ chuyển đổi</div>
+          </div>
+        </div>
+        
+        {/* Legend */}
+        <div style={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: 16, 
+          marginTop: 16,
+          paddingTop: 16,
+          borderTop: '1px solid rgba(0,0,0,0.06)'
+        }}>
+          {pieData.map((entry, index) => (
+            <div key={index} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{
+                width: 12,
+                height: 12,
+                backgroundColor: entry.color,
+                borderRadius: '50%',
+                boxShadow: `0 2px 4px ${entry.color}40`
+              }} />
+              <span style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>{entry.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Biểu đồ Line - Vị trí 4 (dưới phải) - GIỮ NGUYÊN */}
+  <div style={{
+    background: '#fff',
+    borderRadius: 16,
+    overflow: 'hidden',
+    boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+    display: 'flex',
+    flexDirection: 'column'
+  }}>
+    {/* Line Chart */}
+    <div style={{
+      padding: '32px 40px',
+      background: 'linear-gradient(135deg, #e0f7fa 0%, #f3e8ff 100%)',
+      flex: 1,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data}>
+          <defs>
+            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="2" dy="2" stdDeviation="3" floodOpacity="0.3"/>
+            </filter>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <XAxis dataKey="name" stroke="#666" fontSize={12} />
+          <YAxis stroke="#666" fontSize={12} />
+          <Tooltip content={<CustomTooltip />} />
+          <Line 
+            type="monotone" 
+            dataKey="value" 
+            stroke="#ffc658" 
+            strokeWidth={4}
+            dot={{ fill: '#ffc658', strokeWidth: 2, r: 6 }}
+            filter="url(#shadow)"
+          />
+          <Line 
+            type="monotone" 
+            dataKey="users" 
+            stroke="#ff7c7c" 
+            strokeWidth={3}
+            strokeDasharray="5 5"
+            dot={{ fill: '#ff7c7c', strokeWidth: 2, r: 4 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+    
+    {/* Line Chart Footer */}
+    <div style={{
+      padding: '20px 40px 24px 40px',
+      background: 'linear-gradient(135deg, #ffffff 0%, #fefbff 100%)',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      <div style={{ position: 'relative', zIndex: 2 }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'flex-start', 
+          marginBottom: 16 
+        }}>
+          <div>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 12, 
+              marginBottom: 4 
+            }}>
+              <div style={{
+                width: 4,
+                height: 20,
+                background: 'linear-gradient(135deg, #ffc658 0%, #ff7c7c 100%)',
+                borderRadius: 2
+              }} />
+              <h3 style={{ 
+                fontWeight: 700, 
+                fontSize: 18, 
+                color: '#1e293b', 
+                margin: 0,
+                letterSpacing: '-0.5px'
+              }}>Phân tích hiệu quả</h3>
+            </div>
+            <p style={{ 
+              color: '#64748b', 
+              fontSize: 13, 
+              margin: 0,
+              lineHeight: 1.5
+            }}>
+              Theo dõi hiệu suất và tăng trưởng nhiều chiều
+            </p>
+          </div>
+          <div style={{
+            background: 'linear-gradient(135deg, #ffc658 0%, #ff7c7c 100%)',
+            color: '#fff',
+            padding: '6px 12px',
+            borderRadius: 16,
+            fontSize: 13,
+            fontWeight: 600,
+            boxShadow: '0 4px 12px rgba(255, 198, 88, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4
+          }}>
+            <span>📊</span> Tăng trưởng
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
       <div style={{
         padding: '0 32px',
         display: 'flex',
         gap: 20,
         marginBottom: 32,
-        marginTop: -70,
+        marginLeft: '12px',
         flexWrap: 'wrap'
       }}>
         {/* Bảng dự án/Audi Store - Updated */}

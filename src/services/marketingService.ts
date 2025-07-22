@@ -19,6 +19,9 @@ export interface KhuyenMai {
   conHieuLuc: boolean;
   trangThai: number; // 1: còn hiệu lực, 0: hết hiệu lực
   danhSachDieuKien: DieuKienKhuyenMai[];
+  // Trường tạm để hiển thị giá trị giảm
+  _displayGiaTriGiam?: string;
+  doanhThuTaoRa?: number;
 }
 
 export interface DieuKienKhuyenMai {

@@ -209,28 +209,83 @@ const MarketingManagement: React.FC = () => {
     }
   };
 
+  // Xử lý thay đổi giá trị giảm
+  const handleGiaTriGiamChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Chỉ cho phép nhập số và dấu chấm thập phân
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setState(prev => {
+        return {
+          ...prev,
+          newKhuyenMai: {
+            ...prev.newKhuyenMai,
+            giaTriGiam: value === '' ? 0 : parseFloat(value),
+            _displayGiaTriGiam: value
+          }
+        };
+      });
+    }
+  };
+  
+  // Xử lý khi blur khỏi input
+  const handleGiaTriGiamBlur = () => {
+    setState(prev => {
+      const currentValue = prev.newKhuyenMai.giaTriGiam ?? 0;
+
+      // Nếu giá trị là 0, không cần xử lý thêm
+      if (currentValue === 0) return prev;
+
+      // Làm tròn nếu là số nguyên, còn nếu là số thập phân thì loại bỏ số 0 thừa
+      let cleanedValue: string;
+      if (Number.isInteger(currentValue)) {
+        cleanedValue = currentValue.toString();
+      } else {
+        cleanedValue = currentValue.toString().replace(/(\.\d*?[1-9])0+$/, '$1').replace(/\.0+$/, '');
+      }
+
+      return {
+        ...prev,
+        newKhuyenMai: {
+          ...prev.newKhuyenMai,
+          giaTriGiam: parseFloat(cleanedValue),
+          _displayGiaTriGiam: cleanedValue
+        }
+      };
+    });
+  };
+
   const handleUpdateKhuyenMai = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!state.currentKhuyenMai) return;
     try {
+      // Chuyển đổi các giá trị số và loại bỏ số 0 thừa
+      let giaTriGiam = Number(state.newKhuyenMai.giaTriGiam) || 0;
+      const giaTriToiThieu = Number(state.newKhuyenMai.giaTriToiThieu) || 0;
+      const gioiHanSuDung = Number(state.newKhuyenMai.gioiHanSuDung) || 0;
+      
+      // Xử lý định dạng giaTriGiam để loại bỏ số 0 thừa
+      const giaTriGiamStr = giaTriGiam.toString();
+      if (giaTriGiamStr.includes('.')) {
+        giaTriGiam = parseFloat(giaTriGiamStr.replace(/\.0+$/, '').replace(/(\.\d*[1-9])0+$/, '$1'));
+      }
+      
       // Chuẩn bị dữ liệu để gửi
       const updateData = {
         ten: state.newKhuyenMai.ten,
         moTa: state.newKhuyenMai.moTa,
         loaiGiamGia: state.newKhuyenMai.loaiGiamGia,
-        giaTriGiam: state.newKhuyenMai.giaTriGiam,
+        giaTriGiam: giaTriGiam,
         ngayBatDau: state.newKhuyenMai.ngayBatDau,
         ngayKetThuc: state.newKhuyenMai.ngayKetThuc,
         maKhuyenMai: state.newKhuyenMai.maKhuyenMai,
         apDungCho: state.newKhuyenMai.apDungCho,
-        giaTriToiThieu: state.newKhuyenMai.giaTriToiThieu,
-        gioiHanSuDung: state.newKhuyenMai.gioiHanSuDung,
-        trangThai: state.newKhuyenMai.trangThai, // Đảm bảo gửi giá trị này
+        giaTriToiThieu: giaTriToiThieu,
+        gioiHanSuDung: gioiHanSuDung,
+        trangThai: state.newKhuyenMai.trangThai,
         danhSachDieuKien: state.newKhuyenMai.danhSachDieuKien || []
       };
       
       console.log('Sending update data:', updateData);
-      console.log('trangThai value:', updateData.trangThai);
       
       await marketingService.updateKhuyenMai(state.currentKhuyenMai.id, updateData);
       handleCloseModals();
@@ -315,6 +370,8 @@ const MarketingManagement: React.FC = () => {
   const endIndex = startIndex + state.itemsPerPage;
   const currentKhuyenMai = state.filteredKhuyenMai.slice(startIndex, endIndex);
   const totalPages = Math.ceil(state.filteredKhuyenMai.length / state.itemsPerPage);
+
+  const tongDoanhThu = state.khuyenMaiList.reduce((sum, km) => sum + (km.doanhThuTaoRa || 0), 0);
 
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh', padding: 0 }}>
@@ -405,21 +462,22 @@ const MarketingManagement: React.FC = () => {
                   <th style={{ padding: '12px 8px', textAlign: 'left' }}>Thời gian</th>
                   <th style={{ padding: '12px 8px', textAlign: 'left' }}>Trạng thái</th>
                   <th style={{ padding: '12px 8px', textAlign: 'left' }}>Sử dụng</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Doanh thu tạo ra</th>
                   <th style={{ padding: '12px 8px', textAlign: 'center' }}>Thao tác</th>
                 </tr>
               </thead>
               <tbody>
                 {state.isLoading ? (
                   <tr>
-                    <td colSpan={7} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Đang tải...</td>
+                    <td colSpan={8} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Đang tải...</td>
                   </tr>
                 ) : state.error ? (
                   <tr>
-                    <td colSpan={7} style={{ textAlign: 'center', padding: 24, color: '#ff4d4f' }}>{state.error}</td>
+                    <td colSpan={8} style={{ textAlign: 'center', padding: 24, color: '#ff4d4f' }}>{state.error}</td>
                   </tr>
                 ) : currentKhuyenMai.length === 0 ? (
                   <tr>
-                    <td colSpan={7} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có dữ liệu</td>
+                    <td colSpan={8} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có dữ liệu</td>
                   </tr>
                 ) : (
                   currentKhuyenMai.map((khuyenMai, idx) => (
@@ -452,7 +510,7 @@ const MarketingManagement: React.FC = () => {
                             : formatPrice(khuyenMai.giaTriGiam)
                           }
                         </div>
-                        {khuyenMai.giaTriToiThieu && (
+                        {khuyenMai.giaTriToiThieu !== undefined && khuyenMai.giaTriToiThieu > 0 && (
                           <div style={{ fontSize: '12px', color: '#666' }}>
                             Tối thiểu: {formatPrice(khuyenMai.giaTriToiThieu)}
                           </div>
@@ -483,6 +541,11 @@ const MarketingManagement: React.FC = () => {
                             </div>
                           )}
                         </div>
+                      </td>
+                      <td style={{ padding: '10px 8px' }}>
+                        {khuyenMai.doanhThuTaoRa !== undefined
+                          ? formatPrice(khuyenMai.doanhThuTaoRa)
+                          : 'Chưa có'}
                       </td>
                       <td
                         style={{
@@ -590,6 +653,9 @@ const MarketingManagement: React.FC = () => {
               </button>
             </div>
           )}
+        </div>
+        <div style={{ marginTop: 24, padding: '0 32px', textAlign: 'right' }}>
+          <strong>Tổng doanh thu từ khuyến mãi:</strong> {formatPrice(tongDoanhThu)}
         </div>
       </div>
 
@@ -721,17 +787,18 @@ const MarketingManagement: React.FC = () => {
                   <div className="form-group">
                     <label htmlFor="giaTriGiam">Giá trị giảm <span className="required">*</span></label>
                     <input
-                      type="number"
+                      type="text"
                       id="giaTriGiam"
                       name="giaTriGiam"
-                      value={state.newKhuyenMai.giaTriGiam || ''}
-                      onChange={(e) => setState(prev => ({
-                        ...prev,
-                        newKhuyenMai: { ...prev.newKhuyenMai, giaTriGiam: parseFloat(e.target.value) || 0 }
-                      }))}
+                      value={state.newKhuyenMai._displayGiaTriGiam !== undefined 
+                        ? state.newKhuyenMai._displayGiaTriGiam 
+                        : state.newKhuyenMai.giaTriGiam || ''}
+                      onChange={handleGiaTriGiamChange}
+                      onBlur={handleGiaTriGiamBlur}
+                      inputMode="decimal"
+                      pattern="[0-9]*\.?[0-9]*"
                       required
                       min="0"
-                      step="0.01"
                       readOnly={!state.showAddModal && !isEditMode}
                       style={{
                         width: '100%',
@@ -929,6 +996,9 @@ const MarketingManagement: React.FC = () => {
                         : formatPrice(state.currentKhuyenMai.giaTriGiam)
                     }</p>
                     <p><strong>Thời gian:</strong> {formatDate(state.currentKhuyenMai.ngayBatDau)} - {formatDate(state.currentKhuyenMai.ngayKetThuc)}</p>
+                    <p><strong>Doanh thu tạo ra:</strong> {state.currentKhuyenMai?.doanhThuTaoRa !== undefined
+                      ? formatPrice(state.currentKhuyenMai.doanhThuTaoRa)
+                      : 'Chưa có'}</p>
                   </div>
                 )}
 

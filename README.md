@@ -112,9 +112,11 @@ Designed in Audi's style:
 ### 📩 Forgot password OTP to email
 ![Audi Dashboard Demo](public/demo/forgot_pass.png)
 ### 🌝 Light mode
-![Audi Dashboard Demo](public/demo/light_mode.png)
+![Audi Dashboard Demo](public/demo/light_mode1.png)
+![Audi Dashboard Demo](public/demo/light_mode2.png)
 ### 🌚 Dark mode
-![Audi Dashboard Demo](public/demo/dark_mode.png)
+![Audi Dashboard Demo](public/demo/dark_mode1.png)
+![Audi Dashboard Demo](public/demo/dark_mode2.png)
 ## 🌐 Live Demo & Deployment
 
 ### 🚀 Web Application
