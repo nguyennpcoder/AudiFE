@@ -192,6 +192,9 @@ const Header = () => {
             <li className="nav-item nav-animate-item nav-animate-item-5">
               <Link to="/dealership">Đại Lý</Link>
             </li>
+            <li className="nav-item">
+              <Link to="/blog">Tin tức</Link>
+            </li>
           </ul>
         </nav>
         

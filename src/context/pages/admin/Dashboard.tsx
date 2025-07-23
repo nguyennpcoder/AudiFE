@@ -34,6 +34,7 @@ import OrderManagement from './OrderManagement';
 import AnimatedPage from './AnimatedPage';
 import MarketingManagement from './MarketingManagement';
 import Profile from './Profile';
+import BlogManagement from './BlogManagement';
 // import các component khác nếu có...
 
 const { Sider } = Layout;
@@ -923,6 +924,11 @@ const Dashboard: React.FC = () => {
         {selectedMenu === 'marketing' && (
           <AnimatedPage animation="right">
             <MarketingManagement />
+          </AnimatedPage>
+        )}
+        {selectedMenu === 'blog' && (
+          <AnimatedPage animation="left">
+            <BlogManagement />
           </AnimatedPage>
         )}
         {selectedMenu === 'profile' && (

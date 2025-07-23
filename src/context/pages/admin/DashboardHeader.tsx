@@ -505,17 +505,7 @@ const DashboardHeader: React.FC<any> = ({
 
       {/* 4 biểu đồ với layout 2x2 cân đối - GIỮ NGUYÊN TẤT CẢ CONTENT */}
      {/* 4 biểu đồ với layout 2x2 cân đối - ĐÃ ĐỔI VỊ TRÍ */}
-<div
-  style={{
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gridTemplateRows: '1fr 1fr',
-    gap: 24,
-    marginLeft: '45px',
-    marginBottom: 32,
-    height: '1200px',
-  }}
->
+<div className="dashboard-charts-grid" style={{ marginBottom: 32 }}>
   {/* Biểu đồ Bar - Vị trí 1 (trên trái) - GIỮ NGUYÊN */}
   <div style={{
     background: '#fff',

@@ -25,6 +25,9 @@ import LoadingAnimation from './components/common/LoadingAnimation';
 import AdminLayout from './context/pages/admin/AdminLayout';
 import MarketingManagement from './context/pages/admin/MarketingManagement';
 import Profile from './context/pages/admin/Profile';
+import BlogManagement from './context/pages/admin/BlogManagement';
+import BlogList from './context/pages/Blog/BlogList';
+import BlogDetail from './context/pages/Blog/BlogDetail';
 
 function App() {
   const location = useLocation();
@@ -177,9 +180,7 @@ function App() {
                   <ThemeProvider>
                     <AdminLayout>
                       <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                        <div className="admin-placeholder">
-                          <h2>Trang quản lý bài viết đang phát triển</h2>
-                        </div>
+                        <BlogManagement />
                       </RoleBasedRoute>
                     </AdminLayout>
                   </ThemeProvider>
@@ -231,6 +232,8 @@ function App() {
                 <Route path="/dealership/:id" element={<DealershipPage />} />
                 <Route path="/models" element={<ModelsPage />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/blog" element={<BlogList />} />
+                <Route path="/blog/:id" element={<BlogDetail />} />
               </Routes>
             </main>
             {shouldShowFooter && <Footer />}

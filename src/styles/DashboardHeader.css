@@ -946,3 +946,21 @@
     min-width: 100%;
   }
 }
+
+/* Responsive: iPad và iPhone - Chart xuống 1 cột */
+@media (max-width: 1024px) {
+  .dashboard-charts-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: none !important;
+    gap: 16px !important;
+    margin-left: 0 !important;
+    height: auto !important;
+    padding: 0 8px !important;
+  }
+}
+@media (max-width: 600px) {
+  .dashboard-charts-grid {
+    gap: 10px !important;
+    padding: 0 2px !important;
+  }
+}
