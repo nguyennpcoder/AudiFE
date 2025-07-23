@@ -129,4 +129,14 @@
       width: 200px;
     }
   }
-  
+
+  .intro-video {
+    width: 80vw;
+    max-width: 700px; /* Cho phép hiển thị lớn hơn nếu màn hình đủ rộng */
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 0 40px rgba(0,0,0,0.7);
+    background: #000;
+    object-fit: contain;
+    image-rendering: auto; /* Đảm bảo không bị làm mờ */
+  }
