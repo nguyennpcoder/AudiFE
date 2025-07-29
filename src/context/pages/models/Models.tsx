@@ -1,6 +1,7 @@
 // frontend/audi/src/pages/Models.tsx
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import '../../../styles/Models.css';
 const BACKEND_URL = 'http://localhost:8080';
 import rs7Image from '../../../assets/rs7.jpeg'; // Đường dẫn đúng với project bạn
@@ -312,12 +313,12 @@ const ModelsPage: React.FC = () => {
                       </div>
                       
                       <div className="car-buttons">
-                        <button className="models-btn-primary">
+                        <Link to={`/product/${mauXe.id}`} className="models-btn-primary">
                           {translate('Explore')}
-                        </button>
-                        <button className="models-btn-secondary">
+                        </Link>
+                        <Link to={`/configure/${mauXe.id}`} className="models-btn-secondary">
                           {translate('Build')}
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   </div>
