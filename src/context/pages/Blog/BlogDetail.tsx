@@ -10,6 +10,7 @@ interface BlogPost {
   noiDung: string;
   anhDaiDien?: string;
   tenTacGia: string;
+  avatarTacGia?: string; // Thêm avatar của tác giả
   ngayDang: string;
   danhMuc?: string;
   theGan?: string[];
@@ -25,7 +26,34 @@ const BlogDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
 
+  // Smooth scroll to top function with animation
+  const scrollToTop = () => {
+    const scrollStep = -window.scrollY / (500 / 15); // 500ms duration
+    const scrollInterval = setInterval(() => {
+      if (window.scrollY !== 0) {
+        window.scrollBy(0, scrollStep);
+      } else {
+        clearInterval(scrollInterval);
+      }
+    }, 15);
+  };
+
+  // Get avatar URL for author (copied from Profile.tsx logic)
+  const getAuthorAvatarUrl = (avatarPath?: string) => {
+    if (avatarPath) {
+      const avatarUrl = avatarPath.startsWith('http')
+        ? avatarPath
+        : `http://localhost:8080/${avatarPath}`;
+      return avatarUrl;
+    }
+    // Return default avatar if no author avatar
+    return '/avatar-default.png';
+  };
+
   useEffect(() => {
+    // Scroll to top when component mounts
+    scrollToTop();
+    
     const fetchPost = async () => {
       if (!id) {
         setError('ID bài viết không hợp lệ');
@@ -134,6 +162,16 @@ const BlogDetail: React.FC = () => {
 
   const categoryStyle = getCategoryColor(post.danhMuc || '');
   const readingTime = getReadingTime(post.noiDung || '');
+  const authorAvatarUrl = getAuthorAvatarUrl(post.avatarTacGia);
+
+  const handleRelatedPostClick = (postId: string) => {
+    // Scroll to top before navigating
+    scrollToTop();
+    // Small delay to ensure scroll animation starts
+    setTimeout(() => {
+      navigate(`/blog/${postId}`);
+    }, 100);
+  };
 
   return (
     <div className="audi-blog-detail-container fade-in">
@@ -184,9 +222,28 @@ const BlogDetail: React.FC = () => {
         <h1 className="article-title">{post.tieuDe}</h1>
 
         <div className="audi-blog-author-info">
-          <div className="author-avatar large">
-            {post.tenTacGia?.charAt(0)?.toUpperCase() || 'A'}
-          </div>
+          <img
+            src={authorAvatarUrl}
+            alt="Author Avatar"
+            className="author-avatar large"
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: '50%',
+              objectFit: 'cover',
+              border: '2px solid rgba(255, 255, 255, 0.2)'
+            }}
+            onError={(e) => {
+              console.log('Author avatar failed to load, using default');
+              const target = e.currentTarget;
+              if (target.src !== '/avatar-default.png') {
+                target.src = '/avatar-default.png';
+              }
+            }}
+            onLoad={() => {
+              console.log('Author avatar loaded successfully:', authorAvatarUrl);
+            }}
+          />
           <div className="author-info">
             <div className="author-name">{post.tenTacGia}</div>
             <div className="publish-date">{formatDate(post.ngayDang)}</div>
@@ -260,10 +317,11 @@ const BlogDetail: React.FC = () => {
           <h2>Bài viết liên quan</h2>
           <div className="related-posts-grid">
             {relatedPosts.map((relatedPost) => (
-              <Link 
+              <div 
                 key={relatedPost.id} 
-                to={`/blog/${relatedPost.id}`}
                 className="related-post-card"
+                onClick={() => handleRelatedPostClick(relatedPost.id)}
+                style={{ cursor: 'pointer' }}
               >
                 <div className="related-post-image">
                   {relatedPost.anhDaiDien ? (
@@ -282,7 +340,7 @@ const BlogDetail: React.FC = () => {
                     <span>{formatDate(relatedPost.ngayDang)}</span>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </section>

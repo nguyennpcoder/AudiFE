@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../../../styles/Blog.css';
 
 // Configuration for API endpoint
@@ -11,6 +11,7 @@ interface BlogPost {
   noiDung: string;
   anhDaiDien?: string;
   tenTacGia: string;
+  avatarTacGia?: string; // Thêm avatar của tác giả
   ngayDang: string;
   danhMuc?: string;
   theGan?: string[];
@@ -27,8 +28,36 @@ const BlogList: React.FC = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  // Smooth scroll to top function with animation
+  const scrollToTop = () => {
+    const scrollStep = -window.scrollY / (500 / 15); // 500ms duration
+    const scrollInterval = setInterval(() => {
+      if (window.scrollY !== 0) {
+        window.scrollBy(0, scrollStep);
+      } else {
+        clearInterval(scrollInterval);
+      }
+    }, 15);
+  };
+
+  // Get avatar URL for author (copied from Profile.tsx logic)
+  const getAuthorAvatarUrl = (avatarPath?: string) => {
+    if (avatarPath) {
+      const avatarUrl = avatarPath.startsWith('http')
+        ? avatarPath
+        : `http://localhost:8080/${avatarPath}`;
+      return avatarUrl;
+    }
+    // Return default avatar if no author avatar
+    return '/avatar-default.png';
+  };
 
   useEffect(() => {
+    // Scroll to top when component mounts
+    scrollToTop();
+    
     const fetchPosts = async () => {
       try {
         const response = await fetch(API_URL);
@@ -82,6 +111,15 @@ const BlogList: React.FC = () => {
       default: { bg: '#f5f5f5', text: '#616161' }
     };
     return categoryColors[category] || categoryColors.default;
+  };
+
+  const handlePostClick = (postId: string) => {
+    // Scroll to top before navigating
+    scrollToTop();
+    // Small delay to ensure scroll animation starts
+    setTimeout(() => {
+      navigate(`/blog/${postId}`);
+    }, 100);
   };
 
   if (loading) {
@@ -158,6 +196,7 @@ const BlogList: React.FC = () => {
             {posts.map((post, index) => {
               const categoryStyle = getCategoryColor(post.danhMuc || '');
               const readingTime = getReadingTime(post.noiDung || '');
+              const authorAvatarUrl = getAuthorAvatarUrl(post.avatarTacGia);
               
               return (
                 <article 
@@ -165,7 +204,11 @@ const BlogList: React.FC = () => {
                   className="audi-blog-card"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <Link to={`/blog/${post.id}`} className="audi-blog-card-link">
+                  <div 
+                    className="audi-blog-card-link"
+                    onClick={() => handlePostClick(post.id)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <div className="audi-blog-card-image">
                       {post.anhDaiDien ? (
                         <img 
@@ -221,9 +264,28 @@ const BlogList: React.FC = () => {
                       
                       <div className="audi-blog-card-footer">
                         <div className="audi-blog-author-info">
-                          <div className="author-avatar">
-                            {post.tenTacGia?.charAt(0)?.toUpperCase() || 'A'}
-                          </div>
+                          <img
+                            src={authorAvatarUrl}
+                            alt="Author Avatar"
+                            className="author-avatar"
+                            style={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              border: '2px solid rgba(255, 255, 255, 0.2)'
+                            }}
+                            onError={(e) => {
+                              console.log('Author avatar failed to load, using default');
+                              const target = e.currentTarget;
+                              if (target.src !== '/avatar-default.png') {
+                                target.src = '/avatar-default.png';
+                              }
+                            }}
+                            onLoad={() => {
+                              console.log('Author avatar loaded successfully:', authorAvatarUrl);
+                            }}
+                          />
                           <div className="author-details">
                             <span className="author-name">{post.tenTacGia}</span>
                             <span className="post-date">{formatDate(post.ngayDang)}</span>
@@ -248,7 +310,7 @@ const BlogList: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 </article>
               );
             })}

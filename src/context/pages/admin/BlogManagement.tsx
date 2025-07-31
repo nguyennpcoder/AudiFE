@@ -1,13 +1,11 @@
-// frontend/audi/src/context/pages/admin/BlogManagement.tsx
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal, Tag, Select, Input, message, Popconfirm, Form } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, StopOutlined, EyeOutlined } from '@ant-design/icons';
+import { message } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, StopOutlined, EyeOutlined, CameraOutlined } from '@ant-design/icons';
 
-import axios from 'axios';
+import { blogService, BaiViet } from '../../../services/blogService';
 import '../../../styles/Admin.css';
 import AdminHeader from './AdminHeader';
-
-const { Option } = Select;
+import AnimatedPage from './AnimatedPage';
 
 const danhMucOptions = [
   { value: 'tin_tuc', label: 'Tin tức' },
@@ -18,81 +16,128 @@ const danhMucOptions = [
   { value: 'phong_cach_song', label: 'Phong cách sống' },
 ];
 
-const API_URL = 'http://localhost:8080/api/v1/bai-viet';
-
 const BlogManagement: React.FC = () => {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<BaiViet[]>([]);
   const [loading, setLoading] = useState(false);
-  const [formLoading, setFormLoading] = useState(false); // NEW: loading cho form
-  const [formError, setFormError] = useState<string | null>(null); // NEW: error cho form
+  const [formLoading, setFormLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
-  const [viewing, setViewing] = useState<any>(null);
+  const [editing, setEditing] = useState<BaiViet | null>(null);
+  const [viewing, setViewing] = useState<BaiViet | null>(null);
   const [filterDanhMuc, setFilterDanhMuc] = useState<string | undefined>();
   const [search, setSearch] = useState('');
-  const [form] = Form.useForm();
+  
+  // Image upload states
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isImageHover, setIsImageHover] = useState(false);
+
+  // Thêm states cho hover avatar
+  const [hoveredBlogId, setHoveredBlogId] = useState<number | null>(null);
+  const [hoveredBlogImgPos, setHoveredBlogImgPos] = useState<{ x: number; y: number } | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(API_URL, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
-      setData(res.data);
-    } catch (err) {
-      message.error('Không thể tải danh sách bài viết');
+      const result = await blogService.getAllBaiViet();
+      setData(result);
+    } catch (error: any) {
+      message.error(error.message);
     }
     setLoading(false);
   };
 
   useEffect(() => { fetchData(); }, []);
 
-  const handleSave = async (values: any) => {
+  const handleSave = async (formData: FormData) => {
     setFormLoading(true);
     setFormError(null);
+    
     try {
       if (editing) {
-        await axios.put(`${API_URL}/${editing.id}`, values, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+        await blogService.updateBaiViet(editing.id!, formData);
         message.success('Cập nhật thành công');
       } else {
-        await axios.post(API_URL, values, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+        const newBaiViet = await blogService.createBaiViet(formData);
         message.success('Thêm mới thành công');
+        
+        // Tự động xuất bản bài viết mới
+        try {
+          await blogService.updatePublishStatus(newBaiViet.id!, true);
+          message.success('Bài viết đã được xuất bản');
+        } catch (publishError: any) {
+          console.warn('Không thể tự động xuất bản:', publishError);
+        }
       }
+      
       setShowForm(false);
       setEditing(null);
+      setImageFile(null);
+      setImagePreview(null);
       fetchData();
-    } catch (err: any) {
-      setFormError('Lưu bài viết thất bại');
+    } catch (error: any) {
+      setFormError(error.message);
+      message.error(error.message);
     }
     setFormLoading(false);
   };
 
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(`${API_URL}/${id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+      await blogService.deleteBaiViet(id);
       message.success('Đã xóa');
       fetchData();
-    } catch {
-      message.error('Xóa thất bại');
+    } catch (error: any) {
+      message.error(error.message);
     }
   };
 
   const handlePublish = async (id: number, daXuatBan: boolean) => {
     try {
-      await axios.patch(`${API_URL}/${id}/publish?daXuatBan=${daXuatBan}`, {}, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+      await blogService.updatePublishStatus(id, daXuatBan);
       message.success(daXuatBan ? 'Đã xuất bản' : 'Đã bỏ xuất bản');
-      fetchData();
-    } catch {
-      message.error('Cập nhật trạng thái thất bại');
+      fetchData(); // Refresh data sau khi update
+    } catch (error: any) {
+      message.error(error.message);
     }
   };
 
-  // Khi mở form edit/add, set giá trị cho form
+  // Handle image change
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  // Thêm function helper để xử lý đường dẫn ảnh
+  const getImageUrl = (imagePath: string | undefined): string | undefined => {
+    if (!imagePath) return undefined;
+    
+    // Nếu đã có đường dẫn đầy đủ
+    if (imagePath.startsWith('/uploads/') || imagePath.startsWith('http')) {
+      return `http://localhost:8080${imagePath}`;
+    }
+    
+    // Nếu chỉ có tên file
+    return `http://localhost:8080/uploads/images/blogs/${imagePath}`;
+  };
+
+  // Reset form when editing changes
   useEffect(() => {
     if (editing) {
-      form.setFieldsValue(editing);
+      if (editing.anhDaiDien) {
+        // Sử dụng helper function để lấy đường dẫn đúng
+        setImagePreview(getImageUrl(editing.anhDaiDien) || null);
+      } else {
+        setImagePreview(null);
+      }
     } else {
-      form.resetFields();
+      setImagePreview(null);
     }
-  }, [editing, showForm, form]);
+    setImageFile(null);
+  }, [editing, showForm]);
 
   const filteredData = data.filter(item =>
     (!filterDanhMuc || item.danhMuc === filterDanhMuc) &&
@@ -103,184 +148,240 @@ const BlogManagement: React.FC = () => {
     <div style={{ background: '#f5f5f5', minHeight: '100vh', padding: 0 }}>
       <AdminHeader pageTitle="Quản lý bài viết" />
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 0 0 0', minHeight: '100vh' }}>
-        {/* Khối trắng bo góc lớn */}
-        <div
-          className="admin-section"
-          style={{
-            background: '#fff',
-            borderRadius: 18,
-            boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)',
-            padding: '32px 32px 24px 32px',
-            marginBottom: 32,
-          }}
-        >
-          {/* Toolbar */}
-          <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
-            <button
-              className="btn-add"
-              onClick={() => { setShowForm(true); setEditing(null); }}
-              style={{
-                background: '#43a047',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 8,
-                padding: '10px 20px',
-                fontWeight: 600,
-                fontSize: 15,
-                boxShadow: '0 2px 8px 0 rgba(24,144,255,0.10)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-              }}
-            >
-              <i className="fas fa-plus"></i> Thêm bài viết
-            </button>
-            <select
-              value={filterDanhMuc}
-              onChange={e => setFilterDanhMuc(e.target.value)}
-              style={{
-                padding: '10px 16px',
-                borderRadius: 8,
-                border: '1px solid #e5e7eb',
-                color: 'rgb(107, 114, 128)',
-                fontSize: 15,
-                background: '#fafbfc',
-                minWidth: 150
-              }}
-            >
-              <option value="">Danh mục</option>
-              {danhMucOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-            <div style={{ flex: 1, minWidth: 220 }}>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm tiêu đề"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 40px 10px 16px',
-                    borderRadius: 8,
-                    border: '1px solid #e5e7eb',
-                    fontSize: 15,
-                    background: '#fafbfc',
-                  }}
-                />
-                <i className="fas fa-search" style={{
-                  position: 'absolute',
-                  right: 12,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: '#888',
-                  fontSize: 16
-                }}></i>
+        <AnimatedPage animation="center">
+          {/* Khối trắng bo góc lớn */}
+          <div
+            className="admin-section"
+            style={{
+              background: '#fff',
+              borderRadius: 18,
+              boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)',
+              padding: '32px 32px 24px 32px',
+              marginBottom: 32,
+            }}
+          >
+            {/* Toolbar */}
+            <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
+              <button
+                className="btn-add"
+                onClick={() => { setShowForm(true); setEditing(null); }}
+                style={{
+                  background: '#43a047',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '10px 20px',
+                  fontWeight: 600,
+                  fontSize: 15,
+                  boxShadow: '0 2px 8px 0 rgba(24,144,255,0.10)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <i className="fas fa-plus"></i> Thêm bài viết
+              </button>
+              <select
+                value={filterDanhMuc}
+                onChange={e => setFilterDanhMuc(e.target.value)}
+                style={{
+                  padding: '10px 16px',
+                  borderRadius: 8,
+                  border: '1px solid #e5e7eb',
+                  color: 'rgb(107, 114, 128)',
+                  fontSize: 15,
+                  background: '#fafbfc',
+                  minWidth: 150
+                }}
+              >
+                <option value="">Danh mục</option>
+                {danhMucOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+              <div style={{ flex: 1, minWidth: 220 }}>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm tiêu đề"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 40px 10px 16px',
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 15,
+                      background: '#fafbfc',
+                    }}
+                  />
+                  <i className="fas fa-search" style={{
+                    position: 'absolute',
+                    right: 12,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: '#888',
+                    fontSize: 16
+                  }}></i>
+                </div>
               </div>
             </div>
-          </div>
-          {/* Table */}
-          <div style={{ overflowX: 'auto', borderRadius: 12, background: '#fafbfc' }}>
-            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
-              <thead>
-                <tr style={{ background: '#fafbfc', color: '#6b7280', fontWeight: 700 }}>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Tiêu đề</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Danh mục</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Tác giả</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Ngày đăng</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Tags</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Trạng thái</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'center' }}>Hành động</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredData.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có dữ liệu</td>
+            
+            {/* Table */}
+            <div style={{ overflowX: 'auto', borderRadius: 12, background: '#fafbfc' }}>
+              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
+                <thead>
+                  <tr style={{ background: '#fafbfc', color: '#6b7280', fontWeight: 700 }}>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Tiêu đề</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Danh mục</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Tác giả</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Ngày đăng</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Tags</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Trạng thái</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'center' }}>Hành động</th>
                   </tr>
-                ) : (
-                  filteredData.map((item, idx) => (
-                    <tr key={item.id} style={{ background: '#fff', borderBottom: '1px solid #f0f0f0' }}>
-                      <td style={{ padding: '10px 8px' }}>{item.tieuDe}</td>
-                      <td style={{ padding: '10px 8px' }}>{danhMucOptions.find(o => o.value === item.danhMuc)?.label}</td>
-                      <td style={{ padding: '10px 8px' }}>{item.tenTacGia}</td>
-                      <td style={{ padding: '10px 8px' }}>{item.ngayDang}</td>
-                      <td style={{ padding: '10px 8px' }}>
-                        {item.theGan?.map((tag: string) => (
-                          <span key={tag} style={{
-                            display: 'inline-block',
-                            background: '#f3f4f6',
-                            color: '#555',
-                            borderRadius: 8,
-                            padding: '2px 10px',
-                            fontSize: 13,
-                            marginRight: 4,
-                            marginBottom: 2,
-                            fontWeight: 500
-                          }}>{tag}</span>
-                        ))}
-                      </td>
-                      <td style={{ padding: '10px 8px' }}>
-                        <span style={{
-                          display: 'inline-block',
-                          background: item.daXuatBan ? '#e8f5e9' : '#ffebee',
-                          color: item.daXuatBan ? '#43a047' : '#e53935',
-                          borderRadius: 8,
-                          padding: '2px 14px',
-                          fontWeight: 600,
-                          fontSize: 14
-                        }}>
-                          {item.daXuatBan ? 'Đã xuất bản' : 'Nháp'}
-                        </span>
-                      </td>
-                      <td style={{
-                        padding: '10px 8px',
-                        textAlign: 'center',
-                        whiteSpace: 'nowrap',
-                        minWidth: 180,
-                      }}>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: 8,
-                        }}>
-                          <button className="btn-view" title="Xem" onClick={() => setViewing(item)}>
-                            <i className="fas fa-eye"></i>
-                          </button>
-                          <button className="btn-edit" title="Sửa" onClick={() => { setEditing(item); setShowForm(true); }}>
-                            <i className="fas fa-edit"></i>
-                          </button>
-                          <button className="btn-delete" title="Xóa" onClick={() => handleDelete(item.id)}>
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                          <button
-                            className="btn-save"
-                            style={{
-                              background: item.daXuatBan ? '#1976d2' : '#43a047',
-                              color: '#fff',
-                              borderRadius: 8,
-                              padding: '6px 16px',
-                              fontWeight: 600,
-                              fontSize: 14,
-                            }}
-                            onClick={() => handlePublish(item.id, !item.daXuatBan)}
-                          >
-                            {item.daXuatBan ? "Bỏ xuất bản" : "Xuất bản"}
-                          </button>
-                        </div>
-                      </td>
+                </thead>
+                <tbody>
+                  {filteredData.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có dữ liệu</td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    filteredData.map((item, idx) => (
+                      <tr 
+                        key={item.id} 
+                        className="table-row-fadein"
+                        style={{ 
+                          background: '#fff', 
+                          borderBottom: '1px solid #f0f0f0',
+                          animationDelay: `${idx * 120}ms` 
+                        }}
+                        onMouseEnter={e => {
+                          setHoveredBlogId(item.id!);
+                          setHoveredBlogImgPos({ x: e.clientX, y: e.clientY });
+                        }}
+                        onMouseMove={e => {
+                          setHoveredBlogImgPos({ x: e.clientX, y: e.clientY });
+                        }}
+                        onMouseLeave={() => {
+                          setHoveredBlogId(null);
+                          setHoveredBlogImgPos(null);
+                        }}
+                      >
+                        <td style={{ padding: '10px 8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                           
+                            <span style={{ flex: 1 }}>{item.tieuDe}</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: '10px 8px' }}>{danhMucOptions.find(o => o.value === item.danhMuc)?.label}</td>
+                        <td style={{ padding: '10px 8px' }}>{item.tenTacGia}</td>
+                        <td style={{ padding: '10px 8px' }}>{item.ngayDang}</td>
+                        <td style={{ padding: '10px 8px' }}>
+                          {item.theGan?.map((tag: string) => (
+                            <span key={tag} style={{
+                              display: 'inline-block',
+                              background: '#f3f4f6',
+                              color: '#555',
+                              borderRadius: 8,
+                              padding: '2px 10px',
+                              fontSize: 13,
+                              marginRight: 4,
+                              marginBottom: 2,
+                              fontWeight: 500
+                            }}>{tag}</span>
+                          ))}
+                        </td>
+                        <td style={{ padding: '10px 8px' }}>
+                          <span style={{
+                            display: 'inline-block',
+                            background: item.daXuatBan ? '#e8f5e9' : '#ffebee',
+                            color: item.daXuatBan ? '#43a047' : '#e53935',
+                            borderRadius: 8,
+                            padding: '2px 14px',
+                            fontWeight: 600,
+                            fontSize: 14
+                          }}>
+                            {item.daXuatBan ? 'Đã xuất bản' : 'Nháp'}
+                          </span>
+                        </td>
+                        <td style={{
+                          padding: '10px 8px',
+                          textAlign: 'center',
+                          whiteSpace: 'nowrap',
+                          minWidth: 120, // Giảm minWidth vì bớt nút
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 8,
+                          }}>
+                            <button 
+                              className="btn-view" 
+                              title="Xem" 
+                              onClick={() => setViewing(item)}
+                              onMouseEnter={() => { setHoveredBlogId(null); setHoveredBlogImgPos(null); }}
+                              onMouseMove={() => { setHoveredBlogId(null); setHoveredBlogImgPos(null); }}
+                              onMouseLeave={e => {
+                                // Nếu chuột vẫn nằm trên dòng <tr> thì set lại hover
+                                const tr = e.currentTarget.closest('tr');
+                                if (tr && tr.matches(':hover')) {
+                                  setHoveredBlogId(item.id!);
+                                  setHoveredBlogImgPos({ x: e.clientX, y: e.clientY });
+                                }
+                              }}
+                            >
+                              <i className="fas fa-eye"></i>
+                            </button>
+                            <button 
+                              className="btn-edit" 
+                              title="Sửa" 
+                              onClick={() => { setEditing(item); setShowForm(true); }}
+                              onMouseEnter={() => { setHoveredBlogId(null); setHoveredBlogImgPos(null); }}
+                              onMouseMove={() => { setHoveredBlogId(null); setHoveredBlogImgPos(null); }}
+                              onMouseLeave={() => { setHoveredBlogId(null); setHoveredBlogImgPos(null); }}
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            <button
+                              className="btn-publish"
+                              title={item.daXuatBan ? "Bỏ xuất bản" : "Xuất bản"}
+                              onClick={() => handlePublish(item.id!, !item.daXuatBan)}
+                              onMouseEnter={() => { setHoveredBlogId(null); setHoveredBlogImgPos(null); }}
+                              onMouseMove={() => { setHoveredBlogId(null); setHoveredBlogImgPos(null); }}
+                              onMouseLeave={() => { setHoveredBlogId(null); setHoveredBlogImgPos(null); }}
+                              style={{
+                                background: item.daXuatBan ? '#ff4d4f' : '#43a047',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: 8,
+                                padding: '8px 12px',
+                                fontWeight: 600,
+                                fontSize: 14,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                minWidth: 36,
+                                height: 36,
+                              }}
+                            >
+                              <i className={`fas ${item.daXuatBan ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-          {/* Pagination */}
-          {/* Copy y nguyên code phân trang của MarketingManagement */}
-        </div>
+        </AnimatedPage>
       </div>
+      
       {/* Modal Form Add/Edit */}
       {(showForm) && (
         <div className="admin-modal">
@@ -291,7 +392,12 @@ const BlogManagement: React.FC = () => {
               </h2>
               <button
                 className="admin-modal-close"
-                onClick={() => { setShowForm(false); setEditing(null); }}
+                onClick={() => { 
+                  setShowForm(false); 
+                  setEditing(null); 
+                  setImageFile(null);
+                  setImagePreview(null);
+                }}
               >
                 <i className="fas fa-times"></i>
               </button>
@@ -300,17 +406,88 @@ const BlogManagement: React.FC = () => {
               <form
                 onSubmit={async (e) => {
                   e.preventDefault();
-                  const formData = Object.fromEntries(new FormData(e.currentTarget));
-                  const payload = {
-                    ...formData,
-                    theGan: typeof formData.theGan === 'string'
-                      ? formData.theGan.split(',').map(t => t.trim()).filter(Boolean)
-                      : [],
-                  };
-                  await handleSave(payload);
-                  setShowForm(false);
+                  
+                  // Tạo FormData từ form
+                  const formData = new FormData(e.currentTarget);
+                  
+                  // Thêm image file nếu có
+                  if (imageFile) {
+                    formData.append('anhDaiDien', imageFile);
+                  }
+                  
+                  // Thêm idTacGia (lấy từ user hiện tại hoặc hardcode)
+                  formData.append('idTacGia', '1'); // Thay bằng ID user thực tế
+                  
+                  // Xử lý tags
+                  const tagsValue = formData.get('theGan') as string;
+                  if (tagsValue) {
+                    const tags = tagsValue.split(',').map(t => t.trim()).filter(Boolean);
+                    formData.set('theGan', tags.join(',')); // Gửi string thay vì JSON
+                  }
+                  
+                  // Gọi handleSave với FormData
+                  await handleSave(formData);
                 }}
               >
+                {/* Image Upload Section */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
+                  <label
+                    htmlFor="anhDaiDien"
+                    className={`avatar-upload-label${imagePreview ? ' has-avatar' : ''}${isImageHover ? ' hover' : ''}`}
+                    onMouseEnter={() => setIsImageHover(true)}
+                    onMouseLeave={() => setIsImageHover(false)}
+                    style={{
+                      position: 'relative',
+                      width: 120,
+                      height: 90,
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 12px 0 rgba(24,144,255,0.10)',
+                      background: '#f5f5f5',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '2px dashed #e0e0e0',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    <img
+                      src={imagePreview ? 
+                        (imagePreview.startsWith('http') ? imagePreview : getImageUrl(imagePreview)) 
+                        : '/avatar-default.png'
+                      }
+                      alt=""
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '10px',
+                        display: 'block',
+                        transition: 'filter 0.2s',
+                        filter: imagePreview ? 'none' : 'grayscale(1) opacity(0.7)',
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.src = '/avatar-default.png';
+                      }}
+                    />
+                    {(!imagePreview || isImageHover) && (
+                      <div className="avatar-upload-overlay">
+                        <CameraOutlined className={`avatar-upload-icon${isImageHover ? ' show' : ''}`} />
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      id="anhDaiDien"
+                      name="anhDaiDien"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                  <div style={{ marginTop: 8, color: '#888', fontSize: 13 }}>Chọn ảnh đại diện bài viết</div>
+                </div>
+
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="tieuDe">Tiêu đề <span className="required">*</span></label>
@@ -331,26 +508,8 @@ const BlogManagement: React.FC = () => {
                       }}
                     />
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="anhDaiDien">Ảnh đại diện</label>
-                    <input
-                      type="text"
-                      id="anhDaiDien"
-                      name="anhDaiDien"
-                      defaultValue={editing?.anhDaiDien || ''}
-                      placeholder="URL ảnh hoặc để trống"
-                      style={{
-                        width: '100%',
-                        padding: '10px 16px',
-                        borderRadius: 8,
-                        border: '1px solid #e5e7eb',
-                        fontSize: 15,
-                        background: '#fafbfc',
-                        color: '#333',
-                      }}
-                    />
-                  </div>
                 </div>
+                
                 <div className="form-group">
                   <label htmlFor="noiDung">Nội dung <span className="required">*</span></label>
                   <textarea
@@ -370,6 +529,7 @@ const BlogManagement: React.FC = () => {
                     }}
                   />
                 </div>
+                
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="danhMuc">Danh mục <span className="required">*</span></label>
@@ -415,11 +575,16 @@ const BlogManagement: React.FC = () => {
                     <small>Ví dụ: audi, xe sang, review</small>
                   </div>
                 </div>
+                
                 <div className="form-actions">
                   <button
                     type="button"
                     className="btn-cancel"
-                    onClick={() => setShowForm(false)}
+                    onClick={() => {
+                      setShowForm(false);
+                      setImageFile(null);
+                      setImagePreview(null);
+                    }}
                     style={{
                       background: '#e0e0e0',
                       color: '#333',
@@ -437,6 +602,7 @@ const BlogManagement: React.FC = () => {
                   <button
                     type="submit"
                     className="btn-save"
+                    disabled={formLoading}
                     style={{
                       background: '#1890ff',
                       color: '#fff',
@@ -448,7 +614,7 @@ const BlogManagement: React.FC = () => {
                       boxShadow: '0 2px 8px 0 rgba(24,144,255,0.10)',
                     }}
                   >
-                    {editing ? "Cập nhật" : "Thêm mới"}
+                    {formLoading ? 'Đang xử lý...' : (editing ? "Cập nhật" : "Thêm mới")}
                   </button>
                 </div>
               </form>
@@ -456,7 +622,8 @@ const BlogManagement: React.FC = () => {
           </div>
         </div>
       )}
-      {/* Modal View (chuẩn layout UI như MarketingManagement) */}
+
+      {/* Modal View - giữ nguyên phần này */}
       {viewing && (
         <div className="admin-modal">
           <div className="admin-modal-content" style={{
@@ -521,7 +688,7 @@ const BlogManagement: React.FC = () => {
                   <label style={{ color: '#1890ff', fontWeight: 500, marginBottom: 8, fontSize: 14, display: 'block', textAlign: 'center' }}>Ảnh đại diện</label>
                   {viewing.anhDaiDien ? (
                     <img
-                      src={viewing.anhDaiDien}
+                      src={getImageUrl(viewing.anhDaiDien)}
                       alt="Ảnh đại diện"
                       style={{
                         maxWidth: 120,
@@ -533,6 +700,9 @@ const BlogManagement: React.FC = () => {
                         display: 'block',
                         margin: '0 auto',
                         border: '1px solid #e5e7eb'
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
                       }}
                     />
                   ) : (
@@ -624,7 +794,7 @@ const BlogManagement: React.FC = () => {
               <div style={{ marginBottom: 20 }}>
                 <label style={{ color: '#1890ff', fontWeight: 500, marginBottom: 8, fontSize: 14, display: 'block' }}>Tags</label>
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-                  {viewing.theGan?.length > 0 ? viewing.theGan.map((tag: string) => (
+                  {viewing.theGan && viewing.theGan.length > 0 ? viewing.theGan.map((tag: string) => (
                     <span key={tag} style={{
                       display: 'inline-block',
                       background: '#e8f5e9',
@@ -664,6 +834,47 @@ const BlogManagement: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Hover image effect */}
+      {hoveredBlogId && hoveredBlogImgPos && (() => {
+        const blog = data.find(b => b.id === hoveredBlogId);
+        if (!blog || !blog.anhDaiDien) return null;
+        
+        const imgUrl = getImageUrl(blog.anhDaiDien);
+        if (!imgUrl) return null;
+        
+        const offsetX = -320;
+        const offsetY = -100;
+        
+        return (
+          <div
+            className="blog-hover-image"
+            style={{
+              position: 'fixed',
+              left: hoveredBlogImgPos.x + offsetX,
+              top: hoveredBlogImgPos.y + offsetY,
+              zIndex: 9999,
+              pointerEvents: 'none',
+              background: 'transparent',
+              boxShadow: 'none',
+              borderRadius: 0
+            }}
+          >
+            <img
+              src={imgUrl}
+              alt="Ảnh đại diện bài viết"
+              style={{
+                width: 120,
+                height: 90,
+                objectFit: 'cover',
+                borderRadius: 8,
+                border: '4px solid #fff',
+                boxShadow: '0 2px 12px 0 rgba(24,144,255,0.10)'
+              }}
+            />
+          </div>
+        );
+      })()}
     </div>
   );
 };
