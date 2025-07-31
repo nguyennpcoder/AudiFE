@@ -142,3 +142,21 @@ export const verifyOtp = async (otp: string): Promise<boolean> => {
     throw error;
   }
 };
+
+// Add function to handle Google avatar
+export const handleGoogleAvatar = async (photoURL: string): Promise<string> => {
+  try {
+    // If it's a Google URL, we need to handle CORS
+    if (photoURL.includes('googleusercontent.com')) {
+      // Option 1: Use a simple CORS proxy
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(photoURL)}`;
+      console.log('Using CORS proxy for Google avatar:', proxyUrl);
+      return proxyUrl;
+    }
+    
+    return photoURL;
+  } catch (error) {
+    console.error('Error handling Google avatar:', error);
+    return '/avatar-default.png';
+  }
+};

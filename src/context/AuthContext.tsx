@@ -75,6 +75,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           role = 'quan_tri';
         }
         
+        // Check if this is a Google login
+        const isGoogleLogin = authUser.providerData?.some(
+          (provider) => provider.providerId === 'google.com'
+        );
+        
+        console.log('AuthContext - Is Google login:', isGoogleLogin);
+        console.log('AuthContext - authUser.photoURL:', authUser.photoURL);
+        console.log('AuthContext - authUser.providerData:', authUser.providerData);
+        
+        // For Google login, ensure we preserve the photoURL properly
+        let avatar = authUser.photoURL;
+        if (isGoogleLogin && authUser.photoURL) {
+          // For Google, the photoURL is already a complete URL, so use it directly
+          avatar = authUser.photoURL;
+          console.log('AuthContext - Using Google photoURL:', avatar);
+        }
+        
         // Create a user object from the Firebase profile
         const firebaseUserData: AuthResponse = {
           success: true,
@@ -83,8 +100,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           fullName: displayName,
           email: email,
           role: role,
-          avatar: authUser.photoURL || undefined // Thêm dòng này!
+          avatar: avatar || undefined
         };
+        
+        console.log('AuthContext - firebaseUserData:', firebaseUserData);
         
         // Get Firebase ID token to use for API authorization
         authUser.getIdToken().then(token => {
@@ -92,6 +111,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           localStorage.setItem('user', JSON.stringify(firebaseUserData));
           localStorage.setItem('token', token);
           setUser(firebaseUserData);
+          
+          console.log('AuthContext - User data saved to localStorage:', firebaseUserData);
           
           // Set the authorization header
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;

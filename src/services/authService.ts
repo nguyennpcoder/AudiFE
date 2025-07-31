@@ -252,6 +252,33 @@ export const xacThucOtpApi = async (soDienThoai: string, otp: string, matKhauMoi
   }
 };
 
+export const changePasswordApi = async (currentPassword: string, newPassword: string, confirmPassword: string): Promise<AuthResponse> => {
+  try {
+    // Sửa URL từ /auth/nguoi-dung thành /nguoi-dung
+    const response = await axios.put(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api/v1'}/nguoi-dung/change-password`, {
+      currentPassword,
+      newPassword,
+      confirmPassword
+    });
+    
+    return {
+      success: true,
+      message: response.data.message
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        success: false,
+        message: error.response.data.message || 'Không thể đổi mật khẩu'
+      };
+    }
+    return {
+      success: false,
+      message: 'Không thể kết nối đến máy chủ'
+    };
+  }
+};
+
 export interface User {
   id: number;
   ten: string;
@@ -307,12 +334,23 @@ export const buildAvatarUrl = (avatar?: string): string => {
   if (!avatar) {
     return '/avatar-default.png';
   }
+  
+  // If it's already a full URL (from Google, Facebook, etc.), return as is
   if (/^https?:\/\//.test(avatar)) {
+    console.log('buildAvatarUrl output (full URL):', avatar);
     return avatar;
   }
+  
+  // If it starts with /, it's a relative path
+  if (avatar.startsWith('/')) {
+    console.log('buildAvatarUrl output (relative path):', avatar);
+    return avatar;
+  }
+  
+  // Otherwise, assume it's a filename and build the full URL
   const fileName = avatar.split('/').pop();
   const url = `http://localhost:8080/uploads/images/avatar_user/${fileName}`;
-  console.log('buildAvatarUrl output:', url);
+  console.log('buildAvatarUrl output (built URL):', url);
   return url;
 };
 

@@ -88,15 +88,11 @@ const Login: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
+    
     try {
       const response = await loginApi(formData);
-      console.log("Full login API response:", response);
       
       if (response.success) {
-        // Ensure the role is exactly as expected
-        console.log("Raw user role from API:", response.role);
-        
         // Store the response with login function
         authLogin(response);
         
@@ -126,11 +122,22 @@ const Login: React.FC = () => {
         setError(response.message || 'Đăng nhập thất bại, hãy kiểm tra lại thông tin email hoặc mật khẩu');
         antdMessage.error(response.message || 'Đăng nhập thất bại, hãy kiểm tra lại thông tin email hoặc mật khẩu');
       }
-    } catch (err) {
-      setError('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.');
+    } catch (err: any) {
+      // Xử lý lỗi từ API response
+      if (err.response) {
+        const errorMessage = err.response.data?.message;
+        if (errorMessage && errorMessage.includes('vô hiệu hóa')) {
+          setError('Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.');
+          antdMessage.error('Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.');
+        } else {
+          setError(errorMessage || 'Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.');
+          antdMessage.error(errorMessage || 'Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.');
+        }
+      } else {
+        setError('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.');
+        antdMessage.error('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.');
+      }
       console.error(err);
-      // Show error notification
-      antdMessage.error('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.');
     } finally {
       setLoading(false);
     }

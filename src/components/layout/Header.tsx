@@ -63,24 +63,77 @@ const Header = () => {
     console.log('user:', user);
     console.log('user?.avatar:', user?.avatar);
     
-    // First check if Firebase user has a photo URL (for social login)
+    // Check if this is a Google login
+    const isGoogleLogin = firebaseUser?.providerData?.some(
+      provider => provider.providerId === 'google.com'
+    );
+    
+    console.log('Is Google login:', isGoogleLogin);
+    
+    // Priority 1: Use Firebase photoURL if available (for social logins)
     if (firebaseUser?.photoURL && firebaseUser.photoURL.trim() !== '') {
       console.log('Using Firebase photoURL:', firebaseUser.photoURL);
+      
+      // For Google URLs, handle CORS issue
+      if (firebaseUser.photoURL.includes('googleusercontent.com')) {
+        // Use a simple CORS proxy
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(firebaseUser.photoURL)}`;
+        console.log('Using CORS proxy for Google avatar:', proxyUrl);
+        return proxyUrl;
+      }
+      
       return firebaseUser.photoURL;
     }
     
-    // Then check if local user has an avatar (for regular login)
+    // Priority 2: Use user.avatar if it's a full URL (from Google, Facebook, etc.)
     if (user?.avatar && user.avatar.trim() !== '') {
-      // If user.avatar is already processed by buildAvatarUrl during login, use it directly
-      // If it's a full URL, use it as is
-      if (/^https?:\/\//.test(user.avatar) || user.avatar.startsWith('/')) {
-        console.log('Using user avatar directly:', user.avatar);
+      if (/^https?:\/\//.test(user.avatar)) {
+        console.log('Using user avatar (full URL):', user.avatar);
+        
+        // Handle Google URLs in user.avatar as well
+        if (user.avatar.includes('googleusercontent.com')) {
+          const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(user.avatar)}`;
+          console.log('Using CORS proxy for stored Google avatar:', proxyUrl);
+          return proxyUrl;
+        }
+        
         return user.avatar;
-      } else {
-        // Otherwise, process it through buildAvatarUrl
-        const builtUrl = buildAvatarUrl(user.avatar);
-        console.log('Using buildAvatarUrl result:', builtUrl);
-        return builtUrl;
+      }
+      
+      // If it starts with /, it's a relative path
+      if (user.avatar.startsWith('/')) {
+        console.log('Using user avatar (relative path):', user.avatar);
+        return user.avatar;
+      }
+      
+      // Otherwise, process it through buildAvatarUrl
+      const builtUrl = buildAvatarUrl(user.avatar);
+      console.log('Using buildAvatarUrl result:', builtUrl);
+      return builtUrl;
+    }
+    
+    // Priority 3: Check if we have a stored user in localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        console.log('Stored user from localStorage:', parsedUser);
+        if (parsedUser.avatar && parsedUser.avatar.trim() !== '') {
+          if (/^https?:\/\//.test(parsedUser.avatar)) {
+            console.log('Using stored user avatar (full URL):', parsedUser.avatar);
+            
+            // Handle Google URLs in stored user
+            if (parsedUser.avatar.includes('googleusercontent.com')) {
+              const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(parsedUser.avatar)}`;
+              console.log('Using CORS proxy for stored Google avatar:', proxyUrl);
+              return proxyUrl;
+            }
+            
+            return parsedUser.avatar;
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
       }
     }
     
@@ -89,8 +142,27 @@ const Header = () => {
     return '/avatar-default.png';
   };
 
+  // Debug function to test avatar loading
+  const testAvatarUrl = (url: string) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        console.log('Avatar URL is valid:', url);
+        resolve(true);
+      };
+      img.onerror = () => {
+        console.log('Avatar URL is invalid:', url);
+        resolve(false);
+      };
+      img.src = url;
+    });
+  };
+
   const avatarUrl = getAvatarUrl();
   console.log('=== Final avatar URL ===:', avatarUrl);
+  
+  // Test the avatar URL
+  testAvatarUrl(avatarUrl);
 
   return (
     <header className="header header-animate-down">
@@ -222,15 +294,19 @@ const Header = () => {
                     border: '2px solid #ccc'
                   }}
                   onError={(e) => {
-                    console.log('Avatar failed to load, using default');
+                    console.log('Avatar failed to load:', avatarUrl);
+                    console.log('Error event:', e);
                     const target = e.currentTarget;
                     if (target.src !== '/avatar-default.png') {
+                      console.log('Falling back to default avatar');
                       target.src = '/avatar-default.png';
                     }
                   }}
                   onLoad={() => {
                     console.log('Avatar loaded successfully:', avatarUrl);
                   }}
+                  // Remove crossOrigin for proxy URLs
+                  crossOrigin={avatarUrl.includes('allorigins.win') ? undefined : "anonymous"}
                 />
                 <span className="user-name">
                   {getDisplayName()} <span className="dropdown-arrow">▼</span>

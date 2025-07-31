@@ -28,6 +28,7 @@ import Profile from './context/pages/admin/Profile';
 import BlogManagement from './context/pages/admin/BlogManagement';
 import BlogList from './context/pages/Blog/BlogList';
 import BlogDetail from './context/pages/Blog/BlogDetail';
+import ChangePassword from './context/pages/ChangePassword';
 
 function App() {
   const location = useLocation();
@@ -234,6 +235,11 @@ function App() {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/blog" element={<BlogList />} />
                 <Route path="/blog/:id" element={<BlogDetail />} />
+                <Route path="/change-password" element={
+                  <ProtectedRoute>
+                    <ChangePassword />
+                  </ProtectedRoute>
+                } />
               </Routes>
             </main>
             {shouldShowFooter && <Footer />}

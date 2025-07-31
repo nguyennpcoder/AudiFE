@@ -3,7 +3,8 @@ import { useAuth } from '../../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import '../../../styles/Admin.css';
 import axios from 'axios';
-import { Breadcrumb } from 'antd';
+import { Breadcrumb, message } from 'antd'; // Thêm message vào đây
+import { message as antdMessage } from 'antd'; // Thêm antdMessage vào đây
 
 import AdminHeader from './AdminHeader';
 import { buildAvatarUrl } from '../../../services/authService';
@@ -55,6 +56,10 @@ const UserManagement: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  
+  // Thêm state cho animation success
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   
   // Thiết lập trạng thái cho màn hình
   const [state, setState] = useState<UsersScreenState>({
@@ -391,61 +396,105 @@ const UserManagement: React.FC = () => {
   };
 
   // Xử lý cập nhật người dùng
-  const handleUpdateUser = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleEditUser = async (e: React.FormEvent) => {
+    e.preventDefault(); // Thêm dòng này để ngăn form submit mặc định
+    
     if (!state.currentUser) return;
-
+    
     setState(prev => ({ ...prev, isLoading: true }));
-    const token = localStorage.getItem('token');
-
-    // Map các trường sang camelCase cho backend
-    const userToUpdate: any = {
-      ...state.currentUser,
-      diaChi: state.currentUser.dia_chi,
-      thanhPho: state.currentUser.thanh_pho,
-      tinh: state.currentUser.tinh,
-      maBuuDien: state.currentUser.ma_buu_dien,
-      quocGia: state.currentUser.quoc_gia,
-      trangThai: state.currentUser.trangThai,
-    };
-    // Xóa các trường snake_case để tránh gửi thừa
-    delete userToUpdate.dia_chi;
-    delete userToUpdate.thanh_pho;
-    delete userToUpdate.ma_buu_dien;
-    delete userToUpdate.quoc_gia;
-
-    // Không cho phép cập nhật vai trò sang "quan_tri"
-    if (userToUpdate.vaiTro === 'quan_tri' && state.currentUser.vaiTro !== 'quan_tri') {
-      setState(prev => ({
-        ...prev,
-        error: 'Không được phép cập nhật quyền quản trị',
-        isLoading: false
-      }));
-      return;
-    }
-
+    
     try {
-      const response = await fetch(`/api/v1/nguoi-dung/${state.currentUser.id}`, {
+      // Chuẩn bị dữ liệu để gửi lên server
+      const userDataToUpdate = {
+        id: state.currentUser.id,
+        email: state.currentUser.email,
+        ho: state.currentUser.ho,
+        ten: state.currentUser.ten,
+        soDienThoai: state.currentUser.soDienThoai,
+        vaiTro: state.currentUser.vaiTro,
+        trangThai: state.currentUser.trangThai,
+        // Map từ snake_case sang camelCase cho backend
+        diaChi: state.currentUser.dia_chi,
+        thanhPho: state.currentUser.thanh_pho,
+        tinh: state.currentUser.tinh,
+        maBuuDien: state.currentUser.ma_buu_dien,
+        quocGia: state.currentUser.quoc_gia,
+        avatar: state.currentUser.avatar || state.currentUser.avatarUrl || state.currentUser.anhDaiDien || state.currentUser.anh_dai_dien
+      };
+      
+      const response = await fetch(`http://localhost:8080/api/v1/nguoi-dung/${state.currentUser.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${user?.token}`
         },
-        body: JSON.stringify(userToUpdate)
+        body: JSON.stringify(userDataToUpdate)
       });
-
-      if (!response.ok) {
-        throw new Error('Không thể cập nhật người dùng');
+      
+      if (response.ok) {
+        // Nếu user được mở khóa (từ false sang true), gọi unlock endpoint
+        if (state.currentUser.trangThai) {
+          try {
+            const unlockResponse = await fetch(`http://localhost:8080/api/v1/auth/unlock-user/${state.currentUser.email}`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${user?.token}`
+              }
+            });
+            
+            if (unlockResponse.ok) {
+              const unlockData = await unlockResponse.json();
+              antdMessage.success(unlockData.message);
+            } else {
+              const errorData = await unlockResponse.json();
+              antdMessage.warning(errorData.message);
+            }
+          } catch (unlockError) {
+            console.error('Error unlocking user:', unlockError);
+            antdMessage.warning('Cập nhật thành công nhưng có lỗi khi gửi email password mới');
+          }
+        }
+        
+        // Clear user cache after update
+        await fetch(`http://localhost:8080/api/v1/auth/clear-cache/${state.currentUser.email}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${user?.token}`
+          }
+        });
+        
+        antdMessage.success('Cập nhật người dùng thành công!');
+        
+        // Cập nhật user trong danh sách hiện tại
+        setState(prev => {
+          const updatedUsers = prev.users.map(user => 
+            user.id === state.currentUser!.id ? state.currentUser! : user
+          );
+          
+          const updatedFilteredUsers = prev.filteredUsers.map(user => 
+            user.id === state.currentUser!.id ? state.currentUser! : user
+          );
+          
+          return {
+            ...prev,
+            users: updatedUsers,
+            filteredUsers: updatedFilteredUsers,
+            isLoading: false
+          };
+        });
+        
+        // Chuyển sang view mode ngay lập tức
+        setIsEditMode(false);
+        
+      } else {
+        const errorData = await response.json();
+        antdMessage.error(errorData.message || 'Có lỗi xảy ra khi cập nhật người dùng');
+        setState(prev => ({ ...prev, isLoading: false }));
       }
-
-      await fetchUsers();
-      setState(prev => ({ ...prev, showEditModal: false }));
     } catch (error) {
-      setState(prev => ({
-        ...prev,
-        error: error instanceof Error ? error.message : 'Đã xảy ra lỗi',
-        isLoading: false
-      }));
+      console.error('Error updating user:', error);
+      antdMessage.error('Có lỗi xảy ra khi cập nhật người dùng');
+      setState(prev => ({ ...prev, isLoading: false }));
     }
   };
 
@@ -486,6 +535,87 @@ const UserManagement: React.FC = () => {
         error: error instanceof Error ? error.message : 'Đã xảy ra lỗi', 
         isLoading: false 
       }));
+    }
+  };
+
+  // Tối ưu function unlock user với animation
+  const handleUnlockUser = async (userEmail: string) => {
+    try {
+      // Hiển thị loading ngay lập tức
+      const loadingKey = message.loading('Đang mở khóa tài khoản...', 0);
+      
+      const response = await fetch(`http://localhost:8080/api/v1/auth/unlock-user/${userEmail}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.token}`
+        }
+      });
+      
+      if (response.ok) {
+        // Tìm tên người dùng từ danh sách hiện tại
+        const targetUser = state.users.find(u => u.email === userEmail);
+        const userName = targetUser ? `${targetUser.ho} ${targetUser.ten}` : userEmail;
+        
+        // Đóng loading
+        message.destroy();
+        
+        // Hiển thị animation success
+        setSuccessMessage(`Mở khóa tài khoản thành công!\nĐã gửi mật khẩu mới về Email cho ${userName}`);
+        setShowSuccessAnimation(true);
+        
+        // Ẩn animation sau 5 giây (tăng từ 3 giây)
+        setTimeout(() => {
+          setShowSuccessAnimation(false);
+          setSuccessMessage('');
+        }, 5000);
+        
+        // Refresh user list ngay lập tức mà không cần đợi
+        fetchUsers();
+      } else {
+        const errorData = await response.json();
+        message.destroy();
+        message.error(errorData.message || 'Có lỗi xảy ra khi mở khóa tài khoản');
+      }
+    } catch (error) {
+      message.destroy();
+      console.error('Error unlocking user:', error);
+      message.error('Có lỗi xảy ra khi mở khóa tài khoản');
+    }
+  };
+
+  // Tối ưu function lock user với message thông báo
+  const handleLockUser = async (userEmail: string) => {
+    try {
+      // Hiển thị loading ngay lập tức
+      const loadingKey = message.loading('Đang khóa tài khoản...', 0);
+      
+      const response = await fetch(`http://localhost:8080/api/v1/auth/lock-user/${userEmail}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.token}`
+        }
+      });
+      
+      if (response.ok) {
+        // Tìm tên người dùng từ danh sách hiện tại
+        const targetUser = state.users.find(u => u.email === userEmail);
+        const userName = targetUser ? `${targetUser.ho} ${targetUser.ten}` : userEmail;
+        
+        // Đóng loading và hiển thị thông báo thành công
+        message.destroy();
+        message.success(`Đã khóa tài khoản thành công cho ${userName}`);
+        
+        // Refresh user list ngay lập tức
+        fetchUsers();
+      } else {
+        const errorData = await response.json();
+        message.destroy();
+        message.error(errorData.message || 'Có lỗi xảy ra khi khóa tài khoản');
+      }
+    } catch (error) {
+      message.destroy();
+      console.error('Error locking user:', error);
+      message.error('Có lỗi xảy ra khi khóa tài khoản');
     }
   };
 
@@ -679,9 +809,47 @@ const UserManagement: React.FC = () => {
                           >
                             <i className="fas fa-edit"></i>
                           </button>
-                          {/* <button className="btn-delete" title="Xóa" onClick={() => handleShowDeleteModal(user)}>
-                            <i className="fas fa-trash-alt"></i>
-                          </button> */}
+                          {user.trangThai ? (
+                            <button
+                              className="btn-lock"
+                              title="Khóa tài khoản"
+                              onClick={() => handleLockUser(user.email)}
+                              onMouseEnter={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                              onMouseMove={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                              onMouseLeave={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                              style={{
+                                background: '#ff7875', // Đổi từ #faad14 thành màu đỏ nhạt
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: 6,
+                                padding: '6px 10px',
+                                fontSize: 12,
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <i className="fas fa-lock"></i>
+                            </button>
+                          ) : (
+                            <button
+                              className="btn-unlock"
+                              title="Mở khóa tài khoản"
+                              onClick={() => handleUnlockUser(user.email)}
+                              onMouseEnter={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                              onMouseMove={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                              onMouseLeave={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                              style={{
+                                background: '#52c41a',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: 6,
+                                padding: '6px 10px',
+                                fontSize: 12,
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <i className="fas fa-unlock"></i>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -942,7 +1110,7 @@ const UserManagement: React.FC = () => {
               </button>
             </div>
             <div className="admin-modal-body">
-              <form onSubmit={handleUpdateUser}>
+              <form onSubmit={handleEditUser}>
                 <div
                   style={{
                     display: 'flex',
@@ -1068,7 +1236,8 @@ const UserManagement: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="form-group checkbox-group">
+                {/* BỎ checkbox trạng thái - xóa toàn bộ phần này */}
+                {/* <div className="form-group checkbox-group">
                   <input 
                     type="checkbox" 
                     id="edit-trangThai" 
@@ -1084,7 +1253,7 @@ const UserManagement: React.FC = () => {
                   <label htmlFor="edit-trangThai" style={{ fontSize: 15 }}>
                     Hoạt động
                   </label>
-                </div>
+                </div> */}
                 
                 {/* BỎ điều kiện isEditMode, luôn render các trường này */}
                 <div className="form-group">
@@ -1333,6 +1502,45 @@ const UserManagement: React.FC = () => {
           </div>
         );
       })()}
+      
+      {/* Animation Success Modal */}
+      {showSuccessAnimation && (
+        <div className="success-animation-modal">
+          <div className="success-animation-content">
+            {/* Video Animation - tăng kích thước */}
+            <video
+              autoPlay
+              muted
+              className="success-video"
+              style={{
+                width: 180,  // Tăng từ 120px
+                height: 180,  // Tăng từ 120px
+                marginBottom: 24,
+                borderRadius: '50%',
+                objectFit: 'cover'
+              }}
+            >
+              <source src="/src/assets/Success.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            
+            {/* Success Message */}
+            <div className="success-message">
+              {successMessage.split('\n').map((line, index) => (
+                <div key={index} style={{ marginBottom: index < successMessage.split('\n').length - 1 ? 8 : 0 }}>
+                  {line}
+                </div>
+              ))}
+            </div>
+            
+            {/* Additional Info */}
+            <div className="success-info">
+              <i className="fas fa-info-circle"></i>
+              Người dùng có thể đăng nhập ngay với mật khẩu mới
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
