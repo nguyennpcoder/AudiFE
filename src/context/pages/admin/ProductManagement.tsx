@@ -3,6 +3,7 @@ import { useAuth } from '../../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import '../../../styles/Admin.css';
 import axios from 'axios';
+import { message } from 'antd';
 
 import AdminHeader from './AdminHeader';
 
@@ -128,6 +129,9 @@ const ProductManagement: React.FC = () => {
   
   // 1. Thêm state mới để lưu ảnh đại diện từng sản phẩm
   const [productThumbnailMap, setProductThumbnailMap] = useState<Record<number, string>>({});
+
+  // Add this state near the top of the component, after other state declarations
+  const [selectedImageType, setSelectedImageType] = useState<string>('noi_that');
 
   const handleLogout = () => {
     logout();
@@ -671,9 +675,14 @@ const ProductManagement: React.FC = () => {
       // Clear newly added images
       setNewlyAddedImages([]);
       
+      // Hiển thị thông báo thành công
+      message.success('Cập nhật mẫu xe thành công!');
+      
+      // Chuyển sang view mode ngay lập tức
+      setIsEditMode(false);
+      
       setState(prev => ({ 
         ...prev, 
-        showEditModal: false,
         productImages: updatedImages || [],
         isLoading: false 
       }));
@@ -684,6 +693,7 @@ const ProductManagement: React.FC = () => {
         error: error instanceof Error ? error.message : 'Đã xảy ra lỗi', 
         isLoading: false 
       }));
+      message.error('Có lỗi xảy ra khi cập nhật mẫu xe');
     }
   };
 
@@ -1075,17 +1085,67 @@ const ProductManagement: React.FC = () => {
 
   const mouseMoveTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  // Thêm function để toggle trạng thái sản phẩm
+  const handleToggleProductStatus = async (productId: number, currentStatus: boolean) => {
+    try {
+      setState(prev => ({ ...prev, isLoading: true }));
+      
+      const token = localStorage.getItem('token');
+      
+      // Tìm sản phẩm hiện tại
+      const currentProduct = state.mauXeList.find(p => p.id === productId);
+      if (!currentProduct) return;
+      
+      // Cập nhật trạng thái
+      const updatedProduct = {
+        ...currentProduct,
+        conHang: !currentStatus
+      };
+      
+      const response = await fetch(`http://localhost:8080/api/v1/mau-xe/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedProduct)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Không thể cập nhật trạng thái sản phẩm');
+      }
+      
+      // Refresh data
+      await fetchCarModels();
+      
+      // Hiển thị thông báo
+      const newStatus = !currentStatus;
+      const statusText = newStatus ? 'còn hàng' : 'hết hàng';
+      message.success(`Đã cập nhật trạng thái sản phẩm thành ${statusText}`);
+      
+    } catch (error) {
+      console.error('Error updating product status:', error);
+      message.error('Có lỗi xảy ra khi cập nhật trạng thái sản phẩm');
+    } finally {
+      setState(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
   return (
-    <div style={{ background: '#f5f5f5', minHeight: '100vh', padding: 0 }}>
+    <div style={{ 
+      background: '#f5f5f5', 
+      height: '100vh', // Cố định chiều cao viewport
+      overflow: 'hidden', // Không cho scroll
+      padding: 0 
+    }}>
       <AdminHeader pageTitle="Quản lý sản phẩm" />
-      <div
-        style={{
-          maxWidth: 1200,
-          margin: '0 auto',
-          padding: '32px 0 0 0',
-          minHeight: '100vh',
-        }}
-      >
+      <div style={{ 
+        maxWidth: 1200, 
+        margin: '0 auto', 
+        padding: '32px 0 0 0',
+        height: 'calc(100vh - 80px)', // Trừ đi chiều cao header
+        overflow: 'hidden', // Không cho scroll
+      }}>
         <div
           className="admin-section"
           style={{
@@ -1094,6 +1154,8 @@ const ProductManagement: React.FC = () => {
             boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)',
             padding: '32px 32px 24px 32px',
             marginBottom: 32,
+            height: 'calc(100vh - 120px)', // Cố định chiều cao
+            overflow: 'hidden', // Không cho scroll
           }}
         >
           {/* Toolbar */}
@@ -1190,196 +1252,268 @@ const ProductManagement: React.FC = () => {
             </button>
           </div>
 
-          {/* Table */}
-          <div style={{ overflowX: 'auto', borderRadius: 12, background: '#fafbfc' }}>
-            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
-              <thead>
-                <tr style={{ background: '#fafbfc', color: '#6b7280', fontWeight: 700 }}>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>ID</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Tên mẫu xe</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Dòng xe</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Năm SX</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Giá cơ bản</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Trạng thái</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'center' }}>Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentProducts.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có dữ liệu</td>
+          {/* Table Container - Cố định chiều cao */}
+          <div style={{ 
+            height: 'calc(100vh - 280px)', // Cố định chiều cao cho table
+            overflow: 'hidden', // Không cho scroll
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {/* Table */}
+            <div style={{ 
+              overflowX: 'auto', 
+              borderRadius: 12, 
+              background: '#fafbfc',
+              flex: 1, // Chiếm hết không gian còn lại
+              minHeight: 0 // Quan trọng cho flex
+            }}>
+              <table style={{ 
+                width: '100%', 
+                borderCollapse: 'separate', 
+                borderSpacing: 0,
+                height: '100%' // Chiếm hết chiều cao
+              }}>
+                <thead>
+                  <tr style={{ background: '#fafbfc', color: '#6b7280', fontWeight: 700 }}>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>ID</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Tên mẫu xe</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Dòng xe</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Năm SX</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Giá cơ bản</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Trạng thái</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'center' }}>Thao tác</th>
                   </tr>
-                ) : (
-                  currentProducts.map((product, idx) => (
-                    <tr
-                      key={product.id}
-                      className="table-row-fadein"
-                      style={{
-                        animationDelay: `${idx * 120}ms`,
-                        background: '#fff',
-                        borderBottom: '1px solid #f0f0f0'
-                      }}
-                      onMouseEnter={e => {
-                        setHoveredRow(product.id);
-                        setHoveredImgPos({ x: e.clientX, y: e.clientY });
-                      }}
-                      onMouseMove={e => {
-                        setHoveredImgPos({ x: e.clientX, y: e.clientY });
-                      }}
-                      onMouseLeave={() => {
-                        setHoveredRow(null);
-                        setHoveredImgPos(null);
-                      }}
-                    >
-                      <td style={{ padding: '10px 8px' }}>{product.id}</td>
-                      <td style={{ padding: '10px 8px' }}>{product.tenMau}</td>
-                      <td style={{ padding: '10px 8px' }}>{product.tenDong}</td>
-                      <td style={{ padding: '10px 8px' }}>{product.namSanXuat}</td>
-                      <td style={{ padding: '10px 8px' }}>{formatPrice(product.giaCoban)}</td>
-                      <td style={{ padding: '10px 8px' }}>{renderStatus(product.conHang)}</td>
-                      <td
-                        style={{
-                          padding: '10px 8px',
-                          textAlign: 'center',
-                          whiteSpace: 'nowrap',
-                          minWidth: 160,
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: 8,
-                        }}>
-                          <button
-                            className="btn-view"
-                            title="Xem chi tiết"
-                            onClick={() => handleShowEditModal(product, false)}
-                            onMouseEnter={() => { setHoveredRow(null); setHoveredImgPos(null); }}
-                            onMouseMove={() => { setHoveredRow(null); setHoveredImgPos(null); }}
-                            onMouseLeave={e => {
-                              const tr = e.currentTarget.closest('tr');
-                              if (tr && tr.matches(':hover')) {
-                                setHoveredRow(product.id);
-                                setHoveredImgPos({ x: e.clientX, y: e.clientY });
-                              }
-                            }}
-                          >
-                            <i className="fas fa-eye"></i>
-                          </button>
-                          <button
-                            className="btn-edit"
-                            title="Chỉnh sửa"
-                            onClick={() => handleShowEditModal(product, true)}
-                            onMouseEnter={() => { setHoveredRow(null); setHoveredImgPos(null); }}
-                            onMouseMove={() => { setHoveredRow(null); setHoveredImgPos(null); }}
-                            onMouseLeave={() => { setHoveredRow(null); setHoveredImgPos(null); }}
-                          >
-                            <i className="fas fa-edit"></i>
-                          </button>
-                          <button
-                            className="btn-inventory"
-                            title="Xem tồn kho"
-                            onClick={() => handleViewInventory(product)}
-                            onMouseEnter={() => { setHoveredRow(null); setHoveredImgPos(null); }}
-                            onMouseMove={() => { setHoveredRow(null); setHoveredImgPos(null); }}
-                            onMouseLeave={() => { setHoveredRow(null); setHoveredImgPos(null); }}
-                          >
-                            <i className="fas fa-warehouse"></i>
-                          </button>
-                          <button
-                            className="btn-delete"
-                            title="Xóa"
-                            onClick={() => handleShowDeleteModal(product)}
-                            onMouseEnter={() => { setHoveredRow(null); setHoveredImgPos(null); }}
-                            onMouseMove={() => { setHoveredRow(null); setHoveredImgPos(null); }}
-                            onMouseLeave={() => { setHoveredRow(null); setHoveredImgPos(null); }}
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                        </div>
+                </thead>
+                <tbody>
+                  {currentProducts.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ 
+                        textAlign: 'center', 
+                        padding: '100px 24px', // Giảm padding
+                        color: '#888',
+                        height: '300px' // Giảm chiều cao
+                      }}>
+                        Không có dữ liệu
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="admin-pagination" style={{ marginTop: 24, display: 'flex', justifyContent: 'center', gap: 8 }}>
-              <button 
-                onClick={() => handlePageChange(1)}
-                disabled={state.currentPage === 1}
-                style={{
-                  background: '#e0e0e0',
-                  color: '#333',
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '8px 12px',
-                  fontSize: 14,
-                  cursor: state.currentPage === 1 ? 'not-allowed' : 'pointer',
-                  opacity: state.currentPage === 1 ? 0.6 : 1,
-                }}
-              >
-                <i className="fas fa-angle-double-left"></i>
-              </button>
-              <button 
-                onClick={() => handlePageChange(state.currentPage - 1)}
-                disabled={state.currentPage === 1}
-                style={{
-                  background: '#e0e0e0',
-                  color: '#333',
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '8px 12px',
-                  fontSize: 14,
-                  cursor: state.currentPage === 1 ? 'not-allowed' : 'pointer',
-                  opacity: state.currentPage === 1 ? 0.6 : 1,
-                }}
-              >
-                <i className="fas fa-angle-left"></i>
-              </button>
-              
-              <span style={{ fontSize: 14, color: '#555' }}>
-                Trang {state.currentPage} / {totalPages}
-              </span>
-              
-              <button 
-                onClick={() => handlePageChange(state.currentPage + 1)}
-                disabled={state.currentPage === totalPages}
-                style={{
-                  background: '#e0e0e0',
-                  color: '#333',
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '8px 12px',
-                  fontSize: 14,
-                  cursor: state.currentPage === totalPages ? 'not-allowed' : 'pointer',
-                  opacity: state.currentPage === totalPages ? 0.6 : 1,
-                }}
-              >
-                <i className="fas fa-angle-right"></i>
-              </button>
-              <button 
-                onClick={() => handlePageChange(totalPages)}
-                disabled={state.currentPage === totalPages}
-                style={{
-                  background: '#e0e0e0',
-                  color: '#333',
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '8px 12px',
-                  fontSize: 14,
-                  cursor: state.currentPage === totalPages ? 'not-allowed' : 'pointer',
-                  opacity: state.currentPage === totalPages ? 0.6 : 1,
-                }}
-              >
-                <i className="fas fa-angle-double-right"></i>
-              </button>
+                  ) : (
+                    currentProducts.map((product, idx) => (
+                      <tr
+                        key={product.id}
+                        className="table-row-fadein"
+                        style={{
+                          animationDelay: `${idx * 120}ms`,
+                          background: '#fff',
+                          borderBottom: '1px solid #f0f0f0',
+                          height: '50px' // Giảm chiều cao row
+                        }}
+                        onMouseEnter={e => {
+                          setHoveredRow(product.id);
+                          setHoveredImgPos({ x: e.clientX, y: e.clientY });
+                        }}
+                        onMouseMove={e => {
+                          setHoveredImgPos({ x: e.clientX, y: e.clientY });
+                        }}
+                        onMouseLeave={() => {
+                          setHoveredRow(null);
+                          setHoveredImgPos(null);
+                        }}
+                      >
+                        <td style={{ padding: '10px 8px' }}>{product.id}</td>
+                        <td style={{ padding: '10px 8px' }}>{product.tenMau}</td>
+                        <td style={{ padding: '10px 8px' }}>{product.tenDong}</td>
+                        <td style={{ padding: '10px 8px' }}>{product.namSanXuat}</td>
+                        <td style={{ padding: '10px 8px' }}>{formatPrice(product.giaCoban)}</td>
+                        <td style={{ padding: '10px 8px' }}>{renderStatus(product.conHang)}</td>
+                        <td
+                          style={{
+                            padding: '10px 8px',
+                            textAlign: 'center',
+                            whiteSpace: 'nowrap',
+                            minWidth: 160,
+                          }}
+                        >
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 8,
+                          }}>
+                            <button
+                              className="btn-view"
+                              title="Xem chi tiết"
+                              onClick={() => handleShowEditModal(product, false)}
+                              onMouseEnter={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                              onMouseMove={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                              onMouseLeave={e => {
+                                const tr = e.currentTarget.closest('tr');
+                                if (tr && tr.matches(':hover')) {
+                                  setHoveredRow(product.id);
+                                  setHoveredImgPos({ x: e.clientX, y: e.clientY });
+                                }
+                              }}
+                            >
+                              <i className="fas fa-eye"></i>
+                            </button>
+                            <button
+                              className="btn-edit"
+                              title="Chỉnh sửa"
+                              onClick={() => handleShowEditModal(product, true)}
+                              onMouseEnter={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                              onMouseMove={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                              onMouseLeave={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            <button
+                              className="btn-inventory"
+                              title="Xem tồn kho"
+                              onClick={() => handleViewInventory(product)}
+                              onMouseEnter={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                              onMouseMove={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                              onMouseLeave={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                            >
+                              <i className="fas fa-warehouse"></i>
+                            </button>
+                            {product.conHang ? (
+                              <button
+                                className="btn-out-of-stock"
+                                title="Đánh dấu hết hàng"
+                                onClick={() => handleToggleProductStatus(product.id, product.conHang)}
+                                onMouseEnter={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                                onMouseMove={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                                onMouseLeave={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                                style={{
+                                  background: '#ff7875',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: 6,
+                                  padding: '6px 10px',
+                                  fontSize: 12,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <i className="fas fa-times-circle"></i>
+                              </button>
+                            ) : (
+                              <button
+                                className="btn-in-stock"
+                                title="Đánh dấu còn hàng"
+                                onClick={() => handleToggleProductStatus(product.id, product.conHang)}
+                                onMouseEnter={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                                onMouseMove={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                                onMouseLeave={() => { setHoveredRow(null); setHoveredImgPos(null); }}
+                                style={{
+                                  background: '#52c41a',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: 6,
+                                  padding: '6px 10px',
+                                  fontSize: 12,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <i className="fas fa-check-circle"></i>
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                  {/* Thêm các row trống để cố định chiều cao khi data ít */}
+                  {currentProducts.length > 0 && currentProducts.length < 10 && 
+                    Array.from({ length: 10 - currentProducts.length }).map((_, index) => (
+                      <tr key={`empty-${index}`} style={{ height: '50px', background: '#fff' }}>
+                        <td colSpan={7} style={{ padding: '10px 8px' }}></td>
+                      </tr>
+                    ))
+                  }
+                </tbody>
+              </table>
             </div>
-          )}
+
+            {/* Pagination - Cố định ở dưới */}
+            {totalPages > 1 && (
+              <div className="admin-pagination" style={{ 
+                marginTop: 16, 
+                display: 'flex', 
+                justifyContent: 'center', 
+                gap: 8,
+                flexShrink: 0 // Không co lại
+              }}>
+                <button 
+                  onClick={() => handlePageChange(1)}
+                  disabled={state.currentPage === 1}
+                  style={{
+                    background: '#e0e0e0',
+                    color: '#333',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '8px 12px',
+                    fontSize: 14,
+                    cursor: state.currentPage === 1 ? 'not-allowed' : 'pointer',
+                    opacity: state.currentPage === 1 ? 0.6 : 1,
+                  }}
+                >
+                  <i className="fas fa-angle-double-left"></i>
+                </button>
+                <button 
+                  onClick={() => handlePageChange(state.currentPage - 1)}
+                  disabled={state.currentPage === 1}
+                  style={{
+                    background: '#e0e0e0',
+                    color: '#333',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '8px 12px',
+                    fontSize: 14,
+                    cursor: state.currentPage === 1 ? 'not-allowed' : 'pointer',
+                    opacity: state.currentPage === 1 ? 0.6 : 1,
+                  }}
+                >
+                  <i className="fas fa-angle-left"></i>
+                </button>
+                
+                <span style={{ fontSize: 14, color: '#555' }}>
+                  Trang {state.currentPage} / {totalPages}
+                </span>
+                
+                <button 
+                  onClick={() => handlePageChange(state.currentPage + 1)}
+                  disabled={state.currentPage === totalPages}
+                  style={{
+                    background: '#e0e0e0',
+                    color: '#333',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '8px 12px',
+                    fontSize: 14,
+                    cursor: state.currentPage === totalPages ? 'not-allowed' : 'pointer',
+                    opacity: state.currentPage === totalPages ? 0.6 : 1,
+                  }}
+                >
+                  <i className="fas fa-angle-right"></i>
+                </button>
+                <button 
+                  onClick={() => handlePageChange(totalPages)}
+                  disabled={state.currentPage === totalPages}
+                  style={{
+                    background: '#e0e0e0',
+                    color: '#333',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '8px 12px',
+                    fontSize: 14,
+                    cursor: state.currentPage === totalPages ? 'not-allowed' : 'pointer',
+                    opacity: state.currentPage === totalPages ? 0.6 : 1,
+                  }}
+                >
+                  <i className="fas fa-angle-double-right"></i>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       
@@ -1665,42 +1799,6 @@ const ProductManagement: React.FC = () => {
                   />
                 </div>
                 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="ngayRaMat">Ngày ra mắt</label>
-                    <input 
-                      type="date" 
-                      id="ngayRaMat" 
-                      name="ngayRaMat"
-                      value={state.newProduct.ngayRaMat}
-                      onChange={handleNewProductChange}
-                      style={{
-                        width: '100%',
-                        padding: '10px 16px',
-                        borderRadius: 8,
-                        border: '1px solid #e5e7eb',
-                        fontSize: 15,
-                        background: '#fafbfc',
-                      }}
-                    />
-                  </div>
-                  
-                  <div className="form-group checkbox-group">
-                    <input 
-                      type="checkbox" 
-                      id="conHang" 
-                      name="conHang"
-                      checked={state.newProduct.conHang}
-                      onChange={handleNewProductChange}
-                      style={{
-                        width: 'auto',
-                        marginRight: '8px',
-                      }}
-                    />
-                    <label htmlFor="conHang" style={{ fontSize: 15 }}>Còn hàng</label>
-                  </div>
-                </div>
-                
                 <div className="form-actions">
                   <button 
                     type="button" 
@@ -1912,22 +2010,6 @@ const ProductManagement: React.FC = () => {
                       }}
                     />
                   </div>
-                  
-                  <div className="form-group checkbox-group">
-                    <input 
-                      type="checkbox" 
-                      id="edit-conHang" 
-                      name="conHang"
-                      checked={state.currentProduct.conHang}
-                      onChange={handleEditProductChange}
-                      disabled={!isEditMode}
-                      style={{
-                        width: 'auto',
-                        marginRight: '8px',
-                      }}
-                    />
-                    <label htmlFor="edit-conHang" style={{ fontSize: 15 }}>Còn hàng</label>
-                  </div>
                 </div>
                 
                 <div className="product-info-section">
@@ -1974,30 +2056,69 @@ const ProductManagement: React.FC = () => {
                   {/* CHỈ HIỂN THỊ KHI EDIT */}
                   {isEditMode && (
                     <div className="upload-image-section">
-                      <input 
-                        type="file" 
-                        id="image-upload" 
-                        accept="image/*" 
-                        onChange={(e) => {
-                          if (e.target.files && e.target.files[0] && state.currentProduct) {
-                            let imageType = 'noi_that';
-                            const isRSModel = state.currentProduct.tenMau.includes('RS') || 
-                                              state.currentProduct.tenDong.includes('RS');
-                            imageType = isRSModel ? 'interior' : 'noi_that';
-                            uploadProductImage(e.target.files[0], state.currentProduct.id, imageType)
-                              .then((result) => {
-                                if (result && state.currentProduct) {
-                                  fetchProductImages(state.currentProduct.id).then(images => {
-                                    setState(prev => ({ ...prev, productImages: images || [] }));
-                                  });
-                                }
-                              });
-                          }
-                        }} 
-                      />
-                      <label htmlFor="image-upload" className="btn-upload">
-                        <i className="fas fa-upload"></i> Tải lên hình ảnh mới
-                      </label>
+                      <div style={{ 
+                        display: 'flex', 
+                        gap: 12, 
+                        alignItems: 'center',
+                        marginBottom: 16 
+                      }}>
+                        <select
+                          value={selectedImageType}
+                          onChange={(e) => setSelectedImageType(e.target.value)}
+                          style={{
+                            padding: '10px 16px',
+                            borderRadius: 8,
+                            border: '1px solid #e5e7eb',
+                            fontSize: 15,
+                            background: '#fafbfc',
+                            minWidth: 530, // Thu hẹp từ 150px xuống 120px
+                            maxWidth: 530, // Thêm maxWidth để đảm bảo không mở rộng
+                          }}
+                        >
+                          <option value="noi_that">Nội thất</option>
+                          <option value="ngoai_that">Ngoại thất</option>
+                          {/* Gỡ bỏ Interior và Exterior */}
+                        </select>
+                        
+                        <input 
+                          type="file" 
+                          id="image-upload" 
+                          accept="image/*" 
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0] && state.currentProduct) {
+                              uploadProductImage(e.target.files[0], state.currentProduct.id, selectedImageType)
+                                .then((result) => {
+                                  if (result && state.currentProduct) {
+                                    fetchProductImages(state.currentProduct.id).then(images => {
+                                      setState(prev => ({ ...prev, productImages: images || [] }));
+                                    });
+                                  }
+                                });
+                            }
+                          }} 
+                          style={{ display: 'none' }}
+                        />
+                        <label htmlFor="image-upload" className="btn-upload" style={{
+                          background: '#1890ff',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: 8,
+                          padding: '10px 20px',
+                          fontWeight: 600,
+                          fontSize: 15,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          boxShadow: '0 2px 8px 0 rgba(24,144,255,0.10)',
+                          whiteSpace: 'nowrap', // Đảm bảo text không xuống dòng
+                        }}>
+                          <i className="fas fa-upload"></i> Tải lên hình ảnh mới
+                        </label>
+                      </div>
+                      
+                     
+                      
                     </div>
                   )}
                 </div>
@@ -2045,69 +2166,13 @@ const ProductManagement: React.FC = () => {
         </div>
       )}
       
-      {/* Modal xóa sản phẩm */}
-      {state.showDeleteModal && state.currentProduct && (
-        <div className="admin-modal">
-          <div className="admin-modal-content">
-            <div className="admin-modal-header">
-              <h2>Xóa sản phẩm</h2>
-              <button 
-                className="admin-modal-close"
-                onClick={handleCloseDeleteModal}
-              >
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="admin-modal-body">
-              <p>Bạn có chắc chắn muốn xóa sản phẩm này?</p>
-              <div className="form-actions">
-                <button 
-                  type="button" 
-                  className="btn-cancel"
-                  onClick={handleCloseDeleteModal}
-                  style={{
-                    background: '#e0e0e0',
-                    color: '#333',
-                    border: 'none',
-                    borderRadius: 8,
-                    padding: '10px 20px',
-                    fontWeight: 600,
-                    fontSize: 15,
-                    boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)',
-                  }}
-                >
-                  Hủy bỏ
-                </button>
-                <button 
-                  type="submit" 
-                  className="btn-delete"
-                  onClick={handleDeleteProduct}
-                  style={{
-                    background: '#ff4d4f',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 8,
-                    padding: '10px 20px',
-                    fontWeight: 600,
-                    fontSize: 15,
-                    boxShadow: '0 2px 8px 0 rgba(255,77,79,0.10)',
-                  }}
-                >
-                  Xóa
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Hover image effect - Cập nhật để di chuyển mượt mà hơn */}
       {hoveredRow && hoveredImgPos && (() => {
         const imgUrl = productThumbnailMap[hoveredRow];
         if (!imgUrl) return null;
         
         const offsetX = -340;
-        const offsetY = -100;
+        const offsetY = -120;
         
         return (
           <div

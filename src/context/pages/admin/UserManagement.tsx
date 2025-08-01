@@ -641,11 +641,29 @@ const UserManagement: React.FC = () => {
   };
 
   return (
-    <div style={{ background: '#f5f5f5', minHeight: '100vh', padding: 0 }}>
+    <div style={{ 
+      background: '#f5f5f5', 
+      height: '100vh', // Cố định chiều cao viewport
+      overflow: 'hidden', // Không cho scroll
+      padding: 0 
+    }}>
       <AdminHeader pageTitle="Quản lý người dùng" />
-    
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 0 0 0', minHeight: '100vh' }}>
-        <div className="admin-section" style={{ background: '#fff', borderRadius: 18, boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)', padding: '32px 32px 24px 32px', marginBottom: 32 }}>
+      <div style={{ 
+        maxWidth: 1200, 
+        margin: '0 auto', 
+        padding: '32px 0 0 0',
+        height: 'calc(100vh - 80px)', // Trừ đi chiều cao header
+        overflow: 'hidden', // Không cho scroll
+      }}>
+        <div className="admin-section" style={{ 
+          background: '#fff', 
+          borderRadius: 18, 
+          boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)', 
+          padding: '32px 32px 24px 32px', 
+          marginBottom: 32,
+          height: 'calc(100vh - 120px)', // Cố định chiều cao
+          overflow: 'hidden', // Không cho scroll
+        }}>
           {/* Toolbar */}
           <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
             <div style={{ flex: 1, minWidth: 220 }}>
@@ -719,149 +737,187 @@ const UserManagement: React.FC = () => {
             </button>
           </div>
 
-          {/* Table */}
-          <div style={{ overflowX: 'auto', borderRadius: 12, background: '#fafbfc' }}>
-            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
-              <thead>
-                <tr style={{ background: '#fafbfc', color: '#6b7280', fontWeight: 700 }}>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>ID</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Email</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Họ và tên</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Số điện thoại</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Vai trò</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Trạng thái</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left' }}>Ngày đăng ký</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'center' }}>Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentUsers.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có dữ liệu</td>
+          {/* Table Container - Cố định chiều cao */}
+          <div style={{ 
+            height: 'calc(100vh - 280px)', // Cố định chiều cao cho table
+            overflow: 'hidden', // Không cho scroll
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {/* Table */}
+            <div style={{ 
+              overflowX: 'auto', 
+              borderRadius: 12, 
+              background: '#fafbfc',
+              flex: 1, // Chiếm hết không gian còn lại
+              minHeight: 0 // Quan trọng cho flex
+            }}>
+              <table style={{ 
+                width: '100%', 
+                borderCollapse: 'separate', 
+                borderSpacing: 0,
+                height: '100%' // Chiếm hết chiều cao
+              }}>
+                <thead>
+                  <tr style={{ background: '#fafbfc', color: '#6b7280', fontWeight: 700 }}>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>ID</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Email</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Họ và tên</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Số điện thoại</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Vai trò</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Trạng thái</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Ngày đăng ký</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'center' }}>Thao tác</th>
                   </tr>
-                ) : (
-                  currentUsers.map((user, idx) => (
-                    <tr
-                      key={user.id}
-                      className="table-row-fadein"
-                      style={{
-                        animationDelay: `${idx * 120}ms`, // mỗi dòng hiện ra sau dòng trước 120ms
-                        background: '#fff',
-                        borderBottom: '1px solid #f0f0f0'
-                      }}
-                      onMouseEnter={e => {
-                        setHoveredUserId(user.id);
-                        setHoveredUserImgPos({ x: e.clientX, y: e.clientY });
-                      }}
-                      onMouseMove={e => {
-                        setHoveredUserImgPos({ x: e.clientX, y: e.clientY });
-                      }}
-                      onMouseLeave={() => {
-                        setHoveredUserId(null);
-                        setHoveredUserImgPos(null);
-                      }}
-                    >
-                      <td style={{ padding: '10px 8px' }}>{user.id}</td>
-                      <td style={{ padding: '10px 8px' }}>{user.email}</td>
-                      <td style={{ padding: '10px 8px' }}>{`${user.ho} ${user.ten}`}</td>
-                      <td style={{ padding: '10px 8px' }}>{user.soDienThoai || "—"}</td>
-                      <td style={{ padding: '10px 8px' }}>{renderRole(user.vaiTro)}</td>
-                      <td style={{ padding: '10px 8px' }}>{renderStatus(user.trangThai)}</td>
-                      <td style={{ padding: '10px 8px' }}>{new Date(user.ngayTao).toLocaleDateString('vi-VN')}</td>
-                      <td
-                        style={{
-                          padding: '10px 8px',
-                          textAlign: 'center',
-                          whiteSpace: 'nowrap',
-                          minWidth: 120,
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: 8,
-                        }}>
-                          <button
-                            className="btn-view"
-                            title="Xem chi tiết"
-                            onClick={() => { setIsEditMode(false); handleShowEditModal(user); }}
-                            onMouseEnter={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
-                            onMouseMove={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
-                            onMouseLeave={e => {
-                              // Nếu chuột vẫn nằm trên dòng <tr> thì set lại hover
-                              const tr = e.currentTarget.closest('tr');
-                              if (tr && tr.matches(':hover')) {
-                                setHoveredUserId(user.id);
-                                setHoveredUserImgPos({ x: e.clientX, y: e.clientY });
-                              }
-                            }}
-                          >
-                            <i className="fas fa-eye"></i>
-                          </button>
-                          <button
-                            className="btn-edit"
-                            title="Chỉnh sửa"
-                            onClick={() => { setIsEditMode(true); handleShowEditModal(user); }}
-                            onMouseEnter={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
-                            onMouseMove={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
-                            onMouseLeave={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
-                          >
-                            <i className="fas fa-edit"></i>
-                          </button>
-                          {user.trangThai ? (
-                            <button
-                              className="btn-lock"
-                              title="Khóa tài khoản"
-                              onClick={() => handleLockUser(user.email)}
-                              onMouseEnter={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
-                              onMouseMove={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
-                              onMouseLeave={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
-                              style={{
-                                background: '#ff7875', // Đổi từ #faad14 thành màu đỏ nhạt
-                                color: '#fff',
-                                border: 'none',
-                                borderRadius: 6,
-                                padding: '6px 10px',
-                                fontSize: 12,
-                                cursor: 'pointer',
-                              }}
-                            >
-                              <i className="fas fa-lock"></i>
-                            </button>
-                          ) : (
-                            <button
-                              className="btn-unlock"
-                              title="Mở khóa tài khoản"
-                              onClick={() => handleUnlockUser(user.email)}
-                              onMouseEnter={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
-                              onMouseMove={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
-                              onMouseLeave={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
-                              style={{
-                                background: '#52c41a',
-                                color: '#fff',
-                                border: 'none',
-                                borderRadius: 6,
-                                padding: '6px 10px',
-                                fontSize: 12,
-                                cursor: 'pointer',
-                              }}
-                            >
-                              <i className="fas fa-unlock"></i>
-                            </button>
-                          )}
-                        </div>
+                </thead>
+                <tbody>
+                  {currentUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} style={{ 
+                        textAlign: 'center', 
+                        padding: '100px 24px', // Giảm padding
+                        color: '#888',
+                        height: '300px' // Giảm chiều cao
+                      }}>
+                        Không có dữ liệu
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="admin-pagination" style={{ marginTop: 24, display: 'flex', justifyContent: 'center', gap: 8 }}>
+                  ) : (
+                    currentUsers.map((user, idx) => (
+                      <tr
+                        key={user.id}
+                        className="table-row-fadein"
+                        style={{
+                          animationDelay: `${idx * 120}ms`,
+                          background: '#fff',
+                          borderBottom: '1px solid #f0f0f0',
+                          height: '50px' // Giảm chiều cao row
+                        }}
+                        onMouseEnter={e => {
+                          setHoveredUserId(user.id);
+                          setHoveredUserImgPos({ x: e.clientX, y: e.clientY });
+                        }}
+                        onMouseMove={e => {
+                          setHoveredUserImgPos({ x: e.clientX, y: e.clientY });
+                        }}
+                        onMouseLeave={() => {
+                          setHoveredUserId(null);
+                          setHoveredUserImgPos(null);
+                        }}
+                      >
+                        <td style={{ padding: '10px 8px' }}>{user.id}</td>
+                        <td style={{ padding: '10px 8px' }}>{user.email}</td>
+                        <td style={{ padding: '10px 8px' }}>{`${user.ho} ${user.ten}`}</td>
+                        <td style={{ padding: '10px 8px' }}>{user.soDienThoai || "—"}</td>
+                        <td style={{ padding: '10px 8px' }}>{renderRole(user.vaiTro)}</td>
+                        <td style={{ padding: '10px 8px' }}>{renderStatus(user.trangThai)}</td>
+                        <td style={{ padding: '10px 8px' }}>{new Date(user.ngayTao).toLocaleDateString('vi-VN')}</td>
+                        <td
+                          style={{
+                            padding: '10px 8px',
+                            textAlign: 'center',
+                            whiteSpace: 'nowrap',
+                            minWidth: 120,
+                          }}
+                        >
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 8,
+                          }}>
+                            <button
+                              className="btn-view"
+                              title="Xem chi tiết"
+                              onClick={() => { setIsEditMode(false); handleShowEditModal(user); }}
+                              onMouseEnter={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                              onMouseMove={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                              onMouseLeave={e => {
+                                const tr = e.currentTarget.closest('tr');
+                                if (tr && tr.matches(':hover')) {
+                                  setHoveredUserId(user.id);
+                                  setHoveredUserImgPos({ x: e.clientX, y: e.clientY });
+                                }
+                              }}
+                            >
+                              <i className="fas fa-eye"></i>
+                            </button>
+                            <button
+                              className="btn-edit"
+                              title="Chỉnh sửa"
+                              onClick={() => { setIsEditMode(true); handleShowEditModal(user); }}
+                              onMouseEnter={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                              onMouseMove={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                              onMouseLeave={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            {user.trangThai ? (
+                              <button
+                                className="btn-lock"
+                                title="Khóa tài khoản"
+                                onClick={() => handleLockUser(user.email)}
+                                onMouseEnter={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                                onMouseMove={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                                onMouseLeave={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                                style={{
+                                  background: '#ff7875',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: 6,
+                                  padding: '6px 10px',
+                                  fontSize: 12,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <i className="fas fa-lock"></i>
+                              </button>
+                            ) : (
+                              <button
+                                className="btn-unlock"
+                                title="Mở khóa tài khoản"
+                                onClick={() => handleUnlockUser(user.email)}
+                                onMouseEnter={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                                onMouseMove={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                                onMouseLeave={() => { setHoveredUserId(null); setHoveredUserImgPos(null); }}
+                                style={{
+                                  background: '#52c41a',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: 6,
+                                  padding: '6px 10px',
+                                  fontSize: 12,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <i className="fas fa-unlock"></i>
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                  {/* Thêm các row trống để cố định chiều cao khi data ít */}
+                  {currentUsers.length > 0 && currentUsers.length < 10 && 
+                    Array.from({ length: 10 - currentUsers.length }).map((_, index) => (
+                      <tr key={`empty-${index}`} style={{ height: '50px', background: '#fff' }}>
+                        <td colSpan={8} style={{ padding: '10px 8px' }}></td>
+                      </tr>
+                    ))
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination - Cố định ở dưới */}
+            <div className="admin-pagination" style={{ 
+              marginTop: 16, 
+              display: 'flex', 
+              justifyContent: 'center', 
+              gap: 8,
+              flexShrink: 0 // Không co lại
+            }}>
               <button 
                 onClick={() => handlePageChange(1)}
                 disabled={state.currentPage === 1}
@@ -932,7 +988,7 @@ const UserManagement: React.FC = () => {
                 <i className="fas fa-angle-double-right"></i>
               </button>
             </div>
-          )}
+          </div>
         </div>
       </div>
       
@@ -1471,8 +1527,8 @@ const UserManagement: React.FC = () => {
       {hoveredUserId && hoveredUserImgPos && (() => {
         const imgUrl = userAvatarMap[hoveredUserId];
         if (!imgUrl) return null;
-        const offsetX = -320;
-        const offsetY = -100;
+        const offsetX = -323;
+        const offsetY = -105;
         return (
           <div
             className="product-hover-image"

@@ -59,8 +59,38 @@ const BlogManagement: React.FC = () => {
     
     try {
       if (editing) {
+        // Thêm trường daXuatBan = false để đảm bảo bài viết chuyển về nháp sau khi edit
+        formData.append('daXuatBan', 'false');
+        
         await blogService.updateBaiViet(editing.id!, formData);
-        message.success('Cập nhật thành công');
+        message.success('Cập nhật thành công - Bài viết đã chuyển về trạng thái nháp');
+        
+        // Fetch lại dữ liệu để có thông tin mới nhất
+        await fetchData();
+        
+        // Tìm bài viết đã được cập nhật trong danh sách mới
+        const updatedBlog = data.find(blog => blog.id === editing.id);
+        if (updatedBlog) {
+          // Đảm bảo trạng thái là nháp
+          const blogWithDraftStatus = {
+            ...updatedBlog,
+            daXuatBan: false
+          };
+          // Chuyển sang view mode với dữ liệu đã cập nhật
+          setViewing(blogWithDraftStatus);
+        } else {
+          // Nếu không tìm thấy, sử dụng dữ liệu editing hiện tại với trạng thái nháp
+          const editingWithDraftStatus = {
+            ...editing,
+            daXuatBan: false
+          };
+          setViewing(editingWithDraftStatus);
+        }
+        
+        setShowForm(false);
+        setEditing(null);
+        setImageFile(null);
+        setImagePreview(null);
       } else {
         const newBaiViet = await blogService.createBaiViet(formData);
         message.success('Thêm mới thành công - Bài viết đã được lưu dưới dạng bản nháp');
@@ -72,13 +102,13 @@ const BlogManagement: React.FC = () => {
         // } catch (publishError: any) {
         //   console.warn('Không thể tự động xuất bản:', publishError);
         // }
+        
+        setShowForm(false);
+        setEditing(null);
+        setImageFile(null);
+        setImagePreview(null);
+        fetchData();
       }
-      
-      setShowForm(false);
-      setEditing(null);
-      setImageFile(null);
-      setImagePreview(null);
-      fetchData();
     } catch (error: any) {
       setFormError(error.message);
       message.error(error.message);
@@ -183,91 +213,105 @@ const BlogManagement: React.FC = () => {
   }, [filterDanhMuc, search]);
 
   return (
-    <div style={{ background: '#f5f5f5', minHeight: '100vh', padding: 0 }}>
+    <div style={{ 
+      background: '#f5f5f5', 
+      height: '100vh', // Cố định chiều cao viewport
+      overflow: 'hidden', // Không cho scroll
+      padding: 0 
+    }}>
       <AdminHeader pageTitle="Quản lý bài viết" />
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 0 0 0', minHeight: '100vh' }}>
-        <AnimatedPage animation="center">
-          {/* Khối trắng bo góc lớn */}
-          <div
-            className="admin-section"
-            style={{
-              background: '#fff',
-              borderRadius: 18,
-              boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)',
-              padding: '32px 32px 24px 32px',
-              marginBottom: 32,
-            }}
-          >
-            {/* Toolbar */}
-            <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
-              <button
-                className="btn-add"
-                onClick={() => { setShowForm(true); setEditing(null); }}
+      <div style={{ 
+        maxWidth: 1200, 
+        margin: '0 auto', 
+        padding: '32px 0 0 0',
+        height: 'calc(100vh - 80px)', // Trừ đi chiều cao header
+        overflow: 'hidden', // Không cho scroll
+      }}>
+        <div className="admin-section" style={{ 
+          background: '#fff', 
+          borderRadius: 18, 
+          boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)', 
+          padding: '32px 32px 24px 32px', 
+          marginBottom: 32,
+          height: 'calc(100vh - 120px)', // Cố định chiều cao
+          overflow: 'hidden', // Không cho scroll
+        }}>
+          {/* Toolbar */}
+          <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
+            <button
+              className="btn-add"
+              onClick={() => { setShowForm(true); setEditing(null); }}
+              style={{
+                background: '#52c41a',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                padding: '10px 20px',
+                fontWeight: 600,
+                fontSize: 15,
+                boxShadow: '0 2px 8px 0 rgba(82,196,26,0.10)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <PlusOutlined /> Thêm bài viết
+            </button>
+            <select
+              value={filterDanhMuc || ''}
+              onChange={(e) => setFilterDanhMuc(e.target.value)}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 8,
+                border: '1px solid #e5e7eb',
+                fontSize: 15,
+                background: '#fafbfc',
+              }}
+            >
+              <option value="">Tất cả danh mục</option>
+              {danhMucOptions.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <input
+                type="text"
+                placeholder="Tìm kiếm tiêu đề"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 style={{
-                  background: '#43a047',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '10px 20px',
-                  fontWeight: 600,
-                  fontSize: 15,
-                  boxShadow: '0 2px 8px 0 rgba(24,144,255,0.10)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                }}
-              >
-                <i className="fas fa-plus"></i> Thêm bài viết
-              </button>
-              <select
-                value={filterDanhMuc}
-                onChange={e => setFilterDanhMuc(e.target.value)}
-                style={{
+                  width: '100%',
                   padding: '10px 16px',
                   borderRadius: 8,
                   border: '1px solid #e5e7eb',
-                  color: 'rgb(107, 114, 128)',
                   fontSize: 15,
                   background: '#fafbfc',
-                  minWidth: 150
                 }}
-              >
-                <option value="">Danh mục</option>
-                {danhMucOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-              <div style={{ flex: 1, minWidth: 220 }}>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm tiêu đề"
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '10px 40px 10px 16px',
-                      borderRadius: 8,
-                      border: '1px solid #e5e7eb',
-                      fontSize: 15,
-                      background: '#fafbfc',
-                    }}
-                  />
-                  <i className="fas fa-search" style={{
-                    position: 'absolute',
-                    right: 12,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: '#888',
-                    fontSize: 16
-                  }}></i>
-                </div>
-              </div>
+              />
             </div>
-            
+          </div>
+
+          {/* Table Container - Cố định chiều cao */}
+          <div style={{ 
+            height: 'calc(100vh - 280px)', // Cố định chiều cao cho table
+            overflow: 'hidden', // Không cho scroll
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
             {/* Table */}
-            <div style={{ overflowX: 'auto', borderRadius: 12, background: '#fafbfc' }}>
-              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
+            <div style={{ 
+              overflowX: 'auto', 
+              borderRadius: 12, 
+              background: '#fafbfc',
+              flex: 1, // Chiếm hết không gian còn lại
+              minHeight: 0 // Quan trọng cho flex
+            }}>
+              <table style={{ 
+                width: '100%', 
+                borderCollapse: 'separate', 
+                borderSpacing: 0,
+                height: '100%' // Chiếm hết chiều cao
+              }}>
                 <thead>
                   <tr style={{ background: '#fafbfc', color: '#6b7280', fontWeight: 700 }}>
                     <th style={{ padding: '12px 8px', textAlign: 'left', width: '25%' }}>Tiêu đề</th>
@@ -282,7 +326,14 @@ const BlogManagement: React.FC = () => {
                 <tbody>
                   {currentData.length === 0 ? (
                     <tr>
-                      <td colSpan={7} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có dữ liệu</td>
+                      <td colSpan={7} style={{ 
+                        textAlign: 'center', 
+                        padding: '100px 24px', // Giảm padding
+                        color: '#888',
+                        height: '300px' // Giảm chiều cao
+                      }}>
+                        Không có dữ liệu
+                      </td>
                     </tr>
                   ) : (
                     currentData.map((item, idx) => (
@@ -292,7 +343,8 @@ const BlogManagement: React.FC = () => {
                         style={{ 
                           background: '#fff', 
                           borderBottom: '1px solid #f0f0f0',
-                          animationDelay: `${idx * 120}ms` 
+                          animationDelay: `${idx * 120}ms`,
+                          height: '50px' // Giảm chiều cao row
                         }}
                         onMouseEnter={e => {
                           setHoveredBlogId(item.id!);
@@ -460,86 +512,98 @@ const BlogManagement: React.FC = () => {
                       </tr>
                     ))
                   )}
+                  {/* Thêm các row trống để cố định chiều cao khi data ít */}
+                  {currentData.length > 0 && currentData.length < 10 && 
+                    Array.from({ length: 10 - currentData.length }).map((_, index) => (
+                      <tr key={`empty-${index}`} style={{ height: '50px', background: '#fff' }}>
+                        <td colSpan={7} style={{ padding: '10px 8px' }}></td>
+                      </tr>
+                    ))
+                  }
                 </tbody>
               </table>
             </div>
 
-            {/* Pagination - Thêm phần này */}
-            {totalPages > 1 && (
-              <div className="admin-pagination" style={{ marginTop: 24, display: 'flex', justifyContent: 'center', gap: 8 }}>
-                <button 
-                  onClick={() => handlePageChange(1)}
-                  disabled={currentPage === 1}
-                  style={{
-                    background: '#e0e0e0',
-                    color: '#333',
-                    border: 'none',
-                    borderRadius: 8,
-                    padding: '8px 12px',
-                    fontSize: 14,
-                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                    opacity: currentPage === 1 ? 0.6 : 1,
-                  }}
-                >
-                  <i className="fas fa-angle-double-left"></i>
-                </button>
-                <button 
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  style={{
-                    background: '#e0e0e0',
-                    color: '#333',
-                    border: 'none',
-                    borderRadius: 8,
-                    padding: '8px 12px',
-                    fontSize: 14,
-                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                    opacity: currentPage === 1 ? 0.6 : 1,
-                  }}
-                >
-                  <i className="fas fa-angle-left"></i>
-                </button>
-                
-                <span style={{ fontSize: 14, color: '#555' }}>
-                  Trang {currentPage} / {totalPages}
-                </span>
-                
-                <button 
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  style={{
-                    background: '#e0e0e0',
-                    color: '#333',
-                    border: 'none',
-                    borderRadius: 8,
-                    padding: '8px 12px',
-                    fontSize: 14,
-                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                    opacity: currentPage === totalPages ? 0.6 : 1,
-                  }}
-                >
-                  <i className="fas fa-angle-right"></i>
-                </button>
-                <button 
-                  onClick={() => handlePageChange(totalPages)}
-                  disabled={currentPage === totalPages}
-                  style={{
-                    background: '#e0e0e0',
-                    color: '#333',
-                    border: 'none',
-                    borderRadius: 8,
-                    padding: '8px 12px',
-                    fontSize: 14,
-                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                    opacity: currentPage === totalPages ? 0.6 : 1,
-                  }}
-                >
-                  <i className="fas fa-angle-double-right"></i>
-                </button>
-              </div>
-            )}
+            {/* Pagination - Cố định ở dưới */}
+            <div className="admin-pagination" style={{ 
+              marginTop: 16, 
+              display: 'flex', 
+              justifyContent: 'center', 
+              gap: 8,
+              flexShrink: 0 // Không co lại
+            }}>
+              <button 
+                onClick={() => handlePageChange(1)}
+                disabled={currentPage === 1}
+                style={{
+                  background: '#e0e0e0',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  fontSize: 14,
+                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                  opacity: currentPage === 1 ? 0.6 : 1,
+                }}
+              >
+                <i className="fas fa-angle-double-left"></i>
+              </button>
+              <button 
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                style={{
+                  background: '#e0e0e0',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  fontSize: 14,
+                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                  opacity: currentPage === 1 ? 0.6 : 1,
+                }}
+              >
+                <i className="fas fa-angle-left"></i>
+              </button>
+              
+              <span style={{ fontSize: 14, color: '#555' }}>
+                Trang {currentPage} / {totalPages}
+              </span>
+              
+              <button 
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                style={{
+                  background: '#e0e0e0',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  fontSize: 14,
+                  cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                  opacity: currentPage === totalPages ? 0.6 : 1,
+                }}
+              >
+                <i className="fas fa-angle-right"></i>
+              </button>
+              <button 
+                onClick={() => handlePageChange(totalPages)}
+                disabled={currentPage === totalPages}
+                style={{
+                  background: '#e0e0e0',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  fontSize: 14,
+                  cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                  opacity: currentPage === totalPages ? 0.6 : 1,
+                }}
+              >
+                <i className="fas fa-angle-double-right"></i>
+              </button>
+            </div>
           </div>
-        </AnimatedPage>
+        </div>
       </div>
       
       {/* Modal Form Add/Edit */}
@@ -1030,17 +1094,14 @@ const BlogManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Hover image effect */}
+      {/* Hover image effect - Giữ nguyên logic cũ */}
       {hoveredBlogId && hoveredBlogImgPos && (() => {
         const blog = data.find(b => b.id === hoveredBlogId);
         if (!blog || !blog.anhDaiDien) return null;
-        
         const imgUrl = getImageUrl(blog.anhDaiDien);
         if (!imgUrl) return null;
-        
         const offsetX = -340;
-        const offsetY = -100;
-        
+        const offsetY = -110;
         return (
           <div
             className="blog-hover-image"

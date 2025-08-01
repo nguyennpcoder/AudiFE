@@ -20,6 +20,12 @@ const Header = () => {
     setIsUserMenuOpen(!isUserMenuOpen);
   };
 
+  // Thêm hàm xử lý khi click logo Audi
+  const handleLogoClick = () => {
+    // Đánh dấu rằng người dùng click logo để trở về trang chủ
+    sessionStorage.setItem('skipIntro', 'true');
+  };
+
   const handleLogout = (e: React.MouseEvent) => {
     e.preventDefault();
     logout();
@@ -168,7 +174,7 @@ const Header = () => {
     <header className="header header-animate-down">
       <div className="header-container">
         <div className="logo-container header-animate-item header-animate-item-1">
-          <Link to="/">
+          <Link to="/" onClick={handleLogoClick}>
             <img src={logo} alt="Audi Logo" className="logo" />
           </Link>
         </div>

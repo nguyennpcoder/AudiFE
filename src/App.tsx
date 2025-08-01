@@ -71,17 +71,19 @@ function App() {
     setIsLoading(false);
   };
 
-  // Kiểm tra xem có phải từ trang login không
+  // Kiểm tra các trường hợp cần bỏ qua animation
   const isFromLogin = sessionStorage.getItem('fromLogin') === 'true';
+  const skipIntro = sessionStorage.getItem('skipIntro') === 'true';
   
-  // Chỉ hiện animation khi KHÔNG phải admin và KHÔNG phải từ trang login
-  if (isLoading && location.pathname === "/" && !isAdminRoute && !isFromLogin) {
+  // Chỉ hiện animation khi KHÔNG phải admin và KHÔNG có flag bỏ qua
+  if (isLoading && location.pathname === "/" && !isAdminRoute && !isFromLogin && !skipIntro) {
     return <LoadingAnimation onAnimationComplete={handleAnimationComplete} />;
   }
 
-  // Xóa flag khi đã load xong
-  if (isFromLogin) {
+  // Xóa các flag khi đã load xong
+  if (isFromLogin || skipIntro) {
     sessionStorage.removeItem('fromLogin');
+    sessionStorage.removeItem('skipIntro');
   }
 
   return (
