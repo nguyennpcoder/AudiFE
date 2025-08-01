@@ -1215,7 +1215,7 @@ const ProductManagement: React.FC = () => {
                       key={product.id}
                       className="table-row-fadein"
                       style={{
-                        animationDelay: `${idx * 120}ms`, // mỗi dòng hiện ra sau dòng trước 120ms
+                        animationDelay: `${idx * 120}ms`,
                         background: '#fff',
                         borderBottom: '1px solid #f0f0f0'
                       }}
@@ -1224,11 +1224,7 @@ const ProductManagement: React.FC = () => {
                         setHoveredImgPos({ x: e.clientX, y: e.clientY });
                       }}
                       onMouseMove={e => {
-                        if (mouseMoveTimeout.current) return;
-                        mouseMoveTimeout.current = setTimeout(() => {
-                          setHoveredImgPos({ x: e.clientX, y: e.clientY });
-                          mouseMoveTimeout.current = null;
-                        }, 16); // ~60fps
+                        setHoveredImgPos({ x: e.clientX, y: e.clientY });
                       }}
                       onMouseLeave={() => {
                         setHoveredRow(null);
@@ -2105,12 +2101,14 @@ const ProductManagement: React.FC = () => {
         </div>
       )}
 
+      {/* Hover image effect - Cập nhật để di chuyển mượt mà hơn */}
       {hoveredRow && hoveredImgPos && (() => {
         const imgUrl = productThumbnailMap[hoveredRow];
         if (!imgUrl) return null;
-        // Điều chỉnh offset cho hợp lý
-        const offsetX = -350; // lệch phải nhẹ
-        const offsetY = -130; // lên trên một nửa chiều cao ảnh (90px/2)
+        
+        const offsetX = -340;
+        const offsetY = -100;
+        
         return (
           <div
             className="product-hover-image"
@@ -2120,11 +2118,23 @@ const ProductManagement: React.FC = () => {
               top: hoveredImgPos.y + offsetY,
               zIndex: 9999,
               pointerEvents: 'none',
-              transform: `translate3d(0,0,0)`,
-              transition: 'transform 0.08s cubic-bezier(0.4,0,0.2,1)'
+              background: 'transparent',
+              boxShadow: 'none',
+              borderRadius: 0
             }}
           >
-            <img src={imgUrl} alt="" />
+            <img
+              src={imgUrl}
+              alt="Ảnh sản phẩm"
+              style={{
+                width: 120,
+                height: 90,
+                objectFit: 'cover',
+                borderRadius: 8,
+                border: '4px solid #fff',
+                boxShadow: '0 2px 12px 0 rgba(24,144,255,0.10)'
+              }}
+            />
           </div>
         );
       })()}

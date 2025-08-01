@@ -106,15 +106,29 @@ export const blogService = {
   // Create new blog post with FormData
   createBaiViet: async (formData: FormData): Promise<BaiViet> => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/bai-viet`, formData, {
+      console.log('Sending FormData to backend...');
+      
+      // Debug: Log FormData contents
+      for (let [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log('File:', key, value.name, value.size, value.type);
+        } else {
+          console.log('Field:', key, value);
+        }
+      }
+      
+      const response = await axios.post(`${API_BASE_URL}/bai-viet/upload`, formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'multipart/form-data',
+          // Không set Content-Type để browser tự động set với boundary
         },
       });
+      
+      console.log('Backend response:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('Error creating blog post:', error);
+      console.error('Error response:', error.response?.data);
       if (error.response?.status === 401) {
         throw new Error('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
       }
@@ -128,15 +142,29 @@ export const blogService = {
   // Update blog post with FormData
   updateBaiViet: async (id: number, formData: FormData): Promise<BaiViet> => {
     try {
-      const response = await axios.put(`${API_BASE_URL}/bai-viet/${id}`, formData, {
+      console.log('Sending FormData to backend for update...');
+      
+      // Debug: Log FormData contents
+      for (let [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log('File:', key, value.name, value.size, value.type);
+        } else {
+          console.log('Field:', key, value);
+        }
+      }
+      
+      const response = await axios.put(`${API_BASE_URL}/bai-viet/${id}/upload`, formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'multipart/form-data',
+          // Không set Content-Type để browser tự động set với boundary
         },
       });
+      
+      console.log('Backend response:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('Error updating blog post:', error);
+      console.error('Error response:', error.response?.data);
       if (error.response?.status === 401) {
         throw new Error('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
       }
@@ -170,8 +198,8 @@ export const blogService = {
     try {
       const headers = getAuthHeaders();
       const response = await axios.patch(
-        `${API_BASE_URL}/bai-viet/${id}/publish`,
-        { daXuatBan },
+        `${API_BASE_URL}/bai-viet/${id}/publish?daXuatBan=${daXuatBan}`,
+        null, // No request body needed
         { headers }
       );
       
@@ -179,6 +207,9 @@ export const blogService = {
         throw new Error('Không thể cập nhật trạng thái xuất bản');
       }
     } catch (error: any) {
+      if (error.response?.status === 401) {
+        throw new Error('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
+      }
       throw new Error(error.response?.data?.message || 'Không thể cập nhật trạng thái xuất bản');
     }
   },

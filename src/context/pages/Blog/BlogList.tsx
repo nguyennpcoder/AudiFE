@@ -22,12 +22,18 @@ interface BlogPost {
 interface ApiResponse {
   baiViet?: BlogPost[];
   data?: BlogPost[];
+  totalPages?: number;
+  totalItems?: number;
 }
 
 const BlogList: React.FC = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
+  const [pageSize] = useState(20); // Tăng từ 10 lên 20
   const navigate = useNavigate();
 
   // Smooth scroll to top function with animation
@@ -54,18 +60,58 @@ const BlogList: React.FC = () => {
     return '/avatar-default.png';
   };
 
+  // Tạo danh sách placeholder images từ Ant Design
+  const placeholderImages = [
+    'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
+    'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
+    'https://gw.alipayobjects.com/zos/rmsportal/DkKNubTaaVsKwUzKzQhQ.png',
+    'https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png',
+    'https://gw.alipayobjects.com/zos/rmsportal/rMSqrFDLlkZjfWKXoQpa.png'
+  ];
+
+  // Lấy placeholder image ngẫu nhiên
+  const getRandomPlaceholder = () => {
+    const randomIndex = Math.floor(Math.random() * placeholderImages.length);
+    return placeholderImages[randomIndex];
+  };
+
+  // Get image URL for blog posts
+  const getBlogImageUrl = (imagePath?: string) => {
+    if (!imagePath) return getRandomPlaceholder();
+    
+    // If it's already a full URL, use it as is
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+    
+    // If it's a relative path starting with /uploads/, add backend URL
+    if (imagePath.startsWith('/uploads/')) {
+      return `http://localhost:8080${imagePath}`;
+    }
+    
+    // If it's just a filename, assume it's in the blogs folder
+    if (!imagePath.includes('/')) {
+      return `http://localhost:8080/uploads/images/blogs/${imagePath}`;
+    }
+    
+    // Default fallback
+    return getRandomPlaceholder();
+  };
+
   useEffect(() => {
     // Scroll to top when component mounts
     scrollToTop();
     
     const fetchPosts = async () => {
       try {
-        const response = await fetch(API_URL);
+        const response = await fetch(`${API_URL}?page=${currentPage}&size=${pageSize}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data: ApiResponse = await response.json();
         setPosts(data.baiViet || data.data || []);
+        setTotalPages(data.totalPages || 0);
+        setTotalItems(data.totalItems || 0);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch posts');
         console.error('Error fetching posts:', err);
@@ -75,7 +121,7 @@ const BlogList: React.FC = () => {
     };
 
     fetchPosts();
-  }, []);
+  }, [currentPage, pageSize]);
 
   const formatDate = (dateString: string): string => {
     try {
@@ -120,6 +166,11 @@ const BlogList: React.FC = () => {
     setTimeout(() => {
       navigate(`/blog/${postId}`);
     }, 100);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    scrollToTop();
   };
 
   if (loading) {
@@ -186,7 +237,7 @@ const BlogList: React.FC = () => {
         <>
           <div className="audi-blog-stats">
             <span className="stats-item">
-              <strong>{posts.length}</strong> bài viết
+              <strong>{totalItems}</strong> bài viết
             </span>
             <span className="stats-divider">•</span>
             <span className="stats-item">Cập nhật hàng ngày</span>
@@ -212,13 +263,21 @@ const BlogList: React.FC = () => {
                     <div className="audi-blog-card-image">
                       {post.anhDaiDien ? (
                         <img 
-                          src={post.anhDaiDien} 
+                          src={getBlogImageUrl(post.anhDaiDien)} 
                           alt={post.tieuDe}
                           loading="lazy"
+                          onError={(e) => {
+                            console.error('Blog image failed to load:', post.anhDaiDien);
+                            e.currentTarget.src = getRandomPlaceholder();
+                          }}
                         />
                       ) : (
                         <div className="placeholder-image">
-                          <div className="placeholder-icon">📄</div>
+                          <img 
+                            src={getRandomPlaceholder()} 
+                            alt="Placeholder"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
                         </div>
                       )}
                       <div className="image-overlay"></div>
@@ -315,6 +374,37 @@ const BlogList: React.FC = () => {
               );
             })}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="audi-blog-pagination">
+              <button 
+                className="pagination-btn"
+                disabled={currentPage === 0}
+                onClick={() => handlePageChange(currentPage - 1)}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
+                </svg>
+                Trước
+              </button>
+              
+              <div className="pagination-info">
+                Trang {currentPage + 1} / {totalPages}
+              </div>
+              
+              <button 
+                className="pagination-btn"
+                disabled={currentPage === totalPages - 1}
+                onClick={() => handlePageChange(currentPage + 1)}
+              >
+                Sau
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
+                </svg>
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>

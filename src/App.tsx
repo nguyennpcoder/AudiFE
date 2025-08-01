@@ -71,9 +71,17 @@ function App() {
     setIsLoading(false);
   };
 
-  // Chỉ hiện animation khi KHÔNG phải admin
-  if (isLoading && location.pathname === "/" && !isAdminRoute) {
+  // Kiểm tra xem có phải từ trang login không
+  const isFromLogin = sessionStorage.getItem('fromLogin') === 'true';
+  
+  // Chỉ hiện animation khi KHÔNG phải admin và KHÔNG phải từ trang login
+  if (isLoading && location.pathname === "/" && !isAdminRoute && !isFromLogin) {
     return <LoadingAnimation onAnimationComplete={handleAnimationComplete} />;
+  }
+
+  // Xóa flag khi đã load xong
+  if (isFromLogin) {
+    sessionStorage.removeItem('fromLogin');
   }
 
   return (

@@ -298,6 +298,12 @@ const Login: React.FC = () => {
     }
   };
 
+  // Thêm hàm xử lý khi click nút trở về trang chủ
+  const handleBackToHome = () => {
+    // Đánh dấu rằng người dùng đến từ trang login
+    sessionStorage.setItem('fromLogin', 'true');
+  };
+
   return (
     <div className="auth-container ">
       {/* Left video section */}
@@ -416,7 +422,7 @@ const Login: React.FC = () => {
 
           {/* Nút trở về trang chủ màu xanh dương đậm */}
           <div className="back-home-container">
-            <Link to="/" className="back-home-button">
+            <Link to="/" className="back-home-button" onClick={handleBackToHome}>
               <i className="fas fa-home"></i> TRỞ VỀ TRANG CHỦ
             </Link>
           </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../../styles/CarModelFeature.css';
 
 interface CarFeatureProps {
@@ -22,43 +22,23 @@ const CarModelFeature = ({
   onNext,
   onDotClick
 }: CarFeatureProps) => {
-  // Lưu trữ nội dung hiện tại và nội dung tiếp theo
-  const [slides, setSlides] = useState({
-    current: {
-      image: backgroundImage,
-      title: featureTitle,
-      description: featureDescription
-    },
-    next: {
-      image: '',
-      title: '',
-      description: ''
-    }
-  });
-  
-  // Hướng chuyển đổi và trạng thái hoạt ảnh
-  const [direction, setDirection] = useState('');
+  // Thêm state để quản lý fade effect như trong ProductDetail
+  const [fadeState, setFadeState] = useState<'fade-in' | 'fade-out' | null>('fade-in');
+  const [slideDirection, setSlideDirection] = useState<'slide-left' | 'slide-right' | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   
   // Refs cho timers
   const animationTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Cập nhật nội dung hiện tại khi props thay đổi (chỉ khi không đang hoạt ảnh)
+  // Cập nhật nội dung khi props thay đổi (chỉ khi không đang hoạt ảnh)
   useEffect(() => {
     if (!isAnimating) {
-      setSlides(prev => ({
-        ...prev,
-        current: {
-          image: backgroundImage,
-          title: featureTitle,
-          description: featureDescription
-        }
-      }));
+      setFadeState('fade-in');
     }
   }, [backgroundImage, featureTitle, featureDescription, isAnimating]);
 
-  // Xử lý điều hướng
+  // Xử lý điều hướng với logic mượt mà hơn
   const handleNavigation = (navigationType: string, callback: () => void) => {
     if (isAnimating) return;
     
@@ -71,39 +51,27 @@ const CarModelFeature = ({
       clearInterval(autoRotateRef.current);
     }
 
-    // Lưu trữ nội dung hiện tại
-    const currentSlide = slides.current;
-    
-    // Gọi callback để thay đổi state ở component cha (cập nhật index)
-    callback();
-    
     // Đánh dấu đang hoạt ảnh và thiết lập hướng
     setIsAnimating(true);
-    setDirection(navigationType);
+    setFadeState('fade-out');
+    setSlideDirection(navigationType === 'next' ? 'slide-left' : 'slide-right');
     
-    // Chỉ đặt một timer duy nhất cho hoạt ảnh hoàn thành
-    animationTimerRef.current = setTimeout(() => {
-      // Cập nhật slide hiện tại thành slide mới từ props
-      setSlides({
-        current: {
-          image: backgroundImage,
-          title: featureTitle,
-          description: featureDescription
-        },
-        next: {
-          image: '',
-          title: '',
-          description: ''
-        }
-      });
+    // Sử dụng timeout ngắn hơn để tránh chớp nháy
+    setTimeout(() => {
+      // Gọi callback để thay đổi state ở component cha
+      callback();
       
       // Reset trạng thái hoạt ảnh
-      setIsAnimating(false);
-      setDirection('');
+      setFadeState('fade-in');
+      setSlideDirection(null);
       
-      // Khởi động lại auto-rotate
-      startAutoRotate();
-    }, 1000); // Khớp với thời gian hoạt ảnh CSS
+      // Kết thúc animation sau một khoảng thời gian ngắn
+      setTimeout(() => {
+        setIsAnimating(false);
+        // Khởi động lại auto-rotate
+        startAutoRotate();
+      }, 400); // Khớp với thời gian CSS transition
+    }, 280); // Thời gian fade-out
   };
 
   const handlePrev = () => {
@@ -115,7 +83,7 @@ const CarModelFeature = ({
   };
 
   const handleDotClick = (index: number) => {
-    if (index === currentIndex) return;
+    if (index === currentIndex || isAnimating) return;
     const dir = index > currentIndex ? 'next' : 'prev';
     handleNavigation(dir, () => onDotClick(index));
   };
@@ -146,55 +114,20 @@ const CarModelFeature = ({
   return (
     <section className="car-model-feature">
       <div className="feature-container">
-        {/* Slide cơ sở - chỉ hiển thị khi không hoạt ảnh */}
-        <div 
-          className="feature-slide" 
-          style={{ 
-            opacity: isAnimating ? 0 : 1,
-            transition: 'opacity 0.3s ease-in-out'
-          }}
-        >
-          <img
-            src={slides.current.image}
-            alt="Audi car model"
-            className="feature-image"
-          />
-          <div className="feature-info">
-            <h2 className="feature-title">{slides.current.title}</h2>
-            <p className="feature-description">{slides.current.description}</p>
+        {/* Slide container với logic mượt mà */}
+        <div className="feature-slideshow">
+          <div className={`feature-slide ${fadeState || ''} ${slideDirection || ''}`}>
+            <img
+              src={backgroundImage}
+              alt="Audi car model"
+              className="feature-image"
+            />
+            <div className="feature-info">
+              <h2 className="feature-title">{featureTitle}</h2>
+              <p className="feature-description">{featureDescription}</p>
+            </div>
           </div>
         </div>
-
-        {/* Lớp hoạt ảnh - chỉ hiển thị khi đang hoạt ảnh */}
-        {isAnimating && (
-          <>
-            {/* Slide đi ra */}
-            <div className={`feature-slide slide-${direction} animation-layer`}>
-              <img
-                src={slides.current.image}
-                alt="Audi car model transition"
-                className="feature-image"
-              />
-              <div className="feature-info">
-                <h2 className="feature-title">{slides.current.title}</h2>
-                <p className="feature-description">{slides.current.description}</p>
-              </div>
-            </div>
-
-            {/* Slide đi vào */}
-            <div className={`feature-slide slide-${direction}-prev animation-layer`}>
-              <img
-                src={backgroundImage}
-                alt="Audi car model transition"
-                className="feature-image"
-              />
-              <div className="feature-info">
-                <h2 className="feature-title">{featureTitle}</h2>
-                <p className="feature-description">{featureDescription}</p>
-              </div>
-            </div>
-          </>
-        )}
 
         <button
           className="feature-nav-arrow feature-nav-prev"

@@ -50,6 +50,44 @@ const BlogDetail: React.FC = () => {
     return '/avatar-default.png';
   };
 
+  // Tạo danh sách placeholder images từ Ant Design
+  const placeholderImages = [
+    'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
+    'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
+    'https://gw.alipayobjects.com/zos/rmsportal/DkKNubTaaVsKwUzKzQhQ.png',
+    'https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png',
+    'https://gw.alipayobjects.com/zos/rmsportal/rMSqrFDLlkZjfWKXoQpa.png'
+  ];
+
+  // Lấy placeholder image ngẫu nhiên
+  const getRandomPlaceholder = () => {
+    const randomIndex = Math.floor(Math.random() * placeholderImages.length);
+    return placeholderImages[randomIndex];
+  };
+
+  // Get image URL for blog posts
+  const getBlogImageUrl = (imagePath?: string) => {
+    if (!imagePath) return getRandomPlaceholder();
+    
+    // If it's already a full URL, use it as is
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+    
+    // If it's a relative path starting with /uploads/, add backend URL
+    if (imagePath.startsWith('/uploads/')) {
+      return `http://localhost:8080${imagePath}`;
+    }
+    
+    // If it's just a filename, assume it's in the blogs folder
+    if (!imagePath.includes('/')) {
+      return `http://localhost:8080/uploads/images/blogs/${imagePath}`;
+    }
+    
+    // Default fallback
+    return getRandomPlaceholder();
+  };
+
   useEffect(() => {
     // Scroll to top when component mounts
     scrollToTop();
@@ -71,7 +109,8 @@ const BlogDetail: React.FC = () => {
 
         // Fetch related posts
         try {
-          const relatedResponse = await fetch(`${API_URL}/public`);
+          // Thay đổi URL để lấy tất cả bài viết (size=1000)
+          const relatedResponse = await fetch(`${API_URL}/public?size=1000`);
           if (relatedResponse.ok) {
             const relatedData = await relatedResponse.json();
             const allPosts = relatedData.baiViet || relatedData.data || [];
@@ -254,7 +293,14 @@ const BlogDetail: React.FC = () => {
       {/* Featured Image */}
       {post.anhDaiDien && (
         <div className="article-featured-image">
-          <img src={post.anhDaiDien} alt={post.tieuDe} />
+          <img 
+            src={getBlogImageUrl(post.anhDaiDien)} 
+            alt={post.tieuDe}
+            onError={(e) => {
+              console.error('Blog featured image failed to load:', post.anhDaiDien);
+              e.currentTarget.src = getRandomPlaceholder();
+            }}
+          />
         </div>
       )}
 
@@ -325,10 +371,21 @@ const BlogDetail: React.FC = () => {
               >
                 <div className="related-post-image">
                   {relatedPost.anhDaiDien ? (
-                    <img src={relatedPost.anhDaiDien} alt={relatedPost.tieuDe} />
+                    <img 
+                      src={getBlogImageUrl(relatedPost.anhDaiDien)} 
+                      alt={relatedPost.tieuDe}
+                      onError={(e) => {
+                        console.error('Related post image failed to load:', relatedPost.anhDaiDien);
+                        e.currentTarget.src = getRandomPlaceholder();
+                      }}
+                    />
                   ) : (
                     <div className="placeholder-image small">
-                      <div className="placeholder-icon">📄</div>
+                      <img 
+                        src={getRandomPlaceholder()} 
+                        alt="Placeholder"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
                     </div>
                   )}
                 </div>

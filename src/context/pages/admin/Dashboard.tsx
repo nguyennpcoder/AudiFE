@@ -927,7 +927,7 @@ const Dashboard: React.FC = () => {
           </AnimatedPage>
         )}
         {selectedMenu === 'blog' && (
-          <AnimatedPage animation="left">
+          <AnimatedPage animation="bottom">
             <BlogManagement />
           </AnimatedPage>
         )}

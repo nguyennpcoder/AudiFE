@@ -27,6 +27,10 @@ const BlogManagement: React.FC = () => {
   const [filterDanhMuc, setFilterDanhMuc] = useState<string | undefined>();
   const [search, setSearch] = useState('');
   
+  // Thêm states cho phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  
   // Image upload states
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -59,15 +63,15 @@ const BlogManagement: React.FC = () => {
         message.success('Cập nhật thành công');
       } else {
         const newBaiViet = await blogService.createBaiViet(formData);
-        message.success('Thêm mới thành công');
+        message.success('Thêm mới thành công - Bài viết đã được lưu dưới dạng bản nháp');
         
-        // Tự động xuất bản bài viết mới
-        try {
-          await blogService.updatePublishStatus(newBaiViet.id!, true);
-          message.success('Bài viết đã được xuất bản');
-        } catch (publishError: any) {
-          console.warn('Không thể tự động xuất bản:', publishError);
-        }
+        // Không tự động xuất bản nữa - để mặc định là bản nháp
+        // try {
+        //   await blogService.updatePublishStatus(newBaiViet.id!, true);
+        //   message.success('Bài viết đã được xuất bản');
+        // } catch (publishError: any) {
+        //   console.warn('Không thể tự động xuất bản:', publishError);
+        // }
       }
       
       setShowForm(false);
@@ -102,18 +106,36 @@ const BlogManagement: React.FC = () => {
     }
   };
 
+  // Tạo danh sách placeholder images từ Ant Design
+  const placeholderImages = [
+    'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
+    'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
+    'https://gw.alipayobjects.com/zos/rmsportal/DkKNubTaaVsKwUzKzQhQ.png',
+    'https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png',
+    'https://gw.alipayobjects.com/zos/rmsportal/rMSqrFDLlkZjfWKXoQpa.png'
+  ];
+
+  // Lấy placeholder image ngẫu nhiên
+  const getRandomPlaceholder = () => {
+    const randomIndex = Math.floor(Math.random() * placeholderImages.length);
+    return placeholderImages[randomIndex];
+  };
+
   // Handle image change
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    console.log('Selected file:', file);
     if (file) {
       setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+      console.log('Image preview URL created:', previewUrl);
     }
   };
 
   // Thêm function helper để xử lý đường dẫn ảnh
   const getImageUrl = (imagePath: string | undefined): string | undefined => {
-    if (!imagePath) return undefined;
+    if (!imagePath) return getRandomPlaceholder();
     
     // Nếu đã có đường dẫn đầy đủ
     if (imagePath.startsWith('/uploads/') || imagePath.startsWith('http')) {
@@ -128,13 +150,12 @@ const BlogManagement: React.FC = () => {
   useEffect(() => {
     if (editing) {
       if (editing.anhDaiDien) {
-        // Sử dụng helper function để lấy đường dẫn đúng
-        setImagePreview(getImageUrl(editing.anhDaiDien) || null);
+        setImagePreview(getImageUrl(editing.anhDaiDien) || getRandomPlaceholder());
       } else {
-        setImagePreview(null);
+        setImagePreview(getRandomPlaceholder());
       }
     } else {
-      setImagePreview(null);
+      setImagePreview(getRandomPlaceholder());
     }
     setImageFile(null);
   }, [editing, showForm]);
@@ -143,6 +164,23 @@ const BlogManagement: React.FC = () => {
     (!filterDanhMuc || item.danhMuc === filterDanhMuc) &&
     (!search || item.tieuDe.toLowerCase().includes(search.toLowerCase()))
   );
+
+  // Tính toán phân trang
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const currentData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Xử lý thay đổi trang
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // Reset về trang đầu khi filter thay đổi
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterDanhMuc, search]);
 
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh', padding: 0 }}>
@@ -232,22 +270,22 @@ const BlogManagement: React.FC = () => {
               <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
                 <thead>
                   <tr style={{ background: '#fafbfc', color: '#6b7280', fontWeight: 700 }}>
-                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Tiêu đề</th>
-                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Danh mục</th>
-                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Tác giả</th>
-                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Ngày đăng</th>
-                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Tags</th>
-                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Trạng thái</th>
-                    <th style={{ padding: '12px 8px', textAlign: 'center' }}>Hành động</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left', width: '25%' }}>Tiêu đề</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left', width: '12%' }}>Danh mục</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left', width: '15%' }}>Tác giả</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left', width: '12%' }}>Ngày đăng</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left', width: '20%' }}>Tags</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left', width: '10%' }}>Trạng thái</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'center', width: '8%' }}>Hành động</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredData.length === 0 ? (
+                  {currentData.length === 0 ? (
                     <tr>
                       <td colSpan={7} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có dữ liệu</td>
                     </tr>
                   ) : (
-                    filteredData.map((item, idx) => (
+                    currentData.map((item, idx) => (
                       <tr 
                         key={item.id} 
                         className="table-row-fadein"
@@ -268,31 +306,79 @@ const BlogManagement: React.FC = () => {
                           setHoveredBlogImgPos(null);
                         }}
                       >
-                        <td style={{ padding: '10px 8px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                           
-                            <span style={{ flex: 1 }}>{item.tieuDe}</span>
+                        <td style={{ 
+                          padding: '10px 8px',
+                          maxWidth: '0',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: 8,
+                            overflow: 'hidden'
+                          }}>
+                            <span style={{ 
+                              flex: 1,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }} title={item.tieuDe}>
+                              {item.tieuDe}
+                            </span>
                           </div>
                         </td>
-                        <td style={{ padding: '10px 8px' }}>{danhMucOptions.find(o => o.value === item.danhMuc)?.label}</td>
-                        <td style={{ padding: '10px 8px' }}>{item.tenTacGia}</td>
-                        <td style={{ padding: '10px 8px' }}>{item.ngayDang}</td>
-                        <td style={{ padding: '10px 8px' }}>
-                          {item.theGan?.map((tag: string) => (
-                            <span key={tag} style={{
-                              display: 'inline-block',
-                              background: '#f3f4f6',
-                              color: '#555',
-                              borderRadius: 8,
-                              padding: '2px 10px',
-                              fontSize: 13,
-                              marginRight: 4,
-                              marginBottom: 2,
-                              fontWeight: 500
-                            }}>{tag}</span>
-                          ))}
+                        <td style={{ 
+                          padding: '10px 8px',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {danhMucOptions.find(o => o.value === item.danhMuc)?.label}
+                        </td>
+                        <td style={{ 
+                          padding: '10px 8px',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {item.tenTacGia}
+                        </td>
+                        <td style={{ 
+                          padding: '10px 8px',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {item.ngayDang}
                         </td>
                         <td style={{ padding: '10px 8px' }}>
+                          <div style={{ 
+                            display: 'flex', 
+                            flexWrap: 'nowrap', 
+                            gap: 4, 
+                            overflow: 'hidden',
+                            alignItems: 'center'
+                          }}>
+                            {item.theGan?.map((tag: string, index: number) => (
+                              <span key={tag} style={{
+                                display: 'inline-flex',
+                                background: '#f3f4f6',
+                                color: '#555',
+                                borderRadius: 8,
+                                padding: '2px 8px',
+                                fontSize: 12,
+                                fontWeight: 500,
+                                whiteSpace: 'nowrap',
+                                flexShrink: 0,
+                                maxWidth: '120px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }} title={tag}>
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td style={{ 
+                          padding: '10px 8px',
+                          whiteSpace: 'nowrap'
+                        }}>
                           <span style={{
                             display: 'inline-block',
                             background: item.daXuatBan ? '#e8f5e9' : '#ffebee',
@@ -309,7 +395,7 @@ const BlogManagement: React.FC = () => {
                           padding: '10px 8px',
                           textAlign: 'center',
                           whiteSpace: 'nowrap',
-                          minWidth: 120, // Giảm minWidth vì bớt nút
+                          minWidth: 120,
                         }}>
                           <div style={{
                             display: 'flex',
@@ -324,7 +410,6 @@ const BlogManagement: React.FC = () => {
                               onMouseEnter={() => { setHoveredBlogId(null); setHoveredBlogImgPos(null); }}
                               onMouseMove={() => { setHoveredBlogId(null); setHoveredBlogImgPos(null); }}
                               onMouseLeave={e => {
-                                // Nếu chuột vẫn nằm trên dòng <tr> thì set lại hover
                                 const tr = e.currentTarget.closest('tr');
                                 if (tr && tr.matches(':hover')) {
                                   setHoveredBlogId(item.id!);
@@ -378,6 +463,81 @@ const BlogManagement: React.FC = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination - Thêm phần này */}
+            {totalPages > 1 && (
+              <div className="admin-pagination" style={{ marginTop: 24, display: 'flex', justifyContent: 'center', gap: 8 }}>
+                <button 
+                  onClick={() => handlePageChange(1)}
+                  disabled={currentPage === 1}
+                  style={{
+                    background: '#e0e0e0',
+                    color: '#333',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '8px 12px',
+                    fontSize: 14,
+                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                    opacity: currentPage === 1 ? 0.6 : 1,
+                  }}
+                >
+                  <i className="fas fa-angle-double-left"></i>
+                </button>
+                <button 
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  style={{
+                    background: '#e0e0e0',
+                    color: '#333',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '8px 12px',
+                    fontSize: 14,
+                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                    opacity: currentPage === 1 ? 0.6 : 1,
+                  }}
+                >
+                  <i className="fas fa-angle-left"></i>
+                </button>
+                
+                <span style={{ fontSize: 14, color: '#555' }}>
+                  Trang {currentPage} / {totalPages}
+                </span>
+                
+                <button 
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  style={{
+                    background: '#e0e0e0',
+                    color: '#333',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '8px 12px',
+                    fontSize: 14,
+                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                    opacity: currentPage === totalPages ? 0.6 : 1,
+                  }}
+                >
+                  <i className="fas fa-angle-right"></i>
+                </button>
+                <button 
+                  onClick={() => handlePageChange(totalPages)}
+                  disabled={currentPage === totalPages}
+                  style={{
+                    background: '#e0e0e0',
+                    color: '#333',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '8px 12px',
+                    fontSize: 14,
+                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                    opacity: currentPage === totalPages ? 0.6 : 1,
+                  }}
+                >
+                  <i className="fas fa-angle-double-right"></i>
+                </button>
+              </div>
+            )}
           </div>
         </AnimatedPage>
       </div>
@@ -410,9 +570,26 @@ const BlogManagement: React.FC = () => {
                   // Tạo FormData từ form
                   const formData = new FormData(e.currentTarget);
                   
+                  // Debug: Log form data before adding image
+                  console.log('Form data before image:', {
+                    tieuDe: formData.get('tieuDe'),
+                    noiDung: formData.get('noiDung'),
+                    danhMuc: formData.get('danhMuc'),
+                    theGan: formData.get('theGan'),
+                    idTacGia: formData.get('idTacGia')
+                  });
+                  
                   // Thêm image file nếu có
                   if (imageFile) {
+                    console.log('Adding image file to FormData:', imageFile.name, imageFile.size);
                     formData.append('anhDaiDien', imageFile);
+                  } else {
+                    console.log('No image file selected');
+                  }
+                  
+                  // Debug: Log all FormData entries
+                  for (let [key, value] of formData.entries()) {
+                    console.log('FormData entry:', key, value);
                   }
                   
                   // Thêm idTacGia (lấy từ user hiện tại hoặc hardcode)
@@ -453,10 +630,7 @@ const BlogManagement: React.FC = () => {
                     }}
                   >
                     <img
-                      src={imagePreview ? 
-                        (imagePreview.startsWith('http') ? imagePreview : getImageUrl(imagePreview)) 
-                        : '/avatar-default.png'
-                      }
+                      src={imagePreview || getRandomPlaceholder()}
                       alt=""
                       style={{
                         width: '100%',
@@ -465,10 +639,14 @@ const BlogManagement: React.FC = () => {
                         borderRadius: '10px',
                         display: 'block',
                         transition: 'filter 0.2s',
-                        filter: imagePreview ? 'none' : 'grayscale(1) opacity(0.7)',
+                        filter: imagePreview && !imagePreview.includes('alipayobjects') ? 'none' : 'grayscale(1) opacity(0.7)',
                       }}
                       onError={(e) => {
-                        e.currentTarget.src = '/avatar-default.png';
+                        console.log('Image failed to load, using placeholder');
+                        e.currentTarget.src = getRandomPlaceholder();
+                      }}
+                      onLoad={() => {
+                        console.log('Image loaded successfully:', imagePreview);
                       }}
                     />
                     {(!imagePreview || isImageHover) && (
@@ -576,6 +754,22 @@ const BlogManagement: React.FC = () => {
                   </div>
                 </div>
                 
+                {/* Thêm thông báo về trạng thái bản nháp */}
+                {!editing && (
+                  <div style={{
+                    padding: '12px 16px',
+                    backgroundColor: '#fff3cd',
+                    border: '1px solid #ffeaa7',
+                    borderRadius: 8,
+                    marginBottom: 16,
+                    color: '#856404',
+                    fontSize: 14
+                  }}>
+                    <strong>📝 Lưu ý:</strong> Bài viết mới sẽ được lưu dưới dạng bản nháp. 
+                    Bạn có thể xuất bản sau khi hoàn thành chỉnh sửa.
+                  </div>
+                )}
+                
                 <div className="form-actions">
                   <button
                     type="button"
@@ -604,17 +798,18 @@ const BlogManagement: React.FC = () => {
                     className="btn-save"
                     disabled={formLoading}
                     style={{
-                      background: '#1890ff',
+                      background: formLoading ? '#ccc' : '#43a047',
                       color: '#fff',
                       border: 'none',
                       borderRadius: 8,
                       padding: '10px 20px',
                       fontWeight: 600,
                       fontSize: 15,
-                      boxShadow: '0 2px 8px 0 rgba(24,144,255,0.10)',
+                      boxShadow: '0 2px 8px 0 rgba(67,160,71,0.10)',
+                      cursor: formLoading ? 'not-allowed' : 'pointer',
                     }}
                   >
-                    {formLoading ? 'Đang xử lý...' : (editing ? "Cập nhật" : "Thêm mới")}
+                    {formLoading ? 'Đang lưu...' : (editing ? 'Cập nhật' : 'Lưu bản nháp')}
                   </button>
                 </div>
               </form>
@@ -843,7 +1038,7 @@ const BlogManagement: React.FC = () => {
         const imgUrl = getImageUrl(blog.anhDaiDien);
         if (!imgUrl) return null;
         
-        const offsetX = -320;
+        const offsetX = -340;
         const offsetY = -100;
         
         return (
