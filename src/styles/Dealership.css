@@ -1,0 +1,969 @@
+/* Audi Dealership Styles */
+.audi-dealership-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  margin-top: 20px;
+  min-height: 100vh;
+  /* Thay đổi để kế thừa nền đen từ root giống như blog */
+  background: transparent;
+  color: #ffffff;
+}
+
+/* Loại bỏ overlay pattern vì không cần thiết với nền đen thuần */
+/* .audi-dealership-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255,255,255,0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+} */
+
+/* Đảm bảo content nằm trên overlay */
+.audi-dealership-header,
+.audi-dealership-stats,
+.audi-dealership-grid,
+.audi-dealership-pagination {
+  position: relative;
+  z-index: 1;
+}
+
+.audi-dealership-header {
+  text-align: center;
+  margin-bottom: 60px;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.audi-dealership-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 16px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  position: relative;
+}
+
+.audi-dealership-brand {
+  color: #D50000;
+  margin-left: 8px;
+  position: relative;
+  display: inline-block;
+}
+
+/* Thay đổi đường kẻ gradient từ dưới sang bên phải */
+.audi-dealership-brand::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 100%; /* Bắt đầu từ cuối chữ Audi */
+  width: 600px; /* Độ dài đường kẻ */
+  height: 3px;
+  background: linear-gradient(90deg, #D50000, transparent);
+  border-radius: 2px;
+  transform: translateY(-50%); /* Căn giữa theo chiều dọc */
+  animation: slideInFromLeft 1s ease-out 0.5s both;
+}
+
+/* Animation cho đường kẻ */
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+.audi-dealership-subtitle {
+  font-size: 1.25rem;
+  color: #cccccc;
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.audi-dealership-stats {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stats-item {
+  font-size: 0.95rem;
+  color: #cccccc;
+}
+
+.stats-divider {
+  color: #D50000;
+  font-weight: bold;
+}
+
+.audi-dealership-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 32px;
+  margin-bottom: 60px;
+}
+
+.audi-dealership-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInUp 0.6s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  position: relative;
+  cursor: pointer;
+}
+
+/* Thêm đường kẻ gradient trên card khi hover */
+.audi-dealership-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #D50000, #B71C1C);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+  border-radius: 16px 16px 0 0;
+}
+
+.audi-dealership-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 0%,
+    rgba(213, 0, 0, 0.1) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 2;
+  border-radius: 16px;
+}
+
+.audi-dealership-card:hover::before {
+  opacity: 1;
+}
+
+.audi-dealership-card:hover::after {
+  opacity: 1;
+}
+
+.audi-dealership-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(213, 0, 0, 0.3),
+    0 0 20px rgba(213, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Đảm bảo content nằm trên hiệu ứng glow */
+.audi-dealership-card-content {
+  position: relative;
+  z-index: 3;
+}
+
+.audi-dealership-map-section {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+/* Map container với dark theme */
+.map-container {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.map-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  color: #ffffff;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #D50000;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 8px;
+}
+
+.audi-dealership-info-section {
+  padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.dealership-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.dealership-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.open-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.open-status.open {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.open-status.closed {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.open-status.open .status-dot {
+  background: #22c55e;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+}
+
+.open-status.closed .status-dot {
+  background: #ef4444;
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+}
+
+.status-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Animation cho status dot */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+.open-status.closed .status-dot {
+  animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.dealership-address {
+  margin-bottom: 20px;
+}
+
+.dealership-address p {
+  margin: 4px 0;
+  color: #cccccc;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.dealership-contact {
+  margin-bottom: 20px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.contact-label {
+  font-weight: 600;
+  color: #ffffff;
+  min-width: 60px;
+  font-size: 0.9rem;
+}
+
+.contact-value {
+  color: #cccccc;
+  font-size: 0.9rem;
+}
+
+.email-link {
+  color: #D50000;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.email-link:hover {
+  color: #ff6b6b;
+  text-decoration: underline;
+}
+
+.service-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #D50000, #B71C1C);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  align-self: flex-start;
+}
+
+.working-hours {
+  margin-bottom: 24px;
+  flex: 1;
+}
+
+.working-hours h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.hours-text {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: #cccccc;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 12px;
+  border-radius: 8px;
+  margin: 0;
+  white-space: pre-line;
+  line-height: 1.4;
+  border-left: 3px solid #D50000;
+}
+
+.view-map-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #D50000;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  margin-top: auto;
+}
+
+.view-map-btn:hover {
+  background: #B71C1C;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(213, 0, 0, 0.4);
+}
+
+.view-map-btn:active {
+  transform: translateY(0);
+}
+
+/* Pagination với dark theme */
+.audi-dealership-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 40px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+.pagination-btn:hover:not(.disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #D50000;
+  color: #D50000;
+}
+
+.pagination-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.page-info {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.items-info {
+  font-size: 0.8rem;
+  color: #cccccc;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 4px;
+}
+
+.page-number {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+.page-number:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #D50000;
+  color: #D50000;
+}
+
+.page-number.active {
+  background: #D50000;
+  color: white;
+  border-color: #D50000;
+}
+
+.page-ellipsis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: #cccccc;
+  font-size: 0.9rem;
+}
+
+/* Loading States */
+.skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+.skeleton-title {
+  height: 2rem;
+  width: 60%;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+}
+
+.skeleton-subtitle {
+  height: 1rem;
+  width: 80%;
+  border-radius: 4px;
+}
+
+.skeleton-card {
+  height: 400px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.skeleton-map {
+  height: 200px;
+  background: #f0f0f0;
+}
+
+.skeleton-text {
+  height: 1rem;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+}
+
+.skeleton-button {
+  height: 2.5rem;
+  width: 100%;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+/* Error và empty states với dark theme */
+.error-state, .empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.error-icon, .empty-icon {
+  font-size: 4rem;
+  margin-bottom: 24px;
+  opacity: 0.7;
+}
+
+.error-state h2, .empty-state h3 {
+  font-size: 1.5rem;
+  color: #ffffff;
+  margin-bottom: 16px;
+}
+
+.error-state p, .empty-state p {
+  color: #cccccc;
+  margin-bottom: 24px;
+}
+
+.retry-button {
+  background: #D50000;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.retry-button:hover {
+  background: #B71C1C;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .audi-dealership-container {
+    padding: 20px 16px;
+  }
+  
+  .audi-dealership-title {
+    font-size: 2.5rem;
+  }
+  
+  .audi-dealership-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .audi-dealership-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .audi-dealership-pagination {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .page-numbers {
+    order: -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .audi-dealership-title {
+    font-size: 2rem;
+  }
+  
+  .audi-dealership-card {
+    margin: 0 -8px;
+  }
+  
+  .audi-dealership-info-section {
+    padding: 20px;
+  }
+}
+
+/* Custom Audi Marker với logo */
+.audi-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.audi-marker img {
+  transition: transform 0.2s ease;
+}
+
+.audi-marker:hover img {
+  transform: scale(1.1);
+}
+
+/* Leaflet Map Customization */
+.leaflet-container {
+  font-family: inherit;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-content {
+  margin: 12px 16px;
+  font-size: 0.9rem;
+}
+
+.leaflet-popup-tip {
+  background: white;
+}
+
+.leaflet-control-attribution {
+  font-size: 0.7rem;
+  opacity: 0.7;
+} 
+
+/* Fade-in animation cho container */
+.fade-in {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Stagger animation cho các card */
+.audi-dealership-card {
+  animation: fadeInUp 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+/* Tạo delay cho từng card */
+.audi-dealership-card:nth-child(1) { animation-delay: 0.1s; }
+.audi-dealership-card:nth-child(2) { animation-delay: 0.2s; }
+.audi-dealership-card:nth-child(3) { animation-delay: 0.3s; }
+.audi-dealership-card:nth-child(4) { animation-delay: 0.4s; }
+.audi-dealership-card:nth-child(5) { animation-delay: 0.5s; }
+.audi-dealership-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* Smooth hover effects */
+.audi-dealership-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.audi-dealership-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+}
+
+/* Button hover effects */
+.view-map-btn {
+  transition: all 0.2s ease;
+}
+
+.view-map-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(213, 0, 0, 0.3);
+}
+
+/* Loading skeleton animation */
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+/* Smooth page transitions */
+.audi-dealership-container {
+  opacity: 0;
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+/* Hover effects cho pagination */
+.pagination-btn:hover:not(.disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(213, 0, 0, 0.2);
+}
+
+.page-number:hover {
+  transform: scale(1.1);
+}
+
+/* Smooth transitions cho stats */
+.audi-dealership-stats {
+  animation: slideInDown 0.8s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Card content animations */
+.audi-dealership-info-section {
+  animation: slideInRight 0.6s ease-out 0.2s both;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Map container animation */
+.audi-dealership-map-section {
+  animation: zoomIn 0.8s ease-out;
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Error and empty state animations */
+.error-state, .empty-state {
+  animation: bounceIn 0.8s ease-out;
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Smooth transitions cho contact items */
+.contact-item {
+  transition: all 0.2s ease;
+}
+
+.contact-item:hover {
+  transform: translateX(5px);
+  color: #D50000;
+}
+
+/* Email link hover effect */
+.email-link {
+  transition: all 0.2s ease;
+}
+
+.email-link:hover {
+  transform: scale(1.05);
+  text-shadow: 0 0 8px rgba(213, 0, 0, 0.3);
+}
+
+/* Working hours hover effect - thay đổi từ trắng sang xám nhạt */
+.working-hours:hover .hours-text {
+  background: #2a2a2a; /* Thay đổi từ #f0f0f0 sang màu xám nhạt */
+  transform: scale(1.02);
+  transition: all 0.3s ease;
+}
+
+/* Responsive animations */
+@media (max-width: 768px) {
+  .audi-dealership-card {
+    animation-delay: 0.1s !important;
+  }
+  
+  .audi-dealership-card:nth-child(n) {
+    animation-delay: 0.1s !important;
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+} 
+
+/* Map error state */
+.map-error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  color: #ffffff;
+  text-align: center;
+  padding: 20px;
+}
+
+.map-error .error-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  opacity: 0.7;
+}
+
+.map-error span {
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.retry-map-btn {
+  background: #D50000;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.retry-map-btn:hover {
+  background: #B71C1C;
+} 

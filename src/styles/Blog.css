@@ -156,6 +156,7 @@
   display: inline-block;
   margin-left: 0.5rem;
   color: #3182ce;
+  
   position: relative;
   animation: slideInFromLeft 0.8s ease-out 0.3s both;
 }
@@ -163,9 +164,11 @@
 .audi-blog-brand::before {
   content: '';
   position: absolute;
-  bottom: -4px;
+  bottom: -40px;
   left: 0;
-  width: 100%;
+  /* width: 100%; */
+  
+  width: 700px; /* Độ dài đường kẻ */
   height: 3px;
   background: linear-gradient(90deg, #3182ce, transparent);
   border-radius: 2px;
@@ -176,11 +179,14 @@
   font-size: 1.125rem;
   color: #e2e8f0;
   margin-bottom: 0;
-  max-width: 600px;
+  max-width: 800px;
   margin-left: auto;
   margin-right: auto;
   line-height: 1.6;
   animation: fadeIn 0.8s ease-out 0.4s both;
+  white-space: nowrap; /* Thêm dòng này để ngăn xuống hàng */
+  overflow: hidden; /* Ẩn phần text bị tràn */
+  text-overflow: ellipsis; /* Thêm dấu ... nếu text quá dài */
 }
 
 .audi-blog-stats {

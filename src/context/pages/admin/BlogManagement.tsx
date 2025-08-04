@@ -65,11 +65,12 @@ const BlogManagement: React.FC = () => {
         await blogService.updateBaiViet(editing.id!, formData);
         message.success('Cập nhật thành công - Bài viết đã chuyển về trạng thái nháp');
         
-        // Fetch lại dữ liệu để có thông tin mới nhất
-        await fetchData();
+        // Fetch lại dữ liệu và chuyển sang view mode với dữ liệu mới
+        const updatedData = await blogService.getAllBaiViet();
+        setData(updatedData);
         
         // Tìm bài viết đã được cập nhật trong danh sách mới
-        const updatedBlog = data.find(blog => blog.id === editing.id);
+        const updatedBlog = updatedData.find(blog => blog.id === editing.id);
         if (updatedBlog) {
           // Đảm bảo trạng thái là nháp
           const blogWithDraftStatus = {

@@ -17,7 +17,7 @@ import OrderManagement from './context/pages/admin/OrderManagement';
 import { ConfigProvider } from 'antd';
 import { NotificationProvider } from './context/NotificationContext';
 import ProductDetail from './components/sections/ProductDetail';
-import DealershipPage from './context/pages/Dealership';
+
 import ModelsPage from './context/pages/models/Models';
 import ForgotPassword from './context/pages/ForgotPassword';
 import { ThemeProvider } from './context/ThemeContext';
@@ -29,12 +29,14 @@ import BlogManagement from './context/pages/admin/BlogManagement';
 import BlogList from './context/pages/Blog/BlogList';
 import BlogDetail from './context/pages/Blog/BlogDetail';
 import ChangePassword from './context/pages/ChangePassword';
+import DealershipPage from './context/pages/Dealership/index';
 
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+  const [hasShownIntro, setHasShownIntro] = useState(false);
   
   const authRoutes = ['/login', '/register', '/forgot-password'];
   const adminRoutes = [
@@ -69,15 +71,33 @@ function App() {
 
   const handleAnimationComplete = () => {
     setIsLoading(false);
+    setHasShownIntro(true);
   };
 
-  // Kiểm tra các trường hợp cần bỏ qua animation
+  // Kiểm tra xem có phải là lần đầu load trang hay không
+  const isFirstLoad = !sessionStorage.getItem('hasLoadedBefore');
   const isFromLogin = sessionStorage.getItem('fromLogin') === 'true';
   const skipIntro = sessionStorage.getItem('skipIntro') === 'true';
   
-  // Chỉ hiện animation khi KHÔNG phải admin và KHÔNG có flag bỏ qua
-  if (isLoading && location.pathname === "/" && !isAdminRoute && !isFromLogin && !skipIntro) {
+  // Chỉ hiện animation khi:
+  // 1. Đang ở trang chủ (/)
+  // 2. Không phải admin route
+  // 3. Là lần đầu load (F5 hoặc mở tab mới)
+  // 4. Chưa hiển thị intro trong session này
+  // 5. Không có flag bỏ qua
+  if (isLoading && 
+      location.pathname === "/" && 
+      !isAdminRoute && 
+      isFirstLoad && 
+      !hasShownIntro && 
+      !isFromLogin && 
+      !skipIntro) {
     return <LoadingAnimation onAnimationComplete={handleAnimationComplete} />;
+  }
+
+  // Đánh dấu đã load lần đầu
+  if (isFirstLoad) {
+    sessionStorage.setItem('hasLoadedBefore', 'true');
   }
 
   // Xóa các flag khi đã load xong
@@ -239,8 +259,7 @@ function App() {
                 } />
 
                 <Route path="/product/:id" element={<ProductDetail />} />
-                <Route path="/dealership" element={<DealershipPage />} />
-                <Route path="/dealership/:id" element={<DealershipPage />} />
+               
                 <Route path="/models" element={<ModelsPage />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/blog" element={<BlogList />} />
@@ -250,6 +269,8 @@ function App() {
                     <ChangePassword />
                   </ProtectedRoute>
                 } />
+                <Route path="/dealership" element={<DealershipPage />} />
+                <Route path="/dealership/:id" element={<DealershipPage />} />
               </Routes>
             </main>
             {shouldShowFooter && <Footer />}
