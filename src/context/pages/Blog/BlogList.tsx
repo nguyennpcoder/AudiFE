@@ -33,7 +33,7 @@ const BlogList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
-  const [pageSize] = useState(20); // Tăng từ 10 lên 20
+  const [pageSize] = useState(10); // Thay đổi từ 20 về 10
   const navigate = useNavigate();
 
   // Smooth scroll to top function with animation
@@ -171,6 +171,47 @@ const BlogList: React.FC = () => {
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     scrollToTop();
+  };
+
+  // Hàm tạo danh sách các trang để hiển thị
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5; // Hiển thị tối đa 5 trang
+    
+    if (totalPages <= maxVisiblePages) {
+      // Nếu tổng số trang <= 5, hiển thị tất cả
+      for (let i = 0; i < totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Nếu tổng số trang > 5, hiển thị thông minh
+      if (currentPage <= 2) {
+        // Trang đầu: hiển thị 1,2,3,4,5...last
+        for (let i = 0; i < 4; i++) {
+          pages.push(i);
+        }
+        pages.push(-1); // Dấu "..."
+        pages.push(totalPages - 1);
+      } else if (currentPage >= totalPages - 3) {
+        // Trang cuối: hiển thị 1...last-3,last-2,last-1,last
+        pages.push(0);
+        pages.push(-1); // Dấu "..."
+        for (let i = totalPages - 4; i < totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // Trang giữa: hiển thị 1...current-1,current,current+1...last
+        pages.push(0);
+        pages.push(-1); // Dấu "..."
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push(-1); // Dấu "..."
+        pages.push(totalPages - 1);
+      }
+    }
+    
+    return pages;
   };
 
   if (loading) {
@@ -375,30 +416,59 @@ const BlogList: React.FC = () => {
             })}
           </div>
 
-          {/* Pagination */}
+          {/* Pagination - Cải thiện */}
           {totalPages > 1 && (
             <div className="audi-blog-pagination">
+              {/* Nút Previous */}
               <button 
-                className="pagination-btn"
+                className={`pagination-btn ${currentPage === 0 ? 'disabled' : ''}`}
                 disabled={currentPage === 0}
                 onClick={() => handlePageChange(currentPage - 1)}
+                aria-label="Trang trước"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
                 </svg>
-                Trước
+                <span className="btn-text">Trước</span>
               </button>
               
+              {/* Thông tin trang */}
               <div className="pagination-info">
-                Trang {currentPage + 1} / {totalPages}
+                <span className="page-info">
+                  Trang {currentPage + 1} / {totalPages}
+                </span>
+                <span className="items-info">
+                  ({((currentPage * pageSize) + 1)}-{Math.min((currentPage + 1) * pageSize, totalItems)} / {totalItems} bài viết)
+                </span>
               </div>
               
+              {/* Các nút số trang */}
+              <div className="page-numbers">
+                {getPageNumbers().map((pageNum, index) => (
+                  <React.Fragment key={index}>
+                    {pageNum === -1 ? (
+                      <span className="page-ellipsis">...</span>
+                    ) : (
+                      <button
+                        className={`page-number ${currentPage === pageNum ? 'active' : ''}`}
+                        onClick={() => handlePageChange(pageNum)}
+                        aria-label={`Trang ${pageNum + 1}`}
+                      >
+                        {pageNum + 1}
+                      </button>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+              
+              {/* Nút Next */}
               <button 
-                className="pagination-btn"
+                className={`pagination-btn ${currentPage === totalPages - 1 ? 'disabled' : ''}`}
                 disabled={currentPage === totalPages - 1}
                 onClick={() => handlePageChange(currentPage + 1)}
+                aria-label="Trang tiếp"
               >
-                Sau
+                <span className="btn-text">Sau</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
                 </svg>
