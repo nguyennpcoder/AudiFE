@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { getAllDealerships, getDealershipById, Dealership } from '../../../services/dealershipService';
 import DealershipCard from '../../../components/sections/DealershipCard';
@@ -14,53 +14,50 @@ const DealershipPage: React.FC = () => {
   const [pageSize] = useState(6);
   const params = useParams<{ id?: string }>();
 
-  // Smooth scroll to top function
-  const scrollToTop = () => {
-    const scrollStep = -window.scrollY / (500 / 15);
-    const scrollInterval = setInterval(() => {
-      if (window.scrollY !== 0) {
-        window.scrollBy(0, scrollStep);
-      } else {
-        clearInterval(scrollInterval);
-      }
-    }, 15);
-  };
+  // Tối ưu hóa scroll to top function với useCallback
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, []);
+
+  // Tối ưu hóa fetch dealerships với useCallback
+  const fetchDealerships = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getAllDealerships();
+      setDealerships(data);
+      setTotalItems(data.length);
+      setTotalPages(Math.ceil(data.length / pageSize));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể tải thông tin đại lý');
+      console.error('Error fetching dealerships:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [pageSize]);
 
   useEffect(() => {
     scrollToTop();
-    
-    const fetchDealerships = async () => {
-      setLoading(true);
-      try {
-        const data = await getAllDealerships();
-        setDealerships(data);
-        setTotalItems(data.length);
-        setTotalPages(Math.ceil(data.length / pageSize));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Không thể tải thông tin đại lý');
-        console.error('Error fetching dealerships:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDealerships();
-  }, [pageSize]);
+  }, [scrollToTop, fetchDealerships]);
 
-  const handlePageChange = (newPage: number) => {
+  // Tối ưu hóa handlePageChange với useCallback
+  const handlePageChange = useCallback((newPage: number) => {
     setCurrentPage(newPage);
     scrollToTop();
-  };
+  }, [scrollToTop]);
 
-  // Get current page dealerships
-  const getCurrentPageDealerships = () => {
+  // Tối ưu hóa getCurrentPageDealerships với useMemo
+  const getCurrentPageDealerships = useMemo(() => {
     const startIndex = currentPage * pageSize;
     const endIndex = startIndex + pageSize;
     return dealerships.slice(startIndex, endIndex);
-  };
+  }, [dealerships, currentPage, pageSize]);
 
-  // Generate page numbers for pagination
-  const getPageNumbers = () => {
+  // Tối ưu hóa getPageNumbers với useMemo
+  const getPageNumbers = useMemo(() => {
     const pages = [];
     const maxVisiblePages = 5;
     
@@ -93,8 +90,9 @@ const DealershipPage: React.FC = () => {
     }
     
     return pages;
-  };
+  }, [currentPage, totalPages]);
 
+  // Tối ưu hóa loading state
   if (loading) {
     return (
       <div className="audi-dealership-container">
@@ -119,6 +117,7 @@ const DealershipPage: React.FC = () => {
     );
   }
 
+  // Tối ưu hóa error state
   if (error) {
     return (
       <div className="audi-dealership-container">
@@ -128,7 +127,7 @@ const DealershipPage: React.FC = () => {
           <p>{error}</p>
           <button 
             className="retry-button"
-            onClick={() => window.location.reload()}
+            onClick={fetchDealerships}
           >
             Thử lại
           </button>
@@ -166,7 +165,7 @@ const DealershipPage: React.FC = () => {
           </div>
           
           <div className="audi-dealership-grid">
-            {getCurrentPageDealerships().map((dealership, index) => (
+            {getCurrentPageDealerships.map((dealership, index) => (
               <DealershipCard 
                 key={dealership.id} 
                 dealership={dealership}
@@ -203,7 +202,7 @@ const DealershipPage: React.FC = () => {
               
               {/* Page numbers */}
               <div className="page-numbers">
-                {getPageNumbers().map((pageNum, index) => (
+                {getPageNumbers.map((pageNum, index) => (
                   <React.Fragment key={index}>
                     {pageNum === -1 ? (
                       <span className="page-ellipsis">...</span>

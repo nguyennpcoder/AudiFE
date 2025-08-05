@@ -92,13 +92,20 @@ export const getAllDealerships = async (): Promise<Dealership[]> => {
     // Kiểm tra và chuyển đổi dữ liệu giờ làm việc
     return response.data.map((dealership: Dealership) => {
       // Đảm bảo gioLamViec là một object
-      if (dealership.gioLamViec && typeof dealership.gioLamViec === 'string') {
-        try {
-          dealership.gioLamViec = JSON.parse(dealership.gioLamViec);
-        } catch (e) {
-          console.error('Error parsing working hours:', e);
-          dealership.gioLamViec = {};
+      if (dealership.gioLamViec) {
+        if (typeof dealership.gioLamViec === 'string') {
+          try {
+            // Parse JSON string thành object
+            dealership.gioLamViec = JSON.parse(dealership.gioLamViec);
+            console.log('Parsed gioLamViec for', dealership.ten, ':', dealership.gioLamViec);
+          } catch (e) {
+            console.error('Error parsing working hours for', dealership.ten, ':', e);
+            console.log('Raw gioLamViec:', dealership.gioLamViec);
+            dealership.gioLamViec = {};
+          }
         }
+      } else {
+        dealership.gioLamViec = {};
       }
       
       // Kiểm tra và thêm tọa độ nếu chưa có

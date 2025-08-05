@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Dealership } from '../../services/dealershipService';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -13,7 +13,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom Audi marker icon với logo Audi
+// Custom Audi marker icon với logo Audi - tối ưu hóa
 const audiMarkerIcon = L.divIcon({
   className: 'audi-marker',
   html: `
@@ -55,18 +55,21 @@ const DealershipCard: React.FC<DealershipCardProps> = ({ dealership, index }) =>
   const [isHovered, setIsHovered] = useState(false);
   const mapRef = useRef<L.Map | null>(null);
   const cardRef = useRef<HTMLElement>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Default coordinates if not available
   const defaultCoords = { y: 21.0285, x: 105.8542 }; // Hanoi
   const coords = dealership.viTriDiaLy || defaultCoords;
 
-  const handleViewMap = () => {
+  // Tối ưu hóa hàm handleViewMap với useCallback
+  const handleViewMap = useCallback(() => {
     const address = `${dealership.diaChi}, ${dealership.thanhPho}, ${dealership.tinh}, ${dealership.quocGia}`;
     const encodedAddress = encodeURIComponent(address);
     window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
-  };
+  }, [dealership]);
 
-  const formatWorkingHours = (hours: any) => {
+  // Tối ưu hóa hàm formatWorkingHours với màu sắc
+  const formatWorkingHours = useCallback((hours: any) => {
     if (!hours || typeof hours !== 'object') {
       return 'Thông tin giờ làm việc đang cập nhật';
     }
@@ -81,44 +84,53 @@ const DealershipCard: React.FC<DealershipCardProps> = ({ dealership, index }) =>
       'THURSDAY': 'Thứ 5',
       'FRIDAY': 'Thứ 6',
       'SATURDAY': 'Thứ 7',
-      'SUNDAY': 'Chủ nhật'
+      'SUNDAY': 'Chủ nhật',
+      'Thứ 2': 'Thứ 2',
+      'Thứ 3': 'Thứ 3',
+      'Thứ 4': 'Thứ 4',
+      'Thứ 5': 'Thứ 5',
+      'Thứ 6': 'Thứ 6',
+      'Thứ 7': 'Thứ 7',
+      'Chủ nhật': 'Chủ nhật'
     };
 
     const formattedHours = Object.entries(hours).map(([day, time]) => {
       const dayName = dayMapping[day as keyof typeof dayMapping] || day;
-      return `${dayName}: ${time}`;
+        const timeStr = String(time).toLowerCase();
+        
+      // Kiểm tra trạng thái để thêm màu sắc
+      if (timeStr.includes('mo cua') || timeStr.includes('mở cửa')) {
+        return `<span style="color: #22c55e;">${dayName}: ${time}</span>`; // Màu xanh lá
+      } else if (timeStr.includes('dong cua') || timeStr.includes('đóng cửa')) {
+        return `<span style="color: #ef4444;">${dayName}: ${time}</span>`; // Màu đỏ
+      } else {
+        return `${dayName}: ${time}`; // Màu trắng mặc định
+      }
     });
 
     return formattedHours.join('\n');
-  };
+  }, []);
 
-  // Hàm kiểm tra trạng thái mở cửa - sửa lại logic
-  const isOpen = () => {
+  // Thêm lại logic kiểm tra trạng thái mở cửa đơn giản
+  const isOpen = useMemo(() => {
     const now = new Date();
     const currentDay = now.getDay(); // 0 = Chủ nhật, 1 = Thứ 2, ...
     
-    // Mapping chính xác theo dữ liệu database
+    // Mapping ngày
     const daysMapping = {
-      0: ['SUNDAY'], // Chủ nhật
-      1: ['MONDAY'], // Thứ 2
-      2: ['TUESDAY'], // Thứ 3
-      3: ['WEDNESDAY'], // Thứ 4
-      4: ['THURSDAY'], // Thứ 5
-      5: ['FRIDAY'], // Thứ 6
-      6: ['SATURDAY'] // Thứ 7
+      0: ['SUNDAY', 'ChuNhat', 'Chủ nhật'], // Chủ nhật
+      1: ['MONDAY', 'Thu2-Thu6', 'Thứ 2'], // Thứ 2
+      2: ['TUESDAY', 'Thu2-Thu6', 'Thứ 3'], // Thứ 3
+      3: ['WEDNESDAY', 'Thu2-Thu6', 'Thứ 4'], // Thứ 4
+      4: ['THURSDAY', 'Thu2-Thu6', 'Thứ 5'], // Thứ 5
+      5: ['FRIDAY', 'Thu2-Thu6', 'Thứ 6'], // Thứ 6
+      6: ['SATURDAY', 'Thu7', 'Thứ 7'] // Thứ 7
     };
     
     const currentDayNames = daysMapping[currentDay as keyof typeof daysMapping];
     const workingHours = dealership.gioLamViec;
     
-    // Debug log chi tiết
-    console.log('=== DEBUG ISOPEN ===');
-    console.log('Current day number:', currentDay);
-    console.log('Current day names to check:', currentDayNames);
-    console.log('Working hours object:', workingHours);
-    
     if (!workingHours || typeof workingHours !== 'object') {
-      console.log('No working hours data');
       return false;
     }
     
@@ -127,54 +139,66 @@ const DealershipCard: React.FC<DealershipCardProps> = ({ dealership, index }) =>
     for (const dayName of currentDayNames) {
       if (workingHours[dayName]) {
         todayHours = workingHours[dayName];
-        console.log(`Found hours for ${dayName}:`, todayHours);
         break;
       }
     }
     
     if (!todayHours) {
-      console.log('No hours found for any day name');
       return false;
     }
     
     const hoursText = todayHours.toString().toLowerCase();
-    console.log('Hours text:', hoursText);
     
-    // Kiểm tra các trường hợp đặc biệt trước
+    // Kiểm tra "Mo cua" trước
     if (hoursText.includes('mo cua') || hoursText.includes('mở cửa')) {
-      console.log('Found "mo cua" - returning TRUE');
       return true;
     }
     
+    // Kiểm tra "Dong cua"
     if (hoursText.includes('dong cua') || hoursText.includes('đóng cửa')) {
-      console.log('Found "dong cua" - returning FALSE');
       return false;
     }
     
-    // Nếu có giờ cụ thể (ví dụ: 8:00-18:00) thì kiểm tra thời gian
+    // Nếu có giờ cụ thể thì kiểm tra thời gian
     const timeMatch = hoursText.match(/(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})/);
     if (timeMatch) {
       const currentTime = now.getHours() * 100 + now.getMinutes();
       const openTime = parseInt(timeMatch[1]) * 100 + parseInt(timeMatch[2]);
       const closeTime = parseInt(timeMatch[3]) * 100 + parseInt(timeMatch[4]);
-      console.log('Time check:', { currentTime, openTime, closeTime });
       return currentTime >= openTime && currentTime <= closeTime;
     }
     
-    console.log('No matching pattern - returning FALSE');
-    return false;
-  };
+    // Mặc định là mở cửa nếu có dữ liệu
+    return true;
+  }, [dealership.gioLamViec]);
 
-  const openStatus = isOpen();
+  const openStatus = isOpen;
 
-  // Debug log để kiểm tra
+  // Tối ưu hóa hover effects với debounce
+  const handleMouseEnter = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setIsHovered(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 50); // Debounce 50ms
+  }, []);
+
+  // Cleanup timeout
   useEffect(() => {
-    console.log('Dealership:', dealership.ten);
-    console.log('Working hours:', dealership.gioLamViec);
-    console.log('Current day:', new Date().getDay());
-    console.log('Current time:', new Date().getHours() + ':' + new Date().getMinutes());
-    console.log('Is open:', openStatus);
-  }, [dealership, openStatus]);
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     // Set a timeout to show loading state
@@ -187,41 +211,80 @@ const DealershipCard: React.FC<DealershipCardProps> = ({ dealership, index }) =>
     return () => clearTimeout(loadingTimeout);
   }, [mapLoaded]);
 
-  const handleMapLoad = () => {
+  const handleMapLoad = useCallback(() => {
     setMapLoaded(true);
     setMapError(false);
-  };
+  }, []);
 
-  const handleMapError = () => {
+  const handleMapError = useCallback(() => {
     setMapError(true);
     setMapLoaded(false);
-  };
+  }, []);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-    if (cardRef.current) {
-      const rect = cardRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      cardRef.current.style.setProperty('--mouse-x', `${x}px`);
-      cardRef.current.style.setProperty('--mouse-y', `${y}px`);
+  // Component hiển thị giờ làm việc với màu sắc
+  const WorkingHoursDisplay = ({ hours }: { hours: any }) => {
+    if (!hours || typeof hours !== 'object') {
+      return <div className="hours-text">Thông tin giờ làm việc đang cập nhật</div>;
     }
-  };
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
+    const dayMapping = {
+      'Thu2-Thu6': 'Thứ 2 - Thứ 6',
+      'Thu7': 'Thứ 7',
+      'ChuNhat': 'Chủ nhật',
+      'MONDAY': 'Thứ 2',
+      'TUESDAY': 'Thứ 3', 
+      'WEDNESDAY': 'Thứ 4',
+      'THURSDAY': 'Thứ 5',
+      'FRIDAY': 'Thứ 6',
+      'SATURDAY': 'Thứ 7',
+      'SUNDAY': 'Chủ nhật',
+      'Thứ 2': 'Thứ 2',
+      'Thứ 3': 'Thứ 3',
+      'Thứ 4': 'Thứ 4',
+      'Thứ 5': 'Thứ 5',
+      'Thứ 6': 'Thứ 6',
+      'Thứ 7': 'Thứ 7',
+      'Chủ nhật': 'Chủ nhật'
+    };
 
-  const handleMouseLeave = () => {
-    setIsHovered(false);
+    // Thứ tự hiển thị cố định theo thứ tự trong tuần
+    const dayOrder = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+
+    return (
+      <div className="hours-text">
+        {dayOrder.map((dayKey, index) => {
+          const time = (hours as Record<string, any>)[dayKey];
+          if (!time) return null;
+          
+          const dayName = dayMapping[dayKey as keyof typeof dayMapping] || dayKey;
+          const timeStr = String(time).toLowerCase();
+          
+          // Chỉ đổi màu cho phần trạng thái, không đổi màu tên ngày
+          const isOpenStatus = timeStr.includes('mo cua') || timeStr.includes('mở cửa');
+          const isClosedStatus = timeStr.includes('dong cua') || timeStr.includes('đóng cửa');
+          
+          return (
+            <div key={index} style={{ color: '#cccccc' }}>
+              {dayName}: 
+              <span style={{ 
+                color: isOpenStatus ? '#22c55e' : isClosedStatus ? '#ef4444' : '#cccccc',
+                fontWeight: (isOpenStatus || isClosedStatus) ? '600' : 'normal',
+                textShadow: isOpenStatus ? '0 0 4px #22c55e40' : isClosedStatus ? '0 0 4px #ef444440' : 'none'
+              }}>
+                {String(time)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    );
   };
 
   return (
     <article 
       ref={cardRef}
       className="audi-dealership-card"
-      style={{ animationDelay: `${index * 0.1}s` }}
-      onMouseMove={handleMouseMove}
+      style={{ animationDelay: `${index * 0.05}s` }} // Giảm delay animation
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -332,15 +395,15 @@ const DealershipCard: React.FC<DealershipCardProps> = ({ dealership, index }) =>
 
           <div className="working-hours">
             <h4>Giờ làm việc:</h4>
-            <pre className="hours-text">{formatWorkingHours(dealership.gioLamViec)}</pre>
+            <WorkingHoursDisplay hours={dealership.gioLamViec} />
           </div>
 
           <button 
             className="view-map-btn"
             onClick={handleViewMap}
             style={{
-              transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
-              transition: 'all 0.2s ease'
+              transform: isHovered ? 'translateY(-1px)' : 'translateY(0)',
+              transition: 'all 0.15s ease'
             }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
