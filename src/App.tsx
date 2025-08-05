@@ -30,6 +30,12 @@ import BlogList from './context/pages/Blog/BlogList';
 import BlogDetail from './context/pages/Blog/BlogDetail';
 import ChangePassword from './context/pages/ChangePassword';
 import DealershipPage from './context/pages/Dealership/index';
+import VehicleConfigurator from './context/pages/VehicleConfigurator';
+import QuotationDetail from './context/pages/QuotationDetail';
+import OrderForm from './context/pages/OrderForm';
+
+
+import UserOrderManagement from './context/pages/admin/UserOrderManagement';
 
 function App() {
   const location = useLocation();
@@ -271,6 +277,19 @@ function App() {
                 } />
                 <Route path="/dealership" element={<DealershipPage />} />
                 <Route path="/dealership/:id" element={<DealershipPage />} />
+                <Route path="/configure/:id" element={<VehicleConfigurator />} />
+                <Route path="/quotation/:configId" element={<QuotationDetail />} />
+                <Route path="/order/:configId" element={
+                  <ProtectedRoute>
+                    <OrderForm />
+                  </ProtectedRoute>
+                } />
+                <Route path="/orders" element={
+                  <ProtectedRoute>
+                    <UserOrderManagement />
+                  </ProtectedRoute>
+                } />
+               
               </Routes>
             </main>
             {shouldShowFooter && <Footer />}

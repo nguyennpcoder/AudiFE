@@ -1,0 +1,164 @@
+.quotation-detail {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  background: #fff;
+  min-height: 100vh;
+}
+
+.quotation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.header-actions {
+  margin-left: 24px;
+}
+
+.config-card,
+.price-card,
+.action-card,
+.history-card {
+  margin-bottom: 24px;
+}
+
+.option-item {
+  border: 1px solid #d9d9d9;
+  transition: all 0.3s ease;
+}
+
+.option-item:hover {
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+}
+
+.option-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.option-price {
+  font-weight: bold;
+  color: #52c41a;
+}
+
+.price-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.price-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.price-item.discount {
+  color: #52c41a;
+}
+
+.price-item.total {
+  border-top: 2px solid #d9d9d9;
+  padding-top: 16px;
+  margin-top: 16px;
+  font-size: 18px;
+}
+
+.final-price {
+  color: #1890ff;
+  font-size: 20px;
+}
+
+.color-preview {
+  border: 1px solid #d9d9d9;
+}
+
+/* Loading and error states */
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  gap: 16px;
+}
+
+/* Print styles */
+@media print {
+  .quotation-header,
+  .header-actions,
+  .action-card {
+    display: none;
+  }
+  
+  .quotation-detail {
+    padding: 0;
+    background: white;
+  }
+  
+  .config-card,
+  .price-card {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .quotation-detail {
+    padding: 16px;
+  }
+  
+  .quotation-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .header-actions {
+    margin-left: 0;
+  }
+  
+  .header-actions .ant-space {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .quotation-detail {
+    background: #1f1f1f;
+    color: #fff;
+  }
+  
+  .config-card,
+  .price-card,
+  .action-card,
+  .history-card {
+    background: #2f2f2f;
+    border-color: #434343;
+  }
+  
+  .option-item {
+    background: #2f2f2f;
+    border-color: #434343;
+  }
+  
+  .option-item:hover {
+    border-color: #1890ff;
+    background: #1f1f1f;
+  }
+}

@@ -1,0 +1,94 @@
+.order-form {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px;
+  background: #fff;
+  min-height: 100vh;
+}
+
+.order-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.order-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.step-content-container {
+  min-height: 400px;
+  padding: 24px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.step-content {
+  max-width: 100%;
+}
+
+.step-navigation {
+  display: flex;
+  justify-content: space-between;
+  padding: 24px 0;
+}
+
+.order-summary {
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+}
+
+.order-summary .ant-card-body {
+  padding: 24px;
+}
+
+/* Loading and error states */
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  gap: 16px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .order-form {
+    padding: 16px;
+  }
+  
+  .step-content-container {
+    padding: 16px;
+  }
+  
+  .step-navigation {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .step-navigation .ant-btn {
+    width: 100%;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .order-form {
+    background: #1f1f1f;
+    color: #fff;
+  }
+  
+  .step-content-container {
+    background: #2f2f2f;
+  }
+  
+  .order-summary {
+    background: #1f1f1f;
+    border-color: #434343;
+  }
+} 
