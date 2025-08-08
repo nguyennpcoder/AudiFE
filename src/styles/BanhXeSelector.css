@@ -1,0 +1,228 @@
+.banh-xe-selector {
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.banh-xe-selector-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.banh-xe-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.banh-xe-item {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #fafafa;
+}
+
+.banh-xe-item:hover {
+    border-color: #007bff;
+    background: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+}
+
+.banh-xe-item.selected {
+    border-color: #007bff;
+    background: #e3f2fd;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+.banh-xe-image {
+    width: 120px;
+    height: 120px;
+    margin-right: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.banh-xe-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.banh-xe-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.banh-xe-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.banh-xe-description {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.banh-xe-details {
+    display: flex;
+    gap: 15px;
+    margin-top: 5px;
+}
+
+.banh-xe-size,
+.banh-xe-material {
+    font-size: 12px;
+    color: #888;
+    background: #f0f0f0;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.banh-xe-price {
+    margin-top: 8px;
+}
+
+.banh-xe-standard {
+    color: #28a745;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.banh-xe-additional-price {
+    color: #dc3545;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.banh-xe-feature-link {
+    background: none;
+    border: none;
+    color: #007bff;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+    margin-top: 5px;
+    align-self: flex-start;
+}
+
+.banh-xe-feature-link:hover {
+    color: #0056b3;
+}
+
+.banh-xe-gallery {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.banh-xe-gallery-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.banh-xe-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.banh-xe-gallery-item {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.banh-xe-gallery-item:hover {
+    transform: scale(1.05);
+}
+
+.banh-xe-gallery-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.banh-xe-selector-loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 16px;
+}
+
+.banh-xe-selector-error {
+    text-align: center;
+    padding: 40px;
+    color: #dc3545;
+    font-size: 16px;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .banh-xe-item {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .banh-xe-image {
+        margin-right: 0;
+        margin-bottom: 15px;
+        width: 100px;
+        height: 100px;
+    }
+
+    .banh-xe-details {
+        justify-content: center;
+    }
+
+    .banh-xe-gallery-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .banh-xe-selector {
+        padding: 15px;
+    }
+
+    .banh-xe-selector-title {
+        font-size: 20px;
+    }
+
+    .banh-xe-name {
+        font-size: 16px;
+    }
+
+    .banh-xe-gallery-grid {
+        grid-template-columns: 1fr;
+    }
+} 

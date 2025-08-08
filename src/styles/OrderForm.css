@@ -92,3 +92,24 @@
     border-color: #434343;
   }
 } 
+
+/* Force Light + Pro Animations */
+.force-light { color-scheme: light; }
+.force-light .order-form { background:#ffffff; color:#0f0f0f; }
+.force-light .step-content-container { background:#ffffff; border:1px solid #f0f0f0; }
+.force-light .order-summary { background:#ffffff; border-color:#e6f7ff; }
+
+/* Keyframes */
+@keyframes fadeInUp { from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:translateY(0)} }
+@keyframes scaleIn { from{opacity:0; transform:scale(.98)} to{opacity:1; transform:scale(1)} }
+
+/* Form items stagger */
+.step-content .ant-form-item { animation: fadeInUp .4s ease both; }
+.step-content .ant-form-item:nth-child(2){ animation-delay:.05s }
+.step-content .ant-form-item:nth-child(3){ animation-delay:.1s }
+.step-content .ant-form-item:nth-child(4){ animation-delay:.15s }
+.order-summary { animation: scaleIn .35s ease both; }
+
+/* Buttons */
+.step-navigation .ant-btn { transition: transform .2s ease, box-shadow .2s ease; }
+.step-navigation .ant-btn:hover { transform: translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,.12); } 

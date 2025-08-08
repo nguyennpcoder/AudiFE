@@ -162,3 +162,29 @@
     background: #1f1f1f;
   }
 }
+
+/* Force Light + Pro Animations */
+.force-light { color-scheme: light; }
+.force-light .quotation-detail { background:#ffffff; color:#0f0f0f; }
+.force-light .config-card,
+.force-light .price-card,
+.force-light .action-card,
+.force-light .history-card { background:#ffffff; border-color:#f0f0f0; }
+
+/* Keyframes */
+@keyframes fadeInUp { from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:translateY(0)} }
+
+/* Appear effects */
+.quotation-detail .ant-card { animation: fadeInUp .4s ease both; }
+.quotation-detail .ant-card:nth-child(2){ animation-delay:.06s }
+.quotation-detail .ant-card:nth-child(3){ animation-delay:.12s }
+
+/* Option and action polish */
+.option-item{ transition: transform .25s ease, box-shadow .25s ease; }
+.option-item:hover{ transform: translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,.12); }
+.action-card .ant-btn{ transition: transform .2s ease, box-shadow .2s ease; }
+.action-card .ant-btn:hover{ transform: translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,.14); }
+
+/* Final price highlight */
+.final-price{ color:#1677ff; text-shadow:0 0 0 rgba(0,0,0,0); transition: text-shadow .25s ease; }
+.final-price:hover{ text-shadow:0 2px 14px rgba(22,119,255,.35); }

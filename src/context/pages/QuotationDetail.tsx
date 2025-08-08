@@ -148,7 +148,7 @@ const QuotationDetail: React.FC = () => {
   const giaCuoi = cauHinh.giaSauKhuyenMai || cauHinh.tongGia;
 
   return (
-    <div className="quotation-detail">
+    <div className="force-light quotation-detail">
       <div className="quotation-header">
         <div className="header-content">
           <Title level={2}>

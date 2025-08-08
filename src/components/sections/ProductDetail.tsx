@@ -82,6 +82,18 @@ interface HinhAnhTheoNoiThatDTO {
   idMauSac?: number;
 }
 
+// Thêm interface cho bánh xe
+interface BanhXeOption {
+  id: number;
+  ten: string;
+  moTa: string;
+  kichThuoc: string;
+  chatLieu: string;
+  giaThem: number;
+  duongDanAnh: string;
+  laMacDinh?: boolean;
+}
+
 // const BACKEND_URL = 'https://audivn.onrender.com';
 const BACKEND_URL = 'http://localhost:8080';
 const FALLBACK_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSIgZmlsbD0iIzk5OSI+No image</dGV4dD48L3N2Zz4=";
@@ -158,6 +170,58 @@ const ProductDetail: React.FC = () => {
   // Thêm state cho khuyến mãi
   const [selectedPromotion, setSelectedPromotion] = useState<KhuyenMai | null>(null);
 
+  // Thêm state cho bánh xe
+  const [banhXeOptions, setBanhXeOptions] = useState<BanhXeOption[]>([]);
+  const [selectedBanhXe, setSelectedBanhXe] = useState<BanhXeOption | null>(null);
+  const [banhXeImages, setBanhXeImages] = useState<HinhAnhXe[]>([]);
+  const [banhXeError, setBanhXeError] = useState<string | null>(null);
+  const [activeBanhXeTab, setActiveBanhXeTab] = useState(0); // Thêm state này
+
+  // Add new states for wheel comparison functionality
+  const [compareWheelMode, setCompareWheelMode] = useState<boolean>(false);
+  const [compareWheel, setCompareWheel] = useState<BanhXeOption | null>(null);
+  const [compareWheelImages, setCompareWheelImages] = useState<HinhAnhXe[]>([]);
+  const [previousWheel, setPreviousWheel] = useState<BanhXeOption | null>(null);
+  const [showCompareWheelButton, setShowCompareWheelButton] = useState<boolean>(true);
+  const [defaultWheel, setDefaultWheel] = useState<BanhXeOption | null>(null);
+  const [wheelSliderPosition, setWheelSliderPosition] = useState<number>(50);
+  const [isDraggingWheel, setIsDraggingWheel] = useState<boolean>(false);
+  // Track which exterior color id the current wheel images were loaded for
+  const [lastWheelColorId, setLastWheelColorId] = useState<number | null>(null);
+  // Animation states for wheel images (similar to exterior/interior)
+  const [wheelFadeState, setWheelFadeState] = useState<'fade-in' | 'fade-out' | null>('fade-in');
+  const [wheelSlideDirection, setWheelSlideDirection] = useState<'slide-left' | 'slide-right' | null>(null);
+
+  // Add state for wheel image navigation
+  const [activeWheelTab, setActiveWheelTab] = useState(0);
+
+  // Add wheel navigation functions (similar to exterior/interior)
+  const nextWheelImage = () => {
+    if (banhXeImages.length <= 1) return;
+    
+    setWheelFadeState('fade-out');
+    setWheelSlideDirection('slide-left');
+    
+    setTimeout(() => {
+      const newIndex = activeWheelTab < banhXeImages.length - 1 ? activeWheelTab + 1 : 0;
+      setActiveWheelTab(newIndex);
+      setWheelFadeState('fade-in');
+    }, 280);
+  };
+
+  const prevWheelImage = () => {
+    if (banhXeImages.length <= 1) return;
+    
+    setWheelFadeState('fade-out');
+    setWheelSlideDirection('slide-right');
+    
+    setTimeout(() => {
+      const newIndex = activeWheelTab > 0 ? activeWheelTab - 1 : banhXeImages.length - 1;
+      setActiveWheelTab(newIndex);
+      setWheelFadeState('fade-in');
+    }, 280);
+  };
+
   // Đưa trang về đầu khi mới vào
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -190,6 +254,33 @@ const ProductDetail: React.FC = () => {
     }
   };
 
+  // Thêm function để fetch bánh xe options
+  const fetchBanhXeOptions = async (mauXeId: string, exteriorColorId?: number) => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/v1/mau-xe/${mauXeId}/banh-xe`);
+      setBanhXeOptions(response.data);
+
+      const defaultOption = response.data.find((option: BanhXeOption) => option.laMacDinh);
+      if (defaultOption) {
+        setDefaultWheel(defaultOption);
+        setSelectedBanhXe(defaultOption);
+        // Gọi handleBanhXeSelect để load ảnh bánh xe đúng với màu ngoại thất
+        if (exteriorColorId) {
+          await handleBanhXeSelect(defaultOption, exteriorColorId);
+        }
+      } else if (response.data.length > 0) {
+        setDefaultWheel(response.data[0]);
+        setSelectedBanhXe(response.data[0]);
+        // Gọi handleBanhXeSelect để load ảnh bánh xe đúng với màu ngoại thất
+        if (exteriorColorId) {
+          await handleBanhXeSelect(response.data[0], exteriorColorId);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching banh xe options:', error);
+    }
+  };
+
   // Update useEffect to select default color that matches with hinh_anh_xe images
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -203,6 +294,9 @@ const ProductDetail: React.FC = () => {
 
         // Fetch interior options
         await fetchNoiThatOptions(id as string);
+
+        // Fetch bánh xe options
+        await fetchBanhXeOptions(id as string);
 
         // Set dong xe information
         setDongXe(productResponse.data.tenDong);
@@ -347,12 +441,20 @@ const ProductDetail: React.FC = () => {
           setDefaultColor(defaultColorFound);
           setSelectedColor(defaultColorFound);
           // Gọi loadColorImages() ngay để lấy tất cả ảnh của màu mặc định
-          loadColorImages(defaultColorFound);
+          await loadColorImages(defaultColorFound);
+          
+          // Gọi lại fetchNoiThatOptions và fetchBanhXeOptions với màu mặc định
+          await fetchNoiThatOptions(id as string, defaultColorFound.id);
+          await fetchBanhXeOptions(id as string, defaultColorFound.id);
         } else if (colorsResponse.data.length > 0) {
           setDefaultColor(colorsResponse.data[0]);
           setSelectedColor(colorsResponse.data[0]);
           // Gọi loadColorImages() nếu không tìm thấy màu mặc định
-          loadColorImages(colorsResponse.data[0]);
+          await loadColorImages(colorsResponse.data[0]);
+          
+          // Gọi lại fetchNoiThatOptions và fetchBanhXeOptions với màu đầu tiên
+          await fetchNoiThatOptions(id as string, colorsResponse.data[0].id);
+          await fetchBanhXeOptions(id as string, colorsResponse.data[0].id);
         }
 
         // Fetch similar car models
@@ -394,6 +496,18 @@ const ProductDetail: React.FC = () => {
       handleNoiThatSelect(selectedNoiThat, selectedColor.id);
     }
   }, [selectedColor]);
+
+  // Sửa lại useEffect cho bánh xe - chỉ trigger khi màu thay đổi, không trigger khi selectedBanhXe thay đổi
+  useEffect(() => {
+    if (selectedColor && selectedBanhXe) {
+      console.log('useEffect: Loading wheel for color change', {
+        color: selectedColor.ten,
+        wheel: selectedBanhXe.ten
+      });
+      // Chỉ gọi khi màu thay đổi, không gọi khi bánh xe thay đổi
+      handleBanhXeSelect(selectedBanhXe, selectedColor.id);
+    }
+  }, [selectedColor]); // Chỉ dependency vào selectedColor
 
   useEffect(() => {
     const loadImagesAsBase64 = async () => {
@@ -476,6 +590,10 @@ const ProductDetail: React.FC = () => {
     if (imagePath.startsWith('http')) {
       console.log('Using direct URL:', imagePath);
       return imagePath;
+    } else if (imagePath.startsWith('/uploads/')) {
+      // For uploads directory, use the correct static file path
+      console.log('Using uploads URL:', `${BACKEND_URL}${imagePath}`);
+      return `${BACKEND_URL}${imagePath}`;
     } else if (imagePath.startsWith('/')) {
       console.log('Using backend URL with provided path:', `${BACKEND_URL}${imagePath}`);
       return `${BACKEND_URL}${imagePath}`;
@@ -522,6 +640,11 @@ const ProductDetail: React.FC = () => {
     // Add noi that price if selected
     if (selectedNoiThat) {
       total += selectedNoiThat.giaThem;
+    }
+
+    // Add banh xe price if selected
+    if (selectedBanhXe) {
+      total += selectedBanhXe.giaThem;
     }
     
     return total;
@@ -699,7 +822,9 @@ const ProductDetail: React.FC = () => {
       selectedColor: selectedColor?.ten,
       newColor: color.ten,
       currentNoiThat: selectedNoiThat?.ten,
-      noiThatOptions: noiThatOptions.map(opt => opt.ten)
+      noiThatOptions: noiThatOptions.map(opt => opt.ten),
+      currentBanhXe: selectedBanhXe?.ten,
+      banhXeOptions: banhXeOptions.map(opt => opt.ten)
     });
 
     // Start loading state
@@ -710,6 +835,13 @@ const ProductDetail: React.FC = () => {
     setSelectedColor(color);
 
     if (compareMode) setCompareMode(false);
+    
+    // Reset wheel comparison when color changes
+    if (compareWheelMode) {
+      setCompareWheelMode(false);
+      setCompareWheel(null);
+      setCompareWheelImages([]);
+    }
 
     try {
       // 1. Load color-specific images from hinh_anh_xe_theo_mau
@@ -761,6 +893,9 @@ const ProductDetail: React.FC = () => {
         await handleNoiThatSelect(selectedNoiThat, color.id);
       }
 
+      // KHÔNG gọi handleBanhXeSelect ở đây nữa, để useEffect xử lý
+      // useEffect sẽ tự động gọi handleBanhXeSelect khi selectedColor thay đổi
+
     } catch (error) {
       console.error('Error in handleColorSelect:', error);
       // Fallback to default images if color-specific images fail
@@ -771,8 +906,9 @@ const ProductDetail: React.FC = () => {
     }
 
     console.log('Color Select - End', {
-      finalSelectedColor: selectedColor?.ten,
-      finalSelectedNoiThat: selectedNoiThat?.ten
+      finalSelectedColor: color?.ten,
+      finalSelectedNoiThat: selectedNoiThat?.ten,
+      finalSelectedBanhXe: selectedBanhXe?.ten
     });
   };
   
@@ -817,6 +953,9 @@ const ProductDetail: React.FC = () => {
       // Reset image indexes
       setCurrentImageIndex(0);
       setActiveInteriorTab(0);
+
+      // KHÔNG gọi handleBanhXeSelect ở đây nữa, để useEffect xử lý
+      // useEffect sẽ tự động gọi handleBanhXeSelect khi selectedColor thay đổi
   
     } catch (error) {
       console.error('Error in loadColorImages:', error);
@@ -954,6 +1093,132 @@ const ProductDetail: React.FC = () => {
     }
   };
 
+  // Thêm function để handle bánh xe selection
+  const handleBanhXeSelect = async (banhXe: BanhXeOption, colorId?: number) => {
+    const exteriorColorId = colorId || selectedColor?.id;
+    
+    console.log('handleBanhXeSelect called:', {
+      wheel: banhXe?.ten,
+      colorId: exteriorColorId,
+      currentSelectedBanhXe: selectedBanhXe?.ten
+    });
+    
+    // Only skip if both wheel and color are unchanged
+    if (selectedBanhXe?.id === banhXe.id && exteriorColorId === lastWheelColorId) {
+      console.log('Same wheel and color as last load, skipping');
+      return;
+    }
+
+    // Set previous wheel before changing
+    if (selectedBanhXe) setPreviousWheel(selectedBanhXe);
+
+    // Reset wheel comparison when wheel changes
+    if (compareWheelMode) {
+      setCompareWheelMode(false);
+      setCompareWheel(null);
+      setCompareWheelImages([]);
+    }
+
+    try {
+      // Start fade out transition (same pattern as exterior/interior navigation)
+      setWheelFadeState('fade-out');
+      setWheelSlideDirection('slide-left');
+
+      // Thử fetch ảnh bánh xe đúng với màu ngoại thất hiện tại
+      const specificColorBanhXeUrl = `${BACKEND_URL}/api/v1/mau-xe/${id}/banh-xe/${banhXe.id}/hinh-anh/mau-sac/${exteriorColorId}`;
+      console.log('Fetching wheel images from:', specificColorBanhXeUrl);
+      
+      const specificColorResponse = await axios.get(specificColorBanhXeUrl);
+
+      // Kiểm tra xem response.data có phải là array không
+      if (Array.isArray(specificColorResponse.data)) {
+        const sortByPosition = (a: any, b: any) => {
+          if (!a.viTri) return 1;
+          if (!b.viTri) return -1;
+          return a.viTri - b.viTri;
+        };
+
+        const specificBanhXeImages = specificColorResponse.data
+          .filter((img: any) => img.loaiHinh === 'banh_xe')
+          .sort(sortByPosition)
+          .map((img: any) => ({
+            id: img.id,
+            idMauXe: img.idMau,
+            duongDanAnh: img.duongDanAnh,
+            loaiHinh: img.loaiHinh,
+            viTri: img.viTri
+          }));
+
+        if (specificBanhXeImages.length > 0) {
+          console.log('Found specific color wheel images:', specificBanhXeImages.length);
+          // Use setTimeout to create smooth transition (same as exterior/interior)
+          setTimeout(() => {
+            setBanhXeImages(removeDuplicateImages(specificBanhXeImages));
+            setSelectedBanhXe(banhXe);
+            setBanhXeError(null);
+            if (exteriorColorId) setLastWheelColorId(exteriorColorId);
+            setWheelFadeState('fade-in');
+            setActiveWheelTab(0); // Reset to first image
+          }, 280);
+          return;
+        }
+      } else {
+        console.log('specificColorResponse.data is not an array:', specificColorResponse.data);
+      }
+
+      // Fallback về ảnh mặc định của bánh xe này
+      const defaultBanhXeUrl = `${BACKEND_URL}/api/v1/mau-xe/${id}/banh-xe/${banhXe.id}/hinh-anh`;
+      console.log('Fetching default wheel images from:', defaultBanhXeUrl);
+      
+      const defaultBanhXeResponse = await axios.get(defaultBanhXeUrl);
+      
+      // Kiểm tra xem response.data có phải là array không
+      if (Array.isArray(defaultBanhXeResponse.data)) {
+        const sortByPosition = (a: any, b: any) => {
+          if (!a.viTri) return 1;
+          if (!b.viTri) return -1;
+          return a.viTri - b.viTri;
+        };
+
+        const defaultBanhXeImages = defaultBanhXeResponse.data
+          .filter((img: any) => img.loaiHinh === 'banh_xe')
+          .sort(sortByPosition)
+          .map((img: any) => ({
+            id: img.id,
+            idMauXe: img.idMau,
+            duongDanAnh: img.duongDanAnh,
+            loaiHinh: img.loaiHinh,
+            viTri: img.viTri
+          }));
+
+        if (defaultBanhXeImages.length > 0) {
+          console.log('Found default wheel images:', defaultBanhXeImages.length);
+          // Use setTimeout to create smooth transition (same as exterior/interior)
+          setTimeout(() => {
+            setBanhXeImages(removeDuplicateImages(defaultBanhXeImages));
+            setSelectedBanhXe(banhXe);
+            setBanhXeError(null);
+            if (exteriorColorId) setLastWheelColorId(exteriorColorId);
+            setWheelFadeState('fade-in');
+            setActiveWheelTab(0); // Reset to first image
+          }, 280);
+          return;
+        }
+      } else {
+        console.log('defaultBanhXeResponse.data is not an array:', defaultBanhXeResponse.data);
+      }
+
+      setBanhXeError(`Mẫu xe này không hỗ trợ bánh xe "${banhXe.ten}". Vui lòng chọn tùy chọn khác.`);
+    } catch (error) {
+      console.error('Error in handleBanhXeSelect:', error);
+      // Log thêm thông tin để debug
+      if (error && typeof error === 'object' && 'response' in error) {
+        console.log('Error response:', (error as any).response.data);
+        console.log('Error status:', (error as any).response.status);
+      }
+    }
+  };
+
   // Handler to reset to default color
   // Modify the resetToDefaultColor function
 const resetToDefaultColor = async () => {
@@ -962,6 +1227,7 @@ const resetToDefaultColor = async () => {
     try {
       await handleColorSelect(defaultColor);
       await fetchNoiThatOptions(id as string, defaultColor.id);
+      await fetchBanhXeOptions(id as string, defaultColor.id);
       if (compareMode) {
         setCompareMode(false);
       }
@@ -1002,6 +1268,156 @@ const resetToDefaultColor = async () => {
     }
     
     return Math.max(0, discountedPrice);
+  };
+
+  // Update handleCompareWheel to ensure same color for both sides
+  const handleCompareWheel = async (wheel: BanhXeOption) => {
+    // If already comparing with this wheel, turn off comparison
+    if (compareWheelMode && compareWheel?.id === wheel.id) {
+      setCompareWheelMode(false);
+      setCompareWheel(null);
+      setCompareWheelImages([]);
+      return;
+    }
+    
+    setCompareWheel(wheel);
+    setCompareWheelMode(true);
+    setWheelSliderPosition(50);
+    
+    try {
+      // Load wheel images for the same exterior color (current selected color)
+      const currentColorId = selectedColor?.id;
+      if (!currentColorId) {
+        console.error('No exterior color selected for wheel comparison');
+        return;
+      }
+      
+      const response = await axios.get(
+        `${BACKEND_URL}/api/v1/mau-xe/${id}/banh-xe/${wheel.id}/hinh-anh/mau-sac/${currentColorId}`
+      );
+      
+      const sortByPosition = (a: HinhAnhXe, b: HinhAnhXe) => {
+        if (!a.viTri) return 1;
+        if (!b.viTri) return -1;
+        return a.viTri - b.viTri;
+      };
+      
+      const wheelImages = response.data
+        .filter((img: HinhAnhXe) => img.loaiHinh === 'banh_xe')
+        .sort(sortByPosition);
+        
+      setCompareWheelImages(wheelImages);
+      
+    } catch (error) {
+      console.error("Failed to fetch comparison wheel images:", error);
+      setCompareWheelImages([]);
+    }
+  };
+
+  // Update toggleCompareWheelMode to use same color
+  const toggleCompareWheelMode = async () => {
+    if (compareWheelMode) {
+      setCompareWheelMode(false);
+      return;
+    }
+    
+    if (!previousWheel || !selectedBanhXe) {
+      return;
+    }
+    
+    setCompareWheelMode(true);
+    setCompareWheel(previousWheel);
+    setWheelSliderPosition(50);
+    
+    try {
+      // Load previous wheel images with same color (current selected color)
+      const currentColorId = selectedColor?.id;
+      if (!currentColorId) {
+        console.error('No exterior color selected for wheel comparison');
+        return;
+      }
+      
+      const response = await axios.get(
+        `${BACKEND_URL}/api/v1/mau-xe/${id}/banh-xe/${previousWheel.id}/hinh-anh/mau-sac/${currentColorId}`
+      );
+      
+      const sortByPosition = (a: HinhAnhXe, b: HinhAnhXe) => {
+        if (!a.viTri) return 1;
+        if (!b.viTri) return -1;
+        return a.viTri - b.viTri;
+      };
+      
+      const wheelImages = response.data
+        .filter((img: HinhAnhXe) => img.loaiHinh === 'banh_xe')
+        .sort(sortByPosition);
+        
+      setCompareWheelImages(wheelImages);
+      
+    } catch (error) {
+      console.error("Failed to fetch comparison wheel images:", error);
+      setCompareWheelImages([]);
+    }
+  };
+
+  // Add wheel drag handlers
+  const handleWheelDragStart = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDraggingWheel(true);
+  };
+
+  const handleWheelDrag = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDraggingWheel) return;
+    
+    const container = e.currentTarget.getBoundingClientRect();
+    const position = ((e.clientX - container.left) / container.width) * 100;
+    
+    const clampedPosition = Math.max(5, Math.min(95, position));
+    setWheelSliderPosition(clampedPosition);
+  };
+
+  const handleWheelDragEnd = () => {
+    setIsDraggingWheel(false);
+  };
+
+  // Update useEffect for wheel drag
+  useEffect(() => {
+    const handleMouseUp = () => {
+      if (isDraggingWheel) {
+        setIsDraggingWheel(false);
+      }
+    };
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDraggingWheel && compareWheelMode) {
+        const container = document.querySelector('.wheel-slide-container_details')?.getBoundingClientRect();
+        if (container) {
+          const position = ((e.clientX - container.left) / container.width) * 100;
+          const clampedPosition = Math.max(5, Math.min(95, position));
+          setWheelSliderPosition(clampedPosition);
+        }
+      }
+    };
+    
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousemove', handleMouseMove);
+    
+    return () => {
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [isDraggingWheel, compareWheelMode]);
+
+  // Add reset to default wheel function
+  const resetToDefaultWheel = async () => {
+    if (defaultWheel) {
+      try {
+        await handleBanhXeSelect(defaultWheel, selectedColor?.id);
+        if (compareWheelMode) {
+          setCompareWheelMode(false);
+        }
+      } catch (error) {
+        console.error('Error resetting to default wheel:', error);
+      }
+    }
   };
 
   if (isLoading) {
@@ -1301,7 +1717,223 @@ const resetToDefaultColor = async () => {
           </div>
         </div>
       </section>
+      <section className="fullwidth-section_details">
+        <div className="container_details">
+          <div className="section-header_details">
+            <h2>Bánh xe</h2>
+          </div>
+        </div>
+        <div className="fullwidth-image-container_details">
+          {banhXeImages.length > 0 ? (
+            <div className="image-carousel_details">
+              <button 
+                className="carousel-nav_details prev" 
+                onClick={prevWheelImage}
+                disabled={banhXeImages.length <= 1}
+              >
+                ◀
+              </button>
+              
+              <div className="image-slideshow_details">
+                <div className="slide-container_details">
+                  <div className={`slide_details ${wheelFadeState || ''} ${wheelSlideDirection || ''}`}>
+                    {/* Wheel comparison button overlay - positioned like exterior */}
+                    {showCompareWheelButton && previousWheel && selectedBanhXe && (
+                      <button 
+                        className={`compare-button-overlay ${compareWheelMode ? 'active' : ''}`}
+                        onClick={toggleCompareWheelMode}
+                        title={compareWheelMode ? "Hủy so sánh" : "So sánh với bánh xe trước"}
+                      >
+                        <span className="compare-label">A|B</span>
+                      </button>
+                    )}
+                    
+                    {compareWheelMode && compareWheel && compareWheelImages.length > 0 ? (
+                      <div 
+                        className="compare-slider-container"
+                        onMouseDown={handleWheelDragStart}
+                        onMouseMove={handleWheelDrag}
+                        onMouseUp={handleWheelDragEnd}
+                      >
+                        {/* Current wheel image - using same color as comparison */}
+                        <div className="compare-original" style={{ zIndex: 1 }}>
+                          <img 
+                            src={imageCache[banhXeImages[activeWheelTab]?.duongDanAnh] || getImageUrl(banhXeImages[activeWheelTab]?.duongDanAnh)} 
+                            alt="Bánh xe hiện tại"
+                            onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
+                            className="premium-image"
+                          />
+                        </div>
+                        
+                        {/* Comparison wheel image with clip-path - using same color */}
+                        <div 
+                          className="compare-overlay" 
+                          style={{ 
+                            clipPath: `inset(0 ${100-wheelSliderPosition}% 0 0)`,
+                            zIndex: 2
+                          }}
+                        >
+                          <img 
+                            src={imageCache[compareWheelImages[activeWheelTab < compareWheelImages.length ? activeWheelTab : 0]?.duongDanAnh] || 
+                                 getImageUrl(compareWheelImages[activeWheelTab < compareWheelImages.length ? activeWheelTab : 0]?.duongDanAnh)} 
+                            alt="Bánh xe so sánh"
+                            onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
+                            className="premium-image"
+                          />
+                        </div>
+                        
+                        {/* Slider handle */}
+                        <div 
+                          className="slider-handle"
+                          style={{ 
+                            left: `${wheelSliderPosition}%`,
+                            cursor: isDraggingWheel ? 'grabbing' : 'grab'
+                          }}
+                        >
+                          <div className="slider-divider"></div>
+                          <div className="slider-button">
+                            <span>◀</span>
+                            <span>▶</span>
+                          </div>
+                        </div>
+                        
+                        {/* Wheel labels */}
+                        <div className="color-labels">
+                          <div className="color-label left">{compareWheel?.ten || 'Previous'}</div>
+                          <div className="color-label right">{selectedBanhXe?.ten || 'Current'}</div>
+                        </div>
+                      </div>
+                    ) : (
+                      <img 
+                        src={imageCache[banhXeImages[activeWheelTab]?.duongDanAnh] || getImageUrl(banhXeImages[activeWheelTab]?.duongDanAnh)} 
+                        alt="Bánh xe"
+                        onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
+                        className="premium-image"
+                      />
+                    )}
+                  </div>
+                </div>
+                
+                <div className="image-counter_details">
+                  {Math.min(activeWheelTab + 1, banhXeImages.length)} / {banhXeImages.length}
+                </div>
+              </div>
+              
+              <button 
+                className="carousel-nav_details next" 
+                onClick={nextWheelImage}
+                disabled={banhXeImages.length <= 1}
+              >
+                ▶
+              </button>
+            </div>
+          ) : (
+            <div className="no-image-placeholder_details">Chọn bánh xe để xem hình ảnh</div>
+          )}
+        </div>
+        <div className="container_details">
+          <div className="section-content_details">
+            <div className="wheels-header">
+              <h3>Bánh xe</h3>
+              {defaultWheel && (
+                <button 
+                  className="reset-color-button"
+                  onClick={resetToDefaultWheel}
+                  disabled={selectedBanhXe?.id === defaultWheel?.id}
+                  title="Quay lại bánh xe mặc định"
+                >
+                  Bánh xe mặc định
+                </button>
+              )}
+            </div>
+            
+            {banhXeError && (
+              <div style={{ color: "red", marginTop: 8, fontWeight: "bold" }}>
+                {banhXeError}
+              </div>
+            )}
 
+            <div className="wheels-swatch-container_details">
+              {/* Render default wheel first */}
+              {defaultWheel && (
+                <div
+                  key={defaultWheel.id}
+                  className={`wheels-option ${selectedBanhXe?.id === defaultWheel.id ? 'selected' : ''} ${compareWheel?.id === defaultWheel.id ? 'comparing' : ''} default-wheel`}
+                >
+                  <button
+                    className={`wheels-swatch_details ${selectedBanhXe?.id === defaultWheel.id ? 'selected' : ''} ${compareWheel?.id === defaultWheel.id ? 'comparing' : ''} default-wheel`}
+                    onClick={() => handleBanhXeSelect(defaultWheel, selectedColor?.id)}
+                    title={`${defaultWheel.ten} (Bánh xe mặc định)`}
+                  >
+                    <img 
+                      src={getImageUrl(defaultWheel.duongDanAnh)} 
+                      alt={defaultWheel.ten}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '15px'
+                      }}
+                      onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
+                    />
+                    <span className="default-badge">Mặc định</span>
+                  </button>
+                  <span className="wheels-name">
+                    {defaultWheel.ten}
+                    <span style={{color: '#d5001c', fontWeight: 'bold'}}> (Mặc định)</span>
+                  </span>
+                  {defaultWheel.giaThem > 0 && (
+                    <span className="wheels-price">+{formatPrice(defaultWheel.giaThem)}</span>
+                  )}
+                </div>
+              )}
+              
+              {/* Render remaining wheels */}
+              {banhXeOptions
+                .filter(wheel => wheel.id !== defaultWheel?.id)
+                .map((wheel) => (
+                  <div
+                    key={wheel.id}
+                    className={`wheels-option ${selectedBanhXe?.id === wheel.id ? 'selected' : ''} ${compareWheel?.id === wheel.id ? 'comparing' : ''}`}
+                  >
+                    <button
+                      className={`wheels-swatch_details ${selectedBanhXe?.id === wheel.id ? 'selected' : ''} ${compareWheel?.id === wheel.id ? 'comparing' : ''}`}
+                      onClick={() => handleBanhXeSelect(wheel, selectedColor?.id)}
+                      title={wheel.ten}
+                    >
+                      <img 
+                        src={getImageUrl(wheel.duongDanAnh)} 
+                        alt={wheel.ten}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          borderRadius: '15px'
+                        }}
+                        onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
+                      />
+                    </button>
+                    <span className="wheels-name">{wheel.ten}</span>
+                    {wheel.giaThem > 0 && (
+                      <span className="wheels-price">+{formatPrice(wheel.giaThem)}</span>
+                    )}
+                  </div>
+                ))}
+            </div>
+
+            {selectedBanhXe && (
+              <div className="wheels-details_details">
+                <p><strong>Kích thước:</strong> {selectedBanhXe.kichThuoc}</p>
+                <p><strong>Chất liệu:</strong> {selectedBanhXe.chatLieu}</p>
+                <p><strong>Mô tả:</strong> {selectedBanhXe.moTa}</p>
+                {selectedBanhXe.giaThem > 0 && (
+                  <p><strong>Giá thêm:</strong> {formatPrice(selectedBanhXe.giaThem)}</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
       {/* Updated Interior Section with NoiThat options */}
       <section className="fullwidth-section_details">
         <div className="container_details">
@@ -1436,7 +2068,7 @@ const resetToDefaultColor = async () => {
           </div>
         </div>
       </section>
-      
+
       {/* Chi tiết kỹ thuật section */}
       {thongSoKyThuat && (
         <section className="specs-section_details">
@@ -1476,6 +2108,7 @@ const resetToDefaultColor = async () => {
                 {product.tenMau} 
                 {selectedColor && ` - ${selectedColor.ten}`}
                 {selectedNoiThat && ` + ${selectedNoiThat.ten.split(',')[0]}`}
+                {selectedBanhXe && ` + ${selectedBanhXe.ten}`}
               </h3>
               <p>{formatPrice(calculateTotalPrice())}</p>
             </div>
@@ -1511,6 +2144,9 @@ const resetToDefaultColor = async () => {
           </div>
         </div>
       )}
+
+      {/* Updated Wheels Section with wheel comparison functionality */}
+      
     </div>
   );
 };

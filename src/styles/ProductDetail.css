@@ -1712,3 +1712,340 @@
   to { opacity: 0; }
 }
 
+/* Wheels Section Styles */
+.wheels-section_details {
+  padding: 60px 0;
+  background: #f8f9fa;
+}
+
+.wheels-content_details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.wheels-gallery_details {
+  position: relative;
+}
+
+.wheels-image-container_details {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.wheels-main-image_details {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.wheels-main-image_details:hover {
+  transform: scale(1.05);
+}
+
+.wheels-placeholder_details {
+  width: 100%;
+  height: 400px;
+  background: #e9ecef;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 18px;
+}
+
+.wheels-options_details {
+  padding: 20px;
+}
+
+.wheels-info_details h3 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.wheels-options-container_details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.wheels-option_details {
+  transition: all 0.3s ease;
+}
+
+.wheels-option_details:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.wheels-option_details.selected {
+  border-color: #d5001c !important;
+  box-shadow: 0 0 0 2px rgba(213, 0, 28, 0.2);
+}
+
+.wheels-details_details {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.wheels-details_details p {
+  margin: 8px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.wheels-details_details strong {
+  color: #333;
+  font-weight: 600;
+}
+
+/* Responsive Design for Wheels Section */
+@media (max-width: 768px) {
+  .wheels-content_details {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .wheels-main-image_details {
+    height: 300px;
+  }
+
+  .wheels-placeholder_details {
+    height: 300px;
+  }
+
+  .wheels-options-container_details {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+  }
+
+  .wheels-option_details {
+    width: 100px !important;
+    height: 100px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .wheels-section_details {
+    padding: 40px 0;
+  }
+
+  .wheels-info_details h3 {
+    font-size: 20px;
+  }
+
+  .wheels-options-container_details {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Wheel selection styles matching exterior color selection */
+.wheels-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.wheels-swatch-container_details {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.wheels-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.wheels-option:hover {
+  transform: translateY(-2px);
+}
+
+.wheels-option.selected {
+  transform: scale(1.05);
+}
+
+/* Update wheel image styles to remove white border and background */
+.wheels-swatch_details {
+  width: 120px;
+  height: 120px;
+  border: 2px solid transparent; /* Remove white border */
+  border-radius: 15px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  background: transparent; /* Remove white background */
+}
+
+.wheels-swatch_details:hover {
+  border-color: #d5001c;
+  transform: scale(1.05);
+}
+
+.wheels-swatch_details.selected {
+  border-color: #d5001c;
+  box-shadow: 0 4px 12px rgba(213, 0, 28, 0.3);
+}
+
+.wheels-swatch_details.comparing {
+  border-color: #ffd700;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.wheels-swatch_details.default-wheel {
+  border-color: #d5001c;
+}
+
+/* Update wheel image container to remove any white backgrounds */
+.wheels-swatch_details img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 13px; /* Slightly smaller than container to avoid border overlap */
+  background: transparent;
+}
+
+/* Update wheel option container to remove any white backgrounds */
+.wheels-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: transparent;
+}
+
+/* Update wheel name and price colors to work better on dark background */
+.wheels-option .wheels-name {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff; /* Change to white for dark background */
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wheels-option .wheels-price {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #d5001c;
+  font-weight: 600;
+}
+
+/* Update default wheel badge to work on dark background */
+.default-wheel .wheels-swatch_details {
+  border-color: #d5001c;
+  background: transparent;
+}
+
+.default-badge {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #d5001c; /* Change to Audi red */
+  color: #fff; /* White text */
+  font-size: 9px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  letter-spacing: 0.5px;
+}
+
+/* Responsive design for wheels */
+@media (max-width: 768px) {
+  .wheels-swatch-container_details {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+  }
+  
+  .wheels-swatch_details {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .wheels-option .wheels-name {
+    font-size: 11px;
+    max-width: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wheels-swatch-container_details {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+  }
+  
+  .wheels-swatch_details {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .wheels-option .wheels-name {
+    font-size: 10px;
+    max-width: 80px;
+  }
+}
+
+/* Add wheel comparison button styles */
+.wheels-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: transparent;
+}
+
+.wheels-option .compare-button {
+  margin-top: 5px;
+  padding: 4px 8px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.wheels-option .compare-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  opacity: 1;
+}
+
+.wheels-option.comparing .wheels-swatch_details {
+  border-color: #ffd700;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+/* Update wheel option to show comparison state */
+.wheels-option.comparing .compare-button {
+  background-color: rgba(255, 215, 0, 0.3);
+  border-color: #ffd700;
+  color: #ffd700;
+}
+

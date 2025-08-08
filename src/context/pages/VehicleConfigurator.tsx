@@ -505,7 +505,7 @@ const VehicleConfigurator: React.FC = () => {
   }
 
   return (
-    <div className="vehicle-configurator">
+    <div className="force-light vehicle-configurator">
       <div className="configurator-header">
         <Title level={2}>
           <CarOutlined /> Cấu hình xe {mauXe.tenMau}

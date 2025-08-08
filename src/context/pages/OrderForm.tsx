@@ -397,7 +397,7 @@ const OrderForm: React.FC = () => {
   }
 
   return (
-    <div className="order-form">
+    <div className="force-light order-form">
       <div className="order-header">
         <Title level={2}>
           <ShoppingCartOutlined /> Đặt hàng xe {cauHinh.tenMau}
