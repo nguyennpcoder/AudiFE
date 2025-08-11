@@ -1,50 +1,232 @@
 .quotation-detail {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 24px;
-  background: #fff;
+  padding: 0;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
   min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.quotation-detail::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(213, 0, 28, 0.03) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .quotation-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 32px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 50px;
+  padding: 40px 60px 30px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.quotation-header::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(213, 0, 28, 0.5) 50%, transparent 100%);
 }
 
 .header-content {
   flex: 1;
 }
 
+.header-content h2 {
+  color: #ffffff !important;
+  font-size: 2.5rem;
+  font-weight: 200;
+  margin: 0 0 10px;
+  background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.01em;
+}
+
+.header-content .ant-typography {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
 .header-actions {
-  margin-left: 24px;
+  margin-left: 30px;
+}
+
+.header-actions .ant-btn {
+  min-height: 40px;
+  border-radius: 25px;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  margin: 0 4px;
+}
+
+.header-actions .ant-btn:not(.ant-btn-primary) {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.header-actions .ant-btn-primary {
+  background: linear-gradient(135deg, #d5001c 0%, #b8001a 100%);
+  border: none;
+  box-shadow: 0 8px 25px rgba(213, 0, 28, 0.3);
+}
+
+.header-actions .ant-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.header-actions .ant-btn-primary:hover {
+  background: linear-gradient(135deg, #e6001f 0%, #d5001c 100%);
+  box-shadow: 0 15px 35px rgba(213, 0, 28, 0.4);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.header-actions .ant-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.header-actions .ant-btn:hover::before {
+  left: 100%;
 }
 
 .config-card,
 .price-card,
 .action-card,
 .history-card {
-  margin-bottom: 24px;
+  margin-bottom: 30px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.6s ease both;
+}
+
+.config-card::before,
+.price-card::before,
+.action-card::before,
+.history-card::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: linear-gradient(45deg, rgba(213, 0, 28, 0.1), transparent, rgba(213, 0, 28, 0.1));
+  border-radius: 21px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.config-card:hover::before,
+.price-card:hover::before,
+.action-card:hover::before,
+.history-card:hover::before {
+  opacity: 0.3;
+}
+
+.config-card .ant-card-head,
+.price-card .ant-card-head,
+.action-card .ant-card-head,
+.history-card .ant-card-head {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.config-card .ant-card-head-title,
+.price-card .ant-card-head-title,
+.action-card .ant-card-head-title,
+.history-card .ant-card-head-title {
+  color: #ffffff !important;
+  font-size: 1.4rem;
+  font-weight: 300;
+}
+
+.config-card .ant-card-body,
+.price-card .ant-card-body,
+.action-card .ant-card-body,
+.history-card .ant-card-body {
+  background: transparent !important;
+  padding: 30px !important;
 }
 
 .option-item {
-  border: 1px solid #d9d9d9;
-  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
+  backdrop-filter: blur(15px);
+  border-radius: 12px !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.option-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(213, 0, 28, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.option-item:hover::before {
+  left: 100%;
 }
 
 .option-item:hover {
-  border-color: #1890ff;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+  border-color: #d5001c !important;
+  box-shadow: 0 8px 25px rgba(213, 0, 28, 0.2);
+  transform: translateY(-3px);
 }
 
 .option-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.option-item .ant-typography {
+  color: #ffffff !important;
+}
+
+.option-item .ant-tag {
+  background: linear-gradient(135deg, rgba(213, 0, 28, 0.2) 0%, rgba(213, 0, 28, 0.1) 100%) !important;
+  border: 1px solid rgba(213, 0, 28, 0.3) !important;
+  color: #ffffff !important;
 }
 
 .option-price {
@@ -55,34 +237,103 @@
 .price-breakdown {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  padding: 25px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.05) 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .price-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
+  padding: 12px 0;
+  animation: fadeInUp 0.5s ease both;
+}
+
+.price-item .ant-typography {
+  color: #ffffff !important;
+  font-size: 1rem;
 }
 
 .price-item.discount {
-  color: #52c41a;
+  color: #52c41a !important;
+}
+
+.price-item.discount .ant-typography {
+  color: #52c41a !important;
 }
 
 .price-item.total {
-  border-top: 2px solid #d9d9d9;
-  padding-top: 16px;
-  margin-top: 16px;
-  font-size: 18px;
+  border-top: 2px solid rgba(213, 0, 28, 0.3);
+  padding-top: 20px;
+  margin-top: 20px;
+  font-size: 1.3rem;
+  position: relative;
+}
+
+.price-item.total::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #d5001c 0%, transparent 100%);
+}
+
+.price-item.total .ant-typography {
+  color: #d5001c !important;
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(213, 0, 28, 0.3);
 }
 
 .final-price {
-  color: #1890ff;
-  font-size: 20px;
+  color: #d5001c !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 15px rgba(213, 0, 28, 0.4) !important;
+  animation: priceGlow 2s ease-in-out infinite;
+}
+
+@keyframes priceGlow {
+  0%, 100% {
+    text-shadow: 0 0 15px rgba(213, 0, 28, 0.4);
+  }
+  50% {
+    text-shadow: 0 0 25px rgba(213, 0, 28, 0.6), 0 0 35px rgba(213, 0, 28, 0.3);
+  }
 }
 
 .color-preview {
-  border: 1px solid #d9d9d9;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(10px);
+}
+
+/* Descriptions styling */
+.config-card .ant-descriptions-item-label {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 500;
+}
+
+.config-card .ant-descriptions-item-content {
+  color: #ffffff !important;
+}
+
+.config-card .ant-descriptions-bordered .ant-descriptions-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.config-card .ant-descriptions-bordered .ant-descriptions-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.config-card .ant-descriptions-bordered .ant-descriptions-view {
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 /* Loading and error states */
@@ -94,6 +345,34 @@
   justify-content: center;
   height: 400px;
   gap: 16px;
+  background: radial-gradient(circle at center, rgba(213, 0, 28, 0.05) 0%, transparent 70%);
+  color: #fff;
+  position: relative;
+}
+
+.loading-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.02) 0%, transparent 70%);
+  animation: breathe 3s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.loading-container .ant-spin .ant-spin-dot {
+  color: #d5001c;
+}
+
+.loading-container .ant-typography,
+.error-container .ant-typography {
+  color: #ffffff !important;
 }
 
 /* Print styles */
@@ -116,15 +395,82 @@
   }
 }
 
+/* Main content area styling */
+.quotation-detail .ant-row {
+  padding: 0 60px 60px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Action card buttons styling */
+.action-card .ant-btn {
+  height: 45px;
+  border-radius: 25px;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.action-card .ant-btn-primary {
+  background: linear-gradient(135deg, #d5001c 0%, #b8001a 100%);
+  border: none;
+  box-shadow: 0 8px 25px rgba(213, 0, 28, 0.3);
+}
+
+.action-card .ant-btn:not(.ant-btn-primary) {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.action-card .ant-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.action-card .ant-btn-primary:hover {
+  background: linear-gradient(135deg, #e6001f 0%, #d5001c 100%);
+  box-shadow: 0 15px 35px rgba(213, 0, 28, 0.4);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.action-card .ant-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.action-card .ant-btn:hover::before {
+  left: 100%;
+}
+
+/* History card styling */
+.history-card .ant-timeline {
+  color: #ffffff;
+}
+
+.history-card .ant-timeline-item-content {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .quotation-detail {
-    padding: 16px;
+    padding: 20px;
   }
   
   .quotation-header {
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
+    padding: 30px 20px;
   }
   
   .header-actions {
@@ -134,6 +480,18 @@
   .header-actions .ant-space {
     width: 100%;
     justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .quotation-detail .ant-row {
+    padding: 0 20px 40px;
+  }
+  
+  .config-card .ant-card-body,
+  .price-card .ant-card-body,
+  .action-card .ant-card-body,
+  .history-card .ant-card-body {
+    padding: 20px !important;
   }
 }
 

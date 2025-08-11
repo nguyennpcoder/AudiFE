@@ -44,6 +44,28 @@ interface HinhAnhXe {
   loaiHinh: string;
 }
 
+// Thêm interface cho BanhXe
+interface BanhXe {
+  id: number;
+  ten: string;
+  moTa: string;
+  kichThuoc: string;
+  chatLieu: string;
+  giaThem: number;
+  duongDanAnh: string;
+}
+
+// Thêm interface cho HinhAnhTheoBanhXe
+interface HinhAnhTheoBanhXe {
+  id: number;
+  idMau: number;
+  idBanhXe: number;
+  idMauSac?: number;
+  duongDanAnh: string;
+  loaiHinh: string;
+  viTri: number;
+}
+
 // Khai báo kiểu dữ liệu cho màn hình
 interface ProductsScreenState {
   dongXeList: DongXe[];
@@ -68,6 +90,11 @@ interface ProductsScreenState {
   currentDongXe: DongXe | null;
   newDongXe: DongXe;
   productImages: any[];
+  banhXeList: BanhXe[];
+  banhXeImages: HinhAnhTheoBanhXe[];
+  showBanhXeModal: boolean;
+  selectedBanhXe: BanhXe | null;
+  newBanhXeImage: HinhAnhTheoBanhXe;
 }
 
 // Khai báo hằng số URL từ biến môi trường
@@ -119,6 +146,19 @@ const ProductManagement: React.FC = () => {
       duongDanAnh: '',
     },
     productImages: [],
+    banhXeList: [],
+    banhXeImages: [],
+    showBanhXeModal: false,
+    selectedBanhXe: null,
+    newBanhXeImage: {
+      id: 0,
+      idMau: 0,
+      idBanhXe: 0,
+      idMauSac: undefined,
+      duongDanAnh: '',
+      loaiHinh: 'banh_xe',
+      viTri: 0,
+    },
   });
   
   // Add a new state for tracking newly added images at the top of your component, near other state declarations
@@ -155,6 +195,7 @@ const ProductManagement: React.FC = () => {
     checkServerConnection();
     fetchCarSeries();
     fetchCarModels();
+    fetchBanhXe(); // Thêm fetch bánh xe
   }, []);
 
   // API call để lấy danh sách dòng xe
@@ -538,6 +579,9 @@ const ProductManagement: React.FC = () => {
       
       // Lấy thông tin hình ảnh sản phẩm
       const productImages = await fetchProductImages(product.id);
+      
+      // Lấy hình ảnh bánh xe
+      await fetchBanhXeImages(product.id);
       
       setState(prev => ({ 
         ...prev, 
@@ -1128,6 +1172,292 @@ const ProductManagement: React.FC = () => {
       message.error('Có lỗi xảy ra khi cập nhật trạng thái sản phẩm');
     } finally {
       setState(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  // Lấy danh sách bánh xe từ API
+  const fetchBanhXe = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:8080/api/v1/banh-xe', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Không thể tải danh sách bánh xe: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setState(prev => ({ ...prev, banhXeList: data }));
+    } catch (error) {
+      console.error("Error fetching banh xe:", error);
+    }
+  };
+
+  // Lấy hình ảnh bánh xe theo mẫu xe
+  const fetchBanhXeImages = async (mauXeId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:8080/api/v1/mau-xe/${mauXeId}/banh-xe`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Không thể tải danh sách bánh xe: ${response.status}`);
+      }
+      
+      const banhXeList = await response.json();
+      
+      // Lấy hình ảnh cho từng bánh xe
+      const allImages: HinhAnhTheoBanhXe[] = [];
+      for (const banhXe of banhXeList) {
+        try {
+          const imgResponse = await fetch(`http://localhost:8080/api/v1/mau-xe/${mauXeId}/banh-xe/${banhXe.id}/hinh-anh`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (imgResponse.ok) {
+            const images = await imgResponse.json();
+            allImages.push(...images);
+          }
+        } catch (error) {
+          console.error(`Error fetching images for banh xe ${banhXe.id}:`, error);
+        }
+      }
+      
+      setState(prev => ({ ...prev, banhXeImages: allImages }));
+    } catch (error) {
+      console.error("Error fetching banh xe images:", error);
+    }
+  };
+
+  // Cập nhật useEffect để fetch bánh xe
+  useEffect(() => {
+    checkServerConnection();
+    fetchCarSeries();
+    fetchCarModels();
+    fetchBanhXe(); // Thêm fetch bánh xe
+  }, []);
+
+  // Thêm section hiển thị bánh xe và hình ảnh trong modal edit
+  const renderBanhXeSection = () => {
+    if (!state.currentProduct) return null;
+
+    // Lấy danh sách bánh xe của mẫu xe hiện tại
+    const banhXeOfMauXe = state.banhXeList.filter(banhXe => 
+      state.banhXeImages.some(img => img.idBanhXe === banhXe.id && img.idMau === state.currentProduct!.id)
+    );
+
+    return (
+      <div className="form-group">
+        <label>Bánh xe và hình ảnh</label>
+        <div className="banh-xe-container">
+          {banhXeOfMauXe.length > 0 ? (
+            banhXeOfMauXe.map((banhXe) => {
+              const banhXeImages = state.banhXeImages.filter(
+                img => img.idBanhXe === banhXe.id && img.idMau === state.currentProduct!.id
+              );
+              
+              return (
+                <div key={banhXe.id} className="banh-xe-item">
+                  <div className="banh-xe-header">
+                    <h4>{banhXe.ten}</h4>
+                    <span className="banh-xe-specs">
+                      {banhXe.kichThuoc} - {banhXe.chatLieu}
+                    </span>
+                  </div>
+                  
+                  <div className="banh-xe-images">
+                    {banhXeImages.length > 0 ? (
+                      banhXeImages.map((image, index) => (
+                        <div key={image.id} className="banh-xe-image-item">
+                          <div className="image-wrapper">
+                            {isEditMode && (
+                              <button 
+                                className="image-delete-btn" 
+                                onClick={() => deleteBanhXeImage(image.id, state.currentProduct!.id)}
+                                title="Xóa hình ảnh"
+                              >
+                                <i className="fas fa-times"></i>
+                              </button>
+                            )}
+                            <ImageWithFallback 
+                              src={image.duongDanAnh}
+                              alt={`${banhXe.ten} ${index + 1}`}
+                              fallbackSrc={FALLBACK_IMAGE}
+                              imageType={image.loaiHinh}
+                            />
+                          </div>
+                          <div className="image-type">{image.loaiHinh || 'Unknown'}</div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="no-images">Không có hình ảnh</div>
+                    )}
+                  </div>
+                  
+                  {/* Upload section cho bánh xe */}
+                  {isEditMode && (
+                    <div className="upload-banh-xe-section">
+                      <div style={{ 
+                        display: 'flex', 
+                        gap: 12, 
+                        alignItems: 'center',
+                        marginTop: 16 
+                      }}>
+                        <select
+                          value={selectedImageType}
+                          onChange={(e) => setSelectedImageType(e.target.value)}
+                          style={{
+                            padding: '10px 16px',
+                            borderRadius: 8,
+                            border: '1px solid #e5e7eb',
+                            fontSize: 15,
+                            background: '#fafbfc',
+                            minWidth: 200,
+                          }}
+                        >
+                          <option value="banh_xe">Bánh xe</option>
+                          <option value="chi_tiet">Chi tiết</option>
+                          <option value="thu_nho">Thu nhỏ</option>
+                        </select>
+                        
+                        <input 
+                          type="file" 
+                          id={`banh-xe-upload-${banhXe.id}`} 
+                          accept="image/*" 
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0] && state.currentProduct) {
+                              uploadBanhXeImage(e.target.files[0], state.currentProduct.id, banhXe.id, selectedImageType);
+                            }
+                          }} 
+                          style={{ display: 'none' }}
+                        />
+                        <label htmlFor={`banh-xe-upload-${banhXe.id}`} className="btn-upload" style={{
+                          background: '#52c41a',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: 8,
+                          padding: '8px 16px',
+                          fontWeight: 600,
+                          fontSize: 14,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          boxShadow: '0 2px 8px 0 rgba(82,196,26,0.10)',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          <i className="fas fa-upload"></i> Thêm ảnh
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            <div className="no-banh-xe">
+              <p>Chưa có bánh xe nào được gán cho mẫu xe này</p>
+              {isEditMode && (
+                <button 
+                  className="btn-add-banh-xe"
+                  onClick={() => setState(prev => ({ ...prev, showBanhXeModal: true }))}
+                  style={{
+                    background: '#1890ff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '10px 20px',
+                    fontWeight: 600,
+                    fontSize: 15,
+                    cursor: 'pointer',
+                    marginTop: 12,
+                  }}
+                >
+                  <i className="fas fa-plus"></i> Gán bánh xe
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Upload hình ảnh bánh xe
+  const uploadBanhXeImage = async (file: File, mauXeId: number, banhXeId: number, imageType: string) => {
+    try {
+      setState(prev => ({ ...prev, isLoading: true }));
+      const token = localStorage.getItem('token');
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('idMau', mauXeId.toString());
+      formData.append('idBanhXe', banhXeId.toString());
+      formData.append('loaiHinh', imageType);
+      
+      const response = await fetch(`http://localhost:8080/api/v1/mau-xe/${mauXeId}/banh-xe/${banhXeId}/hinh-anh/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Không thể tải lên hình ảnh bánh xe: ${response.status}`);
+      }
+      
+      // Refresh hình ảnh bánh xe
+      await fetchBanhXeImages(mauXeId);
+      
+      setState(prev => ({ ...prev, isLoading: false }));
+      message.success('Tải lên hình ảnh bánh xe thành công!');
+      
+    } catch (error) {
+      console.error("Error uploading banh xe image:", error);
+      setState(prev => ({ ...prev, isLoading: false }));
+      message.error('Có lỗi xảy ra khi tải lên hình ảnh bánh xe');
+    }
+  };
+
+  // Xóa hình ảnh bánh xe
+  const deleteBanhXeImage = async (imageId: number, mauXeId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`http://localhost:8080/api/v1/mau-xe/${mauXeId}/banh-xe/hinh-anh/${imageId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Không thể xóa hình ảnh bánh xe');
+      }
+      
+      // Refresh hình ảnh bánh xe
+      await fetchBanhXeImages(mauXeId);
+      message.success('Xóa hình ảnh bánh xe thành công!');
+      
+    } catch (error) {
+      console.error("Error deleting banh xe image:", error);
+      message.error('Có lỗi xảy ra khi xóa hình ảnh bánh xe');
     }
   };
 
@@ -2018,6 +2348,9 @@ const ProductManagement: React.FC = () => {
                     <strong>ID:</strong> {state.currentProduct.id}
                   </p>
                 </div>
+                
+                {/* Thêm section bánh xe trước section hình ảnh sản phẩm */}
+                {renderBanhXeSection()}
                 
                 <div className="form-group">
                   <label>Hình ảnh sản phẩm</label>
