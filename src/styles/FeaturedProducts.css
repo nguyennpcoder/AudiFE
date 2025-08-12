@@ -10,75 +10,53 @@
   --font-primary: "Audi Type", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* General Section Styling */
+/* General Section Styling - Giữ màu nền nhưng bỏ hiệu ứng đỏ */
 .featured-products-section {
   padding: 7rem 0 9rem;
   position: relative;
   margin-top: 0;
-  background: linear-gradient(to bottom, rgba(10, 10, 12, 0.95) 0%, rgba(30, 30, 32, 0.85) 40%, var(--audi-light) 100%);
+  background: linear-gradient(135deg, #0a0a0a 0%, #0f0f0f 100%);
 }
 
-/* Create full-width top noise texture that fades into background */
-.featured-products-section::before {
+/* Xóa hiệu ứng shimmer đỏ */
+/* .featured-products-section::before {
   content: '';
   position: absolute;
-  top: -100px; /* Extend well above the section */
-  left: 0;
-  right: 0;
-  width: 100%;
-  height: 500px; /* Make it much taller to ensure full coverage */
-  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  opacity: 0.15;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(213, 0, 28, 0.5) 50%, transparent 100%);
+  animation: shimmer 3s ease-in-out infinite;
   z-index: 0;
   pointer-events: none;
-  mix-blend-mode: luminosity;
-}
+} */
 
-/* Asymmetric random cloud-like black gradient at top */
+/* Giữ hiệu ứng radial gradient nhẹ */
 .featured-products-section::after {
   content: '';
   position: absolute;
-  top: -80px; /* Start above section */
+  top: 0;
   left: 0;
   right: 0;
-  height: 180px;
-  background: 
-    radial-gradient(circle at 20% 0%, rgba(0, 0, 0, 0.95) 0%, transparent 70%),
-    radial-gradient(circle at 50% 0%, rgba(0, 0, 0, 0.9) 0%, transparent 65%),
-    radial-gradient(circle at 80% 0%, rgba(0, 0, 0, 0.95) 0%, transparent 70%),
-    radial-gradient(ellipse at 40% 0%, rgba(0, 0, 0, 0.85) 0%, transparent 75%);
-  opacity: 0.9;
-  z-index: 0;
-  pointer-events: none;
-  filter: blur(15px);
-}
-
-/* Additional overlay to smooth the transition */
-.featured-products-section .top-overlay {
-  content: '';
-  position: absolute;
-  top: -1px; /* Overlap with the header by 1px to eliminate line */
-  left: 0;
-  right: 0;
-  height: 120px;
-  background: linear-gradient(to bottom, var(--audi-dark) 0%, rgba(0, 0, 0, 0.8) 40%, transparent 100%);
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* Dark gradient overlay at the bottom */
-.featured-products-section .dark-bottom-overlay {
-  content: '';
-  position: absolute;
   bottom: 0;
-  left: 0;
-  right: 0;
-  height: 400px;
-  background-image: linear-gradient(to top, rgba(10, 10, 12, 0.95) 0%, rgba(10, 10, 12, 0.3) 80%, transparent 100%);
-  opacity: 0.8;
-  z-index: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(213, 0, 28, 0.03) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
   pointer-events: none;
+  z-index: 0;
 }
+
+/* Xóa animation shimmer */
+/* @keyframes shimmer {
+  0%, 100% { transform: translateX(-100%); opacity: 0; }
+  50% { transform: translateX(0%); opacity: 1; }
+} */
+
+/* Xóa các overlay cũ không cần thiết */
+/* .featured-products-section .top-overlay,
+.featured-products-section .dark-bottom-overlay {
+  display: none;
+} */
 
 .container {
   max-width: 1300px;
@@ -98,31 +76,35 @@
 .section-header h2 {
   font-size: 2.75rem;
   font-weight: 300;
-  margin-bottom: 1.2rem;
   color: var(--audi-light);
-  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
   position: relative;
-  display: inline-block;
 }
 
-.section-header h2:after {
+/* Xóa đường kẻ đỏ dưới tiêu đề */
+/* .section-header h2::after {
   content: '';
   position: absolute;
-  bottom: -0.8rem;
-  left: 50%;
-  width: 40px;
+  bottom: -15px;
+  left: 0;
+  width: 60px;
   height: 2px;
-  background-color: var(--audi-red);
-  transform: translateX(-50%);
-}
+  background: linear-gradient(90deg, #d5001c 0%, transparent 100%);
+  animation: expandLine 0.8s ease-out 0.5s both;
+} */
+
+/* Xóa animation expandLine */
+/* @keyframes expandLine {
+  from { width: 0; }
+  to { width: 60px; }
+} */
 
 .section-header p {
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.7);
-  max-width: 700px;
-  margin: 1rem auto 0;
+  color: #cccccc;
+  max-width: 600px;
+  margin: 0 auto;
   line-height: 1.6;
-  font-weight: 300;
 }
 
 /* Filter Styling */
