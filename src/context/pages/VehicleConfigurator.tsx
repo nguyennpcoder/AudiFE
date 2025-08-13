@@ -52,8 +52,10 @@ interface NoiThat {
   id: number;
   ten: string;
   moTa: string;
-  gia: number;
+  giaThem: number; // Thay đổi từ gia thành giaThem
   duongDanAnh: string;
+  laMacDinh?: boolean; // Thêm field này
+  mauSac?: string; // Thêm field này
 }
 
 interface CauHinhTuyChinh {
@@ -123,25 +125,36 @@ const VehicleConfigurator: React.FC = () => {
       const mauXeResponse = await axios.get(`${BACKEND_URL}/mau-xe/${id}`);
       setMauXe(mauXeResponse.data);
       
-      // Load màu sắc cho mẫu xe cụ thể
+      // Load màu sắc cho mẫu xe cụ thể - BỎ /api/v1
       const mauSacResponse = await axios.get(`${BACKEND_URL}/mau-sac/mau-xe/${id}`);
-      console.log('Màu sắc loaded:', mauSacResponse.data); // Debug log
+      console.log('Màu sắc loaded:', mauSacResponse.data);
       setDanhSachMauSac(mauSacResponse.data);
       
-      // Load tùy chọn
+      // Load tùy chọn - BỎ /api/v1
       const tuyChonResponse = await axios.get(`${BACKEND_URL}/tuy-chon`);
+      console.log('Tùy chọn loaded:', tuyChonResponse.data);
       setDanhSachTuyChon(tuyChonResponse.data);
       
-      // Load nội thất
-      const noiThatResponse = await axios.get(`${BACKEND_URL}/noi-that`);
-      setDanhSachNoiThat(noiThatResponse.data);
+      // Load nội thất - BỎ /api/v1
+      try {
+        const noiThatResponse = await axios.get(`${BACKEND_URL}/noi-that/mau-xe/${id}`);
+        console.log('Nội thất loaded:', noiThatResponse.data);
+        setDanhSachNoiThat(noiThatResponse.data);
+      } catch (noiThatError: any) {
+        console.error('Lỗi khi load nội thất:', noiThatError);
+        setDanhSachNoiThat([]);
+      }
       
-      // Set màu sắc đầu tiên làm mặc định
+      // Set màu sắc đầu tiên làm mặc định và load hình ảnh
       if (mauSacResponse.data.length > 0) {
+        const defaultColor = mauSacResponse.data[0];
         setCauHinhHienTai(prev => ({
           ...prev,
-          idMauSac: mauSacResponse.data[0].id
+          idMauSac: defaultColor.id
         }));
+        
+        // Load hình ảnh cho màu mặc định
+        await loadColorImages(defaultColor.id);
       }
       
     } catch (error) {
@@ -152,7 +165,45 @@ const VehicleConfigurator: React.FC = () => {
     }
   };
 
-  // Tính tổng giá
+  // Load hình ảnh theo màu sắc - BỎ /api/v1
+  const loadColorImages = async (colorId: number) => {
+    try {
+      console.log(`Loading images for color ID: ${colorId}, model ID: ${id}`);
+      
+      // Sử dụng đúng API endpoint - BỎ /api/v1
+      const response = await axios.get(`${BACKEND_URL}/hinh-anh-theo-mau/mau-xe/${id}/mau-sac/${colorId}`);
+      console.log('API Response for color images:', response.data);
+      
+      if (response.data && response.data.length > 0) {
+        // Sắp xếp theo vị trí
+        const sortedImages = response.data.sort((a: HinhAnhXeTheoMauDTO, b: HinhAnhXeTheoMauDTO) => {
+          if (!a.viTri) return 1;
+          if (!b.viTri) return -1;
+          return a.viTri - b.viTri;
+        });
+        
+        setHinhAnhXeTheoMau(prev => ({
+          ...prev,
+          [colorId]: sortedImages
+        }));
+      } else {
+        console.log('No images found for this color');
+        setHinhAnhXeTheoMau(prev => ({
+          ...prev,
+          [colorId]: []
+        }));
+      }
+      
+    } catch (error) {
+      console.error("Lỗi khi tải hình ảnh màu sắc:", error);
+      setHinhAnhXeTheoMau(prev => ({
+        ...prev,
+        [colorId]: []
+      }));
+    }
+  };
+
+  // Tính tổng giá - BỎ /api/v1
   const tinhTongGia = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/cau-hinh/tinh-gia`, {
@@ -201,11 +252,15 @@ const VehicleConfigurator: React.FC = () => {
   }, [cauHinhHienTai.idMauSac, cauHinhHienTai.danhSachIdTuyChon]);
 
   // Xử lý chọn màu sắc
-  const handleChonMauSac = (mauSac: MauSac) => {
+  const handleChonMauSac = async (mauSac: MauSac) => {
+    console.log('Chọn màu sắc:', mauSac);
     setCauHinhHienTai(prev => ({
       ...prev,
       idMauSac: mauSac.id
     }));
+    
+    // Load hình ảnh cho màu sắc mới
+    await loadColorImages(mauSac.id);
   };
 
   // Xử lý chọn tùy chọn
@@ -287,7 +342,17 @@ const VehicleConfigurator: React.FC = () => {
           <Title level={3}>Chọn màu sắc cho xe của bạn</Title>
           <Row gutter={[16, 16]}>
             {danhSachMauSac.map(mauSac => {
-              console.log('Rendering color:', mauSac); // Debug log
+              const colorImages = hinhAnhXeTheoMau[mauSac.id] || [];
+              const exteriorImages = colorImages.filter(img => img.loaiHinh === 'ngoai_that');
+              const mainImage = exteriorImages.length > 0 ? exteriorImages[0] : null;
+              
+              console.log(`Rendering color ${mauSac.ten}:`, {
+                colorId: mauSac.id,
+                totalImages: colorImages.length,
+                exteriorImages: exteriorImages.length,
+                mainImage: mainImage
+              });
+              
               return (
                 <Col xs={24} sm={12} md={8} lg={6} key={mauSac.id}>
                   <Card
@@ -296,27 +361,32 @@ const VehicleConfigurator: React.FC = () => {
                     onClick={() => handleChonMauSac(mauSac)}
                   >
                     <div className="color-preview">
-                      {mauSac.duongDanAnh ? (
+                      {mainImage ? (
                         <img 
-                          src={`${BACKEND_URL}${mauSac.duongDanAnh}`}
+                          // Sử dụng đúng đường dẫn hình ảnh như ProductDetail
+                          src={`${BACKEND_URL.replace('/api/v1', '')}${mainImage.duongDanAnh}`}
                           alt={`${mauSac.ten} - ${mauXe?.tenMau}`}
                           className="color-car-image"
                           onError={(e) => {
-                            console.error('Image failed to load:', `${BACKEND_URL}${mauSac.duongDanAnh}`);
+                            console.error('Image failed to load:', `${BACKEND_URL.replace('/api/v1', '')}${mainImage.duongDanAnh}`);
+                            // Ẩn hình ảnh và hiển thị color swatch
                             e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                            const colorSwatch = e.currentTarget.nextElementSibling;
+                            if (colorSwatch) {
+                              colorSwatch.classList.remove('hidden');
+                            }
                           }}
                         />
                       ) : null}
                       <div 
-                        className={`color-swatch ${mauSac.duongDanAnh ? 'hidden' : ''}`}
+                        className={`color-swatch ${mainImage ? 'hidden' : ''}`}
                         style={{ backgroundColor: mauSac.maHex }}
                       />
                     </div>
                     <div className="color-info">
                       <Text strong>{mauSac.ten}</Text>
-                      <Text type="secondary">
-                        {mauSac.giaThem > 0 ? `+${mauSac.giaThem.toLocaleString('vi-VN')} VNĐ` : '+0 VNĐ'}
+                      <Text type="secondary" className="color-price">
+                        {mauSac.giaThem > 0 ? `+${mauSac.giaThem.toLocaleString('vi-VN')} VNĐ` : 'Miễn phí'}
                       </Text>
                       {mauSac.laMetallic && (
                         <Text type="secondary" className="metallic-badge">
@@ -369,32 +439,61 @@ const VehicleConfigurator: React.FC = () => {
       content: (
         <div className="step-content">
           <Title level={3}>Tùy chỉnh nội thất</Title>
-          <Row gutter={[16, 16]}>
-            {danhSachNoiThat.map(noiThat => (
-              <Col xs={24} sm={12} md={8} key={noiThat.id}>
-                <Card
-                  hoverable
-                  className={`interior-card ${cauHinhHienTai.idNoiThat === noiThat.id ? 'selected' : ''}`}
-                  onClick={() => handleChonNoiThat(noiThat.id)}
-                >
-                  {noiThat.duongDanAnh && (
-                    <img 
-                      src={`${BACKEND_URL}${noiThat.duongDanAnh}`}
-                      alt={noiThat.ten}
-                      className="interior-image"
-                    />
-                  )}
-                  <div className="interior-info">
-                    <Text strong>{noiThat.ten}</Text>
-                    <Text type="secondary">{noiThat.moTa}</Text>
-                    <Text className="interior-price" style={{ color: '#1890ff' }}>
-                      +{noiThat.gia.toLocaleString('vi-VN')} VNĐ
-                    </Text>
-                  </div>
-                </Card>
-              </Col>
-            ))}
-          </Row>
+          
+          {/* Debug info */}
+          <div style={{ marginBottom: '20px', padding: '10px', background: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}>
+            <Text type="secondary">
+              Debug: Đã load {danhSachNoiThat.length} nội thất
+            </Text>
+            <br />
+            <Text type="secondary">
+              Danh sách: {danhSachNoiThat.map(n => n.ten).join(', ')}
+            </Text>
+          </div>
+          
+          {danhSachNoiThat.length > 0 ? (
+            <Row gutter={[16, 16]}>
+              {danhSachNoiThat.map(noiThat => (
+                <Col xs={24} sm={12} md={8} key={noiThat.id}>
+                  <Card
+                    hoverable
+                    className={`interior-card ${cauHinhHienTai.idNoiThat === noiThat.id ? 'selected' : ''}`}
+                    onClick={() => handleChonNoiThat(noiThat.id)}
+                  >
+                    {noiThat.duongDanAnh && (
+                      <img 
+                        src={`${BACKEND_URL.replace('/api/v1', '')}${noiThat.duongDanAnh}`}
+                        alt={noiThat.ten}
+                        className="interior-image"
+                        onError={(e) => {
+                          console.error('Interior image failed to load:', noiThat.duongDanAnh);
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    )}
+                    <div className="interior-info">
+                      <Text strong>{noiThat.ten}</Text>
+                      <Text type="secondary">{noiThat.moTa}</Text>
+                      <Text className="interior-price" style={{ color: '#1890ff' }}>
+                        +{noiThat.giaThem.toLocaleString('vi-VN')} VNĐ
+                      </Text>
+                      {noiThat.laMacDinh && (
+                        <Text type="secondary" className="default-badge">
+                          Mặc định
+                        </Text>
+                      )}
+                    </div>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.6)' }}>
+              <Text>Không có tùy chọn nội thất nào</Text>
+              <br />
+              <Text type="secondary">Vui lòng kiểm tra backend hoặc database</Text>
+            </div>
+          )}
         </div>
       )
     },
@@ -403,84 +502,79 @@ const VehicleConfigurator: React.FC = () => {
       icon: <CheckCircleOutlined />,
       content: (
         <div className="step-content">
-          <Title level={3}>Xem lại cấu hình của bạn</Title>
+          <Title level={3}>Tổng quan cấu hình</Title>
           
-          <Card className="summary-card">
-            <Row gutter={[24, 16]}>
-              <Col xs={24} md={12}>
-                <Title level={4}>Thông tin xe</Title>
-                <Paragraph>
-                  <Text strong>Mẫu xe:</Text> {mauXe?.tenMau}
-                </Paragraph>
-                <Paragraph>
-                  <Text strong>Màu sắc:</Text> {
-                    danhSachMauSac.find(m => m.id === cauHinhHienTai.idMauSac)?.ten
-                  }
-                </Paragraph>
-                <Paragraph>
-                  <Text strong>Nội thất:</Text> {
-                    danhSachNoiThat.find(n => n.id === cauHinhHienTai.idNoiThat)?.ten || 'Chưa chọn'
-                  }
-                </Paragraph>
+          {/* Thông tin xe */}
+          <Card title="Thông tin xe" className="summary-card">
+            <Row gutter={[16, 16]}>
+              <Col span={12}>
+                <Text strong>Mẫu xe:</Text>
+                <Text>{mauXe?.tenMau}</Text>
               </Col>
-              
-              <Col xs={24} md={12}>
-                <Title level={4}>Tùy chọn đã chọn</Title>
-                {cauHinhHienTai.danhSachIdTuyChon.length > 0 ? (
-                  <ul>
-                    {cauHinhHienTai.danhSachIdTuyChon.map(id => {
-                      const tuyChon = danhSachTuyChon.find(t => t.id === id);
-                      return tuyChon ? (
-                        <li key={id}>
-                          {tuyChon.ten} (+{tuyChon.gia.toLocaleString('vi-VN')} VNĐ)
-                        </li>
-                      ) : null;
-                    })}
-                  </ul>
-                ) : (
-                  <Text type="secondary">Chưa chọn tùy chọn nào</Text>
+              <Col span={12}>
+                <Text strong>Màu sắc:</Text>
+                <Text>{danhSachMauSac.find(m => m.id === cauHinhHienTai.idMauSac)?.ten}</Text>
+              </Col>
+            </Row>
+          </Card>
+
+          {/* Tùy chọn đã chọn */}
+          {cauHinhHienTai.danhSachIdTuyChon.length > 0 && (
+            <Card title="Tùy chọn đã chọn" className="summary-card">
+              <Row gutter={[16, 16]}>
+                {cauHinhHienTai.danhSachIdTuyChon.map(tuyChonId => {
+                  const tuyChon = danhSachTuyChon.find(t => t.id === tuyChonId);
+                  return tuyChon ? (
+                    <Col span={24} key={tuyChonId}>
+                      <div className="option-summary">
+                        <Text>{tuyChon.ten}</Text>
+                        <Text className="option-price">+{tuyChon.gia.toLocaleString('vi-VN')} VNĐ</Text>
+                      </div>
+                    </Col>
+                  ) : null;
+                })}
+              </Row>
+            </Card>
+          )}
+
+          {/* Nội thất đã chọn */}
+          {cauHinhHienTai.idNoiThat && (
+            <Card title="Nội thất đã chọn" className="summary-card">
+              <Row gutter={[16, 16]}>
+                <Col span={24}>
+                  <div className="interior-summary">
+                    <Text>{danhSachNoiThat.find(n => n.id === cauHinhHienTai.idNoiThat)?.ten}</Text>
+                    <Text className="interior-price">
+                      +{danhSachNoiThat.find(n => n.id === cauHinhHienTai.idNoiThat)?.giaThem.toLocaleString('vi-VN')} VNĐ
+                    </Text>
+                  </div>
+                </Col>
+              </Row>
+            </Card>
+          )}
+
+          {/* Tổng giá */}
+          <Card title="Tổng giá" className="summary-card">
+            <Row gutter={[16, 16]}>
+              <Col span={24}>
+                <div className="price-summary">
+                  <Text strong>Giá cơ bản:</Text>
+                  <Text>{mauXe?.giaCoban.toLocaleString('vi-VN')} VNĐ</Text>
+                </div>
+                {cauHinhHienTai.tongGia > 0 && (
+                  <div className="price-summary">
+                    <Text strong>Tổng giá sau tùy chỉnh:</Text>
+                    <Text className="total-price">{cauHinhHienTai.tongGia.toLocaleString('vi-VN')} VNĐ</Text>
+                    </div>
+                )}
+                {khuyenMai && (
+                  <div className="price-summary">
+                    <Text strong>Giá sau khuyến mãi:</Text>
+                    <Text className="discount-price">{giaSauKhuyenMai.toLocaleString('vi-VN')} VNĐ</Text>
+                  </div>
                 )}
               </Col>
             </Row>
-            
-            <Divider />
-            
-            <div className="price-summary">
-              <Title level={4}>Tổng giá</Title>
-              <div className="price-breakdown">
-                <div className="price-item">
-                  <Text>Giá cơ bản:</Text>
-                  <Text>{mauXe?.giaCoban.toLocaleString('vi-VN')} VNĐ</Text>
-                </div>
-                <div className="price-item">
-                  <Text>Màu sắc:</Text>
-                  <Text>+{danhSachMauSac.find(m => m.id === cauHinhHienTai.idMauSac)?.giaThem.toLocaleString('vi-VN') || 0} VNĐ</Text>
-                </div>
-                <div className="price-item">
-                  <Text>Tùy chọn:</Text>
-                  <Text>+{cauHinhHienTai.danhSachIdTuyChon.reduce((sum, id) => {
-                    const tuyChon = danhSachTuyChon.find(t => t.id === id);
-                    return sum + (tuyChon?.gia || 0);
-                  }, 0).toLocaleString('vi-VN')} VNĐ</Text>
-                </div>
-                {khuyenMai && (
-                  <div className="price-item discount">
-                    <Text>Khuyến mãi ({khuyenMai.ten}):</Text>
-                    <Text>-{khuyenMai.loaiKhuyenMai === 'PHAN_TRAM' 
-                      ? `${khuyenMai.giaTri}%`
-                      : khuyenMai.giaTri.toLocaleString('vi-VN') + ' VNĐ'
-                    }</Text>
-                  </div>
-                )}
-                <Divider />
-                <div className="price-item total">
-                  <Text strong>Tổng cộng:</Text>
-                  <Text strong>
-                    {giaSauKhuyenMai > 0 ? giaSauKhuyenMai : cauHinhHienTai.tongGia} VNĐ
-                  </Text>
-                </div>
-              </div>
-            </div>
           </Card>
         </div>
       )
@@ -489,64 +583,59 @@ const VehicleConfigurator: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <Spin size="large" />
-        <Text>Đang tải cấu hình xe...</Text>
-      </div>
-    );
-  }
-
-  if (!mauXe) {
-    return (
-      <div className="error-container">
-        <Text type="danger">Không tìm thấy mẫu xe</Text>
+      <div className="vehicle-configurator">
+        <div style={{ textAlign: 'center', padding: '100px 20px' }}>
+          <Spin size="large" />
+          <div style={{ marginTop: '20px', color: '#ffffff' }}>Đang tải cấu hình xe...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="force-light vehicle-configurator">
+    <div className="vehicle-configurator">
+      {/* Header */}
       <div className="configurator-header">
-        <Title level={2}>
-          <CarOutlined /> Cấu hình xe {mauXe.tenMau}
-        </Title>
+        <h2>Cấu hình xe {mauXe?.tenMau}</h2>
         <div className="header-actions">
           <Button 
-            icon={<EyeOutlined />}
+            icon={<EyeOutlined />} 
             onClick={() => setPreviewMode(!previewMode)}
           >
             {previewMode ? 'Chế độ cấu hình' : 'Xem trước'}
           </Button>
           <Button 
-            icon={<SaveOutlined />}
-            loading={saving}
+            icon={<SaveOutlined />} 
             onClick={handleLuuCauHinh}
+            loading={saving}
           >
             Lưu cấu hình
           </Button>
           <Button 
-            type="primary"
-            icon={<ShoppingCartOutlined />}
-            onClick={() => navigate(`/order/${cauHinhHienTai.id}`)}
+            icon={<ShareAltOutlined />} 
+            onClick={handleChiaSe}
           >
-            Đặt hàng ngay
+            Chia sẻ
           </Button>
           <Button 
-            icon={<DownloadOutlined />}
+            icon={<DownloadOutlined />} 
             onClick={handleXuatPDF}
           >
             Xuất PDF
           </Button>
           <Button 
-            icon={<ShareAltOutlined />}
-            onClick={handleChiaSe}
+            type="primary" 
+            icon={<ShoppingCartOutlined />}
+            onClick={() => navigate('/quotation/new', { state: { config: cauHinhHienTai } })}
           >
-            Chia sẻ
+            Đặt hàng ngay
           </Button>
         </div>
       </div>
 
+      {/* Content */}
       <div className="configurator-content">
+        {/* Steps */}
         <div className="steps-container">
           <Steps current={currentStep} onChange={setCurrentStep}>
             {steps.map((step, index) => (
@@ -555,10 +644,12 @@ const VehicleConfigurator: React.FC = () => {
           </Steps>
         </div>
 
-        <div className="step-content-container">
+        {/* Step Content */}
+        <div className="step-content-wrapper">
           {steps[currentStep].content}
         </div>
 
+        {/* Navigation */}
         <div className="step-navigation">
           <Button 
             disabled={currentStep === 0}
@@ -575,22 +666,6 @@ const VehicleConfigurator: React.FC = () => {
           </Button>
         </div>
       </div>
-
-      {previewMode && (
-        <div className="preview-panel">
-          <Title level={4}>Xem trước cấu hình</Title>
-          <div className="preview-content">
-            {/* Ở đây có thể thêm 3D preview hoặc hình ảnh xe với màu đã chọn */}
-            <div className="vehicle-preview">
-              <img 
-                src={mauXe.hinhAnh || '/placeholder-car.jpg'} 
-                alt={mauXe.tenMau}
-                className="preview-image"
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
