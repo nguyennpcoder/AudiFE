@@ -1690,29 +1690,41 @@ const resetToDefaultColor = async () => {
               {/* Render remaining colors */}
               {availableColors
                 .filter(color => color.id !== defaultColor?.id) // Skip default color as it's already rendered
-                .map((color) => (
-                  <div
-                    key={color.id}
-                    className={`color-option ${selectedColor?.id === color.id ? 'selected' : ''} ${compareColor?.id === color.id ? 'comparing' : ''}`}
-                  >
-                    <button
-                      className={`color-swatch_details ${selectedColor?.id === color.id ? 'selected' : ''} ${compareColor?.id === color.id ? 'comparing' : ''}`}
-                      style={{ 
-                        backgroundColor: color.maHex,
-                        backgroundImage: color.duongDanAnh ? `url(${BACKEND_URL}${color.duongDanAnh})` : 'none',
-                        borderRadius: '15px'
-                      }}
-                      onClick={() => handleColorSelect(color)}
-                      title={color.ten}
+                .map((color) => {
+                  // Debug: Log thông tin màu sắc khi render
+                  console.log(`Rendering color ${color.ten}:`, {
+                    id: color.id,
+                    giaThem: color.giaThem,
+                    giaThemType: typeof color.giaThem,
+                    giaThemNumber: Number(color.giaThem),
+                    shouldShowPrice: Number(color.giaThem) > 0,
+                    formattedPrice: formatPrice(color.giaThem)
+                  });
+                  
+                  return (
+                    <div
+                      key={color.id}
+                      className={`color-option ${selectedColor?.id === color.id ? 'selected' : ''} ${compareColor?.id === color.id ? 'comparing' : ''}`}
                     >
-                      {color.laMetallic && <span className="metallic-badge_details">★</span>}
-                    </button>
-                    <span className="color-name">{color.ten}</span>
-                    {color.giaThem > 0 && (
-                      <span className="color-price">+{formatPrice(color.giaThem)}</span>
-                    )}
-                  </div>
-                ))}
+                      <button
+                        className={`color-swatch_details ${selectedColor?.id === color.id ? 'selected' : ''} ${compareColor?.id === color.id ? 'comparing' : ''}`}
+                        style={{ 
+                          backgroundColor: color.maHex,
+                          backgroundImage: color.duongDanAnh ? `url(${BACKEND_URL}${color.duongDanAnh})` : 'none',
+                          borderRadius: '15px'
+                        }}
+                        onClick={() => handleColorSelect(color)}
+                        title={color.ten}
+                      >
+                        {color.laMetallic && <span className="metallic-badge_details">★</span>}
+                      </button>
+                      <span className="color-name">{color.ten}</span>
+                      {Number(color.giaThem) > 0 && (
+                        <span className="color-price">+{formatPrice(color.giaThem)}</span>
+                      )}
+                    </div>
+                  );
+                })}
             </div>
           </div>
         </div>

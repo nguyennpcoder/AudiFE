@@ -11,9 +11,13 @@ import {
   SaveOutlined,
   ShareAltOutlined,
   DownloadOutlined,
-  ShoppingCartOutlined
+  ShoppingCartOutlined,
+  GiftOutlined
 } from "@ant-design/icons";
 import "../../styles/VehicleConfigurator.css";
+import { useAuth } from "../AuthContext"; // Thêm import này
+import { cauHinhService } from "../../services/cauHinhService";
+
 
 const { Title, Text, Paragraph } = Typography;
 const { Step } = Steps;
@@ -64,6 +68,7 @@ interface CauHinhTuyChinh {
   idMau: number;
   idMauSac: number;
   idNoiThat?: number;
+  idBanhXe?: number; // Thêm trường này
   danhSachIdTuyChon: number[];
   tongGia: number;
   ten?: string;
@@ -81,9 +86,20 @@ interface HinhAnhXeTheoMauDTO {
   viTri?: number;
 }
 
+interface KhuyenMai {
+  id: number;
+  ten: string;
+  moTa: string;
+  giaTriGiam: number;
+  loaiGiamGia: 'phan_tram' | 'so_tien_co_dinh' | 'tuy_chon_mien_phi';
+  ngayBatDau: string;
+  ngayKetThuc: string;
+}
+
 const VehicleConfigurator: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth(); // Thêm hook này
   
   // State cho dữ liệu
   const [mauXe, setMauXe] = useState<MauXe | null>(null);
@@ -112,6 +128,10 @@ const VehicleConfigurator: React.FC = () => {
   const [khuyenMai, setKhuyenMai] = useState<any>(null);
   const [giaSauKhuyenMai, setGiaSauKhuyenMai] = useState(0);
 
+  // Thêm state cho khuyến mãi
+  const [danhSachKhuyenMai, setDanhSachKhuyenMai] = useState<KhuyenMai[]>([]);
+  const [khuyenMaiDuocChon, setKhuyenMaiDuocChon] = useState<KhuyenMai | null>(null);
+
   // Load dữ liệu ban đầu
   useEffect(() => {
     loadInitialData();
@@ -125,25 +145,95 @@ const VehicleConfigurator: React.FC = () => {
       const mauXeResponse = await axios.get(`${BACKEND_URL}/mau-xe/${id}`);
       setMauXe(mauXeResponse.data);
       
-      // Load màu sắc cho mẫu xe cụ thể - BỎ /api/v1
+      // Load màu sắc cho mẫu xe cụ thể
       const mauSacResponse = await axios.get(`${BACKEND_URL}/mau-sac/mau-xe/${id}`);
       console.log('Màu sắc loaded:', mauSacResponse.data);
+      
       setDanhSachMauSac(mauSacResponse.data);
       
-      // Load tùy chọn - BỎ /api/v1
-      const tuyChonResponse = await axios.get(`${BACKEND_URL}/tuy-chon`);
-      console.log('Tùy chọn loaded:', tuyChonResponse.data);
-      setDanhSachTuyChon(tuyChonResponse.data);
+      // Load tùy chọn - Sửa error handling
+      try {
+        const tuyChonResponse = await axios.get(`${BACKEND_URL}/tuy-chon`);
+        console.log('Tùy chọn loaded:', tuyChonResponse.data);
+        setDanhSachTuyChon(tuyChonResponse.data);
+      } catch (tuyChonError: any) {
+        console.error('Lỗi khi load tùy chọn:', tuyChonError);
+        
+        // Fallback: thử load tùy chọn theo mẫu xe
+        try {
+          const tuyChonByMauXeResponse = await axios.get(`${BACKEND_URL}/tuy-chon/mau-xe/${id}`);
+          console.log('Tùy chọn theo mẫu xe loaded:', tuyChonByMauXeResponse.data);
+          setDanhSachTuyChon(tuyChonByMauXeResponse.data);
+        } catch (fallbackError) {
+          console.error('Fallback cũng thất bại:', fallbackError);
+          // Tạo danh sách tùy chọn mặc định
+          const defaultTuyChon: TuyChon[] = [
+            {
+              id: 1,
+              ten: "Gói nội thất cao cấp",
+              moTa: "Nội thất da cao cấp với đường chỉ tổ ong",
+              gia: 5000000,
+              danhMuc: "Noi_that"
+            },
+            {
+              id: 2,
+              ten: "Gói ngoại thất thể thao",
+              moTa: "Bộ kit thể thao cho ngoại thất",
+              gia: 3000000,
+              danhMuc: "Ngoai_that"
+            },
+            {
+              id: 3,
+              ten: "Gói công nghệ tiên tiến",
+              moTa: "Hệ thống thông tin giải trí cao cấp",
+              gia: 8000000,
+              danhMuc: "Cong_nghe"
+            }
+          ];
+          setDanhSachTuyChon(defaultTuyChon);
+          message.warning('Sử dụng tùy chọn mặc định do lỗi server');
+        }
+      }
       
-      // Load nội thất - BỎ /api/v1
+      // Load nội thất
       try {
         const noiThatResponse = await axios.get(`${BACKEND_URL}/noi-that/mau-xe/${id}`);
         console.log('Nội thất loaded:', noiThatResponse.data);
         setDanhSachNoiThat(noiThatResponse.data);
       } catch (noiThatError: any) {
         console.error('Lỗi khi load nội thất:', noiThatError);
-        setDanhSachNoiThat([]);
+        // Fallback: load tất cả nội thất
+        try {
+          const allNoiThatResponse = await axios.get(`${BACKEND_URL}/noi-that`);
+          setDanhSachNoiThat(allNoiThatResponse.data);
+        } catch (fallbackError) {
+          console.error('Fallback cũng thất bại:', fallbackError);
+          // Tạo danh sách nội thất mặc định
+          const defaultNoiThat: NoiThat[] = [
+            {
+              id: 1,
+              ten: "Nội thất da đen cơ bản",
+              moTa: "Nội thất da đen với ghế thể thao",
+              giaThem: 0,
+              duongDanAnh: "/uploads/images/interiors/black_leather_basic.jpg",
+              laMacDinh: true
+            },
+            {
+              id: 2,
+              ten: "Nội thất da nâu cao cấp",
+              moTa: "Nội thất da nâu với đường chỉ tổ ong",
+              giaThem: 3000000,
+              duongDanAnh: "/uploads/images/interiors/brown_leather_premium.jpg",
+              laMacDinh: false
+            }
+          ];
+          setDanhSachNoiThat(defaultNoiThat);
+          message.warning('Sử dụng nội thất mặc định do lỗi server');
+        }
       }
+      
+      // Load khuyến mãi
+      await loadKhuyenMai();
       
       // Set màu sắc đầu tiên làm mặc định và load hình ảnh
       if (mauSacResponse.data.length > 0) {
@@ -203,16 +293,39 @@ const VehicleConfigurator: React.FC = () => {
     }
   };
 
-  // Tính tổng giá - BỎ /api/v1
+  // Thêm function để load khuyến mãi
+  const loadKhuyenMai = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/khuyen-mai/con-hieu-luc`, {
+        params: { page: 0, size: 50 }
+      });
+      setDanhSachKhuyenMai(response.data.khuyenMai || []);
+    } catch (error) {
+      console.error("Lỗi khi tải khuyến mãi:", error);
+      setDanhSachKhuyenMai([]);
+    }
+  };
+
+  // Tính tổng giá - Sửa để bao gồm nội thất
   const tinhTongGia = async () => {
     try {
+      console.log('Đang tính giá với params:', {
+        idMauXe: cauHinhHienTai.idMau,
+        idMauSac: cauHinhHienTai.idMauSac,
+        idNoiThat: cauHinhHienTai.idNoiThat,
+        idTuyChon: cauHinhHienTai.danhSachIdTuyChon
+      });
+      
       const response = await axios.get(`${BACKEND_URL}/cau-hinh/tinh-gia`, {
         params: {
           idMauXe: cauHinhHienTai.idMau,
           idMauSac: cauHinhHienTai.idMauSac,
+          idNoiThat: cauHinhHienTai.idNoiThat,
           idTuyChon: cauHinhHienTai.danhSachIdTuyChon
         }
       });
+      
+      console.log('Response tính giá:', response.data);
       
       const tongGia = response.data;
       setCauHinhHienTai(prev => ({ ...prev, tongGia }));
@@ -220,36 +333,92 @@ const VehicleConfigurator: React.FC = () => {
       // Tính khuyến mãi
       await tinhKhuyenMai(tongGia);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Lỗi khi tính giá:", error);
+      
+      // Fallback: tính giá thủ công
+      let tongGia = mauXe?.giaCoban || 0;
+      
+      // Cộng giá màu sắc
+      const mauSac = danhSachMauSac.find(m => m.id === cauHinhHienTai.idMauSac);
+      if (mauSac && mauSac.giaThem) {
+        tongGia += mauSac.giaThem;
+      }
+      
+      // Cộng giá nội thất
+      const noiThat = danhSachNoiThat.find(n => n.id === cauHinhHienTai.idNoiThat);
+      if (noiThat && noiThat.giaThem) {
+        tongGia += noiThat.giaThem;
+      }
+      
+      // Cộng giá tùy chọn
+      cauHinhHienTai.danhSachIdTuyChon.forEach(tuyChonId => {
+        const tuyChon = danhSachTuyChon.find(t => t.id === tuyChonId);
+        if (tuyChon && tuyChon.gia) {
+          tongGia += tuyChon.gia;
+        }
+      });
+      
+      setCauHinhHienTai(prev => ({ ...prev, tongGia }));
+      setGiaSauKhuyenMai(tongGia);
+      
+      message.warning('Sử dụng tính giá thủ công do lỗi server');
     }
   };
 
-  // Tính khuyến mãi
+  // Fix function tính khuyến mãi
   const tinhKhuyenMai = async (tongGia: number) => {
     try {
       const response = await axios.get(`${BACKEND_URL}/khuyen-mai/ap-dung`, {
         params: { tongGia }
       });
       
-      if (response.data) {
+      if (response.data && response.data.coApDung) {
         setKhuyenMai(response.data);
-        const giamGia = response.data.loaiKhuyenMai === 'PHAN_TRAM' 
-          ? (tongGia * response.data.giaTri / 100)
-          : response.data.giaTri;
-        setGiaSauKhuyenMai(Math.max(0, tongGia - giamGia));
+        
+        // Fix logic tính giảm giá - sử dụng đúng enum từ backend
+        let giamGia = 0;
+        switch (response.data.loaiKhuyenMai) {
+          case 'phan_tram':
+            giamGia = (tongGia * response.data.giaTri) / 100;
+            break;
+          case 'so_tien_co_dinh':
+            giamGia = response.data.giaTri;
+            break;
+          case 'tuy_chon_mien_phi':
+            giamGia = 0; // Không giảm giá, chỉ miễn phí tùy chọn
+            break;
+          default:
+            giamGia = 0;
+        }
+        
+        const giaSauKhuyenMai = Math.max(0, tongGia - giamGia);
+        setGiaSauKhuyenMai(giaSauKhuyenMai);
+        
+        console.log('Khuyến mãi áp dụng:', {
+          loaiKhuyenMai: response.data.loaiKhuyenMai,
+          giaTri: response.data.giaTri,
+          giamGia: giamGia,
+          giaSauKhuyenMai: giaSauKhuyenMai
+        });
+      } else {
+        // Không có khuyến mãi phù hợp
+        setKhuyenMai(null);
+        setGiaSauKhuyenMai(tongGia);
       }
     } catch (error) {
       console.error("Lỗi khi tính khuyến mãi:", error);
+      // Nếu có lỗi, set giá sau khuyến mãi = tổng giá
+      setGiaSauKhuyenMai(tongGia);
     }
   };
 
-  // Cập nhật cấu hình khi thay đổi
+  // Cập nhật cấu hình khi thay đổi - Sửa để bao gồm nội thất
   useEffect(() => {
     if (cauHinhHienTai.idMauSac > 0) {
       tinhTongGia();
     }
-  }, [cauHinhHienTai.idMauSac, cauHinhHienTai.danhSachIdTuyChon]);
+  }, [cauHinhHienTai.idMauSac, cauHinhHienTai.danhSachIdTuyChon, cauHinhHienTai.idNoiThat]);
 
   // Xử lý chọn màu sắc
   const handleChonMauSac = async (mauSac: MauSac) => {
@@ -285,21 +454,79 @@ const VehicleConfigurator: React.FC = () => {
     }));
   };
 
-  // Lưu cấu hình
+  // Thêm function validation
+  const validateCauHinh = () => {
+    if (!cauHinhHienTai.idMau || !cauHinhHienTai.idMauSac) {
+      message.error("Vui lòng chọn mẫu xe và màu sắc");
+      return false;
+    }
+    
+    if (!isAuthenticated || !user) {
+      message.error("Vui lòng đăng nhập để lưu cấu hình");
+      return false;
+    }
+    
+    if (!cauHinhHienTai.tongGia || cauHinhHienTai.tongGia <= 0) {
+      message.error("Vui lòng tính giá trước khi lưu");
+      return false;
+    }
+    
+    return true;
+  };
+
+  // Sửa handleLuuCauHinh
   const handleLuuCauHinh = async () => {
     try {
+      // Validation trước
+      if (!validateCauHinh()) {
+        return null;
+      }
+
       setSaving(true);
       
-      const response = await axios.post(`${BACKEND_URL}/cau-hinh`, {
+      // Tạo object cấu hình với đầy đủ thông tin
+      const cauHinhData = {
         ...cauHinhHienTai,
-        ten: `${mauXe?.tenMau} - ${new Date().toLocaleDateString('vi-VN')}`
-      });
+        idNguoiDung: user!.userId,
+        ten: `${mauXe?.tenMau} - ${new Date().toLocaleDateString('vi-VN')}`,
+        tongGia: cauHinhHienTai.tongGia,
+        // Đảm bảo có đầy đủ thông tin
+        idNoiThat: cauHinhHienTai.idNoiThat || undefined,
+        idBanhXe: cauHinhHienTai.idBanhXe || undefined,
+        danhSachIdTuyChon: cauHinhHienTai.danhSachIdTuyChon || []
+      };
+      
+      console.log('Gửi dữ liệu cấu hình:', cauHinhData);
+      
+      const response = await cauHinhService.createCauHinh(cauHinhData);
       
       message.success("Đã lưu cấu hình thành công!");
-      return response.data.id;
-    } catch (error) {
+      return response.id;
+    } catch (error: any) {
       console.error("Lỗi khi lưu cấu hình:", error);
-      message.error("Không thể lưu cấu hình");
+      
+      // Hiển thị thông báo lỗi chi tiết hơn
+      if (error.response) {
+        console.error('Response error:', error.response.data);
+        console.error('Status:', error.response.status);
+        
+        if (error.response.status === 400) {
+          const errorMessage = error.response.data.message || 'Dữ liệu không hợp lệ';
+          message.error(`Lỗi validation: ${errorMessage}`);
+        } else if (error.response.status === 401) {
+          message.error('Vui lòng đăng nhập để sử dụng tính năng này');
+        } else if (error.response.status === 403) {
+          message.error('Bạn không có quyền truy cập tính năng này');
+        } else {
+          message.error(`Lỗi server: ${error.response.data.message || 'Không thể lưu cấu hình'}`);
+        }
+      } else if (error.request) {
+        console.error('Request error:', error.request);
+        message.error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng');
+      } else {
+        message.error('Lỗi không xác định: ' + error.message);
+      }
+      
       return null;
     } finally {
       setSaving(false);
@@ -309,12 +536,67 @@ const VehicleConfigurator: React.FC = () => {
   // Xuất PDF
   const handleXuatPDF = async () => {
     try {
-      const configId = await handleLuuCauHinh();
-      if (configId) {
-        window.open(`${BACKEND_URL}/cau-hinh/${configId}/pdf`, '_blank');
+      // Kiểm tra xem user đã đăng nhập chưa
+      if (!isAuthenticated || !user) {
+        message.error("Vui lòng đăng nhập để xuất PDF");
+        return;
       }
+
+      // Hiển thị loading
+      const hideLoading = message.loading('Đang tạo PDF...', 0);
+      
+      // Lưu cấu hình trước
+      const configId = await handleLuuCauHinh();
+      if (!configId) {
+        hideLoading();
+        message.error('Không thể lưu cấu hình');
+        return;
+      }
+      
+      // Tạo URL để download PDF
+      const pdfUrl = `${BACKEND_URL}/cau-hinh/${configId}/pdf`;
+      
+      try {
+        // Kiểm tra xem có thể truy cập URL không
+        const response = await axios.get(pdfUrl, {
+          responseType: 'blob',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        // Tạo blob và download
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        
+        // Tạo link ẩn để download
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `cau-hinh-xe-${mauXe?.tenMau || 'unknown'}-${new Date().toISOString().split('T')[0]}.pdf`;
+        link.style.display = 'none';
+        
+        // Thêm vào DOM và click
+        document.body.appendChild(link);
+        link.click();
+        
+        // Cleanup
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        hideLoading();
+        message.success('Đã xuất PDF thành công!');
+        
+      } catch (downloadError) {
+        console.error("Lỗi khi download PDF:", downloadError);
+        
+        // Fallback: mở trong tab mới
+        window.open(pdfUrl, '_blank');
+        message.success({ content: 'Đã mở PDF trong tab mới!', key: 'pdf' });
+      }
+      
     } catch (error) {
-      message.error("Không thể xuất PDF");
+      console.error("Lỗi khi xuất PDF:", error);
+      message.error({ content: 'Không thể xuất PDF: ' + (error as any).message, key: 'pdf' });
     }
   };
 
@@ -332,6 +614,19 @@ const VehicleConfigurator: React.FC = () => {
     }
   };
 
+  // Thêm function để retry load data
+  const retryLoadData = async () => {
+    message.loading('Đang thử lại...', 0);
+    try {
+      await loadInitialData();
+      message.destroy();
+      message.success('Đã tải lại dữ liệu thành công!');
+    } catch (error) {
+      message.destroy();
+      message.error('Không thể tải lại dữ liệu');
+    }
+  };
+
   // Các bước cấu hình
   const steps = [
     {
@@ -346,13 +641,6 @@ const VehicleConfigurator: React.FC = () => {
               const exteriorImages = colorImages.filter(img => img.loaiHinh === 'ngoai_that');
               const mainImage = exteriorImages.length > 0 ? exteriorImages[0] : null;
               
-              console.log(`Rendering color ${mauSac.ten}:`, {
-                colorId: mauSac.id,
-                totalImages: colorImages.length,
-                exteriorImages: exteriorImages.length,
-                mainImage: mainImage
-              });
-              
               return (
                 <Col xs={24} sm={12} md={8} lg={6} key={mauSac.id}>
                   <Card
@@ -363,13 +651,11 @@ const VehicleConfigurator: React.FC = () => {
                     <div className="color-preview">
                       {mainImage ? (
                         <img 
-                          // Sử dụng đúng đường dẫn hình ảnh như ProductDetail
                           src={`${BACKEND_URL.replace('/api/v1', '')}${mainImage.duongDanAnh}`}
                           alt={`${mauSac.ten} - ${mauXe?.tenMau}`}
                           className="color-car-image"
                           onError={(e) => {
-                            console.error('Image failed to load:', `${BACKEND_URL.replace('/api/v1', '')}${mainImage.duongDanAnh}`);
-                            // Ẩn hình ảnh và hiển thị color swatch
+                            console.error('Image failed to load:', mainImage.duongDanAnh);
                             e.currentTarget.style.display = 'none';
                             const colorSwatch = e.currentTarget.nextElementSibling;
                             if (colorSwatch) {
@@ -384,15 +670,59 @@ const VehicleConfigurator: React.FC = () => {
                       />
                     </div>
                     <div className="color-info">
-                      <Text strong>{mauSac.ten}</Text>
-                      <Text type="secondary" className="color-price">
-                        {mauSac.giaThem > 0 ? `+${mauSac.giaThem.toLocaleString('vi-VN')} VNĐ` : 'Miễn phí'}
+                      <Text strong style={{ fontSize: '16px', marginBottom: '8px' }}>
+                        {mauSac.ten}
                       </Text>
+                      
+                      {/* Giá thêm - đảm bảo luôn hiển thị rõ ràng */}
+                      <div 
+                        style={{ 
+                          margin: '8px 0',
+                          padding: '6px 12px',
+                          borderRadius: '20px',
+                          background: mauSac.giaThem > 0 
+                            ? 'linear-gradient(135deg, #1890ff, #40a9ff)' 
+                            : 'linear-gradient(135deg, #52c41a, #73d13d)',
+                          color: 'white',
+                          fontWeight: 'bold',
+                          fontSize: '14px',
+                          textAlign: 'center',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                        }}
+                      >
+                        {mauSac.giaThem > 0 
+                          ? `+${mauSac.giaThem.toLocaleString('vi-VN')} VNĐ`
+                          : 'Miễn phí'
+                        }
+                      </div>
+                      
+                      {/* Badge Metallic nếu có */}
                       {mauSac.laMetallic && (
-                        <Text type="secondary" className="metallic-badge">
+                        <div 
+                          style={{
+                            display: 'inline-block',
+                            background: 'linear-gradient(135deg, #ffd700, #ffed4e)',
+                            color: '#000',
+                            padding: '4px 12px',
+                            borderRadius: '20px',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            marginTop: '8px'
+                          }}
+                        >
                           Metallic
-                        </Text>
+                        </div>
                       )}
+                      
+                      {/* Debug info - để kiểm tra giá */}
+                      <div style={{ 
+                        fontSize: '11px', 
+                        color: 'rgba(255,255,255,0.5)', 
+                        marginTop: '4px',
+                        fontStyle: 'italic'
+                      }}>
+                        Debug: giaThem = {mauSac.giaThem}
+                      </div>
                     </div>
                   </Card>
                 </Col>
@@ -408,28 +738,104 @@ const VehicleConfigurator: React.FC = () => {
       content: (
         <div className="step-content">
           <Title level={3}>Tùy chỉnh các tính năng</Title>
-          <Row gutter={[16, 16]}>
-            {danhSachTuyChon.map(tuyChon => (
-              <Col xs={24} sm={12} md={8} key={tuyChon.id}>
-                <Card
-                  hoverable
-                  className={`option-card ${cauHinhHienTai.danhSachIdTuyChon.includes(tuyChon.id) ? 'selected' : ''}`}
-                  onClick={() => handleChonTuyChon(tuyChon.id)}
-                >
-                  <div className="option-info">
-                    <Text strong>{tuyChon.ten}</Text>
-                    <Text type="secondary">{tuyChon.moTa}</Text>
-                    <Text className="option-price" style={{ color: '#1890ff' }}>
-                      +{tuyChon.gia.toLocaleString('vi-VN')} VNĐ
-                    </Text>
-                    <Text type="secondary" className="option-category">
-                      {tuyChon.danhMuc}
-                    </Text>
-                  </div>
-                </Card>
-              </Col>
-            ))}
-          </Row>
+          
+          {/* Debug info */}
+          <div style={{ marginBottom: '20px', padding: '10px', background: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}>
+            <Text type="secondary">
+              Debug: Đã load {danhSachTuyChon.length} tùy chọn tính năng
+            </Text>
+            <br />
+            <Text type="secondary">
+              Danh sách: {danhSachTuyChon.length > 0 ? 
+                danhSachTuyChon.map(t => t.ten).join(', ') : 'Không có dữ liệu'
+              }
+            </Text>
+            <br />
+            <Text type="secondary">
+              Tùy chọn đã chọn: {cauHinhHienTai.danhSachIdTuyChon.length} item
+            </Text>
+            <br />
+            <Text type="secondary">
+              IDs: [{cauHinhHienTai.danhSachIdTuyChon.join(', ')}]
+            </Text>
+          </div>
+          
+          {danhSachTuyChon.length > 0 ? (
+            <Row gutter={[16, 16]}>
+              {danhSachTuyChon.map(tuyChon => (
+                <Col xs={24} sm={12} md={8} key={tuyChon.id}>
+                  <Card
+                    hoverable
+                    className={`option-card ${cauHinhHienTai.danhSachIdTuyChon.includes(tuyChon.id) ? 'selected' : ''}`}
+                    onClick={() => handleChonTuyChon(tuyChon.id)}
+                  >
+                    <div className="option-info">
+                      <Text strong>{tuyChon.ten}</Text>
+                      <Text type="secondary">{tuyChon.moTa}</Text>
+                      <Text className="option-price" style={{ color: '#1890ff' }}>
+                        +{tuyChon.gia.toLocaleString('vi-VN')} VNĐ
+                      </Text>
+                      <Text type="secondary" className="option-category">
+                        {tuyChon.danhMuc}
+                      </Text>
+                    </div>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.6)' }}>
+              <Text>Không có tùy chọn tính năng nào</Text>
+              <br />
+              <Text type="secondary">Vui lòng kiểm tra backend hoặc database</Text>
+              <br />
+              <Button 
+                type="primary" 
+                onClick={retryLoadData}
+                style={{ marginTop: '16px' }}
+              >
+                Thử lại
+              </Button>
+            </div>
+          )}
+          
+          {/* Thêm phần khuyến mãi */}
+          {danhSachKhuyenMai.length > 0 && (
+            <>
+              <Divider style={{ margin: '40px 0 20px 0', borderColor: 'rgba(255,255,255,0.2)' }} />
+              <Title level={4} style={{ color: '#ffffff' }}>
+                <GiftOutlined style={{ marginRight: '8px', color: '#fa8c16' }} />
+                Khuyến mãi hiện tại
+              </Title>
+              <Row gutter={[16, 16]}>
+                {danhSachKhuyenMai.map(khuyenMai => (
+                  <Col xs={24} sm={12} md={8} key={khuyenMai.id}>
+                    <Card
+                      hoverable
+                      className={`promotion-card ${khuyenMaiDuocChon?.id === khuyenMai.id ? 'selected' : ''}`}
+                      onClick={() => setKhuyenMaiDuocChon(khuyenMai)}
+                    >
+                      <div className="promotion-info">
+                        <Text strong>{khuyenMai.ten}</Text>
+                        <Text type="secondary">{khuyenMai.moTa}</Text>
+                        <Text className="promotion-value" style={{ color: '#52c41a' }}>
+                          {khuyenMai.loaiGiamGia === 'phan_tram' 
+                            ? `Giảm ${khuyenMai.giaTriGiam}%`
+                            : khuyenMai.loaiGiamGia === 'so_tien_co_dinh'
+                            ? `Giảm ${khuyenMai.giaTriGiam.toLocaleString('vi-VN')} VNĐ`
+                            : 'Tùy chọn miễn phí'
+                          }
+                        </Text>
+                        <Text type="secondary" className="promotion-period">
+                          {new Date(khuyenMai.ngayBatDau).toLocaleDateString('vi-VN')} - {new Date(khuyenMai.ngayKetThuc).toLocaleDateString('vi-VN')}
+                        </Text>
+                      </div>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </>
+          )}
         </div>
       )
     },
@@ -448,6 +854,12 @@ const VehicleConfigurator: React.FC = () => {
             <br />
             <Text type="secondary">
               Danh sách: {danhSachNoiThat.map(n => n.ten).join(', ')}
+            </Text>
+            <br />
+            <Text type="secondary">
+              Nội thất đã chọn: {cauHinhHienTai.idNoiThat ? 
+                danhSachNoiThat.find(n => n.id === cauHinhHienTai.idNoiThat)?.ten : 'Chưa chọn'
+              }
             </Text>
           </div>
           
@@ -492,6 +904,14 @@ const VehicleConfigurator: React.FC = () => {
               <Text>Không có tùy chọn nội thất nào</Text>
               <br />
               <Text type="secondary">Vui lòng kiểm tra backend hoặc database</Text>
+              <br />
+              <Button 
+                type="primary" 
+                onClick={() => loadInitialData()}
+                style={{ marginTop: '16px' }}
+              >
+                Thử lại
+              </Button>
             </div>
           )}
         </div>
@@ -504,16 +924,38 @@ const VehicleConfigurator: React.FC = () => {
         <div className="step-content">
           <Title level={3}>Tổng quan cấu hình</Title>
           
-          {/* Thông tin xe */}
+          {/* Thông tin xe - Fix layout để giá tiền nằm bên phải */}
           <Card title="Thông tin xe" className="summary-card">
             <Row gutter={[16, 16]}>
-              <Col span={12}>
-                <Text strong>Mẫu xe:</Text>
-                <Text>{mauXe?.tenMau}</Text>
-              </Col>
-              <Col span={12}>
-                <Text strong>Màu sắc:</Text>
-                <Text>{danhSachMauSac.find(m => m.id === cauHinhHienTai.idMauSac)?.ten}</Text>
+              <Col span={24}>
+                <div className="vehicle-info-item">
+                  <div className="vehicle-info-label">
+                    <Text strong>Mẫu xe:</Text>
+                  </div>
+                  <div className="vehicle-info-value">
+                    <Text>{mauXe?.tenMau}</Text>
+                  </div>
+                </div>
+                <div className="vehicle-info-item">
+                  <div className="vehicle-info-label">
+                    <Text strong>Màu sắc:</Text>
+                  </div>
+                  <div className="vehicle-info-value">
+                    <Text>{danhSachMauSac.find(m => m.id === cauHinhHienTai.idMauSac)?.ten}</Text>
+                    {(() => {
+                      const mauSac = danhSachMauSac.find(m => m.id === cauHinhHienTai.idMauSac);
+                      if (!mauSac) return null;
+                      const isAdd = mauSac.giaThem > 0;
+                      return (
+                        <Text
+                          className={`value-right ${isAdd ? 'price-add' : 'price-free'}`}
+                        >
+                          {isAdd ? `+${mauSac.giaThem.toLocaleString('vi-VN')} VNĐ` : 'Miễn phí'}
+                        </Text>
+                      );
+                    })()}
+                  </div>
+                </div>
               </Col>
             </Row>
           </Card>
@@ -553,7 +995,7 @@ const VehicleConfigurator: React.FC = () => {
             </Card>
           )}
 
-          {/* Tổng giá */}
+          {/* Tổng giá - Fix hiển thị giá sau khuyến mãi */}
           <Card title="Tổng giá" className="summary-card">
             <Row gutter={[16, 16]}>
               <Col span={24}>
@@ -565,17 +1007,49 @@ const VehicleConfigurator: React.FC = () => {
                   <div className="price-summary">
                     <Text strong>Tổng giá sau tùy chỉnh:</Text>
                     <Text className="total-price">{cauHinhHienTai.tongGia.toLocaleString('vi-VN')} VNĐ</Text>
-                    </div>
+                  </div>
                 )}
-                {khuyenMai && (
+                {/* Fix hiển thị giá sau khuyến mãi */}
+                {khuyenMai && giaSauKhuyenMai > 0 ? (
                   <div className="price-summary">
                     <Text strong>Giá sau khuyến mãi:</Text>
-                    <Text className="discount-price">{giaSauKhuyenMai.toLocaleString('vi-VN')} VNĐ</Text>
+                    <Text className="discount-price" style={{ color: '#52c41a' }}>
+                      {giaSauKhuyenMai.toLocaleString('vi-VN')} VNĐ
+                    </Text>
+                    <Text type="secondary" style={{ marginLeft: '8px' }}>
+                      (Tiết kiệm: {(cauHinhHienTai.tongGia - giaSauKhuyenMai).toLocaleString('vi-VN')} VNĐ)
+                    </Text>
+                  </div>
+                ) : (
+                  <div className="price-summary">
+                    <Text strong>Giá sau khuyến mãi:</Text>
+                    <Text type="secondary">Không có khuyến mãi</Text>
                   </div>
                 )}
               </Col>
             </Row>
           </Card>
+
+          {/* Thêm phần khuyến mãi đã chọn */}
+          {khuyenMaiDuocChon && (
+            <Card title="Khuyến mãi đã chọn" className="summary-card">
+              <Row gutter={[16, 16]}>
+                <Col span={24}>
+                  <div className="promotion-summary">
+                    <Text strong>{khuyenMaiDuocChon.ten}</Text>
+                    <Text className="promotion-value">
+                      {khuyenMaiDuocChon.loaiGiamGia === 'phan_tram' 
+                        ? `Giảm ${khuyenMaiDuocChon.giaTriGiam}%`
+                        : khuyenMaiDuocChon.loaiGiamGia === 'so_tien_co_dinh'
+                        ? `Giảm ${khuyenMaiDuocChon.giaTriGiam.toLocaleString('vi-VN')} VNĐ`
+                        : 'Tùy chọn miễn phí'
+                      }
+                    </Text>
+                  </div>
+                </Col>
+              </Row>
+            </Card>
+          )}
         </div>
       )
     }
@@ -670,4 +1144,4 @@ const VehicleConfigurator: React.FC = () => {
   );
 };
 
-export default VehicleConfigurator; 
+export default VehicleConfigurator;

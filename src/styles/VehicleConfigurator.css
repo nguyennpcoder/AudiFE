@@ -821,11 +821,37 @@
   text-align: center;
 }
 
+/* Fix color-price để đảm bảo hiển thị rõ ràng */
 .color-price {
-  display: block;
-  margin: 8px 0;
-  font-weight: 600;
-  color: #1890ff !important;
+  display: block !important;
+  margin: 8px 0 !important;
+  font-weight: 600 !important;
+  color: white !important;
+  font-size: 14px !important;
+  padding: 6px 12px !important;
+  border-radius: 20px !important;
+  background: linear-gradient(135deg, #1890ff, #40a9ff) !important;
+  text-align: center !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+}
+
+/* Đảm bảo color-info hiển thị đúng */
+.color-info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding: 0 16px 16px !important;
+  flex-grow: 1 !important;
+  text-align: center !important;
+}
+
+.color-info .ant-typography {
+  color: #ffffff !important;
+  margin: 0 !important;
+}
+
+.color-info .ant-typography[data-type="secondary"] {
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
 .metallic-badge {
@@ -972,3 +998,153 @@
   color: white;
   margin-bottom: 8px;
 } 
+
+/* Fix vehicle-info-summary để hiển thị giá thêm của màu sắc */
+.vehicle-info-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vehicle-info-summary:last-child {
+  border-bottom: none;
+}
+
+.vehicle-info-summary .ant-typography {
+  color: #ffffff !important;
+  margin: 0 !important;
+}
+
+.vehicle-info-summary .ant-typography[data-type="strong"] {
+  font-weight: 600 !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+} 
+
+/* Fix layout cho vehicle-info để giá tiền nằm bên phải */
+.vehicle-info-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vehicle-info-item:last-child {
+  border-bottom: none;
+}
+
+.vehicle-info-label {
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.vehicle-info-label .ant-typography {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+}
+
+.vehicle-info-value {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* ensure name left, price right */
+  gap: 8px;
+}
+
+.vehicle-info-value .ant-typography {
+  color: #ffffff !important;
+  margin: 0 !important;
+}
+
+/* Style riêng cho phần giá tiền màu sắc - đẩy sang phải */
+.color-price-display {
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+} 
+
+/* Fix summary cards để giá tiền nằm bên phải */
+.option-summary,
+.interior-summary,
+.promotion-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.option-summary:last-child,
+.interior-summary:last-child,
+.promotion-summary:last-child {
+  border-bottom: none;
+}
+
+.option-summary .ant-typography,
+.interior-summary .ant-typography,
+.promotion-summary .ant-typography {
+  color: #ffffff !important;
+  margin: 0 !important;
+}
+
+.option-price,
+.interior-price,
+.promotion-value {
+  color: #1890ff !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  margin-left: auto !important;
+}
+
+/* Fix price summary để giá tiền nằm bên phải */
+.price-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.price-summary:last-child {
+  border-bottom: none;
+}
+
+.price-summary .ant-typography {
+  color: #ffffff !important;
+  margin: 0 !important;
+}
+
+/* Đảm bảo giá tiền luôn nằm bên phải */
+.total-price,
+.discount-price {
+  color: #52c41a !important;
+  font-weight: 600 !important;
+  font-size: 18px !important;
+  margin-left: auto !important;
+}
+
+/* Fix color price trong color card */
+.color-price {
+  display: block !important;
+  margin: 8px 0 !important;
+  font-weight: 600 !important;
+  color: white !important;
+  font-size: 14px !important;
+  padding: 6px 12px !important;
+  border-radius: 20px !important;
+  background: linear-gradient(135deg, #1890ff, #40a9ff) !important;
+  text-align: center !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+} 
+
+/* Style giá trong bước Xem lại & Xác nhận */
+.value-right {
+  margin-left: auto !important;
+  text-align: right;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+}
+
+.value-right.price-add { color: #1890ff !important; }
+.value-right.price-free { color: #52c41a !important; }
