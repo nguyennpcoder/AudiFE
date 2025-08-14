@@ -11,7 +11,7 @@ interface BlogPost {
   noiDung: string;
   anhDaiDien?: string;
   tenTacGia: string;
-  avatarTacGia?: string; // Thêm avatar của tác giả
+  avatarTacGia?: string;
   ngayDang: string;
   danhMuc?: string;
   theGan?: string[];
@@ -33,12 +33,12 @@ const BlogList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
-  const [pageSize] = useState(10); // Thay đổi từ 20 về 10
+  const [pageSize] = useState(10);
   const navigate = useNavigate();
 
   // Smooth scroll to top function with animation
   const scrollToTop = () => {
-    const scrollStep = -window.scrollY / (500 / 15); // 500ms duration
+    const scrollStep = -window.scrollY / (500 / 15);
     const scrollInterval = setInterval(() => {
       if (window.scrollY !== 0) {
         window.scrollBy(0, scrollStep);
@@ -48,7 +48,7 @@ const BlogList: React.FC = () => {
     }, 15);
   };
 
-  // Get avatar URL for author (copied from Profile.tsx logic)
+  // Get avatar URL for author
   const getAuthorAvatarUrl = (avatarPath?: string) => {
     if (avatarPath) {
       const avatarUrl = avatarPath.startsWith('http')
@@ -56,11 +56,10 @@ const BlogList: React.FC = () => {
         : `http://localhost:8080/${avatarPath}`;
       return avatarUrl;
     }
-    // Return default avatar if no author avatar
     return '/avatar-default.png';
   };
 
-  // Tạo danh sách placeholder images từ Ant Design
+  // Tạo danh sách placeholder images
   const placeholderImages = [
     'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
     'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
@@ -69,7 +68,6 @@ const BlogList: React.FC = () => {
     'https://gw.alipayobjects.com/zos/rmsportal/rMSqrFDLlkZjfWKXoQpa.png'
   ];
 
-  // Lấy placeholder image ngẫu nhiên
   const getRandomPlaceholder = () => {
     const randomIndex = Math.floor(Math.random() * placeholderImages.length);
     return placeholderImages[randomIndex];
@@ -78,30 +76,25 @@ const BlogList: React.FC = () => {
   // Get image URL for blog posts
   const getBlogImageUrl = (imagePath?: string) => {
     if (!imagePath) return getRandomPlaceholder();
-    
-    // If it's already a full URL, use it as is
+
     if (imagePath.startsWith('http')) {
       return imagePath;
     }
-    
-    // If it's a relative path starting with /uploads/, add backend URL
+
     if (imagePath.startsWith('/uploads/')) {
       return `http://localhost:8080${imagePath}`;
     }
-    
-    // If it's just a filename, assume it's in the blogs folder
+
     if (!imagePath.includes('/')) {
       return `http://localhost:8080/uploads/images/blogs/${imagePath}`;
     }
-    
-    // Default fallback
+
     return getRandomPlaceholder();
   };
 
   useEffect(() => {
-    // Scroll to top when component mounts
     scrollToTop();
-    
+
     const fetchPosts = async () => {
       try {
         const response = await fetch(`${API_URL}?page=${currentPage}&size=${pageSize}`);
@@ -143,7 +136,7 @@ const BlogList: React.FC = () => {
 
   const truncateText = (text: string, maxLength: number = 150): string => {
     const plainText = text.replace(/<[^>]+>/g, '').trim();
-    return plainText.length > maxLength 
+    return plainText.length > maxLength
       ? plainText.substring(0, maxLength) + '...'
       : plainText;
   };
@@ -154,15 +147,14 @@ const BlogList: React.FC = () => {
       'TIN_TUC': { bg: '#f3e5f5', text: '#7b1fa2' },
       'REVIEW': { bg: '#e8f5e8', text: '#388e3c' },
       'HUONG_DAN': { bg: '#fff3e0', text: '#f57c00' },
+      'MEO': { bg: '#fff3e0', text: '#f57c00' },
       default: { bg: '#f5f5f5', text: '#616161' }
     };
     return categoryColors[category] || categoryColors.default;
   };
 
   const handlePostClick = (postId: string) => {
-    // Scroll to top before navigating
     scrollToTop();
-    // Small delay to ensure scroll animation starts
     setTimeout(() => {
       navigate(`/blog/${postId}`);
     }, 100);
@@ -176,60 +168,55 @@ const BlogList: React.FC = () => {
   // Hàm tạo danh sách các trang để hiển thị
   const getPageNumbers = () => {
     const pages = [];
-    const maxVisiblePages = 5; // Hiển thị tối đa 5 trang
-    
+    const maxVisiblePages = 5;
+
     if (totalPages <= maxVisiblePages) {
-      // Nếu tổng số trang <= 5, hiển thị tất cả
       for (let i = 0; i < totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Nếu tổng số trang > 5, hiển thị thông minh
       if (currentPage <= 2) {
-        // Trang đầu: hiển thị 1,2,3,4,5...last
         for (let i = 0; i < 4; i++) {
           pages.push(i);
         }
-        pages.push(-1); // Dấu "..."
+        pages.push(-1);
         pages.push(totalPages - 1);
       } else if (currentPage >= totalPages - 3) {
-        // Trang cuối: hiển thị 1...last-3,last-2,last-1,last
         pages.push(0);
-        pages.push(-1); // Dấu "..."
+        pages.push(-1);
         for (let i = totalPages - 4; i < totalPages; i++) {
           pages.push(i);
         }
       } else {
-        // Trang giữa: hiển thị 1...current-1,current,current+1...last
         pages.push(0);
-        pages.push(-1); // Dấu "..."
+        pages.push(-1);
         for (let i = currentPage - 1; i <= currentPage + 1; i++) {
           pages.push(i);
         }
-        pages.push(-1); // Dấu "..."
+        pages.push(-1);
         pages.push(totalPages - 1);
       }
     }
-    
+
     return pages;
   };
 
   if (loading) {
     return (
-      <div className="audi-blog-container">
-        <div className="audi-blog-header">
-          <div className="skeleton skeleton-title"></div>
-          <div className="skeleton skeleton-subtitle"></div>
+      <div className="blog-container">
+        <div className="blog-header">
+          <div className="blog-skeleton blog-skeleton-title"></div>
+          <div className="blog-skeleton blog-skeleton-subtitle"></div>
         </div>
-        <div className="audi-blog-grid">
+        <div className="blog-grid">
           {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="audi-blog-card skeleton-card">
-              <div className="skeleton skeleton-image"></div>
-              <div className="audi-blog-card-content">
-                <div className="skeleton skeleton-category"></div>
-                <div className="skeleton skeleton-text"></div>
-                <div className="skeleton skeleton-text"></div>
-                <div className="skeleton skeleton-meta"></div>
+            <div key={index} className="blog-card blog-skeleton-card">
+              <div className="blog-skeleton blog-skeleton-image"></div>
+              <div className="blog-card-content">
+                <div className="blog-skeleton blog-skeleton-category"></div>
+                <div className="blog-skeleton blog-skeleton-text"></div>
+                <div className="blog-skeleton blog-skeleton-text"></div>
+                <div className="blog-skeleton blog-skeleton-meta"></div>
               </div>
             </div>
           ))}
@@ -240,13 +227,13 @@ const BlogList: React.FC = () => {
 
   if (error) {
     return (
-      <div className="audi-blog-container">
-        <div className="error-state">
-          <div className="error-icon">⚠️</div>
+      <div className="blog-container">
+        <div className="blog-error-state">
+          <div className="blog-error-icon">⚠️</div>
           <h2>Oops! Something went wrong</h2>
           <p>{error}</p>
-          <button 
-            className="retry-button"
+          <button
+            className="blog-retry-button"
             onClick={() => window.location.reload()}
           >
             Thử lại
@@ -257,54 +244,56 @@ const BlogList: React.FC = () => {
   }
 
   return (
-    <div className="audi-blog-container fade-in">
-      <div className="audi-blog-header">
-        <h1 className="audi-blog-title">
+    <div className="blog-container blog-fade-in">
+      <div className="blog-header">
+        <h1 className="blog-title">
           Tin tức & Blog
-          <span className="audi-blog-brand">Audi</span>
+          <span className="blog-brand">Audi</span>
         </h1>
-        <p className="audi-blog-subtitle">
+        <p className="blog-subtitle">
           Khám phá những câu chuyện, xu hướng và insights mới nhất từ thế giới ô tô
         </p>
       </div>
 
       {posts.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">📝</div>
+        <div className="blog-empty-state">
+          <div className="blog-empty-icon">��</div>
           <h3>Chưa có bài viết nào</h3>
           <p>Hãy quay lại sau để đọc những bài viết mới nhất</p>
         </div>
       ) : (
         <>
-          <div className="audi-blog-stats">
-            <span className="stats-item">
+          <div className="blog-stats">
+            <span className="blog-stats-item">
               <strong>{totalItems}</strong> bài viết
             </span>
-            <span className="stats-divider">•</span>
-            <span className="stats-item">Cập nhật hàng ngày</span>
+            <span className="blog-stats-divider">•</span>
+            <span className="blog-stats-item">Cập nhật hàng ngày</span>
           </div>
-          
-          <div className="audi-blog-grid">
+
+          <div className="blog-grid">
             {posts.map((post, index) => {
               const categoryStyle = getCategoryColor(post.danhMuc || '');
               const readingTime = getReadingTime(post.noiDung || '');
               const authorAvatarUrl = getAuthorAvatarUrl(post.avatarTacGia);
-              
+
               return (
-                <article 
-                  key={post.id} 
-                  className="audi-blog-card"
+                <article
+                  key={post.id}
+                  className="blog-card"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div 
-                    className="audi-blog-card-link"
+                  // ... existing code ...
+
+                  <div
+                    className="blog-card-link"
                     onClick={() => handlePostClick(post.id)}
                     style={{ cursor: 'pointer' }}
                   >
-                    <div className="audi-blog-card-image">
+                    <div className="blog-card-image">
                       {post.anhDaiDien ? (
-                        <img 
-                          src={getBlogImageUrl(post.anhDaiDien)} 
+                        <img
+                          src={getBlogImageUrl(post.anhDaiDien)}
                           alt={post.tieuDe}
                           loading="lazy"
                           onError={(e) => {
@@ -313,61 +302,61 @@ const BlogList: React.FC = () => {
                           }}
                         />
                       ) : (
-                        <div className="placeholder-image">
-                          <img 
-                            src={getRandomPlaceholder()} 
+                        <div className="blog-placeholder-image">
+                          <img
+                            src={getRandomPlaceholder()}
                             alt="Placeholder"
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />
                         </div>
                       )}
-                      <div className="image-overlay"></div>
+                      <div className="blog-image-overlay"></div>
                     </div>
-                    
-                    <div className="audi-blog-card-content">
-                      <div className="audi-blog-card-meta">
+
+                    <div className="blog-card-content">
+                      <div className="blog-card-meta">
                         {post.danhMuc && (
-                          <span 
-                            className="audi-blog-category-tag"
-                            style={{ 
+                          <span
+                            className="blog-category-tag"
+                            style={{
                               backgroundColor: categoryStyle.bg,
-                              color: categoryStyle.text 
+                              color: categoryStyle.text
                             }}
                           >
                             {post.danhMuc.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
                           </span>
                         )}
-                        
+
                         {post.theGan && post.theGan.length > 0 && (
-                          <div className="tags-container">
+                          <div className="blog-tags-container">
                             {post.theGan.slice(0, 2).map((tag) => (
-                              <span key={tag} className="tag">
+                              <span key={tag} className="blog-tag">
                                 #{tag}
                               </span>
                             ))}
                             {post.theGan.length > 2 && (
-                              <span className="tag tag-more">
+                              <span className="blog-tag blog-tag-more">
                                 +{post.theGan.length - 2}
                               </span>
                             )}
                           </div>
                         )}
                       </div>
-                      
-                      <h2 className="audi-blog-card-title">
+
+                      <h2 className="blog-card-title">
                         {post.tieuDe}
                       </h2>
-                      
-                      <p className="audi-blog-card-excerpt">
+
+                      <p className="blog-card-excerpt">
                         {truncateText(post.noiDung || '')}
                       </p>
-                      
-                      <div className="audi-blog-card-footer">
-                        <div className="audi-blog-author-info">
+
+                      <div className="blog-card-footer">
+                        <div className="blog-author-info">
                           <img
                             src={authorAvatarUrl}
                             alt="Author Avatar"
-                            className="author-avatar"
+                            className="blog-author-avatar"
                             style={{
                               width: 32,
                               height: 32,
@@ -386,21 +375,21 @@ const BlogList: React.FC = () => {
                               console.log('Author avatar loaded successfully:', authorAvatarUrl);
                             }}
                           />
-                          <div className="author-details">
-                            <span className="author-name">{post.tenTacGia}</span>
-                            <span className="post-date">{formatDate(post.ngayDang)}</span>
+                          <div className="blog-author-details">
+                            <span className="blog-author-name">{post.tenTacGia}</span>
+                            <span className="blog-post-date">{formatDate(post.ngayDang)}</span>
                           </div>
                         </div>
-                        
-                        <div className="post-stats">
-                          <span className="reading-time">
+
+                        <div className="blog-post-stats">
+                          <span className="blog-reading-time">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M16.2,16.2L11,13V7H12.5V12.2L17,14.9L16.2,16.2Z" />
                             </svg>
                             {readingTime} phút đọc
                           </span>
                           {post.luotXem && (
-                            <span className="view-count">
+                            <span className="blog-view-count">
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
                               </svg>
@@ -416,12 +405,12 @@ const BlogList: React.FC = () => {
             })}
           </div>
 
-          {/* Pagination - Cải thiện */}
+          {/* Pagination */}
           {totalPages > 1 && (
-            <div className="audi-blog-pagination">
+            <div className="blog-pagination">
               {/* Nút Previous */}
-              <button 
-                className={`pagination-btn ${currentPage === 0 ? 'disabled' : ''}`}
+              <button
+                className={`blog-pagination-btn ${currentPage === 0 ? 'disabled' : ''}`}
                 disabled={currentPage === 0}
                 onClick={() => handlePageChange(currentPage - 1)}
                 aria-label="Trang trước"
@@ -429,28 +418,28 @@ const BlogList: React.FC = () => {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
                 </svg>
-                <span className="btn-text">Trước</span>
+                <span className="blog-btn-text">Trước</span>
               </button>
-              
+
               {/* Thông tin trang */}
-              <div className="pagination-info">
-                <span className="page-info">
+              <div className="blog-pagination-info">
+                <span className="blog-page-info">
                   Trang {currentPage + 1} / {totalPages}
                 </span>
-                <span className="items-info">
+                <span className="blog-items-info">
                   ({((currentPage * pageSize) + 1)}-{Math.min((currentPage + 1) * pageSize, totalItems)} / {totalItems} bài viết)
                 </span>
               </div>
-              
+
               {/* Các nút số trang */}
-              <div className="page-numbers">
+              <div className="blog-page-numbers">
                 {getPageNumbers().map((pageNum, index) => (
                   <React.Fragment key={index}>
                     {pageNum === -1 ? (
-                      <span className="page-ellipsis">...</span>
+                      <span className="blog-page-ellipsis">...</span>
                     ) : (
                       <button
-                        className={`page-number ${currentPage === pageNum ? 'active' : ''}`}
+                        className={`blog-page-number ${currentPage === pageNum ? 'active' : ''}`}
                         onClick={() => handlePageChange(pageNum)}
                         aria-label={`Trang ${pageNum + 1}`}
                       >
@@ -460,15 +449,15 @@ const BlogList: React.FC = () => {
                   </React.Fragment>
                 ))}
               </div>
-              
+
               {/* Nút Next */}
-              <button 
-                className={`pagination-btn ${currentPage === totalPages - 1 ? 'disabled' : ''}`}
+              <button
+                className={`blog-pagination-btn ${currentPage === totalPages - 1 ? 'disabled' : ''}`}
                 disabled={currentPage === totalPages - 1}
                 onClick={() => handlePageChange(currentPage + 1)}
                 aria-label="Trang tiếp"
               >
-                <span className="btn-text">Sau</span>
+                <span className="blog-btn-text">Sau</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
                 </svg>

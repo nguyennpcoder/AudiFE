@@ -57,7 +57,7 @@ const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({
     // Hiển thị trạng thái loading khi đang kiểm tra xác thực
     return (
       <div className="auth-loading">
-        <i className="fas fa-spinner fa-spin"></i> Đang tải...
+        <i className="fas fa-circle-notch"></i> Đang tải...
       </div>
     );
   }

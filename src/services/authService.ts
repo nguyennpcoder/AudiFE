@@ -36,6 +36,7 @@ export interface AuthResponse {
   avatar?: string;
   token?: string;
   trangThai?: boolean;
+  diaChi?: string; // Add this line
 }
 
 export interface QuenMatKhauRequest {

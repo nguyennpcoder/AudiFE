@@ -10,7 +10,7 @@ interface BlogPost {
   noiDung: string;
   anhDaiDien?: string;
   tenTacGia: string;
-  avatarTacGia?: string; // Thêm avatar của tác giả
+  avatarTacGia?: string;
   ngayDang: string;
   danhMuc?: string;
   theGan?: string[];
@@ -28,7 +28,7 @@ const BlogDetail: React.FC = () => {
 
   // Smooth scroll to top function with animation
   const scrollToTop = () => {
-    const scrollStep = -window.scrollY / (500 / 15); // 500ms duration
+    const scrollStep = -window.scrollY / (500 / 15);
     const scrollInterval = setInterval(() => {
       if (window.scrollY !== 0) {
         window.scrollBy(0, scrollStep);
@@ -38,7 +38,7 @@ const BlogDetail: React.FC = () => {
     }, 15);
   };
 
-  // Get avatar URL for author (copied from Profile.tsx logic)
+  // Get avatar URL for author
   const getAuthorAvatarUrl = (avatarPath?: string) => {
     if (avatarPath) {
       const avatarUrl = avatarPath.startsWith('http')
@@ -46,11 +46,10 @@ const BlogDetail: React.FC = () => {
         : `http://localhost:8080/${avatarPath}`;
       return avatarUrl;
     }
-    // Return default avatar if no author avatar
     return '/avatar-default.png';
   };
 
-  // Tạo danh sách placeholder images từ Ant Design
+  // Tạo danh sách placeholder images
   const placeholderImages = [
     'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
     'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
@@ -59,7 +58,6 @@ const BlogDetail: React.FC = () => {
     'https://gw.alipayobjects.com/zos/rmsportal/rMSqrFDLlkZjfWKXoQpa.png'
   ];
 
-  // Lấy placeholder image ngẫu nhiên
   const getRandomPlaceholder = () => {
     const randomIndex = Math.floor(Math.random() * placeholderImages.length);
     return placeholderImages[randomIndex];
@@ -69,27 +67,22 @@ const BlogDetail: React.FC = () => {
   const getBlogImageUrl = (imagePath?: string) => {
     if (!imagePath) return getRandomPlaceholder();
     
-    // If it's already a full URL, use it as is
     if (imagePath.startsWith('http')) {
       return imagePath;
     }
     
-    // If it's a relative path starting with /uploads/, add backend URL
     if (imagePath.startsWith('/uploads/')) {
       return `http://localhost:8080${imagePath}`;
     }
     
-    // If it's just a filename, assume it's in the blogs folder
     if (!imagePath.includes('/')) {
       return `http://localhost:8080/uploads/images/blogs/${imagePath}`;
     }
     
-    // Default fallback
     return getRandomPlaceholder();
   };
 
   useEffect(() => {
-    // Scroll to top when component mounts
     scrollToTop();
     
     const fetchPost = async () => {
@@ -109,7 +102,6 @@ const BlogDetail: React.FC = () => {
 
         // Fetch related posts
         try {
-          // Thay đổi URL để lấy tất cả bài viết (size=1000)
           const relatedResponse = await fetch(`${API_URL}/public?size=1000`);
           if (relatedResponse.ok) {
             const relatedData = await relatedResponse.json();
@@ -117,7 +109,9 @@ const BlogDetail: React.FC = () => {
             const filtered = allPosts
               .filter((p: BlogPost) => p.id !== id)
               .slice(0, 3);
-            setRelatedPosts(filtered);
+           // ... existing code ...
+
+           setRelatedPosts(filtered);
           }
         } catch (err) {
           console.warn('Failed to fetch related posts:', err);
@@ -158,6 +152,7 @@ const BlogDetail: React.FC = () => {
       'TIN_TUC': { bg: '#f3e5f5', text: '#7b1fa2' },
       'REVIEW': { bg: '#e8f5e8', text: '#388e3c' },
       'HUONG_DAN': { bg: '#fff3e0', text: '#f57c00' },
+      'MEO': { bg: '#fff3e0', text: '#f57c00' },
       default: { bg: '#f5f5f5', text: '#616161' }
     };
     return categoryColors[category] || categoryColors.default;
@@ -165,15 +160,15 @@ const BlogDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="audi-blog-detail-container">
+      <div className="blog-detail-container">
         <div className="blog-detail-skeleton">
-          <div className="skeleton skeleton-breadcrumb"></div>
-          <div className="skeleton skeleton-title-large"></div>
-          <div className="skeleton skeleton-meta-large"></div>
-          <div className="skeleton skeleton-image-large"></div>
-          <div className="skeleton skeleton-content"></div>
-          <div className="skeleton skeleton-content"></div>
-          <div className="skeleton skeleton-content"></div>
+          <div className="blog-skeleton blog-skeleton-breadcrumb"></div>
+          <div className="blog-skeleton blog-skeleton-title-large"></div>
+          <div className="blog-skeleton blog-skeleton-meta-large"></div>
+          <div className="blog-skeleton blog-skeleton-image-large"></div>
+          <div className="blog-skeleton blog-skeleton-content"></div>
+          <div className="blog-skeleton blog-skeleton-content"></div>
+          <div className="blog-skeleton blog-skeleton-content"></div>
         </div>
       </div>
     );
@@ -181,16 +176,16 @@ const BlogDetail: React.FC = () => {
 
   if (error || !post) {
     return (
-      <div className="audi-blog-detail-container">
-        <div className="error-state">
-          <div className="error-icon">❌</div>
+      <div className="blog-detail-container">
+        <div className="blog-error-state">
+          <div className="blog-error-icon">❌</div>
           <h2>Bài viết không tồn tại</h2>
           <p>{error || 'Không thể tìm thấy bài viết này'}</p>
-          <div className="error-actions">
-            <button className="retry-button" onClick={() => navigate('/blog')}>
+          <div className="blog-error-actions">
+            <button className="blog-retry-button" onClick={() => navigate('/blog')}>
               Về trang chủ
             </button>
-            <button className="retry-button secondary" onClick={() => window.location.reload()}>
+            <button className="blog-retry-button secondary" onClick={() => window.location.reload()}>
               Thử lại
             </button>
           </div>
@@ -204,34 +199,32 @@ const BlogDetail: React.FC = () => {
   const authorAvatarUrl = getAuthorAvatarUrl(post.avatarTacGia);
 
   const handleRelatedPostClick = (postId: string) => {
-    // Scroll to top before navigating
     scrollToTop();
-    // Small delay to ensure scroll animation starts
     setTimeout(() => {
       navigate(`/blog/${postId}`);
     }, 100);
   };
 
   return (
-    <div className="audi-blog-detail-container fade-in">
+    <div className="blog-detail-container blog-fade-in">
       {/* Breadcrumb Navigation */}
-      <nav className="breadcrumb">
-        <Link to="/blog" className="breadcrumb-link">
+      <nav className="blog-breadcrumb">
+        <Link to="/blog" className="blog-breadcrumb-link">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" />
           </svg>
           Tin tức & Blog
         </Link>
-        <span className="breadcrumb-separator">/</span>
-        <span className="breadcrumb-current">{post.tieuDe}</span>
+        <span className="blog-breadcrumb-separator">/</span>
+        <span className="blog-breadcrumb-current">{post.tieuDe}</span>
       </nav>
 
       {/* Article Header */}
-      <header className="article-header">
-        <div className="article-meta">
+      <header className="blog-article-header">
+        <div className="blog-article-meta">
           {post.danhMuc && (
             <span 
-              className="audi-blog-category-tag large"
+              className="blog-category-tag large"
               style={{ 
                 backgroundColor: categoryStyle.bg,
                 color: categoryStyle.text 
@@ -240,15 +233,15 @@ const BlogDetail: React.FC = () => {
               {post.danhMuc.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (l: string) => l.toUpperCase())}
             </span>
           )}
-          <div className="article-stats">
-            <span className="stat-item">
+          <div className="blog-article-stats">
+            <span className="blog-stat-item">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M16.2,16.2L11,13V7H12.5V12.2L17,14.9L16.2,16.2Z" />
               </svg>
               {readingTime} phút đọc
             </span>
             {post.luotXem && (
-              <span className="stat-item">
+              <span className="blog-stat-item">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
                 </svg>
@@ -258,13 +251,13 @@ const BlogDetail: React.FC = () => {
           </div>
         </div>
 
-        <h1 className="article-title">{post.tieuDe}</h1>
+        <h1 className="blog-article-title">{post.tieuDe}</h1>
 
-        <div className="audi-blog-author-info">
+        <div className="blog-article-author">
           <img
             src={authorAvatarUrl}
             alt="Author Avatar"
-            className="author-avatar large"
+            className="blog-author-avatar large"
             style={{
               width: 48,
               height: 48,
@@ -283,16 +276,15 @@ const BlogDetail: React.FC = () => {
               console.log('Author avatar loaded successfully:', authorAvatarUrl);
             }}
           />
-          <div className="author-info">
-            <div className="author-name">{post.tenTacGia}</div>
-            <div className="publish-date">{formatDate(post.ngayDang)}</div>
+          <div className="blog-article-author-info">
+            <div className="blog-article-author-name">{post.tenTacGia}</div>
+            <div className="blog-publish-date">{formatDate(post.ngayDang)}</div>
           </div>
         </div>
       </header>
 
-      {/* Featured Image */}
       {post.anhDaiDien && (
-        <div className="article-featured-image">
+        <div className="blog-article-featured-image">
           <img 
             src={getBlogImageUrl(post.anhDaiDien)} 
             alt={post.tieuDe}
@@ -305,20 +297,20 @@ const BlogDetail: React.FC = () => {
       )}
 
       {/* Article Content */}
-      <article className="article-content">
+      <article className="blog-article-content">
         <div 
-          className="prose"
+          className="blog-prose"
           dangerouslySetInnerHTML={{ __html: post.noiDung }} 
         />
       </article>
 
       {/* Tags */}
       {post.theGan && post.theGan.length > 0 && (
-        <div className="article-tags">
+        <div className="blog-article-tags">
           <h3>Thẻ bài viết</h3>
-          <div className="tags-list">
+          <div className="blog-tags-list">
             {post.theGan.map((tag) => (
-              <span key={tag} className="tag-item">
+              <span key={tag} className="blog-tag-item">
                 #{tag}
               </span>
             ))}
@@ -327,10 +319,10 @@ const BlogDetail: React.FC = () => {
       )}
 
       {/* Social Share */}
-      <div className="social-share">
+      <div className="blog-social-share">
         <h3>Chia sẻ bài viết</h3>
-        <div className="share-buttons">
-          <button className="share-btn facebook" onClick={() => {
+        <div className="blog-share-buttons">
+          <button className="blog-share-btn facebook" onClick={() => {
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
           }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -338,7 +330,7 @@ const BlogDetail: React.FC = () => {
             </svg>
             Facebook
           </button>
-          <button className="share-btn twitter" onClick={() => {
+          <button className="blog-share-btn twitter" onClick={() => {
             window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(post.tieuDe)}`, '_blank');
           }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -346,7 +338,7 @@ const BlogDetail: React.FC = () => {
             </svg>
             Twitter
           </button>
-          <button className="share-btn copy" onClick={() => {
+          <button className="blog-share-btn copy" onClick={() => {
             navigator.clipboard.writeText(window.location.href);
           }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -359,17 +351,17 @@ const BlogDetail: React.FC = () => {
 
       {/* Related Posts */}
       {relatedPosts.length > 0 && (
-        <section className="audi-blog-related-posts">
+        <section className="blog-related-posts">
           <h2>Bài viết liên quan</h2>
-          <div className="related-posts-grid">
+          <div className="blog-related-posts-grid">
             {relatedPosts.map((relatedPost) => (
               <div 
                 key={relatedPost.id} 
-                className="related-post-card"
+                className="blog-related-post-card"
                 onClick={() => handleRelatedPostClick(relatedPost.id)}
                 style={{ cursor: 'pointer' }}
               >
-                <div className="related-post-image">
+                <div className="blog-related-post-image">
                   {relatedPost.anhDaiDien ? (
                     <img 
                       src={getBlogImageUrl(relatedPost.anhDaiDien)} 
@@ -380,7 +372,7 @@ const BlogDetail: React.FC = () => {
                       }}
                     />
                   ) : (
-                    <div className="placeholder-image small">
+                    <div className="blog-placeholder-image small">
                       <img 
                         src={getRandomPlaceholder()} 
                         alt="Placeholder"
@@ -389,9 +381,9 @@ const BlogDetail: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <div className="related-post-content">
+                <div className="blog-related-post-content">
                   <h3>{relatedPost.tieuDe}</h3>
-                  <div className="related-post-meta">
+                  <div className="blog-related-post-meta">
                     <span>{relatedPost.tenTacGia}</span>
                     <span>•</span>
                     <span>{formatDate(relatedPost.ngayDang)}</span>

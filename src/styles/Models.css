@@ -367,12 +367,7 @@
   border: 4px solid var(--border-color);
   border-top: 4px solid var(--primary-color);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  /* Static loading indicator - no spinning */
 }
 
 .loading-text {

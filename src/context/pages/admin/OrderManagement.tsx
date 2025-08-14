@@ -665,7 +665,7 @@ const OrderManagement: React.FC = () => {
           {/* Bảng danh sách đơn hàng */}
           {state.isLoading ? (
             <div className="loading">
-              <i className="fas fa-spinner fa-spin"></i> Đang tải...
+              <i className="fas fa-circle-notch"></i> Đang tải...
             </div>
           ) : state.error ? (
             <div className="error-message">

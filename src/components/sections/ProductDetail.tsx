@@ -257,7 +257,9 @@ const ProductDetail: React.FC = () => {
   // Thêm function để fetch bánh xe options
   const fetchBanhXeOptions = async (mauXeId: string, exteriorColorId?: number) => {
     try {
+      // Sử dụng đúng endpoint: /api/v1/mau-xe/{idMau}/banh-xe
       const response = await axios.get(`${BACKEND_URL}/api/v1/mau-xe/${mauXeId}/banh-xe`);
+      console.log('Banh xe options response:', response.data);
       setBanhXeOptions(response.data);
 
       const defaultOption = response.data.find((option: BanhXeOption) => option.laMacDinh);
@@ -278,6 +280,23 @@ const ProductDetail: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching banh xe options:', error);
+      // Thử fallback nếu API không hoạt động
+      try {
+        console.log('Trying fallback to general banh xe API');
+        const fallbackResponse = await axios.get(`${BACKEND_URL}/api/v1/banh-xe`);
+        console.log('Fallback banh xe response:', fallbackResponse.data);
+        setBanhXeOptions(fallbackResponse.data);
+        
+        if (fallbackResponse.data.length > 0) {
+          setDefaultWheel(fallbackResponse.data[0]);
+          setSelectedBanhXe(fallbackResponse.data[0]);
+          if (exteriorColorId) {
+            await handleBanhXeSelect(fallbackResponse.data[0], exteriorColorId);
+          }
+        }
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError);
+      }
     }
   };
 
@@ -1120,7 +1139,7 @@ const ProductDetail: React.FC = () => {
     }
 
     try {
-      // Start fade out transition (same pattern as exterior/interior navigation)
+      // Start fade out transition
       setWheelFadeState('fade-out');
       setWheelSlideDirection('slide-left');
 
@@ -1129,9 +1148,10 @@ const ProductDetail: React.FC = () => {
       console.log('Fetching wheel images from:', specificColorBanhXeUrl);
       
       const specificColorResponse = await axios.get(specificColorBanhXeUrl);
+      console.log('Specific color wheel response:', specificColorResponse.data);
 
       // Kiểm tra xem response.data có phải là array không
-      if (Array.isArray(specificColorResponse.data)) {
+      if (Array.isArray(specificColorResponse.data) && specificColorResponse.data.length > 0) {
         const sortByPosition = (a: any, b: any) => {
           if (!a.viTri) return 1;
           if (!b.viTri) return -1;
@@ -1151,7 +1171,7 @@ const ProductDetail: React.FC = () => {
 
         if (specificBanhXeImages.length > 0) {
           console.log('Found specific color wheel images:', specificBanhXeImages.length);
-          // Use setTimeout to create smooth transition (same as exterior/interior)
+          // Use setTimeout to create smooth transition
           setTimeout(() => {
             setBanhXeImages(removeDuplicateImages(specificBanhXeImages));
             setSelectedBanhXe(banhXe);
@@ -1162,8 +1182,6 @@ const ProductDetail: React.FC = () => {
           }, 280);
           return;
         }
-      } else {
-        console.log('specificColorResponse.data is not an array:', specificColorResponse.data);
       }
 
       // Fallback về ảnh mặc định của bánh xe này
@@ -1171,9 +1189,10 @@ const ProductDetail: React.FC = () => {
       console.log('Fetching default wheel images from:', defaultBanhXeUrl);
       
       const defaultBanhXeResponse = await axios.get(defaultBanhXeUrl);
+      console.log('Default wheel response:', defaultBanhXeResponse.data);
       
       // Kiểm tra xem response.data có phải là array không
-      if (Array.isArray(defaultBanhXeResponse.data)) {
+      if (Array.isArray(defaultBanhXeResponse.data) && defaultBanhXeResponse.data.length > 0) {
         const sortByPosition = (a: any, b: any) => {
           if (!a.viTri) return 1;
           if (!b.viTri) return -1;
@@ -1193,7 +1212,7 @@ const ProductDetail: React.FC = () => {
 
         if (defaultBanhXeImages.length > 0) {
           console.log('Found default wheel images:', defaultBanhXeImages.length);
-          // Use setTimeout to create smooth transition (same as exterior/interior)
+          // Use setTimeout to create smooth transition
           setTimeout(() => {
             setBanhXeImages(removeDuplicateImages(defaultBanhXeImages));
             setSelectedBanhXe(banhXe);
@@ -1204,8 +1223,33 @@ const ProductDetail: React.FC = () => {
           }, 280);
           return;
         }
-      } else {
-        console.log('defaultBanhXeResponse.data is not an array:', defaultBanhXeResponse.data);
+      }
+
+      // Nếu không có ảnh, thử lấy ảnh từ bảng hinh_anh_xe với loaiHinh = 'banh_xe'
+      console.log('Trying fallback to general wheel images');
+      const fallbackResponse = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${id}`);
+      
+      if (Array.isArray(fallbackResponse.data)) {
+        const fallbackWheelImages = fallbackResponse.data
+          .filter((img: any) => img.loaiHinh === 'banh_xe')
+          .sort((a: any, b: any) => {
+            if (!a.viTri) return 1;
+            if (!b.viTri) return -1;
+            return a.viTri - b.viTri;
+          });
+
+        if (fallbackWheelImages.length > 0) {
+          console.log('Found fallback wheel images:', fallbackWheelImages.length);
+          setTimeout(() => {
+            setBanhXeImages(removeDuplicateImages(fallbackWheelImages));
+            setSelectedBanhXe(banhXe);
+            setBanhXeError(null);
+            if (exteriorColorId) setLastWheelColorId(exteriorColorId);
+            setWheelFadeState('fade-in');
+            setActiveWheelTab(0);
+          }, 280);
+          return;
+        }
       }
 
       setBanhXeError(`Mẫu xe này không hỗ trợ bánh xe "${banhXe.ten}". Vui lòng chọn tùy chọn khác.`);
@@ -1213,9 +1257,42 @@ const ProductDetail: React.FC = () => {
       console.error('Error in handleBanhXeSelect:', error);
       // Log thêm thông tin để debug
       if (error && typeof error === 'object' && 'response' in error) {
-        console.log('Error response:', (error as any).response.data);
-        console.log('Error status:', (error as any).response.status);
+        console.log('Error response:', (error as any).response?.data);
+        console.log('Error status:', (error as any).response?.status);
       }
+      
+      // Thử fallback cuối cùng
+      try {
+        console.log('Trying final fallback to general wheel images');
+        const finalFallbackResponse = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${id}`);
+        
+        if (Array.isArray(finalFallbackResponse.data)) {
+          const finalWheelImages = finalFallbackResponse.data
+            .filter((img: any) => img.loaiHinh === 'banh_xe')
+            .sort((a: any, b: any) => {
+              if (!a.viTri) return 1;
+              if (!b.viTri) return -1;
+              return a.viTri - b.viTri;
+            });
+
+          if (finalWheelImages.length > 0) {
+            console.log('Found final fallback wheel images:', finalWheelImages.length);
+            setTimeout(() => {
+              setBanhXeImages(removeDuplicateImages(finalWheelImages));
+              setSelectedBanhXe(banhXe);
+              setBanhXeError(null);
+              if (exteriorColorId) setLastWheelColorId(exteriorColorId);
+              setWheelFadeState('fade-in');
+              setActiveWheelTab(0);
+            }, 280);
+            return;
+          }
+        }
+      } catch (finalError) {
+        console.error('Final fallback also failed:', finalError);
+      }
+      
+      setBanhXeError(`Không thể tải hình ảnh bánh xe "${banhXe.ten}". Vui lòng thử lại sau.`);
     }
   };
 
@@ -1682,7 +1759,7 @@ const resetToDefaultColor = async () => {
                     <span style={{color: '#d5001c', fontWeight: 'bold'}}> (Mặc định)</span>
                   </span>
                   {defaultColor.giaThem > 0 && (
-                    <span className="color-price">+{formatPrice(defaultColor.giaThem)}</span>
+                    <span className="color-price-text">+{formatPrice(defaultColor.giaThem)}</span>
                   )}
                 </div>
               )}
@@ -1720,7 +1797,7 @@ const resetToDefaultColor = async () => {
                       </button>
                       <span className="color-name">{color.ten}</span>
                       {Number(color.giaThem) > 0 && (
-                        <span className="color-price">+{formatPrice(color.giaThem)}</span>
+                        <span className="color-price-text">+{formatPrice(color.giaThem)}</span>
                       )}
                     </div>
                   );

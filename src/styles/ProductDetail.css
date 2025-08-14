@@ -638,7 +638,7 @@
   border-radius: 50%;
   border-top-color: #d5001c;
   border-right-color: #d5001c;
-  animation: spinGlow 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+  /* Removed spinning animation */
   margin-bottom: 30px;
   box-shadow: 0 0 20px rgba(213, 0, 28, 0.3);
   position: relative;
@@ -654,25 +654,7 @@
   border: 2px solid transparent;
   border-top-color: rgba(213, 0, 28, 0.5);
   border-radius: 50%;
-  animation: spinGlow 1.8s linear infinite reverse;
-}
-
-@keyframes spinGlow {
-  0% { 
-    transform: rotate(0deg);
-    box-shadow: 0 0 10px rgba(213, 0, 28, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(213, 0, 28, 0.6);
-  }
-  100% { 
-    transform: rotate(360deg);
-    box-shadow: 0 0 10px rgba(213, 0, 28, 0.3);
-  }
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
+  /* Removed spinning animation */
 }
 
 .back-button_details {
@@ -2413,5 +2395,20 @@
   background-color: rgba(255, 215, 0, 0.3);
   border-color: #ffd700;
   color: #ffd700;
+}
+
+/* Thêm style cho text giá thêm màu ngoại thất - bỏ button style */
+.color-price-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7) !important;
+  margin-top: 4px;
+  font-weight: 400;
+  text-align: center;
+  display: block;
+}
+
+/* Bỏ style cũ của color-price nếu có */
+.color-option .color-price {
+  display: none !important;
 }
 

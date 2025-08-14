@@ -1,14 +1,23 @@
+/* Reset toàn bộ background - SỬA TRIỆT ĐỂ */
+html, body {
+  background: #000000 !important;
+  margin: 0;
+  padding: 0;
+}
+
 .vehicle-configurator {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0;
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+  background: #000000 !important; /* Đen thuần - không gradient */
   min-height: 100vh;
+  margin-top: 50px;
   position: relative;
   overflow-x: hidden;
 }
 
-.vehicle-configurator::before {
+/* LOẠI BỎ HOÀN TOÀN pseudo-element tạo gradient */
+/* .vehicle-configurator::before {
   content: '';
   position: fixed;
   top: 0;
@@ -19,7 +28,7 @@
               radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
-}
+} */
 
 .configurator-header {
   display: flex;
@@ -27,14 +36,16 @@
   align-items: center;
   margin-bottom: 40px;
   padding: 40px 60px 30px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-  backdrop-filter: blur(20px);
+  background: transparent !important; /* Hoàn toàn trong suốt */
+  backdrop-filter: none !important; /* Loại bỏ backdrop filter */
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
   z-index: 1;
+  margin-top: 20px;
 }
 
-.configurator-header::before {
+/* LOẠI BỎ gradient border */
+/* .configurator-header::before {
   content: '';
   position: absolute;
   bottom: 0;
@@ -42,17 +53,18 @@
   right: 0;
   height: 1px;
   background: linear-gradient(90deg, transparent 0%, rgba(213, 0, 28, 0.5) 50%, transparent 100%);
-}
+} */
 
 .configurator-header h2 {
   color: #ffffff;
   font-size: 2.5rem;
   font-weight: 200;
   margin: 0;
-  background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+  /* LOẠI BỎ gradient text */
+  /* background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
+  background-clip: text; */
   letter-spacing: -0.01em;
 }
 
@@ -67,20 +79,20 @@
   height: auto;
   border-radius: 50px;
   font-weight: 500;
-  backdrop-filter: blur(10px);
+  backdrop-filter: none !important; /* Loại bỏ backdrop filter */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
 
 .header-actions .ant-btn:not(.ant-btn-primary) {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: rgba(255, 255, 255, 0.1) !important; /* Đơn giản hóa */
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
 }
 
 .header-actions .ant-btn-primary {
-  background: linear-gradient(135deg, #d5001c 0%, #b8001a 100%);
+  background: #d5001c !important; /* Đơn giản hóa */
   border: none;
   box-shadow: 0 8px 25px rgba(213, 0, 28, 0.3);
 }
@@ -91,12 +103,13 @@
 }
 
 .header-actions .ant-btn-primary:hover {
-  background: linear-gradient(135deg, #e6001f 0%, #d5001c 100%);
+  background: #e6001f !important; /* Đơn giản hóa */
   box-shadow: 0 15px 35px rgba(213, 0, 28, 0.4);
   transform: translateY(-2px) scale(1.02);
 }
 
-.header-actions .ant-btn::before {
+/* LOẠI BỎ hover effect gradient */
+/* .header-actions .ant-btn::before {
   content: '';
   position: absolute;
   top: 0;
@@ -109,7 +122,7 @@
 
 .header-actions .ant-btn:hover::before {
   left: 100%;
-}
+} */
 
 .configurator-content {
   display: flex;
@@ -118,62 +131,245 @@
   padding: 0 60px 60px;
   position: relative;
   z-index: 1;
+  margin-top: 20px;
+  background: transparent !important; /* Đảm bảo trong suốt */
 }
 
+/* CẬP NHẬT STEPS CONTAINER - THIẾT KẾ CHUYÊN NGHIỆP */
 .steps-container {
   margin-bottom: 50px;
-  padding: 30px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-  backdrop-filter: blur(15px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 40px 50px;
+  background: rgba(255, 255, 255, 0.03) !important; /* Background tinh tế */
+  backdrop-filter: blur(20px) !important; /* Hiệu ứng blur chuyên nghiệp */
+  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Thêm hiệu ứng glow cho container */
+.steps-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(213, 0, 28, 0.05) 0%, 
+    transparent 30%, 
+    transparent 70%, 
+    rgba(255, 255, 255, 0.02) 100%);
+  border-radius: 25px;
+  pointer-events: none;
+}
+
+/* CẬP NHẬT ANT STEPS - THIẾT KẾ HIỆN ĐẠI */
 .steps-container .ant-steps {
   color: #ffffff;
+  position: relative;
+  z-index: 1;
 }
 
-.steps-container .ant-steps-item-title {
-  color: rgba(255, 255, 255, 0.8) !important;
-  font-weight: 500;
-}
-
-.steps-container .ant-steps-item-process .ant-steps-item-title {
-  color: #d5001c !important;
-}
-
-.steps-container .ant-steps-item-finish .ant-steps-item-title {
-  color: #ffffff !important;
-}
-
+/* Cải thiện icon steps */
 .steps-container .ant-steps-item-icon {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 2px solid rgba(255, 255, 255, 0.15) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hiệu ứng glow cho icon */
+.steps-container .ant-steps-item-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.steps-container .ant-steps-item-icon:hover::before {
+  opacity: 1;
+}
+
+/* Icon cho step đang active */
+.steps-container .ant-steps-item-process .ant-steps-item-icon {
+  background: linear-gradient(135deg, #d5001c 0%, #b8001a 100%) !important;
+  border: 2px solid #d5001c !important;
+  box-shadow: 
+    0 0 0 4px rgba(213, 0, 28, 0.2),
+    0 8px 25px rgba(213, 0, 28, 0.3) !important;
+  transform: scale(1.1);
+}
+
+/* Icon cho step đã hoàn thành */
+.steps-container .ant-steps-item-finish .ant-steps-item-icon {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Icon cho step chưa active */
+.steps-container .ant-steps-item-wait .ant-steps-item-icon {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 2px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Cải thiện text steps */
+.steps-container .ant-steps-item-title {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-weight: 500 !important;
+  font-size: 16px !important;
+  transition: all 0.3s ease !important;
+  margin-top: 8px !important;
+}
+
+/* Text cho step đang active */
+.steps-container .ant-steps-item-process .ant-steps-item-title {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  text-shadow: 0 0 10px rgba(213, 0, 28, 0.3) !important;
+}
+
+/* Text cho step đã hoàn thành */
+.steps-container .ant-steps-item-finish .ant-steps-item-title {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500 !important;
+}
+
+/* Text cho step chưa active */
+.steps-container .ant-steps-item-wait .ant-steps-item-title {
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-weight: 400 !important;
+}
+
+/* Cải thiện description */
+.steps-container .ant-steps-item-description {
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-size: 14px !important;
+  margin-top: 4px !important;
+}
+
+.steps-container .ant-steps-item-process .ant-steps-item-description {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Cải thiện connector line */
+.steps-container .ant-steps-item-tail {
   background: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
+  height: 2px !important;
+  margin-top: 24px !important;
+}
+
+.steps-container .ant-steps-item-finish .ant-steps-item-tail {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%) !important;
+}
+
+/* Hiệu ứng hover cho toàn bộ step */
+.steps-container .ant-steps-item {
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+  padding: 8px !important;
+  border-radius: 15px !important;
+  margin: 0 4px !important;
+}
+
+.steps-container .ant-steps-item:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  transform: translateY(-2px) !important;
+}
+
+.steps-container .ant-steps-item-process {
+  background: rgba(213, 0, 28, 0.1) !important;
+  box-shadow: 0 4px 20px rgba(213, 0, 28, 0.2) !important;
+}
+
+/* Animation cho icon khi active */
+@keyframes stepPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 4px rgba(213, 0, 28, 0.2), 0 8px 25px rgba(213, 0, 28, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 6px rgba(213, 0, 28, 0.3), 0 12px 35px rgba(213, 0, 28, 0.4);
+  }
 }
 
 .steps-container .ant-steps-item-process .ant-steps-item-icon {
-  background: #d5001c !important;
-  border-color: #d5001c !important;
+  animation: stepPulse 2s ease-in-out infinite !important;
 }
 
-.steps-container .ant-steps-item-finish .ant-steps-item-icon {
-  background: rgba(255, 255, 255, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
+/* Responsive design cho steps */
+@media (max-width: 768px) {
+  .steps-container {
+    padding: 25px 20px;
+    margin-bottom: 30px;
+  }
+  
+  .steps-container .ant-steps-item-icon {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .steps-container .ant-steps-item-title {
+    font-size: 14px !important;
+  }
+  
+  .steps-container .ant-steps-item-description {
+    font-size: 12px !important;
+  }
+  
+  .steps-container .ant-steps-item {
+    padding: 6px !important;
+    margin: 0 2px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .steps-container {
+    padding: 20px 15px;
+  }
+  
+  .steps-container .ant-steps-item-icon {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  
+  .steps-container .ant-steps-item-title {
+    font-size: 13px !important;
+  }
 }
 
 .step-content-container {
   min-height: 500px;
   padding: 40px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
-  backdrop-filter: blur(20px);
+  background: transparent !important; /* Hoàn toàn trong suốt */
+  backdrop-filter: none !important; /* Loại bỏ backdrop filter */
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: none !important; /* Loại bỏ box shadow */
   position: relative;
   overflow: hidden;
 }
 
-.step-content-container::before {
+/* LOẠI BỎ hover effect gradient */
+/* .step-content-container::before {
   content: '';
   position: absolute;
   top: -2px;
@@ -189,21 +385,23 @@
 
 .step-content-container:hover::before {
   opacity: 0.3;
-}
+} */
 
 .step-content h3 {
   color: #ffffff !important;
   font-size: 1.8rem;
   font-weight: 300;
   margin-bottom: 30px;
-  background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+  /* LOẠI BỎ gradient text */
+  /* background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
+  background-clip: text; */
 }
 
 .step-content {
   max-width: 100%;
+  background: transparent !important; /* Đảm bảo trong suốt */
 }
 
 .step-navigation {
@@ -220,19 +418,19 @@
   font-weight: 500;
   font-size: 1rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10px);
+  backdrop-filter: none !important; /* Loại bỏ backdrop filter */
   position: relative;
   overflow: hidden;
 }
 
 .step-navigation .ant-btn:not(.ant-btn-primary) {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: rgba(255, 255, 255, 0.1) !important; /* Đơn giản hóa */
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
 }
 
 .step-navigation .ant-btn-primary {
-  background: linear-gradient(135deg, #d5001c 0%, #b8001a 100%);
+  background: #d5001c !important; /* Đơn giản hóa */
   border: none;
   box-shadow: 0 8px 25px rgba(213, 0, 28, 0.3);
 }
@@ -243,12 +441,13 @@
 }
 
 .step-navigation .ant-btn-primary:hover {
-  background: linear-gradient(135deg, #e6001f 0%, #d5001c 100%);
+  background: #e6001f !important; /* Đơn giản hóa */
   box-shadow: 0 15px 35px rgba(213, 0, 28, 0.4);
   transform: translateY(-2px) scale(1.02);
 }
 
-.step-navigation .ant-btn::before {
+/* LOẠI BỎ hover effect gradient */
+/* .step-navigation .ant-btn::before {
   content: '';
   position: absolute;
   top: 0;
@@ -261,15 +460,15 @@
 
 .step-navigation .ant-btn:hover::before {
   left: 100%;
-}
+} */
 
-/* Color cards */
+/* Color cards - Đơn giản hóa */
 .color-card {
   text-align: center;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 2px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
-  backdrop-filter: blur(15px);
+  background: rgba(255, 255, 255, 0.05) !important; /* Đơn giản hóa */
+  backdrop-filter: none !important; /* Loại bỏ backdrop filter */
   border-radius: 20px;
   overflow: hidden;
   height: 100%;
@@ -279,7 +478,8 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
-.color-card::before {
+/* LOẠI BỎ hover effect gradient */
+/* .color-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -292,7 +492,7 @@
 
 .color-card:hover::before {
   left: 100%;
-}
+} */
 
 .color-card:hover {
   transform: translateY(-8px) scale(1.02);
@@ -302,7 +502,7 @@
 
 .color-card.selected {
   border-color: #d5001c;
-  background: linear-gradient(135deg, rgba(213, 0, 28, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: rgba(213, 0, 28, 0.1) !important; /* Đơn giản hóa */
   box-shadow: 0 0 0 3px rgba(213, 0, 28, 0.3), 0 12px 30px rgba(213, 0, 28, 0.2);
   transform: translateY(-5px);
   animation: pulseGlow 2s ease-in-out infinite;
@@ -329,7 +529,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.05) 100%);
+  background: rgba(0, 0, 0, 0.05) !important; /* Đơn giản hóa */
 }
 
 .color-car-image {
@@ -377,19 +577,20 @@
   font-weight: 500;
 }
 
-/* Option cards */
+/* Option cards - Đơn giản hóa */
 .option-card {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 2px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
-  backdrop-filter: blur(15px);
+  background: rgba(255, 255, 255, 0.05) !important; /* Đơn giản hóa */
+  backdrop-filter: none !important; /* Loại bỏ backdrop filter */
   border-radius: 16px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   position: relative;
   overflow: hidden;
 }
 
-.option-card::before {
+/* LOẠI BỎ hover effect gradient */
+/* .option-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -402,7 +603,7 @@
 
 .option-card:hover::before {
   left: 100%;
-}
+} */
 
 .option-card:hover {
   transform: translateY(-6px);
@@ -412,7 +613,7 @@
 
 .option-card.selected {
   border-color: #d5001c;
-  background: linear-gradient(135deg, rgba(213, 0, 28, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  background: rgba(213, 0, 28, 0.1) !important; /* Đơn giản hóa */
   box-shadow: 0 0 0 2px rgba(213, 0, 28, 0.3), 0 12px 30px rgba(213, 0, 28, 0.2);
   transform: translateY(-4px);
 }
@@ -444,19 +645,20 @@
   color: #8c8c8c;
 }
 
-/* Interior cards */
+/* Interior cards - Đơn giản hóa */
 .interior-card {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 2px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
-  backdrop-filter: blur(15px);
+  background: rgba(255, 255, 255, 0.05) !important; /* Đơn giản hóa */
+  backdrop-filter: none !important; /* Loại bỏ backdrop filter */
   border-radius: 16px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   position: relative;
   overflow: hidden;
 }
 
-.interior-card::before {
+/* LOẠI BỎ hover effect gradient */
+/* .interior-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -469,7 +671,7 @@
 
 .interior-card:hover::before {
   left: 100%;
-}
+} */
 
 .interior-card:hover {
   transform: translateY(-6px);
@@ -479,7 +681,7 @@
 
 .interior-card.selected {
   border-color: #d5001c;
-  background: linear-gradient(135deg, rgba(213, 0, 28, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  background: rgba(213, 0, 28, 0.1) !important; /* Đơn giản hóa */
   box-shadow: 0 0 0 2px rgba(213, 0, 28, 0.3), 0 12px 30px rgba(213, 0, 28, 0.2);
   transform: translateY(-4px);
 }
@@ -513,10 +715,10 @@
   color: #52c41a;
 }
 
-/* Summary card */
+/* Summary card - Đơn giản hóa */
 .summary-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
-  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.05) !important; /* Đơn giản hóa */
+  backdrop-filter: none !important; /* Loại bỏ backdrop filter */
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-radius: 20px !important;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
@@ -524,7 +726,8 @@
   overflow: hidden;
 }
 
-.summary-card::before {
+/* LOẠI BỎ gradient border */
+/* .summary-card::before {
   content: '';
   position: absolute;
   top: -1px;
@@ -535,7 +738,7 @@
   border-radius: 21px;
   z-index: -1;
   opacity: 0.5;
-}
+} */
 
 .summary-card .ant-card-head {
   background: transparent !important;
@@ -563,7 +766,7 @@
 .price-summary {
   margin-top: 30px;
   padding: 25px;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.05) 100%);
+  background: rgba(0, 0, 0, 0.1) !important; /* Đơn giản hóa */
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -610,7 +813,8 @@
   position: relative;
 }
 
-.price-item.total::before {
+/* LOẠI BỎ gradient border */
+/* .price-item.total::before {
   content: '';
   position: absolute;
   top: -1px;
@@ -618,7 +822,7 @@
   right: 0;
   height: 2px;
   background: linear-gradient(90deg, #d5001c 0%, transparent 100%);
-}
+} */
 
 .price-item.total .ant-typography {
   color: #d5001c !important;
@@ -702,8 +906,8 @@
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
+/* Dark mode support - LOẠI BỎ */
+/* @media (prefers-color-scheme: dark) {
   .vehicle-configurator {
     background: #1f1f1f;
     color: #fff;
@@ -722,15 +926,15 @@
     background: #1f1f1f;
     border-color: #434343;
   }
-} 
+} */ 
 
-/* Force Light + Pro Animations */
-.force-light { color-scheme: light; }
+/* Force Light + Pro Animations - LOẠI BỎ */
+/* .force-light { color-scheme: light; }
 
 .force-light .vehicle-configurator { background:#ffffff; color:#0f0f0f; }
 .force-light .step-content-container { background:#ffffff; border:1px solid #f0f0f0; }
 .force-light .summary-card { background:#ffffff; border-color:#f0f0f0; }
-.force-light .preview-panel { background:#ffffff; border-color:#f0f0f0; }
+.force-light .preview-panel { background:#ffffff; border-color:#f0f0f0; } */
 
 /* Keyframes */
 @keyframes fadeIn { from{opacity:0} to{opacity:1} }
@@ -830,7 +1034,7 @@
   font-size: 14px !important;
   padding: 6px 12px !important;
   border-radius: 20px !important;
-  background: linear-gradient(135deg, #1890ff, #40a9ff) !important;
+  background: #1890ff !important; /* Đơn giản hóa */
   text-align: center !important;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
 }
@@ -856,7 +1060,7 @@
 
 .metallic-badge {
   display: inline-block;
-  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  background: #ffd700 !important; /* Đơn giản hóa */
   color: #000 !important;
   padding: 4px 12px;
   border-radius: 20px;
@@ -868,7 +1072,7 @@
 /* Summary cards */
 .summary-card {
   margin-bottom: 24px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  background: rgba(255, 255, 255, 0.05) !important; /* Đơn giản hóa */
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -982,7 +1186,7 @@
 
 .card-back {
   transform: rotateY(180deg);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea !important; /* Đơn giản hóa */
   color: white;
   display: flex;
   flex-direction: column;
@@ -1133,7 +1337,7 @@
   font-size: 14px !important;
   padding: 6px 12px !important;
   border-radius: 20px !important;
-  background: linear-gradient(135deg, #1890ff, #40a9ff) !important;
+  background: #1890ff !important; /* Đơn giản hóa */
   text-align: center !important;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
 } 
@@ -1148,3 +1352,168 @@
 
 .value-right.price-add { color: #1890ff !important; }
 .value-right.price-free { color: #52c41a !important; }
+
+/* Auth Required Section - THÊM MỚI */
+.auth-required-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+}
+
+.auth-required-card {
+  max-width: 600px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+}
+
+.auth-required-content {
+  text-align: center;
+  padding: 40px;
+}
+
+.auth-required-icon {
+  font-size: 64px;
+  color: #d5001c;
+  margin-bottom: 24px;
+  display: block;
+}
+
+.auth-required-title {
+  color: #ffffff !important;
+  font-size: 2rem !important;
+  font-weight: 300 !important;
+  margin-bottom: 16px !important;
+  letter-spacing: -0.01em !important;
+}
+
+.auth-required-description {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 16px !important;
+  line-height: 1.6 !important;
+  margin-bottom: 32px !important;
+  display: block !important;
+}
+
+.auth-required-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.auth-login-btn {
+  background: #d5001c !important;
+  border: none !important;
+  border-radius: 25px !important;
+  height: 48px !important;
+  padding: 0 32px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 8px 25px rgba(213, 0, 28, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.auth-login-btn:hover {
+  background: #e6001f !important;
+  box-shadow: 0 12px 35px rgba(213, 0, 28, 0.4) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+}
+
+.auth-back-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  border-radius: 25px !important;
+  height: 48px !important;
+  padding: 0 32px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.auth-back-btn:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-2px) !important;
+}
+
+.auth-benefits-alert {
+  background: rgba(24, 144, 255, 0.1) !important;
+  border: 1px solid rgba(24, 144, 255, 0.3) !important;
+  border-radius: 12px !important;
+  margin-top: 24px !important;
+}
+
+.auth-benefits-alert .ant-alert-message {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+}
+
+.auth-benefits-alert .ant-alert-description {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 14px !important;
+}
+
+.auth-benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0 0;
+  text-align: left;
+}
+
+.auth-benefits-list li {
+  padding: 6px 0;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 14px !important;
+  position: relative;
+  padding-left: 20px;
+}
+
+.auth-benefits-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #52c41a;
+  font-weight: bold;
+}
+
+/* Responsive cho Auth Required */
+@media (max-width: 768px) {
+  .auth-required-section {
+    padding: 20px;
+    min-height: 70vh;
+  }
+  
+  .auth-required-content {
+    padding: 30px 20px;
+  }
+  
+  .auth-required-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+  }
+  
+  .auth-required-title {
+    font-size: 1.5rem !important;
+  }
+  
+  .auth-required-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .auth-login-btn,
+  .auth-back-btn {
+    width: 100%;
+    max-width: 280px;
+  }
+}

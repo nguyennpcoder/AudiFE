@@ -1,0 +1,95 @@
+import React, { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Result, Button, Card, Typography, Space } from 'antd';
+import { CheckCircleOutlined, HomeOutlined, ShoppingOutlined } from '@ant-design/icons';
+import axios from 'axios';
+
+const { Title, Text } = Typography;
+const BACKEND_URL = 'http://localhost:8080/api/v1';
+
+const PaymentSuccess: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [orderInfo, setOrderInfo] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const orderId = searchParams.get('orderId');
+    const transactionId = searchParams.get('transactionId');
+    
+    if (orderId) {
+      loadOrderInfo(orderId, transactionId);
+    }
+  }, [searchParams]);
+
+  const loadOrderInfo = async (orderId: string, transactionId: string | null) => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/don-hang/${orderId}`);
+      setOrderInfo(response.data);
+    } catch (error) {
+      console.error('Lỗi khi tải thông tin đơn hàng:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <div>Đang xử lý...</div>;
+  }
+
+  return (
+    <div style={{ 
+      maxWidth: 800, 
+      margin: '50px auto', 
+      padding: '20px',
+      textAlign: 'center'
+    }}>
+      <Result
+        status="success"
+        icon={<CheckCircleOutlined style={{ fontSize: 72, color: '#52c41a' }} />}
+        title="Thanh toán thành công!"
+        subTitle="Đơn hàng của bạn đã được xác nhận và thanh toán thành công."
+        extra={[
+          <Button 
+            type="primary" 
+            key="home"
+            icon={<HomeOutlined />}
+            onClick={() => navigate('/')}
+          >
+            Về trang chủ
+          </Button>,
+          <Button 
+            key="orders"
+            icon={<ShoppingOutlined />}
+            onClick={() => navigate('/orders')}
+          >
+            Xem đơn hàng
+          </Button>
+        ]}
+      />
+      
+      {orderInfo && (
+        <Card style={{ marginTop: 24 }}>
+          <Title level={4}>Thông tin đơn hàng</Title>
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <div>
+              <Text strong>Mã đơn hàng:</Text> {orderInfo.maDonHang}
+            </div>
+            <div>
+              <Text strong>Số tiền đã thanh toán:</Text> {orderInfo.tienDatCoc?.toLocaleString('vi-VN')} VNĐ
+            </div>
+            <div>
+              <Text strong>Phương thức thanh toán:</Text> {orderInfo.phuongThucThanhToan}
+            </div>
+            <div>
+              <Text strong>Trạng thái:</Text> 
+              <Text type="success"> Đã thanh toán</Text>
+            </div>
+          </Space>
+        </Card>
+      )}
+    </div>
+  );
+};
+
+export default PaymentSuccess; 

@@ -26,14 +26,17 @@ import {
   PlusOutlined,
   ReloadOutlined
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { cauHinhService, CauHinhTuyChinh } from '../../services/cauHinhService';
 import '../../styles/MyAudi.css';
+import { useScrollToTop } from '../../hooks/useScrollToTop';
 
 const { Title, Text, Paragraph } = Typography;
 
 const MyAudi: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [cauHinhList, setCauHinhList] = useState<CauHinhTuyChinh[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCauHinh, setSelectedCauHinh] = useState<CauHinhTuyChinh | null>(null);
@@ -49,7 +52,7 @@ const MyAudi: React.FC = () => {
   const loadCauHinhList = async () => {
     try {
       setLoading(true);
-      const data = await cauHinhService.getCauHinhByNguoiDung(user!.userId);
+      const data = await cauHinhService.getCauHinhByNguoiDung(user!.userId!);
       setCauHinhList(data);
       console.log('Danh sách cấu hình:', data);
     } catch (error) {
@@ -66,8 +69,8 @@ const MyAudi: React.FC = () => {
   };
 
   const handleEdit = (cauHinh: CauHinhTuyChinh) => {
-    // Chuyển đến trang cấu hình xe
-    window.location.href = `/configure/${cauHinh.idMau}?configId=${cauHinh.id}`;
+    // SỬA: Sử dụng navigate thay vì window.location.href
+    navigate(`/configure/${cauHinh.idMau}?configId=${cauHinh.id}`);
   };
 
   const handleDelete = async (id: number) => {
@@ -112,6 +115,8 @@ const MyAudi: React.FC = () => {
     const date = new Date(dateString);
     return date.toLocaleDateString('vi-VN');
   };
+
+  useScrollToTop();
 
   if (!isAuthenticated) {
     return (
@@ -187,9 +192,11 @@ const MyAudi: React.FC = () => {
                     cancelText="Hủy"
                   >
                     <Tooltip title="Xóa">
-                      <DeleteOutlined 
-                        style={{ color: '#ff4d4f' }}
+                      <Button 
+                        type="text" 
+                        icon={<DeleteOutlined style={{ color: '#ff4d4f' }} />}
                         loading={deleting === cauHinh.id}
+                        style={{ padding: 0, border: 'none' }}
                       />
                     </Tooltip>
                   </Popconfirm>

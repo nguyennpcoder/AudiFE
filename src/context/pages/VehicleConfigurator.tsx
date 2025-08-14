@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Steps, Button, Card, Row, Col, Typography, Divider, message, Spin, Progress } from "antd";
+import { Steps, Button, Card, Row, Col, Typography, Divider, message, Spin, Progress, Alert } from "antd";
 import { 
   CarOutlined, 
   BgColorsOutlined, 
@@ -12,11 +12,15 @@ import {
   ShareAltOutlined,
   DownloadOutlined,
   ShoppingCartOutlined,
-  GiftOutlined
+  GiftOutlined,
+  CreditCardOutlined, // THÊM icon này
+  LockOutlined, // THÊM icon này
+  LoginOutlined // THÊM icon này
 } from "@ant-design/icons";
 import "../../styles/VehicleConfigurator.css";
 import { useAuth } from "../AuthContext"; // Thêm import này
 import { cauHinhService } from "../../services/cauHinhService";
+import { useScrollToTop } from "../../hooks/useScrollToTop"; // THÊM import này
 
 
 const { Title, Text, Paragraph } = Typography;
@@ -101,6 +105,84 @@ const VehicleConfigurator: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth(); // Thêm hook này
   
+  // THÊM: Kiểm tra đăng nhập ngay từ đầu
+  useEffect(() => {
+    if (!isAuthenticated) {
+      message.warning('Vui lòng đăng nhập để tùy chỉnh cấu hình xe');
+      navigate('/login', { 
+        state: { 
+          from: `/configurator/${id}`,
+          message: 'Vui lòng đăng nhập để tùy chỉnh cấu hình xe'
+        } 
+      });
+      return;
+    }
+  }, [isAuthenticated, navigate, id]);
+
+  // THÊM: Hiển thị màn hình bảo vệ nếu chưa đăng nhập
+  if (!isAuthenticated) {
+    return (
+      <div className="vehicle-configurator-container">
+        <div className="auth-required-section">
+          <Card className="auth-required-card">
+            <div className="auth-required-content">
+              <LockOutlined className="auth-required-icon" />
+              <Title level={2} className="auth-required-title">
+                Yêu cầu đăng nhập
+              </Title>
+              <Text className="auth-required-description">
+                Bạn cần đăng nhập để có thể tùy chỉnh cấu hình xe và lưu các tùy chọn của mình.
+              </Text>
+              
+              <div className="auth-required-actions">
+                <Button 
+                  type="primary" 
+                  size="large"
+                  icon={<LoginOutlined />}
+                  onClick={() => navigate('/login', { 
+                    state: { 
+                      from: `/configurator/${id}`,
+                      message: 'Vui lòng đăng nhập để tùy chỉnh cấu hình xe'
+                    } 
+                  })}
+                  className="auth-login-btn"
+                >
+                  Đăng nhập ngay
+                </Button>
+                
+                <Button 
+                  size="large"
+                  onClick={() => navigate('/')}
+                  className="auth-back-btn"
+                >
+                  Quay về trang chủ
+                </Button>
+              </div>
+              
+              <Alert
+                message="Lợi ích khi đăng nhập"
+                description={
+                  <ul className="auth-benefits-list">
+                    <li>Lưu và quản lý các cấu hình xe yêu thích</li>
+                    <li>So sánh các tùy chọn khác nhau</li>
+                    <li>Nhận thông báo về khuyến mãi và ưu đãi</li>
+                    <li>Đặt hàng xe với cấu hình đã tùy chỉnh</li>
+                  </ul>
+                }
+                type="info"
+                showIcon
+                className="auth-benefits-alert"
+              />
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // THÊM: Sử dụng custom hook để scroll to top
+  useScrollToTop();
+  
   // State cho dữ liệu
   const [mauXe, setMauXe] = useState<MauXe | null>(null);
   const [danhSachMauSac, setDanhSachMauSac] = useState<MauSac[]>([]);
@@ -132,10 +214,16 @@ const VehicleConfigurator: React.FC = () => {
   const [danhSachKhuyenMai, setDanhSachKhuyenMai] = useState<KhuyenMai[]>([]);
   const [khuyenMaiDuocChon, setKhuyenMaiDuocChon] = useState<KhuyenMai | null>(null);
 
-  // Load dữ liệu ban đầu
+  // THÊM state cho modal đặt hàng
+  const [orderModalVisible, setOrderModalVisible] = useState(false);
+  const [orderLoading, setOrderLoading] = useState(false);
+
+  // Load dữ liệu ban đầu - CHỈ CHẠY KHI ĐÃ ĐĂNG NHẬP
   useEffect(() => {
-    loadInitialData();
-  }, [id]);
+    if (isAuthenticated) {
+      loadInitialData();
+    }
+  }, [id, isAuthenticated]);
 
   const loadInitialData = async () => {
     try {
@@ -235,7 +323,7 @@ const VehicleConfigurator: React.FC = () => {
       // Load khuyến mãi
       await loadKhuyenMai();
       
-      // Set màu sắc đầu tiên làm mặc định và load hình ảnh
+      // SỬA: Load hình ảnh cho TẤT CẢ màu sắc ngay từ đầu
       if (mauSacResponse.data.length > 0) {
         const defaultColor = mauSacResponse.data[0];
         setCauHinhHienTai(prev => ({
@@ -243,8 +331,9 @@ const VehicleConfigurator: React.FC = () => {
           idMauSac: defaultColor.id
         }));
         
-        // Load hình ảnh cho màu mặc định
-        await loadColorImages(defaultColor.id);
+        // Load hình ảnh cho TẤT CẢ màu sắc cùng lúc
+        console.log('Bắt đầu load hình ảnh cho tất cả màu sắc...');
+        await loadAllColorImages(mauSacResponse.data);
       }
       
     } catch (error) {
@@ -255,7 +344,57 @@ const VehicleConfigurator: React.FC = () => {
     }
   };
 
-  // Load hình ảnh theo màu sắc - BỎ /api/v1
+  // THÊM FUNCTION MỚI: Load hình ảnh cho tất cả màu sắc
+  const loadAllColorImages = async (danhSachMauSac: MauSac[]) => {
+    try {
+      console.log(`Loading images for all ${danhSachMauSac.length} colors...`);
+      
+      // Tạo array các promise để load song song
+      const imagePromises = danhSachMauSac.map(async (mauSac) => {
+        try {
+          console.log(`Loading images for color: ${mauSac.ten} (ID: ${mauSac.id})`);
+          
+          const response = await axios.get(`${BACKEND_URL}/hinh-anh-theo-mau/mau-xe/${id}/mau-sac/${mauSac.id}`);
+          
+          if (response.data && response.data.length > 0) {
+            // Sắp xếp theo vị trí
+            const sortedImages = response.data.sort((a: HinhAnhXeTheoMauDTO, b: HinhAnhXeTheoMauDTO) => {
+              if (!a.viTri) return 1;
+              if (!b.viTri) return -1;
+              return a.viTri - b.viTri;
+            });
+            
+            return { colorId: mauSac.id, images: sortedImages };
+          } else {
+            console.log(`No images found for color: ${mauSac.ten}`);
+            return { colorId: mauSac.id, images: [] };
+          }
+        } catch (error) {
+          console.error(`Error loading images for color ${mauSac.ten}:`, error);
+          return { colorId: mauSac.id, images: [] };
+        }
+      });
+      
+      // Chờ tất cả promise hoàn thành
+      const results = await Promise.all(imagePromises);
+      
+      // Cập nhật state với tất cả hình ảnh
+      const newHinhAnhXeTheoMau: { [key: number]: HinhAnhXeTheoMauDTO[] } = {};
+      results.forEach(result => {
+        newHinhAnhXeTheoMau[result.colorId] = result.images;
+      });
+      
+      setHinhAnhXeTheoMau(newHinhAnhXeTheoMau);
+      
+      console.log('Đã load xong hình ảnh cho tất cả màu sắc:', newHinhAnhXeTheoMau);
+      
+    } catch (error) {
+      console.error("Lỗi khi load tất cả hình ảnh màu sắc:", error);
+      message.warning('Có lỗi khi load một số hình ảnh màu sắc');
+    }
+  };
+
+  // Load hình ảnh theo màu sắc - GIỮ LẠI ĐỂ DÙNG KHI CẦN
   const loadColorImages = async (colorId: number) => {
     try {
       console.log(`Loading images for color ID: ${colorId}, model ID: ${id}`);
@@ -420,7 +559,7 @@ const VehicleConfigurator: React.FC = () => {
     }
   }, [cauHinhHienTai.idMauSac, cauHinhHienTai.danhSachIdTuyChon, cauHinhHienTai.idNoiThat]);
 
-  // Xử lý chọn màu sắc
+  // Xử lý chọn màu sắc - SỬA: Không cần load lại hình ảnh nữa
   const handleChonMauSac = async (mauSac: MauSac) => {
     console.log('Chọn màu sắc:', mauSac);
     setCauHinhHienTai(prev => ({
@@ -428,8 +567,8 @@ const VehicleConfigurator: React.FC = () => {
       idMauSac: mauSac.id
     }));
     
-    // Load hình ảnh cho màu sắc mới
-    await loadColorImages(mauSac.id);
+    // BỎ: Không cần load hình ảnh nữa vì đã load sẵn
+    // await loadColorImages(mauSac.id);
   };
 
   // Xử lý chọn tùy chọn
@@ -1066,6 +1205,42 @@ const VehicleConfigurator: React.FC = () => {
     );
   }
 
+  // THÊM function xử lý đặt hàng ngay
+  const handleDatHangNgay = async () => {
+    try {
+      // Kiểm tra xem user đã đăng nhập chưa
+      if (!isAuthenticated || !user) {
+        message.error("Vui lòng đăng nhập để đặt hàng");
+        return;
+      }
+
+      // Kiểm tra cấu hình đã hoàn thành chưa
+      if (!cauHinhHienTai.idMauSac || cauHinhHienTai.tongGia <= 0) {
+        message.error("Vui lòng hoàn thành cấu hình xe trước khi đặt hàng");
+        return;
+      }
+
+      // Lưu cấu hình trước
+      const configId = await handleLuuCauHinh();
+      if (!configId) {
+        message.error('Không thể lưu cấu hình');
+        return;
+      }
+
+      // Chuyển đến trang đặt hàng
+      navigate(`/order/${configId}`, { 
+        state: { 
+          config: cauHinhHienTai,
+          fromConfigurator: true 
+        } 
+      });
+
+    } catch (error) {
+      console.error("Lỗi khi đặt hàng:", error);
+      message.error("Không thể đặt hàng");
+    }
+  };
+
   return (
     <div className="vehicle-configurator">
       {/* Header */}
@@ -1099,8 +1274,14 @@ const VehicleConfigurator: React.FC = () => {
           </Button>
           <Button 
             type="primary" 
-            icon={<ShoppingCartOutlined />}
-            onClick={() => navigate('/quotation/new', { state: { config: cauHinhHienTai } })}
+            icon={<CreditCardOutlined />}
+            onClick={handleDatHangNgay}
+            loading={orderLoading}
+            style={{ 
+              background: 'linear-gradient(135deg, #52c41a, #73d13d)',
+              border: 'none',
+              boxShadow: '0 4px 15px rgba(82, 196, 26, 0.3)'
+            }}
           >
             Đặt hàng ngay
           </Button>

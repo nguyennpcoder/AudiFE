@@ -33,9 +33,12 @@ import DealershipPage from './context/pages/Dealership/index';
 import VehicleConfigurator from './context/pages/VehicleConfigurator';
 import QuotationDetail from './context/pages/QuotationDetail';
 import OrderForm from './context/pages/OrderForm';
+import PaymentSuccess from './context/pages/PaymentSuccess';
+import PaymentCancel from './context/pages/PaymentCancel';
 
 
 import UserOrderManagement from './context/pages/admin/UserOrderManagement';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 function App() {
   const location = useLocation();
@@ -281,7 +284,9 @@ function App() {
                 <Route path="/quotation/:configId" element={<QuotationDetail />} />
                 <Route path="/order/:configId" element={
                   <ProtectedRoute>
-                    <OrderForm />
+                    <ErrorBoundary>
+                      <OrderForm />
+                    </ErrorBoundary>
                   </ProtectedRoute>
                 } />
                 <Route path="/orders" element={
@@ -289,7 +294,8 @@ function App() {
                     <UserOrderManagement />
                   </ProtectedRoute>
                 } />
-               
+                <Route path="/payment/success" element={<PaymentSuccess />} />
+                <Route path="/payment/cancel" element={<PaymentCancel />} />
               </Routes>
             </main>
             {shouldShowFooter && <Footer />}
