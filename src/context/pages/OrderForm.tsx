@@ -272,38 +272,118 @@ const OrderForm: React.FC = () => {
     }
   };
 
+  // Tách riêng VNPay
+  const payWithVNPay = async () => {
+    const token = user?.token || localStorage.getItem('token');
+    if (!token) {
+      message.error('Bạn cần đăng nhập để tiếp tục.');
+      navigate('/login', { state: { redirectTo: location.pathname } });
+      return;
+    }
+
+    const rawDeposit = Number(form.getFieldValue('tienDatCoc')) || 0;
+    const minDeposit = Math.ceil((giaSauKhuyenMai || 0) * 0.1);
+    const amount = rawDeposit > 0 ? rawDeposit : minDeposit;
+    if (!amount || amount <= 0) {
+      message.error('Tiền cọc không hợp lệ. Yêu cầu tối thiểu 10% giá trị xe.');
+      return;
+    }
+
+    const orderData = {
+      idCauHinh: parseInt(configId || "0"),
+      idDaiLy: form.getFieldValue('idDaiLy'),
+      tienDatCoc: amount,
+      phuongThucThanhToan: 'vnpay',
+      ghiChu: form.getFieldValue('ghiChu'),
+      idKhuyenMai: khuyenMaiSelected?.id
+    };
+
+    const orderResponse = await axios.post(`${BACKEND_URL}/don-hang/tu-cau-hinh`, null, {
+      params: orderData,
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const orderId = orderResponse.data.id;
+
+    const paymentResponse = await axios.post(`${BACKEND_URL}/thanh-toan/tao-url`, {
+      orderId,
+      amount,
+      paymentMethod: 'vnpay',
+      returnUrl: `${window.location.origin}/payment/success?vnpay=1`,
+      cancelUrl: `${window.location.origin}/payment/cancel?vnpay=1`
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    window.location.href = paymentResponse.data.paymentUrl;
+  };
+
+  // Tách riêng ZaloPay
+  const payWithZaloPay = async () => {
+    const token = user?.token || localStorage.getItem('token');
+    if (!token) {
+      message.error('Bạn cần đăng nhập để tiếp tục.');
+      navigate('/login', { state: { redirectTo: location.pathname } });
+      return;
+    }
+
+    const rawDeposit = Number(form.getFieldValue('tienDatCoc')) || 0;
+    const minDeposit = Math.ceil((giaSauKhuyenMai || 0) * 0.1);
+    const amount = rawDeposit > 0 ? rawDeposit : minDeposit;
+
+    if (!amount || amount <= 0) {
+      message.error('Tiền cọc không hợp lệ. Yêu cầu tối thiểu 10% giá trị xe.');
+      return;
+    }
+    if (amount < 1000) {
+      message.error('ZaloPay yêu cầu số tiền tối thiểu 1.000 VNĐ.');
+      return;
+    }
+
+    const orderData = {
+      idCauHinh: parseInt(configId || "0"),
+      idDaiLy: form.getFieldValue('idDaiLy'),
+      tienDatCoc: amount,
+      phuongThucThanhToan: 'zalopay',
+      ghiChu: form.getFieldValue('ghiChu'),
+      idKhuyenMai: khuyenMaiSelected?.id
+    };
+
+    const orderResponse = await axios.post(`${BACKEND_URL}/don-hang/tu-cau-hinh`, null, {
+      params: orderData,
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const orderId = orderResponse.data.id;
+
+    const paymentResponse = await axios.post(`${BACKEND_URL}/thanh-toan/tao-url`, {
+      orderId,
+      amount,
+      paymentMethod: 'zalopay',
+      returnUrl: `${window.location.origin}/payment/success?zalopay=1`,
+      cancelUrl: `${window.location.origin}/payment/cancel?zalopay=1`
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    window.location.href = paymentResponse.data.paymentUrl;
+  };
+
+  // Router theo gateway
   const handleOnlinePayment = async (paymentMethod: string) => {
     try {
       setPaymentProcessing(true);
-      
-      const orderData = {
-        idCauHinh: parseInt(configId || "0"),
-        idDaiLy: form.getFieldValue('idDaiLy'),
-        tienDatCoc: form.getFieldValue('tienDatCoc') || 0,
-        phuongThucThanhToan: paymentMethod,
-        ghiChu: form.getFieldValue('ghiChu'),
-        idKhuyenMai: khuyenMaiSelected?.id
-      };
-
-      const orderResponse = await axios.post(`${BACKEND_URL}/don-hang/tu-cau-hinh`, null, {
-        params: orderData
-      });
-
-      const orderId = orderResponse.data.id;
-
-      const paymentResponse = await axios.post(`${BACKEND_URL}/thanh-toan/tao-url`, {
-        orderId: orderId,
-        amount: form.getFieldValue('tienDatCoc') || giaSauKhuyenMai * 0.1,
-        paymentMethod: paymentMethod,
-        returnUrl: `${window.location.origin}/payment/success`,
-        cancelUrl: `${window.location.origin}/payment/cancel`
-      });
-
-      window.location.href = paymentResponse.data.paymentUrl;
-
-    } catch (error) {
+      if (paymentMethod === 'vnpay') {
+        await payWithVNPay();
+      } else if (paymentMethod === 'zalopay') {
+        await payWithZaloPay();
+      } else {
+        message.warning('Cổng thanh toán này chưa được hỗ trợ.');
+      }
+    } catch (error: any) {
       console.error("Lỗi khi tạo thanh toán:", error);
-      message.error("Không thể tạo thanh toán");
+      const backendMsg = error?.response?.data?.error || error?.response?.data?.message;
+      message.error(backendMsg || "Không thể tạo thanh toán");
     } finally {
       setPaymentProcessing(false);
     }
@@ -328,6 +408,13 @@ const OrderForm: React.FC = () => {
     if (paymentMethod === 'tien_mat') {
       try {
         setSubmitting(true);
+
+        const token = user?.token || localStorage.getItem('token');
+        if (!token) {
+          message.error('Bạn cần đăng nhập để tiếp tục.');
+          navigate('/login', { state: { redirectTo: location.pathname } });
+          return;
+        }
         
         const orderData = {
           idCauHinh: parseInt(configId || "0"),
@@ -339,7 +426,8 @@ const OrderForm: React.FC = () => {
         };
 
         const response = await axios.post(`${BACKEND_URL}/don-hang/tu-cau-hinh`, null, {
-          params: orderData
+          params: orderData,
+          headers: { Authorization: `Bearer ${token}` }
         });
 
         message.success("Đặt hàng thành công!");
