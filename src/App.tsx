@@ -39,6 +39,7 @@ import PaymentCancel from './context/pages/PaymentCancel';
 
 import UserOrderManagement from './context/pages/admin/UserOrderManagement';
 import ErrorBoundary from './components/common/ErrorBoundary';
+import DealershipManagement from './context/pages/admin/DealershipManagement';
 
 function App() {
   const location = useLocation();
@@ -186,9 +187,7 @@ function App() {
                   <ThemeProvider>
                     <AdminLayout>
                       <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                        <div className="admin-placeholder">
-                          <h2>Trang quản lý đại lý đang phát triển</h2>
-                        </div>
+                        <DealershipManagement />
                       </RoleBasedRoute>
                     </AdminLayout>
                   </ThemeProvider>

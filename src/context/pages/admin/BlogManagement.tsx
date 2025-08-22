@@ -267,9 +267,10 @@ const BlogManagement: React.FC = () => {
                 border: '1px solid #e5e7eb',
                 fontSize: 15,
                 background: '#fafbfc',
+                color: '#333', // Thêm màu chữ đậm
               }}
             >
-              <option value="">Tất cả danh mục</option>
+              <option value="" style={{ color: '#333' }}>Tất cả danh mục</option>
               {danhMucOptions.map(option => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}

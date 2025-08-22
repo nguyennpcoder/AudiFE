@@ -134,11 +134,22 @@ const BlogList: React.FC = () => {
     return Math.ceil(wordCount / wordsPerMinute);
   };
 
-  const truncateText = (text: string, maxLength: number = 150): string => {
+  // Cải thiện hàm truncateText để có độ dài cố định
+  const truncateText = (text: string, maxLength: number = 120): string => {
     const plainText = text.replace(/<[^>]+>/g, '').trim();
-    return plainText.length > maxLength
-      ? plainText.substring(0, maxLength) + '...'
-      : plainText;
+    if (plainText.length <= maxLength) {
+      return plainText;
+    }
+    
+    // Cắt text tại từ cuối cùng để tránh cắt giữa từ
+    const truncated = plainText.substring(0, maxLength);
+    const lastSpaceIndex = truncated.lastIndexOf(' ');
+    
+    if (lastSpaceIndex > 0) {
+      return truncated.substring(0, lastSpaceIndex) + '...';
+    }
+    
+    return truncated + '...';
   };
 
   const getCategoryColor = (category: string): { bg: string; text: string } => {
@@ -283,8 +294,6 @@ const BlogList: React.FC = () => {
                   className="blog-card"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  // ... existing code ...
-
                   <div
                     className="blog-card-link"
                     onClick={() => handlePostClick(post.id)}
@@ -348,7 +357,7 @@ const BlogList: React.FC = () => {
                       </h2>
 
                       <p className="blog-card-excerpt">
-                        {truncateText(post.noiDung || '')}
+                        {truncateText(post.noiDung || '', 120)}
                       </p>
 
                       <div className="blog-card-footer">

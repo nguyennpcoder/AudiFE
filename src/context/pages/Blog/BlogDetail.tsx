@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../AuthContext';
 import '../../../styles/Blog.css';
 
 const API_URL = 'http://localhost:8080/api/v1/bai-viet';
+const COMMENT_API_URL = 'http://localhost:8080/api/v1/binh-luan';
 
 interface BlogPost {
   id: string;
@@ -18,13 +20,44 @@ interface BlogPost {
   thoiGianDoc?: number;
 }
 
+interface Comment {
+  idBinhLuan: string;
+  idBaiViet: string;
+  idNguoiDung: string;
+  noiDung: string;
+  ngayBinhLuan: string;
+  trangThai: string;
+  idBinhLuanCha?: string;
+  soLuotThich: number;
+  // Thêm các trường từ backend
+  tenNguoiDung?: string;
+  avatarNguoiDung?: string;
+  // Hoặc có thể backend trả về object nguoiDung
+  nguoiDung?: {
+    ho: string;
+    ten: string;
+    email: string;
+    avatar?: string;
+  };
+  replies?: Comment[];
+}
+
 const BlogDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
+  
+  // State cho bình luận
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [replyTo, setReplyTo] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState('');
+  const [commentLoading, setCommentLoading] = useState(false);
 
   // Smooth scroll to top function with animation
   const scrollToTop = () => {
@@ -38,8 +71,19 @@ const BlogDetail: React.FC = () => {
     }, 15);
   };
 
-  // Get avatar URL for author
+  // Get avatar URL for author (giữ nguyên như cũ)
   const getAuthorAvatarUrl = (avatarPath?: string) => {
+    if (avatarPath) {
+      const avatarUrl = avatarPath.startsWith('http')
+        ? avatarPath
+        : `http://localhost:8080/${avatarPath}`;
+      return avatarUrl;
+    }
+    return '/avatar-default.png';
+  };
+
+  // Thêm hàm mới để load avatar user comment (y hệt như admin)
+  const getUserAvatarUrl = (avatarPath?: string) => {
     if (avatarPath) {
       const avatarUrl = avatarPath.startsWith('http')
         ? avatarPath
@@ -82,6 +126,246 @@ const BlogDetail: React.FC = () => {
     return getRandomPlaceholder();
   };
 
+  // Fetch comments
+  const fetchComments = async () => {
+    if (!id) return;
+    
+    try {
+      const url = `${COMMENT_API_URL}/bai-viet/${id}`;
+      console.log('=== FETCHING COMMENTS ===');
+      console.log('URL:', url);
+      console.log('Timestamp:', new Date().toISOString());
+      
+      // Thêm timestamp để tránh cache
+      const response = await fetch(`${url}?t=${Date.now()}`);
+      console.log('Comments response status:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Comments API response:', data);
+        
+        // Kiểm tra cấu trúc dữ liệu trả về
+        let commentsArray: Comment[] = [];
+        
+        if (Array.isArray(data)) {
+          commentsArray = data;
+        } else if (data.binhLuan && Array.isArray(data.binhLuan)) {
+          commentsArray = data.binhLuan;
+        } else if (data.data && Array.isArray(data.data)) {
+          commentsArray = data.data;
+        } else if (data.content && Array.isArray(data.content)) {
+          commentsArray = data.content;
+        } else {
+          console.warn('Unexpected comments data structure:', data);
+          commentsArray = [];
+        }
+        
+        console.log('Extracted comments array:', commentsArray);
+        console.log('Number of comments:', commentsArray.length);
+        
+        // THÊM LOGIC LOẠI BỎ DUPLICATE TRƯỚC KHI XỬ LÝ
+        const uniqueComments = commentsArray.filter((comment, index, self) => 
+          index === self.findIndex(c => c.idBinhLuan === comment.idBinhLuan)
+        );
+        
+        console.log('After removing duplicates:', uniqueComments.length);
+        
+        // Sửa lại phần xử lý comment để sử dụng đúng trường dữ liệu
+        const processedComments = uniqueComments.map(comment => {
+          console.log('Processing comment:', comment);
+          
+          // Kiểm tra xem comment có thông tin người dùng không
+          if (comment.nguoiDung) {
+            return {
+              ...comment,
+              tenNguoiDung: `${comment.nguoiDung.ho} ${comment.nguoiDung.ten}`,
+              avatarNguoiDung: comment.nguoiDung.avatar
+            };
+          } else if (comment.tenNguoiDung) {
+            return comment;
+          } else {
+            // Fallback: sử dụng thông tin từ user context nếu có
+            return {
+              ...comment,
+              tenNguoiDung: user ? `${user.fullName}` : 'Người dùng',
+              avatarNguoiDung: user?.avatar || '/avatar-default.png'
+            };
+          }
+        });
+        
+        const organizedComments = organizeComments(processedComments);
+        console.log('Final organized comments:', organizedComments);
+        setComments(organizedComments);
+      } else {
+        console.error('Failed to fetch comments:', response.status, response.statusText);
+      }
+    } catch (err) {
+      console.error('Failed to fetch comments:', err);
+    }
+  };
+
+  // Organize comments into hierarchical structure - SỬA LẠI LOGIC
+  const organizeComments = (comments: Comment[]): Comment[] => {
+    if (!Array.isArray(comments)) {
+      console.warn('organizeComments received non-array:', comments);
+      return [];
+    }
+    
+    // THÊM LOGIC LOẠI BỎ DUPLICATE LẦN NỮA ĐỂ ĐẢM BẢO
+    const uniqueComments = comments.filter((comment, index, self) => 
+      index === self.findIndex(c => c.idBinhLuan === comment.idBinhLuan)
+    );
+    
+    console.log('organizeComments - unique comments count:', uniqueComments.length);
+    
+    const commentMap = new Map<string, Comment>();
+    const rootComments: Comment[] = [];
+
+    // First pass: create map of all comments
+    uniqueComments.forEach(comment => {
+      commentMap.set(comment.idBinhLuan, { ...comment, replies: [] });
+    });
+
+    // Second pass: organize into hierarchy
+    uniqueComments.forEach(comment => {
+      if (comment.idBinhLuanCha) {
+        const parent = commentMap.get(comment.idBinhLuanCha);
+        if (parent) {
+          parent.replies = parent.replies || [];
+          // KIỂM TRA XEM REPLY ĐÃ TỒN TẠI CHƯA
+          const replyExists = parent.replies.some(reply => reply.idBinhLuan === comment.idBinhLuan);
+          if (!replyExists) {
+            parent.replies.push(commentMap.get(comment.idBinhLuan)!);
+          }
+        }
+      } else {
+        // KIỂM TRA XEM COMMENT ĐÃ TỒN TẠI CHƯA
+        const commentExists = rootComments.some(c => c.idBinhLuan === comment.idBinhLuan);
+        if (!commentExists) {
+          rootComments.push(commentMap.get(comment.idBinhLuan)!);
+        }
+      }
+    });
+
+    console.log('Final root comments count:', rootComments.length);
+    return rootComments;
+  };
+
+  // Submit new comment
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !newComment.trim() || !id) return;
+
+    console.log('=== SUBMITTING NEW COMMENT ===');
+    console.log('User:', user);
+    console.log('Comment content:', newComment);
+    console.log('Article ID:', id);
+    console.log('Reply to:', replyTo);
+
+    setCommentLoading(true);
+    try {
+      const commentData = {
+        idBaiViet: id,
+        idNguoiDung: user.userId,
+        noiDung: newComment.trim(),
+        idBinhLuanCha: replyTo
+      };
+      
+      console.log('Sending comment data:', commentData);
+      console.log('Token:', localStorage.getItem('token'));
+
+      const response = await fetch(COMMENT_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(commentData)
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log('Comment submitted successfully:', responseData);
+        
+        // Clear form
+        setNewComment('');
+        setReplyTo(null);
+        setReplyContent('');
+        
+        // Refresh comments immediately
+        console.log('Refreshing comments...');
+        await fetchComments();
+        
+        // Show success message
+        alert('Bình luận đã được gửi thành công!');
+      } else {
+        const errorData = await response.text();
+        console.error('Failed to submit comment:', response.status, errorData);
+        alert(`Lỗi gửi bình luận: ${response.status} - ${errorData}`);
+      }
+    } catch (err) {
+      console.error('Failed to submit comment:', err);
+      alert('Lỗi kết nối khi gửi bình luận');
+    } finally {
+      setCommentLoading(false);
+    }
+  };
+
+  // Submit reply
+  const handleSubmitReply = async (parentId: string) => {
+    if (!user || !replyContent.trim() || !id) return;
+
+    setCommentLoading(true);
+    try {
+      const response = await fetch(COMMENT_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          idBaiViet: id,
+          idNguoiDung: user.userId,
+          noiDung: replyContent.trim(),
+          idBinhLuanCha: parentId
+        })
+      });
+
+      if (response.ok) {
+        setReplyContent('');
+        setReplyTo(null);
+        fetchComments(); // Refresh comments
+      }
+    } catch (err) {
+      console.error('Failed to submit reply:', err);
+    } finally {
+      setCommentLoading(false);
+    }
+  };
+
+  // Like comment
+  const handleLikeComment = async (commentId: string) => {
+    if (!user) return;
+
+    try {
+      const response = await fetch(`${COMMENT_API_URL}/${commentId}/like`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (response.ok) {
+        fetchComments(); // Refresh comments
+      }
+    } catch (err) {
+      console.error('Failed to like comment:', err);
+    }
+  };
+
   useEffect(() => {
     scrollToTop();
     
@@ -109,13 +393,14 @@ const BlogDetail: React.FC = () => {
             const filtered = allPosts
               .filter((p: BlogPost) => p.id !== id)
               .slice(0, 3);
-           // ... existing code ...
-
-           setRelatedPosts(filtered);
+            setRelatedPosts(filtered);
           }
         } catch (err) {
           console.warn('Failed to fetch related posts:', err);
         }
+
+        // Fetch comments
+        fetchComments();
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch post');
         console.error('Error fetching post:', err);
@@ -156,6 +441,35 @@ const BlogDetail: React.FC = () => {
       default: { bg: '#f5f5f5', text: '#616161' }
     };
     return categoryColors[category] || categoryColors.default;
+  };
+
+  // Thêm hàm format nội dung blog để hiển thị đẹp hơn
+  const formatBlogContent = (content: string): string => {
+    if (!content) return '';
+    
+    // Chuyển đổi markdown-style thành HTML đẹp hơn
+    let formattedContent = content
+      // Xử lý tiêu đề **text** thành <strong>
+      .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #3182ce; font-weight: 700;">$1</strong>')
+      // Xử lý danh sách có dấu gạch đầu dòng
+      .replace(/^- (.+)$/gm, '<li style="margin-bottom: 0.5rem; color: #e2e8f0;">$1</li>')
+      // Bọc danh sách trong <ul>
+      .replace(/(<li.*?<\/li>)/gs, '<ul style="margin: 1rem 0; padding-left: 2rem; list-style: none;">$1</ul>')
+      // Xử lý danh sách số
+      .replace(/^\d+\. (.+)$/gm, '<li style="margin-bottom: 0.5rem; color: #e2e8f0;">$1</li>')
+      // Bọc danh sách số trong <ol>
+      .replace(/(<li.*?<\/li>)/gs, '<ol style="margin: 1rem 0; padding-left: 2rem;">$1</ol>')
+      // Xử lý đoạn văn
+      .replace(/\n\n/g, '</p><p style="margin-bottom: 1.5rem; color: #e2e8f0; line-height: 1.8;">')
+      // Bọc toàn bộ nội dung trong <p>
+      .replace(/^(.+)$/gm, '<p style="margin-bottom: 1.5rem; color: #e2e8f0; line-height: 1.8;">$1</p>')
+      // Loại bỏ <p> rỗng
+      .replace(/<p style="margin-bottom: 1.5rem; color: #e2e8f0; line-height: 1.8;"><\/p>/g, '')
+      // Xử lý các thẻ HTML đã có
+      .replace(/<p style="margin-bottom: 1.5rem; color: #e2e8f0; line-height: 1.8;"><p/g, '<p')
+      .replace(/<\/p><\/p>/g, '</p>');
+
+    return formattedContent;
   };
 
   if (loading) {
@@ -300,7 +614,9 @@ const BlogDetail: React.FC = () => {
       <article className="blog-article-content">
         <div 
           className="blog-prose"
-          dangerouslySetInnerHTML={{ __html: post.noiDung }} 
+          dangerouslySetInnerHTML={{ 
+            __html: formatBlogContent(post.noiDung) 
+          }} 
         />
       </article>
 
@@ -394,6 +710,192 @@ const BlogDetail: React.FC = () => {
           </div>
         </section>
       )}
+
+      {/* Comments Section */}
+      <section className="blog-comments">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+          <h2>Bình luận ({comments.length})</h2>
+          <button 
+            onClick={fetchComments}
+            style={{
+              padding: '0.5rem 1rem',
+              background: 'rgba(255, 255, 255, 0.1)',
+              color: '#ffffff',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '0.875rem'
+            }}
+          >
+            🔄 Làm mới
+          </button>
+        </div>
+        
+        {/* Comment Form */}
+        {user && (
+          <div className="blog-comment-form">
+            <h3>Viết bình luận</h3>
+            <form onSubmit={handleSubmitComment}>
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Viết bình luận của bạn..."
+                rows={4}
+                required
+                disabled={commentLoading}
+              />
+              <div className="blog-comment-form-actions">
+                <button 
+                  type="submit" 
+                  disabled={commentLoading || !newComment.trim()}
+                  className="blog-comment-submit-btn"
+                >
+                  {commentLoading ? 'Đang gửi...' : 'Gửi bình luận'}
+                </button>
+                {replyTo && (
+                  <button 
+                    type="button" 
+                    onClick={() => setReplyTo(null)}
+                    className="blog-comment-cancel-btn"
+                  >
+                    Hủy trả lời
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Comments List */}
+        <div className="blog-comments-list">
+          {comments.length === 0 ? (
+            <div className="blog-no-comments">
+              <p>Chưa có bình luận nào. Hãy là người đầu tiên bình luận!</p>
+            </div>
+          ) : (
+            comments.map((comment) => (
+              <div key={comment.idBinhLuan} className="blog-comment">
+                <div className="blog-comment-header">
+                  <img
+                    src={getUserAvatarUrl(comment.avatarNguoiDung)}
+                    alt={comment.tenNguoiDung || 'Người dùng'}
+                    className="blog-comment-avatar"
+                    onError={(e) => {
+                      console.log('Comment avatar failed to load, using default');
+                      const target = e.currentTarget;
+                      if (target.src !== '/avatar-default.png') {
+                        target.src = '/avatar-default.png';
+                      }
+                    }}
+                  />
+                  <div className="blog-comment-info">
+                    <div className="blog-comment-author">
+                      {comment.tenNguoiDung || 'Người dùng'}
+                    </div>
+                    <div className="blog-comment-date">
+                      {formatDate(comment.ngayBinhLuan)}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="blog-comment-content">
+                  {comment.noiDung}
+                </div>
+                
+                <div className="blog-comment-actions">
+                  <button 
+                    onClick={() => handleLikeComment(comment.idBinhLuan)}
+                    className="blog-comment-like-btn"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z" />
+                    </svg>
+                    Thích ({comment.soLuotThich})
+                  </button>
+                  
+                  {user && (
+                    <button 
+                      onClick={() => setReplyTo(comment.idBinhLuan)}
+                      className="blog-comment-reply-btn"
+                    >
+                      Trả lời
+                    </button>
+                  )}
+                </div>
+
+                {/* Reply Form */}
+                {replyTo === comment.idBinhLuan && (
+                  <div className="blog-reply-form">
+                    <textarea
+                      value={replyContent}
+                      onChange={(e) => setReplyContent(e.target.value)}
+                      placeholder="Viết trả lời..."
+                      rows={3}
+                      required
+                    />
+                    <div className="blog-reply-form-actions">
+                      <button 
+                        onClick={() => handleSubmitReply(comment.idBinhLuan)}
+                        disabled={commentLoading || !replyContent.trim()}
+                        className="blog-reply-submit-btn"
+                      >
+                        {commentLoading ? 'Đang gửi...' : 'Gửi trả lời'}
+                      </button>
+                      <button 
+                        onClick={() => setReplyTo(null)}
+                        className="blog-reply-cancel-btn"
+                      >
+                        Hủy
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Replies */}
+                {comment.replies && comment.replies.length > 0 && (
+                  <div className="blog-comment-replies">
+                    {comment.replies.map((reply) => (
+                      <div key={reply.idBinhLuan} className="blog-comment reply">
+                        <div className="blog-comment-header">
+                          <img
+                            src={getUserAvatarUrl(reply.avatarNguoiDung)}
+                            alt={`${reply.nguoiDung?.ho} ${reply.nguoiDung?.ten}`}
+                            className="blog-comment-avatar"
+                          />
+                          <div className="blog-comment-info">
+                            <div className="blog-comment-author">
+                              {reply.nguoiDung?.ho} {reply.nguoiDung?.ten}
+                            </div>
+                            <div className="blog-comment-date">
+                              {formatDate(reply.ngayBinhLuan)}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="blog-comment-content">
+                          {reply.noiDung}
+                        </div>
+                        
+                        <div className="blog-comment-actions">
+                          <button 
+                            onClick={() => handleLikeComment(reply.idBinhLuan)}
+                            className="blog-comment-like-btn"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z" />
+                            </svg>
+                            Thích ({reply.soLuotThich})
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </section>
     </div>
   );
 };
