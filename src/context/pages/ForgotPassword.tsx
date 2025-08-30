@@ -5,7 +5,7 @@ import { quenMatKhauApi, resetMatKhauApi } from '../../services/authService';
 import '../../styles/Auth.css';
 import logo from '../../assets/logo.svg';
 import backgroundVideo from '../../assets/audivideo.mp4';
-import mailSentVideo from '../../assets/mail_sent.mp4'; // Thêm dòng này, đổi tên file đúng với file bạn có
+import mailSentVideo from '../../assets/mail_sent.mp4';
 
 const ForgotPassword: React.FC = () => {
   const [step, setStep] = useState<'input' | 'reset'>('input');
@@ -26,13 +26,10 @@ const ForgotPassword: React.FC = () => {
 
     try {
       if (step === 'input') {
-        // Gửi yêu cầu quên mật khẩu
         const response = await quenMatKhauApi(emailOrPhone, method);
         
         if (response.success) {
-          // message.success(response.message); // Bỏ thông báo này
-          setShowMailSentVideo(true); // Hiện video gửi mail
-          // Sau 3.5s chuyển sang bước nhập mã xác thực (tăng thời gian hiển thị video)
+          setShowMailSentVideo(true);
           setTimeout(() => {
             setShowMailSentVideo(false);
             setStep('reset');
@@ -42,21 +39,18 @@ const ForgotPassword: React.FC = () => {
           message.error(response.message);
         }
       } else if (step === 'reset') {
-        // Kiểm tra mật khẩu xác nhận
         if (newPassword !== confirmPassword) {
           setError('Mật khẩu xác nhận không khớp!');
           message.error('Mật khẩu xác nhận không khớp!');
           return;
         }
 
-        // Kiểm tra độ dài mật khẩu
         if (newPassword.length < 6) {
           setError('Mật khẩu phải có ít nhất 6 ký tự!');
           message.error('Mật khẩu phải có ít nhất 6 ký tự!');
           return;
         }
 
-        // Đặt lại mật khẩu
         const response = await resetMatKhauApi(resetToken, newPassword);
         
         if (response.success) {
@@ -77,7 +71,7 @@ const ForgotPassword: React.FC = () => {
 
   return (
     <div className="auth-container">
-      {/* Left video section */}
+      {/* Video Background */}
       <div className="auth-video-background auth-animate-right">
         <video autoPlay muted loop>
           <source src={backgroundVideo} type="video/mp4" />
@@ -93,34 +87,41 @@ const ForgotPassword: React.FC = () => {
         </div>
       </div>
 
-      {/* Form section */}
+      {/* Form Section */}
       <div className="auth-form-section auth-animate-left">
         <div className="auth-logo">
           <img src={logo} alt="Audi Logo" />
         </div>
+        
         <div className="auth-form-container">
-          <h2>Quên Mật Khẩu</h2>
+          <div className="auth-header">
+            <h2>Quên Mật Khẩu</h2>
+          </div>
           
-          {/* Hiển thị video gửi mail thành công */}
+          {/* Mail Sent Video */}
           {showMailSentVideo ? (
-            <div className="mail-sent-video-container" style={{ textAlign: 'center', margin: '32px 0' }}>
+            <div className="mail-sent-video-container">
               <video
                 src={mailSentVideo}
                 autoPlay
                 muted
-                style={{ width: 200, height: 200 }}
+                className="mail-sent-video"
                 onEnded={() => {
                   setShowMailSentVideo(false);
                   setStep('reset');
                 }}
               />
-              <div style={{ marginTop: 16, fontWeight: 500 }}>Đã gửi mã xác thực đến email của bạn!</div>
+              <div className="mail-sent-message">
+                Đã gửi mã xác thực đến email của bạn!
+              </div>
             </div>
           ) : (
             <>
               {step === 'input' && (
                 <>
-                  <p>Nhập email hoặc số điện thoại để nhận mã xác thực</p>
+                  <p className="auth-description">
+                    Nhập email hoặc số điện thoại để nhận mã xác thực
+                  </p>
                   
                   <form onSubmit={handleSubmit} className="auth-form">
                     <div className="form-group">
@@ -132,6 +133,7 @@ const ForgotPassword: React.FC = () => {
                         onChange={(e) => setEmailOrPhone(e.target.value)}
                         required
                         placeholder="Nhập email hoặc số điện thoại"
+                        className="auth-input"
                       />
                     </div>
                     
@@ -174,7 +176,9 @@ const ForgotPassword: React.FC = () => {
 
               {step === 'reset' && (
                 <>
-                  <p>Nhập mã xác thực đã được gửi đến {method === 'email' ? 'email' : 'SMS'} của bạn</p>
+                  <p className="auth-description">
+                    Nhập mã xác thực đã được gửi đến {method === 'email' ? 'email' : 'SMS'} của bạn
+                  </p>
                   
                   <form onSubmit={handleSubmit} className="auth-form">
                     <div className="form-group">
@@ -187,6 +191,7 @@ const ForgotPassword: React.FC = () => {
                         required
                         placeholder="Nhập mã xác thực"
                         maxLength={6}
+                        className="auth-input"
                       />
                     </div>
                     
@@ -200,6 +205,7 @@ const ForgotPassword: React.FC = () => {
                         required
                         placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)"
                         minLength={6}
+                        className="auth-input"
                       />
                     </div>
                     
@@ -213,6 +219,7 @@ const ForgotPassword: React.FC = () => {
                         required
                         placeholder="Nhập lại mật khẩu mới"
                         minLength={6}
+                        className="auth-input"
                       />
                     </div>
                     

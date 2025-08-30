@@ -1496,6 +1496,392 @@
   transform: scale(1.1);
 }
 
+/* Owner Badge */
+.blog-comment-owner-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #3182ce, #2c5aa0);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(49, 130, 206, 0.2);
+}
+
+/* ================================================
+   EDIT FORM STYLES - CHUYÊN NGHIỆP VỚI ANIMATION
+   ================================================ */
+
+.blog-comment-edit-form {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  animation: editFormSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.blog-comment-edit-form::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3182ce, #38a169, #e53e3e);
+  animation: editFormProgress 2s ease-in-out infinite;
+}
+
+@keyframes editFormSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes editFormProgress {
+  0%, 100% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+}
+
+/* Edit Form Header */
+.edit-form-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.edit-form-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #3182ce, #2c5aa0);
+  border-radius: 12px;
+  color: white;
+  animation: editIconPulse 2s ease-in-out infinite;
+}
+
+@keyframes editIconPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(49, 130, 206, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(49, 130, 206, 0);
+  }
+}
+
+.edit-form-title h4 {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  margin-bottom: 4px;
+}
+
+.edit-form-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+/* Edit Form Content */
+.edit-form-content {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.edit-form-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: vertical;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  font-family: inherit;
+}
+
+.edit-form-textarea:focus {
+  outline: none;
+  border-color: #3182ce;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 4px rgba(49, 130, 206, 0.1);
+  transform: translateY(-2px);
+}
+
+.edit-form-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+/* Character Count */
+.edit-form-character-count {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.character-count {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.character-count.warning {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  animation: characterCountWarning 0.6s ease-in-out;
+}
+
+.character-count.error {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  animation: characterCountError 0.6s ease-in-out;
+}
+
+@keyframes characterCountWarning {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes characterCountError {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.1) rotate(-2deg); }
+  75% { transform: scale(1.1) rotate(2deg); }
+}
+
+/* Edit Form Actions */
+.edit-form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.edit-form-save-btn,
+.edit-form-cancel-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.edit-form-save-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.edit-form-save-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.edit-form-save-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.edit-form-save-btn:disabled {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+.edit-form-cancel-btn {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  color: white;
+  box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+}
+
+.edit-form-cancel-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.edit-form-cancel-btn:active {
+  transform: translateY(0);
+}
+
+/* Button Icons */
+.edit-form-save-btn svg,
+.edit-form-cancel-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.edit-form-save-btn:hover:not(:disabled) svg {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.edit-form-cancel-btn:hover svg {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+/* Button Ripple Effect */
+.edit-form-save-btn::before,
+.edit-form-cancel-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s ease;
+  opacity: 0;
+}
+
+.edit-form-save-btn:active::before,
+.edit-form-cancel-btn:active::before {
+  width: 300px;
+  height: 300px;
+  opacity: 1;
+  transition: 0s;
+}
+
+/* Enhanced Hover Effects */
+.edit-form-save-btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.edit-form-cancel-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+}
+
+/* Focus States for Accessibility */
+.edit-form-textarea:focus {
+  outline: none;
+  border-color: #3182ce;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 4px rgba(49, 130, 206, 0.1), 0 4px 20px rgba(49, 130, 206, 0.2);
+  transform: translateY(-2px);
+}
+
+.edit-form-save-btn:focus:not(:disabled),
+.edit-form-cancel-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3), 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Smooth Transition for Form Appearance */
+.blog-comment-edit-form {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.blog-comment-edit-form:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Loading State */
+.edit-form-save-btn.loading {
+  pointer-events: none;
+}
+
+.edit-form-save-btn.loading span {
+  opacity: 0;
+}
+
+.edit-form-save-btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: editFormLoading 1s linear infinite;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes editFormLoading {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .blog-comment-edit-form {
+    padding: 1rem;
+    margin: 0.5rem 0;
+  }
+  
+  .edit-form-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .edit-form-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .edit-form-title h4 {
+    font-size: 1rem;
+  }
+  
+  .edit-form-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .edit-form-save-btn,
+  .edit-form-cancel-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /* Reply Form */
 .blog-reply-form {
   margin-top: 1.5rem;

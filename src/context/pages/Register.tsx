@@ -203,7 +203,7 @@ const Register: React.FC = () => {
           <h2>Đăng Ký Tài Khoản</h2>
           <p>Tạo tài khoản để khám phá thế giới Audi</p>
           
-          {/* Avatar Upload UI đặt ở đây */}
+          {/* Avatar Upload UI - Updated with MyAccount animations */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
             <label
               htmlFor="avatar"
@@ -222,6 +222,7 @@ const Register: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                transition: 'all 0.3s ease',
               }}
             >
               <img
@@ -233,13 +234,30 @@ const Register: React.FC = () => {
                   objectFit: 'cover',
                   borderRadius: '50%',
                   display: 'block',
-                  transition: 'filter 0.2s',
-                  filter: avatarPreview ? 'none' : 'grayscale(1) opacity(0.7)',
+                  transition: 'all 0.3s ease',
                 }}
               />
               {(!avatarPreview || isAvatarHover) && (
-                <div className={`avatar-upload-overlay`}>
-                  <CameraOutlined className={`avatar-upload-icon${isAvatarHover ? ' show' : ''}`} />
+                <div className={`avatar-upload-overlay`} style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'rgba(0,0,0,0.5)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: isAvatarHover ? 1 : 0,
+                  transition: 'opacity 0.3s ease',
+                }}>
+                  <CameraOutlined className={`avatar-upload-icon${isAvatarHover ? ' show' : ''}`} style={{
+                    color: 'white',
+                    fontSize: '24px',
+                    opacity: isAvatarHover ? 1 : 0,
+                    transition: 'opacity 0.3s ease',
+                    transform: isAvatarHover ? 'scale(1.1)' : 'scale(1)',
+                  }} />
                 </div>
               )}
               <input
@@ -251,7 +269,15 @@ const Register: React.FC = () => {
                 style={{ display: 'none' }}
               />
             </label>
-            <div style={{ marginTop: 8, color: '#888', fontSize: 13 }}>Chọn ảnh đại diện</div>
+            <div style={{ 
+              marginTop: 8, 
+              color: '#888', 
+              fontSize: 13,
+              transition: 'color 0.3s ease',
+              opacity: isAvatarHover ? 0.7 : 1,
+            }}>
+              {avatarPreview ? 'Ảnh đã chọn' : 'Chọn ảnh đại diện'}
+            </div>
           </div>
           {/* Kết thúc avatar upload UI */}
 

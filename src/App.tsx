@@ -38,6 +38,8 @@ import PaymentCancel from './context/pages/PaymentCancel';
 
 
 import UserOrderManagement from './context/pages/admin/UserOrderManagement';
+import MyOrders from './context/pages/MyOrders';
+import MyAccount from './context/pages/MyAccount';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import DealershipManagement from './context/pages/admin/DealershipManagement';
 
@@ -291,6 +293,16 @@ function App() {
                 <Route path="/orders" element={
                   <ProtectedRoute>
                     <UserOrderManagement />
+                  </ProtectedRoute>
+                } />
+                <Route path="/myaudi/orders" element={
+                  <ProtectedRoute>
+                    <MyOrders />
+                  </ProtectedRoute>
+                } />
+                <Route path="/myaudi/account" element={
+                  <ProtectedRoute>
+                    <MyAccount />
                   </ProtectedRoute>
                 } />
                 <Route path="/payment/success" element={<PaymentSuccess />} />

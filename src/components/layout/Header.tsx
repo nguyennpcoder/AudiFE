@@ -323,7 +323,8 @@ const Header = () => {
                    onMouseEnter={() => setIsUserMenuOpen(true)}
                    onMouseLeave={() => setIsUserMenuOpen(false)}>
                 <ul>
-                  <li><Link to="/myaudi">Tài khoản của tôi</Link></li>
+                  <li><Link to="/myaudi/account">Tài khoản của tôi</Link></li>
+                  <li><Link to="/myaudi">Cấu hình xe</Link></li>
                   <li><Link to="/myaudi/orders">Đơn hàng của tôi</Link></li>
                   <li><Link to="/myaudi/testdrives">Lịch lái thử</Link></li>
                   <li><Link to="/myaudi/favorites">Xe yêu thích</Link></li>

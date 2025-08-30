@@ -133,7 +133,7 @@ const MyAudi: React.FC = () => {
     <div className="my-audi-container">
       <div className="my-audi-header">
         <Title level={2}>
-          <CarOutlined /> My Audi - Cấu hình xe của tôi
+          <CarOutlined /> Tài khoản của tôi - Cấu hình xe
         </Title>
         <Space>
           <Button 

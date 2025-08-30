@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
+import { useNotification } from '../../NotificationContext';
 import '../../../styles/Blog.css';
 
 const API_URL = 'http://localhost:8080/api/v1/bai-viet';
@@ -49,6 +50,7 @@ const BlogDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showNotification } = useNotification();
   
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
@@ -167,7 +169,7 @@ const BlogDetail: React.FC = () => {
   };
 
   // Cập nhật fetchComments để xử lý avatar tốt hơn
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     if (!id) return;
     
     try {
@@ -175,12 +177,27 @@ const BlogDetail: React.FC = () => {
       console.log('=== FETCHING COMMENTS ===');
       console.log('URL:', url);
       
-      const response = await fetch(`${url}&t=${Date.now()}`);
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Thêm token nếu user đã đăng nhập
+      const token = localStorage.getItem('token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(`${url}&t=${Date.now()}`, {
+        method: 'GET',
+        headers
+      });
       console.log('Comments response status:', response.status);
       
       if (response.ok) {
         const data = await response.json();
         console.log('Comments API response:', data);
+        console.log('User token:', localStorage.getItem('token'));
+        console.log('User info:', user);
         
         let commentsArray: Comment[] = [];
         
@@ -205,7 +222,8 @@ const BlogDetail: React.FC = () => {
           let processedComment = {
             ...comment,
             tenNguoiDung: comment.tenNguoiDung || 'Người dùng',
-            avatarNguoiDung: getUserAvatarUrl(comment.avatarNguoiDung)
+            avatarNguoiDung: getUserAvatarUrl(comment.avatarNguoiDung),
+            daThich: comment.daThich || false
           };
           
           // Xử lý replies - CẢI THIỆN XỬ LÝ AVATAR CHO REPLIES
@@ -213,11 +231,13 @@ const BlogDetail: React.FC = () => {
             processedComment.replies = comment.binhLuanCon.map((reply: any) => {
               console.log('Processing reply:', reply);
               console.log('Reply avatar path:', reply.avatarNguoiDung);
+              console.log('Reply daThich:', reply.daThich);
               
               return {
                 ...reply,
                 tenNguoiDung: reply.tenNguoiDung || 'Người dùng',
-                avatarNguoiDung: getUserAvatarUrl(reply.avatarNguoiDung)
+                avatarNguoiDung: getUserAvatarUrl(reply.avatarNguoiDung),
+                daThich: reply.daThich || false
               };
             });
           }
@@ -228,18 +248,24 @@ const BlogDetail: React.FC = () => {
         // Khôi phục trạng thái like từ backend data
         const newLikedComments = new Set<string>();
         processedComments.forEach(comment => {
+          console.log(`Comment ${comment.id} - daThich:`, comment.daThich);
           if (comment.daThich) {
             newLikedComments.add(comment.id);
+            console.log(`Added comment ${comment.id} to likedComments`);
           }
           // Kiểm tra replies
           if (comment.replies) {
             comment.replies.forEach(reply => {
+              console.log(`Reply ${reply.id} - daThich:`, reply.daThich);
               if (reply.daThich) {
                 newLikedComments.add(reply.id);
+                console.log(`Added reply ${reply.id} to likedComments`);
               }
             });
           }
         });
+        
+        console.log('Final likedComments set:', Array.from(newLikedComments));
         
         setLikedComments(newLikedComments);
         setComments(processedComments);
@@ -250,7 +276,7 @@ const BlogDetail: React.FC = () => {
     } catch (err) {
       console.error('Failed to fetch comments:', err);
     }
-  };
+  }, [id, user?.userId]);
 
   // Organize comments into hierarchical structure - SỬA LẠI LOGIC
   const organizeComments = (comments: Comment[]): Comment[] => {
@@ -410,15 +436,15 @@ const BlogDetail: React.FC = () => {
         await fetchComments();
         
         // Show success message
-        alert('Bình luận đã được gửi thành công!');
+        showNotification('success', 'Bình luận đã được gửi thành công!');
       } else {
         const errorData = await response.text();
         console.error('Failed to submit comment:', response.status, errorData);
-        alert(`Lỗi gửi bình luận: ${response.status} - ${errorData}`);
+        showNotification('error', `Lỗi gửi bình luận: ${response.status} - ${errorData}`);
       }
     } catch (err) {
       console.error('Failed to submit comment:', err);
-      alert('Lỗi kết nối khi gửi bình luận');
+      showNotification('error', 'Lỗi kết nối khi gửi bình luận');
     } finally {
       setCommentLoading(false);
     }
@@ -444,7 +470,7 @@ const BlogDetail: React.FC = () => {
   // Cập nhật handleSubmitReply với validation
   const handleSubmitReply = async (parentId: string) => {
     if (!user) {
-      alert('Bạn cần đăng nhập để trả lời bình luận');
+      showNotification('warning', 'Bạn cần đăng nhập để trả lời bình luận');
       return;
     }
 
@@ -491,7 +517,7 @@ const BlogDetail: React.FC = () => {
         setReplyTo(null);
         
         // Hiển thị thông báo thành công
-        alert('Trả lời đã được gửi thành công!');
+        showNotification('success', 'Trả lời đã được gửi thành công!');
         
         // Refresh comments để lấy dữ liệu chính xác từ backend
         // Bây giờ reply sẽ được lưu vĩnh viễn
@@ -516,11 +542,11 @@ const BlogDetail: React.FC = () => {
           }
         }
         
-        alert(`Lỗi: ${errorMessage}`);
+        showNotification('error', `Lỗi: ${errorMessage}`);
       }
     } catch (err) {
       console.error('Failed to submit reply:', err);
-      alert('Lỗi kết nối khi gửi trả lời. Vui lòng thử lại sau.');
+      showNotification('error', 'Lỗi kết nối khi gửi trả lời. Vui lòng thử lại sau.');
     } finally {
       setCommentLoading(false);
     }
@@ -529,7 +555,7 @@ const BlogDetail: React.FC = () => {
   // Like/Unlike comment với animation mượt mà
   const handleLikeComment = async (commentId: string) => {
     if (!user) {
-      alert('Bạn cần đăng nhập để thích bình luận');
+      showNotification('warning', 'Bạn cần đăng nhập để thích bình luận');
       return;
     }
 
@@ -578,6 +604,9 @@ const BlogDetail: React.FC = () => {
       if (response.ok) {
         const result = await response.json();
         console.log(`${endpoint} result:`, result);
+        
+        // Refresh comments từ backend để đảm bảo trạng thái chính xác
+        await fetchComments();
         
         // Kết thúc animation sau 800ms (nhanh hơn)
         setTimeout(() => {
@@ -648,33 +677,34 @@ const BlogDetail: React.FC = () => {
         const result = await response.json();
         console.log('Unlike result:', result);
         
-        // Refresh comments
-        await fetchComments();
-        
-        alert(result.message || 'Đã bỏ thích bình luận thành công!');
+        showNotification('success', result.message || 'Đã bỏ thích bình luận thành công!');
       } else {
         const errorData = await response.json();
-        alert(`Lỗi: ${errorData.error || 'Không thể bỏ thích bình luận'}`);
+        showNotification('error', `Lỗi: ${errorData.error || 'Không thể bỏ thích bình luận'}`);
       }
     } catch (err) {
       console.error('Failed to unlike comment:', err);
-      alert('Lỗi kết nối khi bỏ thích bình luận');
+      showNotification('error', 'Lỗi kết nối khi bỏ thích bình luận');
     }
   };
 
   // Thêm button refresh comments (tùy chọn)
   const handleRefreshComments = async () => {
     await fetchComments();
-    alert('Đã làm mới bình luận!');
+    showNotification('success', 'Đã làm mới bình luận!');
   };
+
+  // Thêm state để quản lý loading khi edit
+  const [editLoading, setEditLoading] = useState<string | null>(null);
 
   // Thêm hàm xử lý chỉnh sửa comment
   const handleEditComment = async (commentId: string) => {
     if (!editContent.trim()) {
-      alert('Vui lòng nhập nội dung');
+      showNotification('warning', 'Vui lòng nhập nội dung');
       return;
     }
 
+    setEditLoading(commentId);
     try {
       const response = await fetch(`${COMMENT_API_URL}/${commentId}`, {
         method: 'PUT',
@@ -688,17 +718,31 @@ const BlogDetail: React.FC = () => {
       });
 
       if (response.ok) {
-        alert('Cập nhật bình luận thành công!');
+        showNotification('success', 'Cập nhật bình luận thành công!');
         setEditingCommentId(null);
         setEditContent('');
         await fetchComments();
       } else {
         const errorData = await response.text();
-        alert(`Lỗi: ${errorData}`);
+        let errorMessage = 'Không thể cập nhật bình luận';
+        try {
+          const errorJson = JSON.parse(errorData);
+          errorMessage = errorJson.message || errorJson.error || errorMessage;
+        } catch (e) {
+          // Nếu không parse được JSON, sử dụng text gốc
+          if (errorData.includes('Không có quyền')) {
+            errorMessage = 'Bạn không có quyền cập nhật bình luận này';
+          } else if (errorData.includes('Không tìm thấy')) {
+            errorMessage = 'Không tìm thấy bình luận';
+          }
+        }
+        showNotification('error', errorMessage);
       }
     } catch (err) {
       console.error('Failed to edit comment:', err);
-      alert('Lỗi kết nối khi cập nhật bình luận');
+      showNotification('error', 'Lỗi kết nối khi cập nhật bình luận');
+    } finally {
+      setEditLoading(null);
     }
   };
 
@@ -717,17 +761,36 @@ const BlogDetail: React.FC = () => {
       });
 
       if (response.ok) {
-        alert('Xóa bình luận thành công!');
+        showNotification('success', 'Xóa bình luận thành công!');
         await fetchComments();
       } else {
         const errorData = await response.text();
-        alert(`Lỗi: ${errorData}`);
+        let errorMessage = 'Không thể xóa bình luận';
+        try {
+          const errorJson = JSON.parse(errorData);
+          errorMessage = errorJson.message || errorJson.error || errorMessage;
+        } catch (e) {
+          // Nếu không parse được JSON, sử dụng text gốc
+          if (errorData.includes('Không có quyền')) {
+            errorMessage = 'Bạn không có quyền xóa bình luận này';
+          } else if (errorData.includes('Không tìm thấy')) {
+            errorMessage = 'Không tìm thấy bình luận';
+          }
+        }
+        showNotification('error', errorMessage);
       }
     } catch (err) {
       console.error('Failed to delete comment:', err);
-      alert('Lỗi kết nối khi xóa bình luận');
+      showNotification('error', 'Lỗi kết nối khi xóa bình luận');
     }
   };
+
+  // Refresh comments khi user thay đổi (đăng nhập/đăng xuất)
+  useEffect(() => {
+    if (id) {
+      fetchComments();
+    }
+  }, [user?.userId]); // Chỉ chạy khi userId thay đổi
 
   useEffect(() => {
     scrollToTop();
@@ -1156,14 +1219,17 @@ const BlogDetail: React.FC = () => {
                   <div className="blog-comment-info">
                     <div className="blog-comment-author">
                       {comment.tenNguoiDung || 'Người dùng'}
+                      {user && user.userId === Number(comment.idNguoiDung) && (
+                        <span className="blog-comment-owner-badge">Bạn</span>
+                      )}
                     </div>
                     <div className="blog-comment-date">
                       {formatDate(comment.ngayBinhLuan)}
                     </div>
                   </div>
                   
-                  {/* Menu 3 chấm - Hiển thị cho tất cả comment để test */}
-                  {user && (
+                  {/* Menu 3 chấm - Hiển thị cho comment của user hiện tại hoặc admin */}
+                  {user && (user.userId === Number(comment.idNguoiDung) || user.role === 'quan_tri') && (
                     <div className="blog-comment-menu">
                       <button 
                         className="blog-comment-menu-btn"
@@ -1210,28 +1276,56 @@ const BlogDetail: React.FC = () => {
                 {/* Hiển thị nội dung comment hoặc form chỉnh sửa */}
                 {editingCommentId === comment.id ? (
                   <div className="blog-comment-edit-form">
-                    <textarea
-                      value={editContent}
-                      onChange={(e) => setEditContent(e.target.value)}
-                      placeholder="Chỉnh sửa bình luận..."
-                      rows={3}
-                      maxLength={1000}
-                    />
-                    <div className="blog-comment-edit-actions">
+                    <div className="edit-form-header">
+                      <div className="edit-form-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                        </svg>
+                      </div>
+                      <div className="edit-form-title">
+                        <h4>Chỉnh sửa bình luận</h4>
+                        <span className="edit-form-subtitle">Cập nhật nội dung bình luận của bạn</span>
+                      </div>
+                    </div>
+                    
+                    <div className="edit-form-content">
+                      <textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        placeholder="Chỉnh sửa bình luận..."
+                        rows={3}
+                        maxLength={1000}
+                        className="edit-form-textarea"
+                      />
+                      <div className="edit-form-character-count">
+                        <span className={`character-count ${editContent.length > 900 ? 'warning' : ''} ${editContent.length > 1000 ? 'error' : ''}`}>
+                          {editContent.length}/1000
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="edit-form-actions">
                       <button 
                         onClick={() => handleEditComment(comment.id)}
-                        className="blog-comment-edit-save-btn"
+                        className={`edit-form-save-btn ${editLoading === comment.id ? 'loading' : ''}`}
+                        disabled={!editContent.trim() || editContent.length > 1000 || editLoading === comment.id}
                       >
-                        Lưu
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" />
+                        </svg>
+                        <span>{editLoading === comment.id ? 'Đang lưu...' : 'Lưu thay đổi'}</span>
                       </button>
                       <button 
                         onClick={() => {
                           setEditingCommentId(null);
                           setEditContent('');
                         }}
-                        className="blog-comment-edit-cancel-btn"
+                        className="edit-form-cancel-btn"
                       >
-                        Hủy
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                        </svg>
+                        <span>Hủy bỏ</span>
                       </button>
                     </div>
                   </div>
@@ -1351,14 +1445,17 @@ const BlogDetail: React.FC = () => {
                           <div className="blog-comment-info">
                             <div className="blog-comment-author">
                               {reply.tenNguoiDung || 'Người dùng'}
+                              {user && user.userId === Number(reply.idNguoiDung) && (
+                                <span className="blog-comment-owner-badge">Bạn</span>
+                              )}
                             </div>
                             <div className="blog-comment-date">
                               {formatDate(reply.ngayBinhLuan)}
                             </div>
                           </div>
                           
-                          {/* Menu 3 chấm cho replies */}
-                          {user && (
+                          {/* Menu 3 chấm cho replies - Hiển thị cho reply của user hiện tại hoặc admin */}
+                          {user && (user.userId === Number(reply.idNguoiDung) || user.role === 'quan_tri') && (
                             <div className="blog-comment-menu">
                               <button 
                                 className="blog-comment-menu-btn"
