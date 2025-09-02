@@ -1,43 +1,44 @@
 .loading-container {
     position: fixed;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100vw;
-    height: 100vh;
-    background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+    height: 100dvh; /* hoặc 100svh để ổn định trên mobile */
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
     z-index: 9999;
-    transition: opacity 0.3s ease-out; /* Giảm từ 0.5s xuống 0.3s */
-  }
-  
-  .loading-container.fade-out {
+    
+    transition: opacity 0.3s ease-out;
+    padding-top: env(safe-area-inset-top); /* iOS safe area */
+}
+
+.loading-container.fade-out {
     opacity: 0;
-  }
-  
-  .loading-background {
+}
+
+.loading-background {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 30px;
-  }
-  
-  .logo-container {
+}
+
+.logo-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
-  }
-  
-  .audi-logo {
+}
+
+.audi-logo {
     width: 200px;
     height: auto;
     animation: logoSlideIn 1s ease-out forwards; /* Giảm từ 2s xuống 1s */
     filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
-  }
-  
-  .loading-text {
+}
+
+.loading-text {
     font-family: 'Arial', sans-serif;
     font-size: 48px;
     font-weight: bold;
@@ -45,26 +46,26 @@
     letter-spacing: 8px;
     animation: textFadeIn 0.8s ease-out 0.3s both; /* Giảm từ 1.5s xuống 0.8s và delay từ 0.5s xuống 0.3s */
     text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-  }
-  
-  .loading-bar {
+}
+
+.loading-bar {
     width: 300px;
     height: 4px;
     background: rgba(255, 255, 255, 0.2);
     border-radius: 2px;
     overflow: hidden;
     position: relative;
-  }
-  
-  .loading-progress {
+}
+
+.loading-progress {
     height: 100%;
     background: linear-gradient(90deg, #ffffff 0%, #cccccc 100%);
     border-radius: 2px;
     animation: progressFill 1.2s ease-out forwards; /* Giảm từ 2.5s xuống 1.2s */
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-  }
-  
-  @keyframes logoSlideIn {
+}
+
+@keyframes logoSlideIn {
     0% {
       transform: translateX(-100vw) scale(0.5);
       opacity: 0;
@@ -130,13 +131,16 @@
     }
   }
 
-  .intro-video {
+.intro-video {
+    display: block;
+    margin: 0 auto;
     width: 80vw;
-    max-width: 700px; /* Cho phép hiển thị lớn hơn nếu màn hình đủ rộng */
+    max-width: 700px;
+    max-height: 80vh;
     height: auto;
     border-radius: 12px;
     box-shadow: 0 0 40px rgba(0,0,0,0.7);
     background: #000;
     object-fit: contain;
-    image-rendering: auto; /* Đảm bảo không bị làm mờ */
-  }
+    transform: translate(-3vw, 20vh); /* qua trái 2vw, xuống 5vh */
+}
