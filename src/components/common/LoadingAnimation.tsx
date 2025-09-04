@@ -16,7 +16,7 @@ const LoadingAnimation: React.FC<LoadingAnimationProps> = ({ onAnimationComplete
   }, [onAnimationComplete]);
 
   return (
-    <div className="loading-container" style={{ background: 'black' }}>
+    <div className="la-loading-container" style={{ background: 'black' }}>
       <video
         ref={videoRef}
         src={introVideo}
@@ -24,7 +24,7 @@ const LoadingAnimation: React.FC<LoadingAnimationProps> = ({ onAnimationComplete
         muted
         playsInline
         onEnded={onAnimationComplete}
-        className="intro-video"
+        className="la-intro-video"
         controls={false} // Không cần controls cho intro
       />
     </div>

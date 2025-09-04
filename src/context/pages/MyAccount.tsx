@@ -95,6 +95,7 @@ const MyAccount: React.FC = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isAvatarHover, setIsAvatarHover] = useState(false);
+  const [avatarVersion, setAvatarVersion] = useState(0);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -222,7 +223,7 @@ const MyAccount: React.FC = () => {
     }
     
     if (avatarPath.startsWith('http')) {
-      return avatarPath;
+      return `${avatarPath}${avatarVersion ? `?v=${avatarVersion}` : ''}`;
     }
     
     if (avatarPath === 'avatar-default.png') {
@@ -230,10 +231,10 @@ const MyAccount: React.FC = () => {
     }
     
     if (avatarPath.includes('uploads/images/avatar_user/')) {
-      return `http://localhost:8080/${avatarPath}`;
+      return `http://localhost:8080/${avatarPath}${avatarVersion ? `?v=${avatarVersion}` : ''}`;
     }
     
-    return `http://localhost:8080/uploads/images/avatar_user/${avatarPath}`;
+    return `http://localhost:8080/uploads/images/avatar_user/${avatarPath}${avatarVersion ? `?v=${avatarVersion}` : ''}`;
   };
 
   const formatDate = (dateString: string) => {
@@ -282,22 +283,80 @@ const MyAccount: React.FC = () => {
 
     try {
       setLoading(true);
-      const formData = new FormData();
-      formData.append('avatar', avatarFile);
+      // 1) Upload file to storage service
+      const uploadForm = new FormData();
+      uploadForm.append('file', avatarFile);
 
-      const response = await axios.put(`${BACKEND_URL}/nguoi-dung/avatar`, formData, {
+      const uploadRes = await axios.post(`${BACKEND_URL}/upload/avatar`, uploadForm, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'multipart/form-data'
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
-      if (response.data.message) {
-        showNotification('success', response.data.message);
-        setAvatarFile(null);
-        setAvatarPreview(null);
-        loadUserProfile(); // Reload profile to get new avatar
+      const uploadedPath: string | undefined = uploadRes.data?.url;
+      if (!uploadedPath) {
+        throw new Error('Không nhận được đường dẫn ảnh từ server');
       }
+
+      // 2) Persist avatar to current user profile
+      const avatarValue = uploadedPath.includes('/')
+        ? uploadedPath.split('/').pop() || uploadedPath
+        : uploadedPath;
+
+      if (!userProfile?.id) {
+        throw new Error('Không xác định được ID người dùng');
+      }
+
+      // Build full DTO to satisfy backend non-null constraints
+      const updatePayload = {
+        id: userProfile.id,
+        ho: userProfile.ho,
+        ten: userProfile.ten,
+        soDienThoai: userProfile.soDienThoai || '',
+        diaChi: userProfile.diaChi || '',
+        thanhPho: userProfile.thanhPho || '',
+        tinh: userProfile.tinh || '',
+        maBuuDien: userProfile.maBuuDien || '',
+        quocGia: userProfile.quocGia || 'Việt Nam',
+        vaiTro: userProfile.vaiTro,
+        trangThai: userProfile.trangThai,
+        avatar: avatarValue
+      };
+
+      await axios.put(`${BACKEND_URL}/nguoi-dung/${userProfile.id}`, updatePayload, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      showNotification('success', 'Cập nhật ảnh đại diện thành công');
+
+      // Update cached user for header and other places
+      try {
+        const stored = localStorage.getItem('user');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          parsed.avatar = avatarValue;
+          localStorage.setItem('user', JSON.stringify(parsed));
+        }
+      } catch {}
+
+      // Notify listeners (Header) to refresh avatar immediately
+      try {
+        const fullUrl = uploadedPath.startsWith('http')
+          ? uploadedPath
+          : `http://localhost:8080/uploads/images/avatar_user/${avatarValue}`;
+        const evt = new CustomEvent('user-avatar-updated', { detail: { avatar: fullUrl } });
+        window.dispatchEvent(evt);
+      } catch {
+        window.dispatchEvent(new Event('user-avatar-updated'));
+      }
+
+      setAvatarVersion(prev => prev + 1);
+      setAvatarFile(null);
+      setAvatarPreview(null);
+      loadUserProfile(); // Reload profile to get new avatar
     } catch (error: any) {
       console.error('Lỗi khi cập nhật ảnh đại diện:', error);
       if (error.response?.data?.message) {
@@ -336,7 +395,7 @@ const MyAccount: React.FC = () => {
       {/* Hero Section */}
       <div className="account-hero">
         <div className="hero-background"></div>
-        <div className="hero-content">
+        <div className="account-hero-content">
           <div className="hero-avatar-section">
             {/* Replace the Badge with the Register-style avatar upload */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -473,24 +532,24 @@ const MyAccount: React.FC = () => {
                 size="large"
                 icon={<EditOutlined />}
                 onClick={handleEditProfile}
-                className="hero-btn primary-btn"
+                className="account-hero-btn account-primary-btn"
               >
                 Chỉnh sửa hồ sơ
               </Button>
               <Button 
                 size="large"
-                icon={<LockOutlined />}
-                onClick={() => setChangePasswordModal(true)}
-                className="hero-btn secondary-btn"
+                icon={<EyeOutlined />}
+                onClick={() => setEditing(false)}
+                className="account-hero-btn account-secondary-btn"
               >
-                Đổi mật khẩu
+                Hiển thị thông tin
               </Button>
               <Button 
                 size="large"
                 icon={<ReloadOutlined />}
                 onClick={loadUserProfile}
                 loading={loading}
-                className="hero-btn ghost-btn"
+                className="account-hero-btn account-ghost-btn"
               >
                 Làm mới
               </Button>
@@ -500,9 +559,9 @@ const MyAccount: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="loading-container">
-          <Spin size="large" className="loading-spinner" />
-          <Title level={4} className="loading-text">Đang tải thông tin...</Title>
+        <div className="account-loading-container">
+          <Spin size="large" className="account-loading-spinner" />
+          <Title level={4} className="account-loading-text">Đang tải thông tin...</Title>
         </div>
       ) : userProfile ? (
         <div className="account-content">
@@ -865,9 +924,8 @@ const MyAccount: React.FC = () => {
                             dot={<CheckCircleOutlined className="timeline-icon" />}
                           >
                             <div className="timeline-content">
-                              <Text strong>Đăng nhập thành công</Text>
-                              <br />
-                              <Text type="secondary">Hôm nay, 14:04</Text>
+                              <div className="timeline-title">Đăng nhập thành công</div>
+                              <div className="timeline-time">Hôm nay, 14:04</div>
                             </div>
                           </Timeline.Item>
                           <Timeline.Item 
@@ -875,9 +933,8 @@ const MyAccount: React.FC = () => {
                             dot={<EditOutlined className="timeline-icon" />}
                           >
                             <div className="timeline-content">
-                              <Text strong>Cập nhật thông tin cá nhân</Text>
-                              <br />
-                              <Text type="secondary">2 ngày trước</Text>
+                              <div className="timeline-title">Cập nhật thông tin cá nhân</div>
+                              <div className="timeline-time">2 ngày trước</div>
                             </div>
                           </Timeline.Item>
                           <Timeline.Item 
@@ -885,18 +942,16 @@ const MyAccount: React.FC = () => {
                             dot={<EyeOutlined className="timeline-icon" />}
                           >
                             <div className="timeline-content">
-                              <Text strong>Xem chi tiết sản phẩm</Text>
-                              <br />
-                              <Text type="secondary">1 tuần trước</Text>
+                              <div className="timeline-title">Xem chi tiết sản phẩm</div>
+                              <div className="timeline-time">1 tuần trước</div>
                             </div>
                           </Timeline.Item>
                           <Timeline.Item 
                             dot={<UserOutlined className="timeline-icon" />}
                           >
                             <div className="timeline-content">
-                              <Text strong>Tạo tài khoản</Text>
-                              <br />
-                              <Text type="secondary">{formatDate(userProfile.ngayTao)}</Text>
+                              <div className="timeline-title">Tạo tài khoản</div>
+                              <div className="timeline-time">{formatDate(userProfile.ngayTao)}</div>
                             </div>
                           </Timeline.Item>
                         </Timeline>
@@ -1061,9 +1116,18 @@ const MyAccount: React.FC = () => {
           <Form.Item
             label="Mật khẩu mới"
             name="newPassword"
+            dependencies={["currentPassword"]}
             rules={[
               { required: true, message: 'Vui lòng nhập mật khẩu mới' },
-              { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự' }
+              { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('currentPassword') !== value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('Mật khẩu mới không được trùng mật khẩu hiện tại'));
+                },
+              })
             ]}
           >
             <Input.Password 

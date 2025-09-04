@@ -221,61 +221,72 @@ const DealershipCard: React.FC<DealershipCardProps> = ({ dealership, index }) =>
     setMapLoaded(false);
   }, []);
 
-  // Component hiển thị giờ làm việc với màu sắc
+  // Component hiển thị giờ làm việc – gọn và chuyên nghiệp
   const WorkingHoursDisplay = ({ hours }: { hours: any }) => {
     if (!hours || typeof hours !== 'object') {
-      return <div className="hours-text">Thông tin giờ làm việc đang cập nhật</div>;
+      return <div className="hours-empty">Thông tin giờ làm việc đang cập nhật</div>;
     }
 
-    const dayMapping = {
-      'Thu2-Thu6': 'Thứ 2 - Thứ 6',
-      'Thu7': 'Thứ 7',
-      'ChuNhat': 'Chủ nhật',
-      'MONDAY': 'Thứ 2',
-      'TUESDAY': 'Thứ 3', 
-      'WEDNESDAY': 'Thứ 4',
-      'THURSDAY': 'Thứ 5',
-      'FRIDAY': 'Thứ 6',
-      'SATURDAY': 'Thứ 7',
-      'SUNDAY': 'Chủ nhật',
-      'Thứ 2': 'Thứ 2',
-      'Thứ 3': 'Thứ 3',
-      'Thứ 4': 'Thứ 4',
-      'Thứ 5': 'Thứ 5',
-      'Thứ 6': 'Thứ 6',
-      'Thứ 7': 'Thứ 7',
-      'Chủ nhật': 'Chủ nhật'
+    const get = (key: string) => (hours as Record<string, any>)[key];
+
+    const normalizeTime = (value: string | null | undefined): string => {
+      if (!value) return '';
+      const v = String(value).trim();
+      // Chuẩn hóa "8:00-18:00" -> "08:00 – 18:00"
+      const m = v.match(/^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/);
+      if (m) {
+        const pad = (n: string) => (n.length === 1 ? `0${n}` : n);
+        return `${pad(m[1])}:${m[2]} – ${pad(m[3])}:${m[4]}`;
+      }
+      return v; // "Mở cửa" | "Đóng cửa" ...
     };
 
-    // Thứ tự hiển thị cố định theo thứ tự trong tuần
-    const dayOrder = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+    const makeRow = (label: string, raw: any) => {
+      const value = raw ? String(raw) : '';
+      const lower = value.toLowerCase();
+      const status = lower.includes('mo cua') || lower.includes('mở cửa')
+        ? 'open'
+        : lower.includes('dong cua') || lower.includes('đóng cửa')
+        ? 'closed'
+        : undefined;
+      return { label, time: normalizeTime(value), status } as { label: string; time: string; status?: 'open' | 'closed' };
+    };
+
+    // Gom nhóm T2–T6 nếu cùng khung giờ
+    const weekdayValues = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'].map(get);
+    const allWeekdaysEqual = weekdayValues.every(v => v && String(v) === String(weekdayValues[0]));
+
+    const rows: Array<{ label: string; time: string; status?: 'open' | 'closed' }> = [];
+    if (allWeekdaysEqual && weekdayValues[0]) {
+      rows.push(makeRow('Thứ 2 – Thứ 6', weekdayValues[0]));
+    } else {
+      rows.push(
+        makeRow('Thứ 2', get('MONDAY')),
+        makeRow('Thứ 3', get('TUESDAY')),
+        makeRow('Thứ 4', get('WEDNESDAY')),
+        makeRow('Thứ 5', get('THURSDAY')),
+        makeRow('Thứ 6', get('FRIDAY')),
+      );
+    }
+    rows.push(makeRow('Thứ 7', get('SATURDAY')));
+    rows.push(makeRow('Chủ nhật', get('SUNDAY')));
+
+    // Bỏ các hàng không có dữ liệu
+    const filtered = rows.filter(r => r.time);
 
     return (
-      <div className="hours-text">
-        {dayOrder.map((dayKey, index) => {
-          const time = (hours as Record<string, any>)[dayKey];
-          if (!time) return null;
-          
-          const dayName = dayMapping[dayKey as keyof typeof dayMapping] || dayKey;
-          const timeStr = String(time).toLowerCase();
-          
-          // Chỉ đổi màu cho phần trạng thái, không đổi màu tên ngày
-          const isOpenStatus = timeStr.includes('mo cua') || timeStr.includes('mở cửa');
-          const isClosedStatus = timeStr.includes('dong cua') || timeStr.includes('đóng cửa');
-          
-          return (
-            <div key={index} style={{ color: '#cccccc' }}>
-              {dayName}: 
-              <span style={{ 
-                color: isOpenStatus ? '#22c55e' : isClosedStatus ? '#ef4444' : '#cccccc',
-                fontWeight: (isOpenStatus || isClosedStatus) ? '600' : 'normal',
-                textShadow: isOpenStatus ? '0 0 4px #22c55e40' : isClosedStatus ? '0 0 4px #ef444440' : 'none'
-              }}>
-                {String(time)}
-              </span>
-            </div>
-          );
-        })}
+      <div className="hours-grid">
+        {filtered.map((r, i) => (
+          <div key={i} className="hours-row">
+            <div className="hours-day">{r.label}</div>
+            <div className="hours-sep" />
+            {r.status ? (
+              <span className={`hours-badge ${r.status}`}>{r.status === 'open' ? 'Mở cửa' : 'Đóng cửa'}</span>
+            ) : (
+              <div className="hours-time">{r.time}</div>
+            )}
+          </div>
+        ))}
       </div>
     );
   };

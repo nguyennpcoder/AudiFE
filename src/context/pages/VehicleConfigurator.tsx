@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Steps, Button, Card, Row, Col, Typography, Divider, message, Spin, Progress, Alert } from "antd";
+import { Steps, Button, Card, Row, Col, Typography, Divider, message, Spin, Progress, Alert, Tag, Space } from "antd";
 import { 
   CarOutlined, 
   BgColorsOutlined, 
@@ -809,58 +809,22 @@ const VehicleConfigurator: React.FC = () => {
                       />
                     </div>
                     <div className="color-info">
-                      <Text strong style={{ fontSize: '16px', marginBottom: '8px' }}>
+                      <Text strong style={{ fontSize: '16px' }}>
                         {mauSac.ten}
                       </Text>
-                      
-                      {/* Giá thêm - đảm bảo luôn hiển thị rõ ràng */}
-                      <div 
-                        style={{ 
-                          margin: '8px 0',
-                          padding: '6px 12px',
-                          borderRadius: '20px',
-                          background: mauSac.giaThem > 0 
-                            ? 'linear-gradient(135deg, #1890ff, #40a9ff)' 
-                            : 'linear-gradient(135deg, #52c41a, #73d13d)',
-                          color: 'white',
-                          fontWeight: 'bold',
-                          fontSize: '14px',
-                          textAlign: 'center',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-                        }}
-                      >
-                        {mauSac.giaThem > 0 
-                          ? `+${mauSac.giaThem.toLocaleString('vi-VN')} VNĐ`
-                          : 'Miễn phí'
-                        }
-                      </div>
-                      
-                      {/* Badge Metallic nếu có */}
-                      {mauSac.laMetallic && (
-                        <div 
-                          style={{
-                            display: 'inline-block',
-                            background: 'linear-gradient(135deg, #ffd700, #ffed4e)',
-                            color: '#000',
-                            padding: '4px 12px',
-                            borderRadius: '20px',
-                            fontSize: '12px',
-                            fontWeight: '600',
-                            marginTop: '8px'
-                          }}
-                        >
-                          Metallic
-                        </div>
-                      )}
-                      
-                      {/* Debug info - để kiểm tra giá */}
-                      <div style={{ 
-                        fontSize: '11px', 
-                        color: 'rgba(255,255,255,0.5)', 
-                        marginTop: '4px',
-                        fontStyle: 'italic'
-                      }}>
-                        Debug: giaThem = {mauSac.giaThem}
+                      <div style={{ marginTop: 8 }}>
+                        <Space size={8} wrap>
+                          <Tag color={mauSac.giaThem > 0 ? 'blue' : 'green'} style={{ margin: 0, padding: '4px 10px', borderRadius: 12 }}>
+                            {mauSac.giaThem > 0 
+                              ? `+${mauSac.giaThem.toLocaleString('vi-VN')} VNĐ`
+                              : 'Miễn phí'}
+                          </Tag>
+                          {mauSac.laMetallic && (
+                            <Tag color="gold" style={{ margin: 0, padding: '4px 10px', borderRadius: 12, color: '#000', fontWeight: 600 }}>
+                              Metallic
+                            </Tag>
+                          )}
+                        </Space>
                       </div>
                     </div>
                   </Card>
@@ -877,27 +841,6 @@ const VehicleConfigurator: React.FC = () => {
       content: (
         <div className="step-content">
           <Title level={3}>Tùy chỉnh các tính năng</Title>
-          
-          {/* Debug info */}
-          <div style={{ marginBottom: '20px', padding: '10px', background: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}>
-            <Text type="secondary">
-              Debug: Đã load {danhSachTuyChon.length} tùy chọn tính năng
-            </Text>
-            <br />
-            <Text type="secondary">
-              Danh sách: {danhSachTuyChon.length > 0 ? 
-                danhSachTuyChon.map(t => t.ten).join(', ') : 'Không có dữ liệu'
-              }
-            </Text>
-            <br />
-            <Text type="secondary">
-              Tùy chọn đã chọn: {cauHinhHienTai.danhSachIdTuyChon.length} item
-            </Text>
-            <br />
-            <Text type="secondary">
-              IDs: [{cauHinhHienTai.danhSachIdTuyChon.join(', ')}]
-            </Text>
-          </div>
           
           {danhSachTuyChon.length > 0 ? (
             <Row gutter={[16, 16]}>
@@ -984,23 +927,6 @@ const VehicleConfigurator: React.FC = () => {
       content: (
         <div className="step-content">
           <Title level={3}>Tùy chỉnh nội thất</Title>
-          
-          {/* Debug info */}
-          <div style={{ marginBottom: '20px', padding: '10px', background: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}>
-            <Text type="secondary">
-              Debug: Đã load {danhSachNoiThat.length} nội thất
-            </Text>
-            <br />
-            <Text type="secondary">
-              Danh sách: {danhSachNoiThat.map(n => n.ten).join(', ')}
-            </Text>
-            <br />
-            <Text type="secondary">
-              Nội thất đã chọn: {cauHinhHienTai.idNoiThat ? 
-                danhSachNoiThat.find(n => n.id === cauHinhHienTai.idNoiThat)?.ten : 'Chưa chọn'
-              }
-            </Text>
-          </div>
           
           {danhSachNoiThat.length > 0 ? (
             <Row gutter={[16, 16]}>

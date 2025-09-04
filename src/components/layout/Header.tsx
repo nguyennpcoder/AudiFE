@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.svg';
 import '../../styles/Header.css';
@@ -11,6 +11,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { isAuthenticated, user, firebaseUser, logout } = useAuth();
+  const [avatarVersion, setAvatarVersion] = useState(0);
   const navigate = useNavigate();
 
   const toggleMenu = () => {
@@ -61,6 +62,44 @@ const Header = () => {
     return user?.email || 'Tài khoản';
   };
 
+  useEffect(() => {
+    const onAvatarUpdated = (e: Event) => {
+      try {
+        const ce = e as CustomEvent<{ avatar?: string }>;
+        if (ce.detail?.avatar) {
+          // Immediately update cached user and force refresh
+          const stored = localStorage.getItem('user');
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            parsed.avatar = ce.detail.avatar;
+            localStorage.setItem('user', JSON.stringify(parsed));
+          }
+        }
+      } catch {}
+      setAvatarVersion(prev => prev + 1);
+    };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'user') setAvatarVersion(prev => prev + 1);
+    };
+    window.addEventListener('user-avatar-updated', onAvatarUpdated as EventListener);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('user-avatar-updated', onAvatarUpdated as EventListener);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
+
+  useEffect(() => {
+    // bump cache if context user avatar changes
+    setAvatarVersion(prev => prev + 1);
+  }, [user?.avatar]);
+
+  const addCacheBust = (url: string) => {
+    if (!url) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    return `${url}${sep}v=${avatarVersion}`;
+  };
+
   // Get avatar URL with improved logic
   const getAvatarUrl = () => {
     console.log('=== Avatar Debug Info ===');
@@ -69,29 +108,7 @@ const Header = () => {
     console.log('user:', user);
     console.log('user?.avatar:', user?.avatar);
     
-    // Check if this is a Google login
-    const isGoogleLogin = firebaseUser?.providerData?.some(
-      provider => provider.providerId === 'google.com'
-    );
-    
-    console.log('Is Google login:', isGoogleLogin);
-    
-    // Priority 1: Use Firebase photoURL if available (for social logins)
-    if (firebaseUser?.photoURL && firebaseUser.photoURL.trim() !== '') {
-      console.log('Using Firebase photoURL:', firebaseUser.photoURL);
-      
-      // For Google URLs, handle CORS issue
-      if (firebaseUser.photoURL.includes('googleusercontent.com')) {
-        // Use a simple CORS proxy
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(firebaseUser.photoURL)}`;
-        console.log('Using CORS proxy for Google avatar:', proxyUrl);
-        return proxyUrl;
-      }
-      
-      return firebaseUser.photoURL;
-    }
-    
-    // Priority 2: Use user.avatar if it's a full URL (from Google, Facebook, etc.)
+    // Priority 1: Always prefer profile avatar set in app (user.avatar)
     if (user?.avatar && user.avatar.trim() !== '') {
       if (/^https?:\/\//.test(user.avatar)) {
         console.log('Using user avatar (full URL):', user.avatar);
@@ -118,6 +135,20 @@ const Header = () => {
       return builtUrl;
     }
     
+    // Priority 2: Use Firebase photoURL if available (for social logins)
+    if (firebaseUser?.photoURL && firebaseUser.photoURL.trim() !== '') {
+      console.log('Using Firebase photoURL:', firebaseUser.photoURL);
+      
+      // For Google URLs, handle CORS issue
+      if (firebaseUser.photoURL.includes('googleusercontent.com')) {
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(firebaseUser.photoURL)}`;
+        console.log('Using CORS proxy for Google avatar:', proxyUrl);
+        return proxyUrl;
+      }
+      
+      return firebaseUser.photoURL;
+    }
+
     // Priority 3: Check if we have a stored user in localStorage
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
@@ -136,6 +167,14 @@ const Header = () => {
             }
             
             return parsedUser.avatar;
+          } else if (parsedUser.avatar.startsWith('/')) {
+            // Relative path stored
+            return parsedUser.avatar;
+          } else {
+            // Filename stored -> build full URL
+            const built = buildAvatarUrl(parsedUser.avatar);
+            console.log('Using buildAvatarUrl for stored avatar:', built);
+            return built;
           }
         }
       } catch (error) {
@@ -164,7 +203,7 @@ const Header = () => {
     });
   };
 
-  const avatarUrl = getAvatarUrl();
+  const avatarUrl = addCacheBust(getAvatarUrl());
   console.log('=== Final avatar URL ===:', avatarUrl);
   
   // Test the avatar URL

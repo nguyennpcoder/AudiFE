@@ -1,4 +1,5 @@
 import React from 'react';
+import '../../styles/Payment.css';
 import { useNavigate } from 'react-router-dom';
 import { Result, Button } from 'antd';
 import { CloseCircleOutlined, HomeOutlined, ShoppingOutlined } from '@ant-design/icons';
@@ -7,8 +8,8 @@ const PaymentCancel: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div style={{ 
-      maxWidth: 800, 
+    <div className="payment-page" style={{ 
+      maxWidth: 900, 
       margin: '50px auto', 
       padding: '20px',
       textAlign: 'center'

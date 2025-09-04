@@ -316,11 +316,11 @@ const BlogManagement: React.FC = () => {
               }}>
                 <thead>
                   <tr style={{ background: '#fafbfc', color: '#6b7280', fontWeight: 700 }}>
-                    <th style={{ padding: '12px 8px', textAlign: 'left', width: '25%' }}>Tiêu đề</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left', width: '40%' }}>Tiêu đề</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left', width: '12%' }}>Danh mục</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left', width: '15%' }}>Tác giả</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left', width: '12%' }}>Ngày đăng</th>
-                    <th style={{ padding: '12px 8px', textAlign: 'left', width: '20%' }}>Tags</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left', width: '10%' }}>Tags</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left', width: '10%' }}>Trạng thái</th>
                     <th style={{ padding: '12px 8px', textAlign: 'center', width: '8%' }}>Hành động</th>
                   </tr>
@@ -409,7 +409,7 @@ const BlogManagement: React.FC = () => {
                             overflow: 'hidden',
                             alignItems: 'center'
                           }}>
-                            {item.theGan?.map((tag: string, index: number) => (
+                            {(item.theGan?.slice(0, 2) || []).map((tag: string) => (
                               <span key={tag} style={{
                                 display: 'inline-flex',
                                 background: '#f3f4f6',
@@ -420,13 +420,25 @@ const BlogManagement: React.FC = () => {
                                 fontWeight: 500,
                                 whiteSpace: 'nowrap',
                                 flexShrink: 0,
-                                maxWidth: '120px',
+                                maxWidth: '84px',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis'
                               }} title={tag}>
                                 {tag}
                               </span>
                             ))}
+                            {!!item.theGan && item.theGan.length > 2 && (
+                              <span style={{
+                                display: 'inline-flex',
+                                background: '#e8f5e9',
+                                color: '#43a047',
+                                borderRadius: 8,
+                                padding: '2px 8px',
+                                fontSize: 12,
+                                fontWeight: 600,
+                                whiteSpace: 'nowrap'
+                              }}>+{item.theGan.length - 2}</span>
+                            )}
                           </div>
                         </td>
                         <td style={{ 

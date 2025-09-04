@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Result, Button, Card, Typography, Space } from 'antd';
 import { CheckCircleOutlined, HomeOutlined, ShoppingOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import '../../styles/Payment.css';
 
 const { Title, Text } = Typography;
 const BACKEND_URL = 'http://localhost:8080/api/v1';
@@ -38,8 +39,8 @@ const PaymentSuccess: React.FC = () => {
   }
 
   return (
-    <div style={{ 
-      maxWidth: 800, 
+    <div className="payment-page" style={{ 
+      maxWidth: 900, 
       margin: '50px auto', 
       padding: '20px',
       textAlign: 'center'
@@ -69,7 +70,15 @@ const PaymentSuccess: React.FC = () => {
       />
       
       {orderInfo && (
-        <Card style={{ marginTop: 24 }}>
+        <Card 
+          style={{ 
+            marginTop: 24,
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.1)'
+          }}
+          headStyle={{ color: '#fff' }}
+          bodyStyle={{ color: '#fff' }}
+        >
           <Title level={4}>Thông tin đơn hàng</Title>
           <Space direction="vertical" style={{ width: '100%' }}>
             <div>

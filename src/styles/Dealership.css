@@ -412,18 +412,60 @@
   margin-bottom: 8px;
 }
 
-.hours-text {
-  font-family: 'Courier New', monospace;
-  font-size: 0.85rem;
-  color: #cccccc; /* Màu trắng mặc định */
-  background: rgba(0, 0, 0, 0.3);
-  padding: 12px;
-  border-radius: 8px;
-  margin: 0;
-  white-space: pre-line;
-  line-height: 1.4;
-  border-left: 3px solid #D50000;
-  transition: background 0.15s ease;
+/* Kiểu mới: lưới gọn gàng cho giờ làm việc */
+.hours-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hours-row {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  align-items: center;
+  column-gap: 8px;
+}
+
+.hours-day {
+  color: #e8e8e8;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.hours-sep {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0));
+}
+
+.hours-time {
+  justify-self: end;
+  color: #cfcfcf;
+  font-variant-numeric: tabular-nums;
+}
+
+.hours-badge {
+  justify-self: end;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.hours-badge.open {
+  color: #1f5131;
+  background: #22c55e33;
+  border: 1px solid #22c55e66;
+}
+
+.hours-badge.closed {
+  color: #5b1f1f;
+  background: #ef444433;
+  border: 1px solid #ef444466;
 }
 
 /* Màu sắc cho các trạng thái đặc biệt */
@@ -871,11 +913,7 @@
 }
 
 /* Working hours hover effect - tối ưu hóa */
-.working-hours:hover .hours-text {
-  background: #2a2a2a;
-  transform: scale(1.01); /* Giảm transform */
-  transition: all 0.2s ease; /* Giảm thời gian transition */
-}
+.working-hours:hover .hours-grid { background: rgba(0, 0, 0, 0.4); }
 
 /* Responsive animations - tối ưu hóa */
 @media (max-width: 768px) {

@@ -1,4 +1,4 @@
-.loading-container {
+.la-loading-container {
     position: fixed;
     inset: 0;
     width: 100vw;
@@ -13,32 +13,32 @@
     padding-top: env(safe-area-inset-top); /* iOS safe area */
 }
 
-.loading-container.fade-out {
+.la-loading-container.fade-out {
     opacity: 0;
 }
 
-.loading-background {
+.la-loading-background {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 30px;
 }
 
-.logo-container {
+.la-logo-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
 }
 
-.audi-logo {
+.la-audi-logo {
     width: 200px;
     height: auto;
     animation: logoSlideIn 1s ease-out forwards; /* Giảm từ 2s xuống 1s */
     filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
 }
 
-.loading-text {
+.la-loading-text {
     font-family: 'Arial', sans-serif;
     font-size: 48px;
     font-weight: bold;
@@ -48,7 +48,7 @@
     text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
 }
 
-.loading-bar {
+.la-loading-bar {
     width: 300px;
     height: 4px;
     background: rgba(255, 255, 255, 0.2);
@@ -57,7 +57,7 @@
     position: relative;
 }
 
-.loading-progress {
+.la-loading-progress {
     height: 100%;
     background: linear-gradient(90deg, #ffffff 0%, #cccccc 100%);
     border-radius: 2px;
@@ -102,36 +102,36 @@
   
   /* Responsive design */
   @media (max-width: 768px) {
-    .audi-logo {
+    .la-audi-logo {
       width: 150px;
     }
     
-    .loading-text {
+    .la-loading-text {
       font-size: 36px;
       letter-spacing: 6px;
     }
     
-    .loading-bar {
+    .la-loading-bar {
       width: 250px;
     }
   }
   
   @media (max-width: 480px) {
-    .audi-logo {
+    .la-audi-logo {
       width: 120px;
     }
     
-    .loading-text {
+    .la-loading-text {
       font-size: 28px;
       letter-spacing: 4px;
     }
     
-    .loading-bar {
+    .la-loading-bar {
       width: 200px;
     }
   }
 
-.intro-video {
+.la-intro-video {
     display: block;
     margin: 0 auto;
     width: 80vw;
@@ -142,5 +142,5 @@
     box-shadow: 0 0 40px rgba(0,0,0,0.7);
     background: #000;
     object-fit: contain;
-    transform: translate(-3vw, 20vh); /* qua trái 2vw, xuống 5vh */
+   
 }

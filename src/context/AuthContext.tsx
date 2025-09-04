@@ -18,34 +18,42 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthResponse | null>(null);
+  // Initialize auth state synchronously from localStorage to avoid redirect flicker on reload
+  const initialUser = (() => {
+    try {
+      const su = localStorage.getItem('user');
+      return su ? JSON.parse(su) as AuthResponse : null;
+    } catch {
+      return null;
+    }
+  })();
+  const initialAuth = !!(localStorage.getItem('user') && localStorage.getItem('token'));
+  const storedTokenInit = localStorage.getItem('token');
+  if (storedTokenInit) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${storedTokenInit}`;
+  }
+
+  const [user, setUser] = useState<AuthResponse | null>(initialUser);
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(initialAuth);
   const { showNotification } = useNotification(); // Use our custom notification
 
-  // First useEffect to handle localStorage
+  // First useEffect to validate localStorage and clean up if corrupted
   useEffect(() => {
-    // Check for traditional token-based auth
-    const storedUser = localStorage.getItem('user');
-    const storedToken = localStorage.getItem('token');
-    
-    if (storedUser && storedToken) {
-      try {
-        const userData = JSON.parse(storedUser);
-        console.log("Loading user from localStorage:", userData);
-        setUser(userData);
-        setIsAuthenticated(true);
-        
-        // Set the authorization header for all future axios requests
-        axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
-      } catch (error) {
-        console.error("Error parsing user data:", error);
-        // Clean up corrupted data
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
+    try {
+      const storedUser = localStorage.getItem('user');
+      const storedToken = localStorage.getItem('token');
+      if (storedUser && storedToken) {
+        JSON.parse(storedUser); // will throw if corrupted
       }
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      setUser(null);
+      setIsAuthenticated(false);
     }
-  }, []); // Only run once on mount
+  }, []);
 
   // Separate useEffect to handle Firebase auth
   useEffect(() => {

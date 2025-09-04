@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../../../styles/Blog.css';
 
@@ -36,16 +36,9 @@ const BlogList: React.FC = () => {
   const [pageSize] = useState(10);
   const navigate = useNavigate();
 
-  // Smooth scroll to top function with animation
+  // Smooth scroll to top (align with Dealership behavior)
   const scrollToTop = () => {
-    const scrollStep = -window.scrollY / (500 / 15);
-    const scrollInterval = setInterval(() => {
-      if (window.scrollY !== 0) {
-        window.scrollBy(0, scrollStep);
-      } else {
-        clearInterval(scrollInterval);
-      }
-    }, 15);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Get avatar URL for author
@@ -176,41 +169,39 @@ const BlogList: React.FC = () => {
     scrollToTop();
   };
 
-  // Hàm tạo danh sách các trang để hiển thị
-  const getPageNumbers = () => {
-    const pages = [];
+  // Danh sách số trang hiển thị (đồng nhất với Dealership)
+  const getPageNumbers = useMemo(() => {
+    const pages: number[] = [];
     const maxVisiblePages = 5;
 
     if (totalPages <= maxVisiblePages) {
       for (let i = 0; i < totalPages; i++) {
         pages.push(i);
       }
-    } else {
-      if (currentPage <= 2) {
-        for (let i = 0; i < 4; i++) {
-          pages.push(i);
-        }
-        pages.push(-1);
-        pages.push(totalPages - 1);
-      } else if (currentPage >= totalPages - 3) {
-        pages.push(0);
-        pages.push(-1);
-        for (let i = totalPages - 4; i < totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        pages.push(0);
-        pages.push(-1);
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i);
-        }
-        pages.push(-1);
-        pages.push(totalPages - 1);
+    } else if (currentPage <= 2) {
+      for (let i = 0; i < 4; i++) {
+        pages.push(i);
       }
+      pages.push(-1);
+      pages.push(totalPages - 1);
+    } else if (currentPage >= totalPages - 3) {
+      pages.push(0);
+      pages.push(-1);
+      for (let i = totalPages - 4; i < totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(0);
+      pages.push(-1);
+      for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+        pages.push(i);
+      }
+      pages.push(-1);
+      pages.push(totalPages - 1);
     }
 
     return pages;
-  };
+  }, [currentPage, totalPages]);
 
   if (loading) {
     return (
@@ -292,7 +283,6 @@ const BlogList: React.FC = () => {
                 <article
                   key={post.id}
                   className="blog-card"
-                  style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <div
                     className="blog-card-link"
@@ -442,7 +432,7 @@ const BlogList: React.FC = () => {
 
               {/* Các nút số trang */}
               <div className="blog-page-numbers">
-                {getPageNumbers().map((pageNum, index) => (
+                {getPageNumbers.map((pageNum, index) => (
                   <React.Fragment key={index}>
                     {pageNum === -1 ? (
                       <span className="blog-page-ellipsis">...</span>

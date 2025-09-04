@@ -1,0 +1,24 @@
+.payment-page {
+  color: #fff;
+}
+
+.payment-page .ant-result-title,
+.payment-page .ant-typography,
+.payment-page .ant-result-subtitle {
+  color: #fff !important;
+}
+
+.payment-page .ant-card-head-title {
+  color: #fff;
+}
+
+.payment-page .ant-card-body {
+  color: #fff;
+}
+
+.payment-page .ant-btn-primary {
+  background: linear-gradient(135deg, #1677ff, #7a5cff);
+  border: none;
+}
+
+

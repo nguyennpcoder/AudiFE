@@ -76,16 +76,24 @@ const BlogDetail: React.FC = () => {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
 
-  // Smooth scroll to top function with animation
+  // Smooth scroll to top function without jank
   const scrollToTop = () => {
-    const scrollStep = -window.scrollY / (500 / 15);
-    const scrollInterval = setInterval(() => {
-      if (window.scrollY !== 0) {
-        window.scrollBy(0, scrollStep);
-      } else {
-        clearInterval(scrollInterval);
-      }
-    }, 15);
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (_) {
+      // Fallback for older browsers
+      const start = window.scrollY || window.pageYOffset;
+      const duration = 400;
+      const startTime = performance.now();
+      const animate = (now: number) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+        window.scrollTo(0, Math.round(start * (1 - ease)));
+        if (progress < 1) requestAnimationFrame(animate);
+      };
+      requestAnimationFrame(animate);
+    }
   };
 
   // Get avatar URL for author (giữ nguyên như cũ)

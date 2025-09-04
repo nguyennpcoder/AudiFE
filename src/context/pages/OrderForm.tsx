@@ -289,28 +289,18 @@ const OrderForm: React.FC = () => {
       return;
     }
 
-    const orderData = {
-      idCauHinh: parseInt(configId || "0"),
-      idDaiLy: form.getFieldValue('idDaiLy'),
-      tienDatCoc: amount,
-      phuongThucThanhToan: 'vnpay',
-      ghiChu: form.getFieldValue('ghiChu'),
-      idKhuyenMai: khuyenMaiSelected?.id
-    };
-
-    const orderResponse = await axios.post(`${BACKEND_URL}/don-hang/tu-cau-hinh`, null, {
-      params: orderData,
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    const orderId = orderResponse.data.id;
-
+    // Không tạo đơn hàng trước. Gửi payload để backend tạo đơn khi callback thành công
     const paymentResponse = await axios.post(`${BACKEND_URL}/thanh-toan/tao-url`, {
-      orderId,
+      orderId: null,
       amount,
       paymentMethod: 'vnpay',
       returnUrl: `${window.location.origin}/payment/success?vnpay=1`,
-      cancelUrl: `${window.location.origin}/payment/cancel?vnpay=1`
+      cancelUrl: `${window.location.origin}/payment/cancel?vnpay=1`,
+      idCauHinh: parseInt(configId || "0"),
+      idDaiLy: form.getFieldValue('idDaiLy'),
+      tienDatCoc: amount,
+      ghiChu: form.getFieldValue('ghiChu'),
+      idKhuyenMai: khuyenMaiSelected?.id || null
     }, {
       headers: { Authorization: `Bearer ${token}` }
     });
