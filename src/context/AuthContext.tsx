@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
-import { AuthResponse } from '../services/authService';
+import { AuthResponse, validateToken } from '../services/authService';
 import axios from 'axios';
 import { User } from 'firebase/auth';
 import auth, { getCurrentUser } from '../services/firebaseService';
@@ -10,6 +10,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   user: AuthResponse | null;
   firebaseUser: User | null;
+  isValidating: boolean;
   login: (userData: AuthResponse) => void;
   logout: () => void;
   setFirebaseUser: (user: User | null) => void;
@@ -18,42 +19,86 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Initialize auth state synchronously from localStorage to avoid redirect flicker on reload
-  const initialUser = (() => {
-    try {
-      const su = localStorage.getItem('user');
-      return su ? JSON.parse(su) as AuthResponse : null;
-    } catch {
-      return null;
-    }
-  })();
-  const initialAuth = !!(localStorage.getItem('user') && localStorage.getItem('token'));
-  const storedTokenInit = localStorage.getItem('token');
-  if (storedTokenInit) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${storedTokenInit}`;
-  }
-
-  const [user, setUser] = useState<AuthResponse | null>(initialUser);
+  // Initialize auth state as not authenticated by default
+  const [user, setUser] = useState<AuthResponse | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(initialAuth);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isValidating, setIsValidating] = useState<boolean>(true);
   const { showNotification } = useNotification(); // Use our custom notification
 
-  // First useEffect to validate localStorage and clean up if corrupted
+  // Function to clear auth data
+  const clearAuthData = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    setIsAuthenticated(false);
+    delete axios.defaults.headers.common['Authorization'];
+  };
+
+  // First useEffect to validate token and initialize auth state
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem('user');
-      const storedToken = localStorage.getItem('token');
-      if (storedUser && storedToken) {
-        JSON.parse(storedUser); // will throw if corrupted
+    const initializeAuth = async () => {
+      try {
+        const storedUser = localStorage.getItem('user');
+        const storedToken = localStorage.getItem('token');
+        
+        if (storedUser && storedToken) {
+          // Parse user data first
+          let parsedUser: AuthResponse;
+          try {
+            parsedUser = JSON.parse(storedUser);
+          } catch (error) {
+            console.error("Error parsing user data:", error);
+            clearAuthData();
+            setIsValidating(false);
+            return;
+          }
+          
+          // Validate token with backend
+          const isTokenValid = await validateToken(storedToken);
+          
+          if (isTokenValid) {
+            // Token is valid, set up authentication
+            setUser(parsedUser);
+            setIsAuthenticated(true);
+            axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+            console.log('Token validation successful, user authenticated');
+          } else {
+            // Token is invalid, clear everything
+            console.log('Token validation failed, clearing auth data');
+            clearAuthData();
+          }
+        }
+      } catch (error) {
+        console.error("Error during auth initialization:", error);
+        clearAuthData();
+      } finally {
+        setIsValidating(false);
       }
-    } catch (error) {
-      console.error("Error parsing user data:", error);
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
-      setUser(null);
-      setIsAuthenticated(false);
-    }
+    };
+
+    initializeAuth();
   }, []);
+
+  // Setup axios interceptor for 401 responses
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          console.log('Received 401, clearing auth data');
+          clearAuthData();
+          showNotification('warning', 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    // Cleanup interceptor on unmount
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, [showNotification]);
 
   // Separate useEffect to handle Firebase auth
   useEffect(() => {
@@ -167,18 +212,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     // Clear regular auth
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
+    clearAuthData();
     
     // Clear Firebase auth
     auth.signOut();
-    
-    // Update state
-    setIsAuthenticated(false);
-    
-    // Remove the authorization header
-    delete axios.defaults.headers.common['Authorization'];
     
     // Show notification using our custom notification
     showNotification('success', 'Đăng xuất thành công!');
@@ -191,6 +228,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       isAuthenticated, 
       user, 
       firebaseUser,
+      isValidating,
       login, 
       logout,
       setFirebaseUser 

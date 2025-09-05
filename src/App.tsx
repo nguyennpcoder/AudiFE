@@ -46,7 +46,7 @@ import DealershipManagement from './context/pages/admin/DealershipManagement';
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isValidating } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [hasShownIntro, setHasShownIntro] = useState(false);
   
@@ -91,6 +91,11 @@ function App() {
   const isFromLogin = sessionStorage.getItem('fromLogin') === 'true';
   const skipIntro = sessionStorage.getItem('skipIntro') === 'true';
   
+  // Show loading when validating token
+  if (isValidating) {
+    return <LoadingAnimation onAnimationComplete={() => {}} />;
+  }
+
   // Chỉ hiện animation khi:
   // 1. Đang ở trang chủ (/)
   // 2. Không phải admin route

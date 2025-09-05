@@ -13,10 +13,23 @@ const PaymentSuccess: React.FC = () => {
   const navigate = useNavigate();
   const [orderInfo, setOrderInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [paymentMethod, setPaymentMethod] = useState<string>('');
 
   useEffect(() => {
     const orderId = searchParams.get('orderId');
     const transactionId = searchParams.get('transactionId');
+    const vnpay = searchParams.get('vnpay');
+    const zalopay = searchParams.get('zalopay');
+    const momo = searchParams.get('momo');
+    
+    // Determine payment method from URL params
+    if (vnpay === '1') {
+      setPaymentMethod('VNPay');
+    } else if (zalopay === '1') {
+      setPaymentMethod('ZaloPay');
+    } else if (momo === '1') {
+      setPaymentMethod('MoMo');
+    }
     
     if (orderId) {
       loadOrderInfo(orderId, transactionId);
@@ -49,7 +62,7 @@ const PaymentSuccess: React.FC = () => {
         status="success"
         icon={<CheckCircleOutlined style={{ fontSize: 72, color: '#52c41a' }} />}
         title="Thanh toán thành công!"
-        subTitle="Đơn hàng của bạn đã được xác nhận và thanh toán thành công."
+        subTitle={`Đơn hàng của bạn đã được xác nhận và thanh toán thành công qua ${paymentMethod || 'cổng thanh toán'}.`}
         extra={[
           <Button 
             type="primary" 
@@ -88,7 +101,7 @@ const PaymentSuccess: React.FC = () => {
               <Text strong>Số tiền đã thanh toán:</Text> {orderInfo.tienDatCoc?.toLocaleString('vi-VN')} VNĐ
             </div>
             <div>
-              <Text strong>Phương thức thanh toán:</Text> {orderInfo.phuongThucThanhToan}
+              <Text strong>Phương thức thanh toán:</Text> {paymentMethod || orderInfo.phuongThucThanhToan}
             </div>
             <div>
               <Text strong>Trạng thái:</Text> 

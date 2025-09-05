@@ -362,3 +362,20 @@ export const fetchUserProfile = async (token: string) => {
   });
   return res.data;
 };
+
+// Function to validate if token is still valid
+export const validateToken = async (token: string): Promise<boolean> => {
+  try {
+    const API_URL = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api/v1'}/nguoi-dung/profile`;
+    await axios.get(API_URL, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return true;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      return false;
+    }
+    // For other errors, assume token is still valid to avoid unnecessary logouts
+    return true;
+  }
+};

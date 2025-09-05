@@ -339,24 +339,109 @@ const OrderForm: React.FC = () => {
       idKhuyenMai: khuyenMaiSelected?.id
     };
 
-    const orderResponse = await axios.post(`${BACKEND_URL}/don-hang/tu-cau-hinh`, null, {
-      params: orderData,
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    try {
+      const orderResponse = await axios.post(`${BACKEND_URL}/don-hang/tu-cau-hinh`, null, {
+        params: orderData,
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-    const orderId = orderResponse.data.id;
+      const orderId = orderResponse?.data?.id;
+      if (!orderId) {
+        console.error('Create order response missing id:', orderResponse?.data);
+        message.error('Không tạo được đơn hàng để thanh toán ZaloPay.');
+        return;
+      }
 
-    const paymentResponse = await axios.post(`${BACKEND_URL}/thanh-toan/tao-url`, {
-      orderId,
-      amount,
-      paymentMethod: 'zalopay',
-      returnUrl: `${window.location.origin}/payment/success?zalopay=1`,
-      cancelUrl: `${window.location.origin}/payment/cancel?zalopay=1`
-    }, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+      const paymentPayload = {
+        orderId,
+        amount,
+        returnUrl: `${window.location.origin}/payment/success?zalopay=1`,
+        cancelUrl: `${window.location.origin}/payment/cancel?zalopay=1`
+      } as any;
 
-    window.location.href = paymentResponse.data.paymentUrl;
+      const paymentResponse = await axios.post(`${BACKEND_URL}/thanh-toan/zalopay/tao-url`, paymentPayload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!paymentResponse?.data?.paymentUrl) {
+        console.error('Create ZaloPay URL missing paymentUrl:', paymentResponse?.data);
+        message.error('Không nhận được đường dẫn thanh toán ZaloPay.');
+        return;
+      }
+
+      window.location.href = paymentResponse.data.paymentUrl;
+    } catch (err: any) {
+      console.error('Lỗi khi tạo thanh toán ZaloPay:', err);
+      const detail = err?.response?.data || err?.message;
+      message.error(`Không thể tạo thanh toán ZaloPay${detail?.error ? ': ' + detail.error : detail?.message ? ': ' + detail.message : ''}`);
+      throw err;
+    }
+  };
+
+  // Tách riêng MoMo
+  const payWithMoMo = async () => {
+    const token = user?.token || localStorage.getItem('token');
+    if (!token) {
+      message.error('Bạn cần đăng nhập để tiếp tục.');
+      navigate('/login', { state: { redirectTo: location.pathname } });
+      return;
+    }
+
+    const rawDeposit = Number(form.getFieldValue('tienDatCoc')) || 0;
+    const minDeposit = Math.ceil((giaSauKhuyenMai || 0) * 0.1);
+    const amount = rawDeposit > 0 ? rawDeposit : minDeposit;
+
+    if (!amount || amount <= 0) {
+      message.error('Tiền cọc không hợp lệ. Yêu cầu tối thiểu 10% giá trị xe.');
+      return;
+    }
+
+    const orderData = {
+      idCauHinh: parseInt(configId || "0"),
+      idDaiLy: form.getFieldValue('idDaiLy'),
+      tienDatCoc: amount,
+      phuongThucThanhToan: 'momo',
+      ghiChu: form.getFieldValue('ghiChu'),
+      idKhuyenMai: khuyenMaiSelected?.id
+    };
+
+    try {
+      const orderResponse = await axios.post(`${BACKEND_URL}/don-hang/tu-cau-hinh`, null, {
+        params: orderData,
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const orderId = orderResponse?.data?.id;
+      if (!orderId) {
+        console.error('Create order response missing id:', orderResponse?.data);
+        message.error('Không tạo được đơn hàng để thanh toán MoMo.');
+        return;
+      }
+
+      const paymentPayload = {
+        orderId,
+        amount,
+        returnUrl: `${window.location.origin}/payment/success?momo=1`,
+        cancelUrl: `${window.location.origin}/payment/cancel?momo=1`
+      } as any;
+
+      const paymentResponse = await axios.post(`${BACKEND_URL}/thanh-toan/momo/tao-url`, paymentPayload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!paymentResponse?.data?.paymentUrl) {
+        console.error('Create MoMo URL missing paymentUrl:', paymentResponse?.data);
+        message.error('Không nhận được đường dẫn thanh toán MoMo.');
+        return;
+      }
+
+      window.location.href = paymentResponse.data.paymentUrl;
+    } catch (err: any) {
+      console.error('Lỗi khi tạo thanh toán MoMo:', err);
+      const detail = err?.response?.data || err?.message;
+      message.error(`Không thể tạo thanh toán MoMo${detail?.error ? ': ' + detail.error : detail?.message ? ': ' + detail.message : ''}`);
+      throw err;
+    }
   };
 
   // Router theo gateway
@@ -367,6 +452,8 @@ const OrderForm: React.FC = () => {
         await payWithVNPay();
       } else if (paymentMethod === 'zalopay') {
         await payWithZaloPay();
+      } else if (paymentMethod === 'momo') {
+        await payWithMoMo();
       } else {
         message.warning('Cổng thanh toán này chưa được hỗ trợ.');
       }
