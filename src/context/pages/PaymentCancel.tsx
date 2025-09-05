@@ -8,19 +8,33 @@ const PaymentCancel: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [paymentMethod, setPaymentMethod] = useState<string>('');
+  const [statusMessage, setStatusMessage] = useState<string>('');
 
   useEffect(() => {
     const vnpay = searchParams.get('vnpay');
     const zalopay = searchParams.get('zalopay');
     const momo = searchParams.get('momo');
+    const status = searchParams.get('status');
     
     // Determine payment method from URL params
     if (vnpay === '1') {
       setPaymentMethod('VNPay');
+      setStatusMessage('Giao dịch thanh toán qua VNPay đã bị hủy hoặc thất bại.');
     } else if (zalopay === '1') {
       setPaymentMethod('ZaloPay');
+      // ZaloPay status codes
+      if (status === '-49') {
+        setStatusMessage('Giao dịch thanh toán qua ZaloPay đã bị hủy bởi người dùng.');
+      } else if (status === '-1') {
+        setStatusMessage('Giao dịch thanh toán qua ZaloPay thất bại do lỗi hệ thống.');
+      } else {
+        setStatusMessage(`Giao dịch thanh toán qua ZaloPay thất bại (Mã lỗi: ${status}).`);
+      }
     } else if (momo === '1') {
       setPaymentMethod('MoMo');
+      setStatusMessage('Giao dịch thanh toán qua MoMo đã bị hủy hoặc thất bại.');
+    } else {
+      setStatusMessage('Giao dịch thanh toán đã bị hủy hoặc thất bại.');
     }
   }, [searchParams]);
 
@@ -35,7 +49,7 @@ const PaymentCancel: React.FC = () => {
         status="error"
         icon={<CloseCircleOutlined style={{ fontSize: 72, color: '#ff4d4f' }} />}
         title="Thanh toán bị hủy"
-        subTitle={`Giao dịch thanh toán qua ${paymentMethod || 'cổng thanh toán'} đã bị hủy hoặc thất bại.`}
+        subTitle={statusMessage}
         extra={[
           <Button 
             type="primary" 

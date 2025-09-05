@@ -1,60 +1,563 @@
+/* ================================================
+   PROFESSIONAL BASE STYLES
+   ================================================ */
+
 .my-audi-container {
-  padding: 24px;
+  min-height: 100vh;
+  padding: 100px 16px;
   max-width: 1200px;
   margin: 0 auto;
+  background: linear-gradient(180deg, #0a0e1a 0%, #1a1f2e 50%, #141821 100%);
+  background-attachment: fixed;
+  position: relative;
 }
 
-.my-audi-header {
+.my-audi-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(600px circle at 50% 0%, rgba(120, 119, 198, 0.15), transparent 50%),
+    radial-gradient(600px circle at 100% 50%, rgba(120, 119, 198, 0.1), transparent 50%),
+    radial-gradient(400px circle at 0% 50%, rgba(120, 119, 198, 0.08), transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.my-audi-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ================================================
+   PROFESSIONAL HEADER
+   ================================================ */
+
+.professional-header {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: headerSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.professional-header:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
-  padding: 24px;
-  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
-  border-radius: 12px;
-  color: white;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
-.my-audi-header h2 {
-  color: white !important;
-  margin: 0;
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-.my-audi-header .ant-typography {
-  color: white !important;
-}
-
-.cau-hinh-card {
-  height: 100%;
+.user-avatar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
+}
+
+.user-avatar:hover {
+  transform: scale(1.05) rotate(5deg);
+  box-shadow: 0 6px 24px rgba(102, 126, 234, 0.4);
+}
+
+.header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.header-title {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 24px !important;
+  margin: 0 !important;
+  background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-subtitle {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Professional Button Styles */
+.action-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-radius: 12px;
+  height: 44px;
+  padding: 0 20px;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.1);
+}
+
+.primary-action-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: none;
+  border-radius: 12px;
+  height: 44px;
+  padding: 0 24px;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.primary-action-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+}
+
+/* ================================================
+   PROFESSIONAL STATISTICS SECTION
+   ================================================ */
+
+.statistics-section {
+  margin-bottom: 20px;
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 16px 20px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  position: relative;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover::before {
+  opacity: 0.5;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.stat-card-primary .ant-statistic-content-value {
+  color: #3b82f6 !important;
+}
+
+.stat-card-success .ant-statistic-content-value {
+  color: #3b82f6 !important;
+}
+
+.stat-card-warning .ant-statistic-content-value {
+  color: #3b82f6 !important;
+}
+
+.stat-card-purple .ant-statistic-content-value {
+  color: #3b82f6 !important;
+}
+
+.ant-statistic-title {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+}
+
+/* ================================================
+   CONTROLS SECTION
+   ================================================ */
+
+.controls-section {
+  margin-bottom: 20px;
+  animation: fadeInUp 0.6s ease-out 0.4s both;
+}
+
+.controls-card {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.search-input .ant-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-radius: 10px;
+  height: 44px;
+  backdrop-filter: blur(8px);
+}
+
+.search-input .ant-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.search-input .ant-input-search-button {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: none;
+  border-radius: 0 10px 10px 0;
+  height: 44px;
+}
+
+.filter-select .ant-select-selector,
+.sort-select .ant-select-selector {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 10px !important;
+  height: 44px !important;
+}
+
+.view-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+/* ================================================
+   PROFESSIONAL CARDS
+   ================================================ */
+
+.professional-card {
+  height: 100%;
+  width: 100%;
+  min-height: 280px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
-.cau-hinh-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+.professional-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    transparent 50%, 
+    rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
-.cau-hinh-card .ant-card-actions {
-  background: #fafafa;
-  border-top: 1px solid #f0f0f0;
+.professional-card:hover::before {
+  opacity: 1;
 }
 
-.cau-hinh-card .ant-card-actions > li {
-  margin: 8px 0;
+.professional-card:hover {
+  transform: translateY(-8px) rotateX(5deg);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 8px 16px rgba(102, 126, 234, 0.1);
 }
 
-.cau-hinh-card .ant-card-actions > li > span {
-  padding: 8px 12px;
+.premium-ribbon {
+  filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.4));
+}
+
+.professional-info {
+  padding: 16px 18px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: flex-start;
+  align-items: stretch;
+  text-align: left;
+}
+
+.professional-header-card {
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.professional-title {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  margin: 0 !important;
+  line-height: 1.3;
+  background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.card-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.model-tag {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: none;
   border-radius: 6px;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 4px 8px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
-.cau-hinh-card .ant-card-actions > li > span:hover {
-  background: #e6f7ff;
-  color: #1890ff;
+.date-tag {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+.professional-details {
+  flex: 1;
+  margin-bottom: 12px;
+}
+
+.detail-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.professional-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+  min-height: 40px;
+  width: 100%;
+}
+
+.professional-detail:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(4px);
+}
+
+.detail-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.color-preview {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.detail-icon-svg {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+}
+
+.detail-content {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.detail-label {
+  display: block;
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px !important;
+}
+
+.detail-value {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600;
+  font-size: 12px;
+  margin: 0 !important;
+}
+
+.professional-divider {
+  border-color: rgba(255, 255, 255, 0.1);
+  margin: 8px 0 !important;
+}
+
+.cau-hinh-footer {
+  margin-top: auto;
+}
+
+.professional-price {
+  background: linear-gradient(135deg, 
+    rgba(52, 211, 153, 0.1) 0%, 
+    rgba(34, 197, 94, 0.1) 100%);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+
+.price-container {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.price-label {
+  display: block;
+  color: rgba(52, 211, 153, 0.8) !important;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px !important;
+}
+
+.price-value-main {
+  color: #34d399 !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  margin: 0 !important;
+  text-shadow: 0 2px 4px rgba(52, 211, 153, 0.2);
+}
+
+.price-progress {
+  margin-top: 6px;
+  height: 4px;
+}
+
+.price-progress .ant-progress-bg {
+  background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 2px;
+  height: 4px;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Card Actions */
+.professional-card .ant-card-actions {
+  background: rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 8px;
+  margin-top: auto;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.professional-card .ant-card-actions > li {
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.card-action-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 14px;
+}
+
+.card-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+}
+
+.card-action-btn.danger-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.card-action-btn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .cau-hinh-info {
@@ -74,6 +577,7 @@
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
@@ -134,28 +638,249 @@
   font-size: 12px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .my-audi-header {
+/* ================================================
+   MODAL STYLES
+   ================================================ */
+
+.ant-modal-content {
+  background: rgba(26, 31, 46, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.ant-modal-header {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(29, 78, 216, 0.8) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px 20px 0 0;
+  backdrop-filter: blur(10px);
+}
+
+.ant-modal-title {
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.ant-modal-close {
+  color: #ffffff !important;
+}
+
+.ant-descriptions-item-label {
+  color: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  font-weight: 600;
+}
+
+.ant-descriptions-item-content {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* ================================================
+   RESPONSIVE DESIGN
+   ================================================ */
+
+@media (max-width: 1200px) {
+  .my-audi-container {
+    max-width: 100%;
+    padding: 16px 12px;
+  }
+  
+  .header-content {
     flex-direction: column;
-    gap: 16px;
     text-align: center;
+    gap: 16px;
   }
   
-  .cau-hinh-card {
-    margin-bottom: 16px;
+  .header-actions {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .my-audi-container {
+    padding: 12px 8px;
   }
   
-  .detail-item {
+  .professional-header {
+    padding: 16px 18px;
+  }
+  
+  .header-left {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .header-title {
+    font-size: 20px !important;
+  }
+  
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .action-btn,
+  .primary-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .controls-card {
+    padding: 12px 16px;
+  }
+  
+  .view-controls {
+    justify-content: center;
+    margin-top: 12px;
+  }
+  
+  .professional-card {
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .professional-info {
+    padding: 12px 16px;
+  }
+  
+  .detail-grid {
+    gap: 10px;
+  }
+  
+  .professional-detail {
+    padding: 10px 12px;
+  }
+  
+  .list-title-section {
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
+    gap: 6px;
   }
   
-  .detail-item .ant-typography:last-child {
-    text-align: left;
-    max-width: 100%;
+  .list-price-section {
+    justify-content: flex-start;
+    margin-top: 10px;
   }
+  
+  .grid-view .ant-col {
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .my-audi-container {
+    padding: 8px 6px;
+  }
+  
+  .professional-header {
+    padding: 12px 14px;
+    border-radius: 12px;
+  }
+  
+  .user-avatar {
+    width: 44px !important;
+    height: 44px !important;
+  }
+  
+  .header-title {
+    font-size: 18px !important;
+  }
+  
+  .stat-card {
+    padding: 12px 14px;
+  }
+  
+  .ant-statistic-title {
+    font-size: 11px !important;
+  }
+  
+  .ant-statistic-content-value {
+    font-size: 16px !important;
+  }
+  
+  .professional-card:hover {
+    transform: translateY(-2px);
+  }
+  
+  .professional-list-item {
+    padding: 12px 14px;
+  }
+  
+  .list-avatar {
+    width: 44px !important;
+    height: 44px !important;
+  }
+}
+
+/* ================================================
+   DARK THEME OVERRIDES
+   ================================================ */
+
+.ant-select-dropdown {
+  background: rgba(26, 31, 46, 0.95) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+}
+
+.ant-select-item {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.ant-select-item:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ant-select-item-option-selected {
+  background: rgba(59, 130, 246, 0.2) !important;
+}
+
+.ant-input {
+  color: #ffffff !important;
+}
+
+.ant-input:focus {
+  border-color: rgba(59, 130, 246, 0.6) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+}
+
+.ant-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ant-btn:hover {
+  transform: translateY(-1px);
+}
+
+.ant-btn:active {
+  transform: translateY(0);
+}
+
+.ant-empty-image svg {
+  fill: rgba(255, 255, 255, 0.3);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* Loading states */
@@ -178,7 +903,7 @@
 
 /* Modal styles */
 .ant-modal-header {
-  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   border-radius: 8px 8px 0 0;
 }
 
@@ -202,7 +927,7 @@
 
 /* Button styles */
 .ant-btn-primary {
-  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   border: none;
   border-radius: 6px;
   height: 40px;
@@ -210,9 +935,9 @@
 }
 
 .ant-btn-primary:hover {
-  background: linear-gradient(135deg, #40a9ff 0%, #9254de 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .ant-btn {
@@ -234,10 +959,187 @@
 }
 
 /* Animation for cards */
+/* ================================================
+   LIST VIEW STYLES
+   ================================================ */
+
+.list-view {
+  animation: fadeInUp 0.6s ease-out 0.6s both;
+}
+
+.professional-list-item {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  padding: 16px 20px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.professional-list-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.list-avatar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.list-title-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.list-title {
+  color: #ffffff !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+}
+
+.list-tags {
+  display: flex;
+  gap: 8px;
+}
+
+.list-description {
+  margin-top: 8px;
+}
+
+.list-price-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.list-price {
+  color: #34d399 !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  text-shadow: 0 2px 4px rgba(52, 211, 153, 0.2);
+}
+
+/* ================================================
+   LOADING AND EMPTY STATES
+   ================================================ */
+
+.loading-section {
+  padding: 40px 0;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.skeleton-header {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.skeleton-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  height: 300px;
+}
+
+.empty-state {
+  padding: 60px 0;
+  text-align: center;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.professional-empty {
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.professional-empty .ant-empty-description {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 16px;
+  margin-bottom: 24px;
+}
+
+.empty-action-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: none;
+  border-radius: 12px;
+  height: 48px;
+  padding: 0 32px;
+  font-weight: 700;
+  font-size: 16px;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.empty-action-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+}
+
+/* ================================================
+   SETTINGS DRAWER
+   ================================================ */
+
+.settings-drawer .ant-drawer-content {
+  background: linear-gradient(180deg, #1a1f2e 0%, #141821 100%);
+}
+
+.settings-drawer .ant-drawer-header {
+  background: rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.settings-drawer .ant-drawer-title {
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.drawer-content {
+  padding: 24px 0;
+}
+
+.setting-item {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.setting-item .ant-typography {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* ================================================
+   PROFESSIONAL ANIMATIONS
+   ================================================ */
+
+@keyframes headerSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -245,38 +1147,100 @@
   }
 }
 
-.cau-hinh-card {
-  animation: fadeInUp 0.6s ease-out;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.cau-hinh-card:nth-child(1) { animation-delay: 0.1s; }
-.cau-hinh-card:nth-child(2) { animation-delay: 0.2s; }
-.cau-hinh-card:nth-child(3) { animation-delay: 0.3s; }
-.cau-hinh-card:nth-child(4) { animation-delay: 0.4s; }
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-card {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.animate-list-item {
+  animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Stagger animation delays */
+.animate-card:nth-child(1) { animation-delay: 0.1s; }
+.animate-card:nth-child(2) { animation-delay: 0.15s; }
+.animate-card:nth-child(3) { animation-delay: 0.2s; }
+.animate-card:nth-child(4) { animation-delay: 0.25s; }
+.animate-card:nth-child(5) { animation-delay: 0.3s; }
+.animate-card:nth-child(6) { animation-delay: 0.35s; }
+
+.animate-list-item:nth-child(1) { animation-delay: 0.1s; }
+.animate-list-item:nth-child(2) { animation-delay: 0.15s; }
+.animate-list-item:nth-child(3) { animation-delay: 0.2s; }
+.animate-list-item:nth-child(4) { animation-delay: 0.25s; }
+.animate-list-item:nth-child(5) { animation-delay: 0.3s; }
 
 /* ================================================
-   ORDER CARD STYLES
+   ORDER CARD STYLES - MATCH MYAUDI LAYOUT
    ================================================ */
 
 .order-card {
+  height: 100%;
+  width: 100%;
+  min-height: 280px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.order-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    transparent 50%, 
+    rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.order-card:hover::before {
+  opacity: 1;
 }
 
 .order-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px) rotateX(5deg);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 8px 16px rgba(102, 126, 234, 0.1);
 }
 
 .order-card-header {
+  margin-bottom: 12px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #f0f0f0;
+  align-items: flex-start;
 }
 
 .order-id {
@@ -290,40 +1254,61 @@
 }
 
 .order-info {
+  padding: 16px 18px;
+  height: 100%;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
+  flex-direction: column;
+  flex: 1;
+  justify-content: flex-start;
+  align-items: stretch;
+  text-align: left;
 }
 
-.order-info:not(:last-child) {
-  border-bottom: 1px solid #f5f5f5;
+.order-details {
+  flex: 1;
+  margin-bottom: 12px;
 }
 
-.order-info .ant-typography {
-  margin: 0;
+.order-footer {
+  margin-top: auto;
 }
 
-/* Order Card Actions */
+/* Order Card Actions - Match MyAudi */
 .order-card .ant-card-actions {
-  background: #fafafa;
-  border-top: 1px solid #f0f0f0;
+  background: rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 8px;
+  margin-top: auto;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
 }
 
-.order-card .ant-card-actions li {
+.order-card .ant-card-actions > li {
   margin: 0;
+  flex: 1;
+  text-align: center;
 }
 
 .order-card .ant-card-actions button {
-  border: none;
   background: transparent;
-  color: #1890ff;
-  transition: all 0.3s ease;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 14px;
 }
 
 .order-card .ant-card-actions button:hover {
-  color: #40a9ff;
-  background: rgba(24, 144, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
 }
 
 /* Status Tags */
@@ -339,8 +1324,8 @@
 }
 
 .order-card .ant-badge .ant-badge-count {
-  background: #1890ff;
-  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.3);
+  background: #3b82f6;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
 }
 
 /* Statistics Cards */
@@ -389,12 +1374,570 @@
 
 /* Loading State */
 .my-audi-container .ant-spin {
-  color: #1890ff;
+  color: #3b82f6;
 }
 
 .my-audi-container .ant-spin-dot-item {
-  background-color: #1890ff;
+  background-color: #3b82f6;
 }
+
+/* ================================================
+   TIMELINE VIEW STYLES
+   ================================================ */
+
+.timeline-view {
+  animation: fadeInUp 0.6s ease-out 0.7s both;
+  padding: 20px 0;
+}
+
+.professional-timeline {
+  margin-top: 20px;
+}
+
+.professional-timeline .ant-timeline-item {
+  padding-bottom: 32px;
+}
+
+.professional-timeline .ant-timeline-item-head {
+  background: transparent;
+  border: 2px solid;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.professional-timeline .ant-timeline-item-head:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 16px currentColor;
+}
+
+.professional-timeline .ant-timeline-item-tail {
+  border-left: 2px solid rgba(255, 255, 255, 0.15);
+  left: 7px;
+}
+
+.timeline-card {
+  margin-left: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.timeline-card:hover {
+  transform: translateX(8px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.timeline-card-content {
+  padding: 16px 20px;
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.timeline-header h4 {
+  color: #ffffff !important;
+  margin: 0 !important;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.timeline-details {
+  margin-bottom: 16px;
+}
+
+.timeline-details .ant-typography {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 14px;
+}
+
+.timeline-details .ant-typography[type="secondary"] {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.timeline-actions {
+  margin-bottom: 16px;
+}
+
+.timeline-progress .ant-progress-outer {
+  margin-right: 0;
+}
+
+.timeline-progress .ant-progress-bg {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+}
+
+.animate-timeline-item {
+  animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* ================================================
+   ORDER SPECIFIC STYLES - MATCH MYAUDI
+   ================================================ */
+
+.order-progress {
+  margin-top: 6px;
+  height: 4px;
+}
+
+.order-progress .ant-progress-bg {
+  background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 2px;
+  height: 4px;
+}
+
+.order-progress .ant-progress-text {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.order-footer {
+  margin-top: auto;
+}
+
+.progress-section {
+  margin-bottom: 16px;
+}
+
+.deposit-text {
+  display: block;
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 12px;
+  margin-top: 4px !important;
+  text-align: center;
+}
+
+/* Order price section to match MyAudi */
+.order-footer .price-section {
+  background: linear-gradient(135deg, 
+    rgba(52, 211, 153, 0.1) 0%, 
+    rgba(34, 197, 94, 0.1) 100%);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+
+.order-footer .price-container {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.order-footer .price-label {
+  display: block;
+  color: rgba(52, 211, 153, 0.8) !important;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px !important;
+}
+
+.order-footer .price-value-main {
+  color: #34d399 !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  margin: 0 !important;
+  text-shadow: 0 2px 4px rgba(52, 211, 153, 0.2);
+}
+
+.order-footer .card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ================================================
+   ORDER CARD ENHANCEMENTS
+   ================================================ */
+
+.order-details {
+  flex: 1;
+  margin-bottom: 20px;
+}
+
+.order-card .professional-info {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.order-card .professional-header-card {
+  margin-bottom: 20px;
+}
+
+.order-card .professional-details {
+  flex: 1;
+}
+
+.order-card .order-footer {
+  margin-top: auto;
+}
+
+/* Status-based styling */
+.order-card[data-status="cho_xu_ly"] .premium-ribbon {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.order-card[data-status="da_xac_nhan"] .premium-ribbon {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.order-card[data-status="dang_san_xuat"] .premium-ribbon {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.order-card[data-status="san_sang_giao"] .premium-ribbon {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.order-card[data-status="da_giao"] .premium-ribbon {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+}
+
+.order-card[data-status="da_huy"] .premium-ribbon {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+/* List progress styling */
+.list-progress {
+  margin-top: 8px;
+}
+
+.list-progress .ant-progress-bg {
+  background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 4px;
+}
+
+/* ================================================
+   PROFESSIONAL MODAL ENHANCEMENTS
+   ================================================ */
+
+.ant-modal {
+  max-width: 90vw;
+}
+
+.ant-modal .ant-descriptions {
+  background: transparent;
+}
+
+.ant-modal .ant-descriptions-item {
+  padding: 16px;
+}
+
+.ant-modal .ant-descriptions-item-label {
+  width: 30%;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ant-modal .ant-descriptions-item-content {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  padding-left: 20px;
+}
+
+/* ================================================
+   RESPONSIVE ENHANCEMENTS FOR ORDERS
+   ================================================ */
+
+@media (max-width: 768px) {
+  .timeline-view {
+    padding: 12px 0;
+  }
+  
+  .professional-timeline .ant-timeline-item {
+    padding-bottom: 24px;
+  }
+  
+  .timeline-card {
+    margin-left: 16px;
+    border-radius: 12px;
+  }
+  
+  .timeline-card:hover {
+    transform: translateX(4px) scale(1.01);
+  }
+  
+  .timeline-card-content {
+    padding: 16px;
+  }
+  
+  .timeline-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .timeline-details .ant-col {
+    margin-bottom: 8px;
+  }
+  
+  .order-footer {
+    padding: 12px 0;
+  }
+  
+  .progress-section {
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeline-card {
+    margin-left: 12px;
+  }
+  
+  .timeline-card-content {
+    padding: 12px;
+  }
+  
+  .timeline-header h4 {
+    font-size: 16px;
+  }
+  
+  .order-progress,
+  .timeline-progress,
+  .list-progress {
+    margin-bottom: 8px;
+  }
+  
+  .deposit-text {
+    font-size: 11px;
+  }
+}
+
+/* ================================================
+   ADVANCED HOVER EFFECTS AND MICRO-INTERACTIONS
+   ================================================ */
+
+.professional-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.professional-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.1), 
+    transparent);
+  transition: left 0.8s ease;
+}
+
+.professional-card:hover::after {
+  left: 100%;
+}
+
+.card-action-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-action-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.card-action-btn:hover::before {
+  width: 100px;
+  height: 100px;
+}
+
+/* Particle effect for premium cards */
+.premium-ribbon::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, 
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.1) 100%);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.professional-card:hover .premium-ribbon::before {
+  opacity: 1;
+  animation: shimmer 2s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(200%) rotate(45deg); }
+}
+
+/* Glowing effect for active status */
+.order-card[data-status="dang_san_xuat"] {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  animation: pulseGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+  from {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+  }
+}
+
+/* Success celebration effect */
+.order-card[data-status="da_giao"] .professional-price {
+  background: linear-gradient(135deg, 
+    rgba(34, 197, 94, 0.15) 0%, 
+    rgba(16, 185, 129, 0.15) 100%);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.2);
+}
+
+/* ================================================
+   ACCOUNT-STYLE THEME OVERRIDES FOR DARK LAYOUT
+   Apply MyAccount look-and-feel to MyAudi & MyOrders
+   (No extra imports, only CSS adjustments here)
+   ================================================ */
+
+/* Page container - dark gradient background */
+.my-audi-container {
+  min-height: 100vh;
+  padding-bottom: 80px;
+  background: linear-gradient(180deg, #141821 0%, #1f2633 100%);
+  color: #ffffff;
+}
+
+/* Header card - glassmorphism like MyAccount */
+.my-audi-header {
+  background: linear-gradient(135deg, rgba(32,36,44,0.9), rgba(40,46,58,0.9));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+
+.my-audi-header h2,
+.my-audi-header .ant-typography {
+  color: #ffffff !important;
+}
+
+/* Cards - dark glass look */
+.cau-hinh-card,
+.order-card {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+}
+
+.cau-hinh-card:hover,
+.order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+/* Card actions */
+.cau-hinh-card .ant-card-actions,
+.order-card .ant-card-actions {
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.cau-hinh-card .ant-card-actions > li > span,
+.order-card .ant-card-actions button {
+  color: #ffffff;
+}
+
+.cau-hinh-card .ant-card-actions > li > span:hover,
+.order-card .ant-card-actions button:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* Typography inside details */
+.cau-hinh-title {
+  color: #ffffff;
+}
+
+.detail-item .ant-typography:first-child { color: rgba(255, 255, 255, 0.8); }
+.detail-item .ant-typography:last-child { color: rgba(255, 255, 255, 0.95); }
+
+/* Make antd secondary text lighter for readability */
+.my-audi-container .ant-typography-secondary {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Price pill - green glass */
+.cau-hinh-price {
+  background: rgba(115, 209, 61, 0.16);
+  border: 1px solid rgba(115, 209, 61, 0.45);
+  border-radius: 12px;
+}
+.price-label { color: #73d13d !important; }
+.price-value { color: #b7eb8f !important; font-weight: 700; }
+.cau-hinh-date { color: rgba(255, 255, 255, 0.6); }
+
+/* Order specifics */
+.order-card-header { border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.order-info:not(:last-child) { border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.order-card .ant-badge .ant-badge-count { background: #3b82f6; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.35); }
+
+/* Modal/Empty/Loading to match dark theme */
+.ant-modal-header { background: rgba(255, 255, 255, 0.06); border-bottom: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px 12px 0 0; }
+.ant-modal-title, .ant-modal-close { color: #ffffff !important; }
+.ant-descriptions-item-label { color: rgba(255, 255, 255, 0.85); background: rgba(255, 255, 255, 0.04); }
+.ant-descriptions-item-content { color: rgba(255, 255, 255, 0.85); }
+.my-audi-container .ant-empty-description { color: rgba(255, 255, 255, 0.7); }
+.my-audi-container .ant-spin { color: #3b82f6; }
+.my-audi-container .ant-spin-dot-item { background-color: #3b82f6; }
+
+/* Buttons */
+.ant-btn { border-radius: 10px; height: 40px; font-weight: 600; }
+.ant-btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border: none;
+  height: 44px;
+}
+.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.3);
+}
+
+/* Subtle fade-in animation utility */
+@keyframes myaudiFadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: myaudiFadeInUp 0.6s ease-out; }
 
 /* ================================================
    PROFILE CARD STYLES
@@ -422,8 +1965,8 @@
 }
 
 .profile-card .ant-badge-count {
-  background: #1890ff;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+  background: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
 .profile-card .ant-badge-count button {
@@ -432,7 +1975,7 @@
 
 .profile-card .ant-badge-count button:hover {
   transform: scale(1.1);
-  background: #40a9ff !important;
+  background: #2563eb !important;
 }
 
 /* Profile Form Styles */
@@ -451,8 +1994,8 @@
 .profile-card .ant-input:focus,
 .profile-card .ant-input-password:focus,
 .profile-card .ant-input-affix-wrapper:focus {
-  border-color: #1890ff;
-  box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .profile-card .ant-input[disabled] {
@@ -506,7 +2049,7 @@
 }
 
 .profile-card .ant-modal-header {
-  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   border-bottom: none;
 }
 
@@ -525,20 +2068,20 @@
 
 /* Form Validation */
 .profile-card .ant-form-item-explain-error {
-  color: #ff4d4f;
+  color: #3b82f6;
   font-size: 12px;
   margin-top: 4px;
 }
 
 .profile-card .ant-form-item-has-error .ant-input,
 .profile-card .ant-form-item-has-error .ant-input-password {
-  border-color: #ff4d4f;
+  border-color: #3b82f6;
 }
 
 .profile-card .ant-form-item-has-error .ant-input:focus,
 .profile-card .ant-form-item-has-error .ant-input-password:focus {
-  border-color: #ff4d4f;
-  box-shadow: 0 0 0 3px rgba(255, 77, 79, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 /* Responsive Design */
@@ -564,4 +2107,106 @@
   .profile-card .ant-card-extra button {
     width: 100%;
   }
+}
+
+/* ================================================
+   CONTENT AREA ENHANCEMENTS
+   ================================================ */
+
+.content-area {
+  animation: fadeInUp 0.6s ease-out 0.5s both;
+  padding: 20px 0;
+}
+
+.grid-view,
+.list-view {
+  animation: fadeInUp 0.6s ease-out 0.6s both;
+}
+
+/* Enhanced grid spacing */
+.grid-view .ant-row {
+  margin-left: -8px;
+  margin-right: -8px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.grid-view .ant-col {
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-bottom: 16px;
+  display: flex;
+}
+
+/* ================================================
+   PERFORMANCE OPTIMIZATIONS
+   ================================================ */
+
+.professional-card,
+.timeline-card,
+.professional-list-item {
+  will-change: transform, opacity;
+  contain: layout style paint;
+}
+
+.card-action-btn,
+.action-btn,
+.primary-action-btn {
+  will-change: transform;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .animate-card,
+  .animate-list-item,
+  .animate-timeline-item {
+    animation: none;
+  }
+  
+  .professional-card:hover,
+  .timeline-card:hover,
+  .professional-list-item:hover {
+    transform: none;
+  }
+  
+  .card-action-btn:hover,
+  .action-btn:hover,
+  .primary-action-btn:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .professional-card,
+  .timeline-card,
+  .professional-list-item {
+    border-width: 2px;
+    border-color: #ffffff;
+  }
+  
+  .professional-title,
+  .list-title,
+  .timeline-header h4 {
+    color: #ffffff !important;
+  }
+  
+  .detail-value,
+  .price-value-main {
+    color: #ffffff !important;
+  }
+}
+
+/* ================================================
+   FULL-WIDTH BACKGROUND FOR ACCOUNT PAGES
+   ================================================ */
+/* Only apply dark background to MyAudi and MyOrders pages */
+.my-audi-container {
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding-left: 16px;
+  padding-right: 16px;
+  background: linear-gradient(180deg, #141821 0%, #1f2633 100%);
+  min-height: 100vh;
 }

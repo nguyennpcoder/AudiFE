@@ -330,36 +330,23 @@ const OrderForm: React.FC = () => {
       return;
     }
 
-    const orderData = {
-      idCauHinh: parseInt(configId || "0"),
-      idDaiLy: form.getFieldValue('idDaiLy'),
-      tienDatCoc: amount,
-      phuongThucThanhToan: 'zalopay',
-      ghiChu: form.getFieldValue('ghiChu'),
-      idKhuyenMai: khuyenMaiSelected?.id
-    };
-
     try {
-      const orderResponse = await axios.post(`${BACKEND_URL}/don-hang/tu-cau-hinh`, null, {
-        params: orderData,
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      const orderId = orderResponse?.data?.id;
-      if (!orderId) {
-        console.error('Create order response missing id:', orderResponse?.data);
-        message.error('Không tạo được đơn hàng để thanh toán ZaloPay.');
-        return;
-      }
-
+      // Send configuration data directly to payment API (like VNPay)
       const paymentPayload = {
-        orderId,
+        idCauHinh: parseInt(configId || "0"),
+        idDaiLy: form.getFieldValue('idDaiLy'),
+        tienDatCoc: amount,
+        ghiChu: form.getFieldValue('ghiChu'),
+        idKhuyenMai: khuyenMaiSelected?.id,
         amount,
         returnUrl: `${window.location.origin}/payment/success?zalopay=1`,
         cancelUrl: `${window.location.origin}/payment/cancel?zalopay=1`
       } as any;
 
-      const paymentResponse = await axios.post(`${BACKEND_URL}/thanh-toan/zalopay/tao-url`, paymentPayload, {
+      const paymentResponse = await axios.post(`${BACKEND_URL}/thanh-toan/tao-url`, {
+        ...paymentPayload,
+        paymentMethod: 'zalopay'
+      }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -396,36 +383,23 @@ const OrderForm: React.FC = () => {
       return;
     }
 
-    const orderData = {
-      idCauHinh: parseInt(configId || "0"),
-      idDaiLy: form.getFieldValue('idDaiLy'),
-      tienDatCoc: amount,
-      phuongThucThanhToan: 'momo',
-      ghiChu: form.getFieldValue('ghiChu'),
-      idKhuyenMai: khuyenMaiSelected?.id
-    };
-
     try {
-      const orderResponse = await axios.post(`${BACKEND_URL}/don-hang/tu-cau-hinh`, null, {
-        params: orderData,
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      const orderId = orderResponse?.data?.id;
-      if (!orderId) {
-        console.error('Create order response missing id:', orderResponse?.data);
-        message.error('Không tạo được đơn hàng để thanh toán MoMo.');
-        return;
-      }
-
+      // Send configuration data directly to payment API (like VNPay)
       const paymentPayload = {
-        orderId,
+        idCauHinh: parseInt(configId || "0"),
+        idDaiLy: form.getFieldValue('idDaiLy'),
+        tienDatCoc: amount,
+        ghiChu: form.getFieldValue('ghiChu'),
+        idKhuyenMai: khuyenMaiSelected?.id,
         amount,
         returnUrl: `${window.location.origin}/payment/success?momo=1`,
         cancelUrl: `${window.location.origin}/payment/cancel?momo=1`
       } as any;
 
-      const paymentResponse = await axios.post(`${BACKEND_URL}/thanh-toan/momo/tao-url`, paymentPayload, {
+      const paymentResponse = await axios.post(`${BACKEND_URL}/thanh-toan/tao-url`, {
+        ...paymentPayload,
+        paymentMethod: 'momo'
+      }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

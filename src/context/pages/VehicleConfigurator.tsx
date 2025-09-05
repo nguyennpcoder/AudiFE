@@ -66,6 +66,16 @@ interface NoiThat {
   mauSac?: string; // Thêm field này
 }
 
+interface BanhXe {
+  id: number;
+  ten: string;
+  moTa: string;
+  giaThem: number;
+  duongDanAnh: string;
+  laMacDinh?: boolean;
+  kichThuoc?: string; // Kích thước bánh xe (ví dụ: "19 inch", "20 inch")
+}
+
 interface CauHinhTuyChinh {
   id?: number;
   idNguoiDung?: number;
@@ -188,6 +198,7 @@ const VehicleConfigurator: React.FC = () => {
   const [danhSachMauSac, setDanhSachMauSac] = useState<MauSac[]>([]);
   const [danhSachTuyChon, setDanhSachTuyChon] = useState<TuyChon[]>([]);
   const [danhSachNoiThat, setDanhSachNoiThat] = useState<NoiThat[]>([]);
+  const [danhSachBanhXe, setDanhSachBanhXe] = useState<BanhXe[]>([]);
   
   // State cho hình ảnh xe theo màu
   const [hinhAnhXeTheoMau, setHinhAnhXeTheoMau] = useState<{ [key: number]: HinhAnhXeTheoMauDTO[] }>({});
@@ -317,6 +328,54 @@ const VehicleConfigurator: React.FC = () => {
           ];
           setDanhSachNoiThat(defaultNoiThat);
           message.warning('Sử dụng nội thất mặc định do lỗi server');
+        }
+      }
+      
+      // Load bánh xe
+      try {
+        const banhXeResponse = await axios.get(`${BACKEND_URL}/mau-xe/${id}/banh-xe`);
+        console.log('Bánh xe loaded:', banhXeResponse.data);
+        setDanhSachBanhXe(banhXeResponse.data);
+      } catch (banhXeError: any) {
+        console.error('Lỗi khi load bánh xe:', banhXeError);
+        // Fallback: load tất cả bánh xe
+        try {
+          const allBanhXeResponse = await axios.get(`${BACKEND_URL}/banh-xe`);
+          setDanhSachBanhXe(allBanhXeResponse.data);
+        } catch (fallbackError) {
+          console.error('Fallback cũng thất bại:', fallbackError);
+          // Tạo danh sách bánh xe mặc định
+          const defaultBanhXe: BanhXe[] = [
+            {
+              id: 1,
+              ten: "Bánh xe 19 inch cơ bản",
+              moTa: "Bánh xe hợp kim 19 inch với lốp mùa hè",
+              giaThem: 0,
+              duongDanAnh: "/uploads/images/wheels/19inch_basic.jpg",
+              laMacDinh: true,
+              kichThuoc: "19 inch"
+            },
+            {
+              id: 2,
+              ten: "Bánh xe 20 inch thể thao",
+              moTa: "Bánh xe hợp kim 20 inch thiết kế thể thao",
+              giaThem: 2500000,
+              duongDanAnh: "/uploads/images/wheels/20inch_sport.jpg",
+              laMacDinh: false,
+              kichThuoc: "20 inch"
+            },
+            {
+              id: 3,
+              ten: "Bánh xe 21 inch cao cấp",
+              moTa: "Bánh xe hợp kim 21 inch cao cấp với thiết kế đặc biệt",
+              giaThem: 5000000,
+              duongDanAnh: "/uploads/images/wheels/21inch_premium.jpg",
+              laMacDinh: false,
+              kichThuoc: "21 inch"
+            }
+          ];
+          setDanhSachBanhXe(defaultBanhXe);
+          message.warning('Sử dụng bánh xe mặc định do lỗi server');
         }
       }
       
@@ -490,6 +549,12 @@ const VehicleConfigurator: React.FC = () => {
         tongGia += noiThat.giaThem;
       }
       
+      // Cộng giá bánh xe
+      const banhXe = danhSachBanhXe.find(b => b.id === cauHinhHienTai.idBanhXe);
+      if (banhXe && banhXe.giaThem) {
+        tongGia += banhXe.giaThem;
+      }
+      
       // Cộng giá tùy chọn
       cauHinhHienTai.danhSachIdTuyChon.forEach(tuyChonId => {
         const tuyChon = danhSachTuyChon.find(t => t.id === tuyChonId);
@@ -590,6 +655,13 @@ const VehicleConfigurator: React.FC = () => {
     setCauHinhHienTai(prev => ({
       ...prev,
       idNoiThat: noiThatId
+    }));
+  };
+
+  const handleChonBanhXe = (banhXeId: number) => {
+    setCauHinhHienTai(prev => ({
+      ...prev,
+      idBanhXe: banhXeId
     }));
   };
 
@@ -922,7 +994,7 @@ const VehicleConfigurator: React.FC = () => {
       )
     },
     {
-      title: 'Chọn nội thất',
+      title: 'Chọn nội thất & bánh xe',
       icon: <CarOutlined />,
       content: (
         <div className="step-content">
@@ -967,6 +1039,67 @@ const VehicleConfigurator: React.FC = () => {
           ) : (
             <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.6)' }}>
               <Text>Không có tùy chọn nội thất nào</Text>
+              <br />
+              <Text type="secondary">Vui lòng kiểm tra backend hoặc database</Text>
+              <br />
+              <Button 
+                type="primary" 
+                onClick={() => loadInitialData()}
+                style={{ marginTop: '16px' }}
+              >
+                Thử lại
+              </Button>
+            </div>
+          )}
+          
+          {/* Thêm phần bánh xe */}
+          <Divider style={{ margin: '40px 0 20px 0', borderColor: 'rgba(255,255,255,0.2)' }} />
+          <Title level={3}>Tùy chỉnh bánh xe</Title>
+          
+          {danhSachBanhXe.length > 0 ? (
+            <Row gutter={[16, 16]}>
+              {danhSachBanhXe.map(banhXe => (
+                <Col xs={24} sm={12} md={8} key={banhXe.id}>
+                  <Card
+                    hoverable
+                    className={`wheel-card ${cauHinhHienTai.idBanhXe === banhXe.id ? 'selected' : ''}`}
+                    onClick={() => handleChonBanhXe(banhXe.id)}
+                  >
+                    {banhXe.duongDanAnh && (
+                      <img 
+                        src={`${BACKEND_URL.replace('/api/v1', '')}${banhXe.duongDanAnh}`}
+                        alt={banhXe.ten}
+                        className="wheel-image"
+                        onError={(e) => {
+                          console.error('Wheel image failed to load:', banhXe.duongDanAnh);
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    )}
+                    <div className="wheel-info">
+                      <Text strong>{banhXe.ten}</Text>
+                      <Text type="secondary">{banhXe.moTa}</Text>
+                      {banhXe.kichThuoc && (
+                        <Text type="secondary" className="wheel-size">
+                          Kích thước: {banhXe.kichThuoc}
+                        </Text>
+                      )}
+                      <Text className="wheel-price" style={{ color: '#1890ff' }}>
+                        +{banhXe.giaThem.toLocaleString('vi-VN')} VNĐ
+                      </Text>
+                      {banhXe.laMacDinh && (
+                        <Text type="secondary" className="default-badge">
+                          Mặc định
+                        </Text>
+                      )}
+                    </div>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.6)' }}>
+              <Text>Không có tùy chọn bánh xe nào</Text>
               <br />
               <Text type="secondary">Vui lòng kiểm tra backend hoặc database</Text>
               <br />
@@ -1053,6 +1186,27 @@ const VehicleConfigurator: React.FC = () => {
                     <Text>{danhSachNoiThat.find(n => n.id === cauHinhHienTai.idNoiThat)?.ten}</Text>
                     <Text className="interior-price">
                       +{danhSachNoiThat.find(n => n.id === cauHinhHienTai.idNoiThat)?.giaThem.toLocaleString('vi-VN')} VNĐ
+                    </Text>
+                  </div>
+                </Col>
+              </Row>
+            </Card>
+          )}
+
+          {/* Bánh xe đã chọn */}
+          {cauHinhHienTai.idBanhXe && (
+            <Card title="Bánh xe đã chọn" className="summary-card">
+              <Row gutter={[16, 16]}>
+                <Col span={24}>
+                  <div className="wheel-summary">
+                    <Text>{danhSachBanhXe.find(b => b.id === cauHinhHienTai.idBanhXe)?.ten}</Text>
+                    {danhSachBanhXe.find(b => b.id === cauHinhHienTai.idBanhXe)?.kichThuoc && (
+                      <Text type="secondary" className="wheel-size-summary">
+                        ({danhSachBanhXe.find(b => b.id === cauHinhHienTai.idBanhXe)?.kichThuoc})
+                      </Text>
+                    )}
+                    <Text className="wheel-price">
+                      +{danhSachBanhXe.find(b => b.id === cauHinhHienTai.idBanhXe)?.giaThem.toLocaleString('vi-VN')} VNĐ
                     </Text>
                   </div>
                 </Col>

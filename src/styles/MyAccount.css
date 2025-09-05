@@ -2,6 +2,105 @@
    MY ACCOUNT STYLES - AUDI THEME CONSISTENT
    ================================================ */
 
+/* ================================================
+   ANIMATION KEYFRAMES - FROM MYAUDI
+   ================================================ */
+
+@keyframes headerSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(200%) rotate(45deg); }
+}
+
+@keyframes pulseGlow {
+  from {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+  }
+}
+
+@keyframes myaudiFadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================================
+   ANIMATION CLASSES
+   ================================================ */
+
+.animate-card {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.animate-list-item {
+  animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.animate-timeline-item {
+  animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.fade-in {
+  animation: myaudiFadeInUp 0.6s ease-out;
+}
+
+/* Stagger animation delays */
+.animate-card:nth-child(1) { animation-delay: 0.1s; }
+.animate-card:nth-child(2) { animation-delay: 0.15s; }
+.animate-card:nth-child(3) { animation-delay: 0.2s; }
+.animate-card:nth-child(4) { animation-delay: 0.25s; }
+.animate-card:nth-child(5) { animation-delay: 0.3s; }
+.animate-card:nth-child(6) { animation-delay: 0.35s; }
+
+.animate-list-item:nth-child(1) { animation-delay: 0.1s; }
+.animate-list-item:nth-child(2) { animation-delay: 0.15s; }
+.animate-list-item:nth-child(3) { animation-delay: 0.2s; }
+.animate-list-item:nth-child(4) { animation-delay: 0.25s; }
+.animate-list-item:nth-child(5) { animation-delay: 0.3s; }
+
 /* Container - Sử dụng theme màu đen như các trang khác */
 .account-container {
   min-height: 100vh;
@@ -36,6 +135,7 @@
   overflow: hidden;
   z-index: 1;
   background: linear-gradient(135deg, rgba(213, 0, 28, 0.08) 0%, rgba(0, 0, 0, 0.9) 100%);
+  animation: headerSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hero-background {
@@ -57,6 +157,7 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 40px;
+  animation: fadeInUp 0.6s ease-out 0.3s both;
 }
 
 .hero-avatar-section {
@@ -76,6 +177,7 @@
   border-radius: 50%;
   overflow: hidden;
   position: relative;
+  animation: fadeInUp 0.6s ease-out 0.4s both;
 }
 
 .hero-avatar:hover {
@@ -218,6 +320,26 @@
   background: linear-gradient(135deg, #d50000, #ff1744);
   border-color: rgba(213, 0, 28, 0.3);
   box-shadow: 0 8px 25px rgba(213, 0, 28, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.account-primary-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.account-primary-btn:hover::before {
+  width: 100px;
+  height: 100px;
 }
 
 .account-primary-btn:hover {
@@ -262,6 +384,7 @@
   grid-template-columns: repeat(3, 1fr); /* 3 cột bằng nhau */
   gap: 24px;
   max-width: 1400px;
+  animation: fadeInUp 0.6s ease-out 0.4s both;
   margin-left: auto;
   margin-right: auto;
   padding: 0 40px;
@@ -278,6 +401,15 @@
   height: 100%;
   position: relative;
   overflow: hidden;
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+/* Stagger animations for stat cards */
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+
+.stat-card {
   min-height: 180px;
   display: flex;
   flex-direction: column;
@@ -285,8 +417,8 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
   width: 100%; /* Đảm bảo chiều rộng đầy đủ */
 }
-  
-  .stat-card::before {
+
+.stat-card::before {
     content: '';
     position: absolute;
     top: 0;
@@ -307,6 +439,11 @@
   
   .stat-card:hover::before {
     opacity: 1;
+  }
+
+  /* Pulse animation for important elements */
+  .stat-card[data-important="true"] {
+    animation: fadeInUp 0.6s ease-out both, pulseGlow 2s ease-in-out infinite alternate;
   }
   
   .stat-card .ant-statistic-title {
@@ -396,6 +533,7 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 40px 80px;
+  animation: fadeInUp 0.6s ease-out 0.5s both;
 }
 
 /* Content Card - Main Tabs Container */
@@ -407,6 +545,26 @@
   backdrop-filter: blur(15px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   overflow: hidden;
+  animation: fadeInUp 0.6s ease-out 0.6s both;
+  position: relative;
+}
+
+.content-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.1), 
+    transparent);
+  transition: left 0.8s ease;
+}
+
+.content-card:hover::before {
+  left: 100%;
 }
 
 .content-card .ant-card-body {
@@ -1463,6 +1621,52 @@
     }
   }
   
+  /* ================================================
+     LOADING SKELETON ANIMATIONS
+     ================================================ */
+
+  .skeleton-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skeleton-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(255, 255, 255, 0.1), 
+      transparent);
+    animation: shimmer 2s linear infinite;
+  }
+
+  .skeleton-avatar {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    margin-bottom: 16px;
+  }
+
+  .skeleton-text {
+    height: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+
+  .skeleton-text:last-child {
+    width: 60%;
+  }
+
   /* ================================================
      ANIMATIONS & TRANSITIONS
      ================================================ */
