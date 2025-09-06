@@ -25,13 +25,17 @@ const DealershipPage: React.FC = () => {
   // Tối ưu hóa fetch dealerships với useCallback
   const fetchDealerships = useCallback(async () => {
     setLoading(true);
+    setError(null);
+    console.log('Fetching dealerships...');
     try {
       const data = await getAllDealerships();
+      console.log('Dealerships data:', data);
       setDealerships(data);
       setTotalItems(data.length);
       setTotalPages(Math.ceil(data.length / pageSize));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể tải thông tin đại lý');
+      const errorMessage = err instanceof Error ? err.message : 'Không thể tải thông tin đại lý';
+      setError(errorMessage);
       console.error('Error fetching dealerships:', err);
     } finally {
       setLoading(false);
@@ -147,6 +151,20 @@ const DealershipPage: React.FC = () => {
           Khám phá mạng lưới đại lý Audi trên toàn quốc và tìm đại lý gần bạn nhất
         </p>
       </div>
+
+      {/* Debug info
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{ 
+          background: 'rgba(255,255,255,0.1)', 
+          padding: '10px', 
+          margin: '20px', 
+          borderRadius: '8px',
+          fontSize: '12px',
+          color: '#fff'
+        }}>
+          Debug: Loading: {loading.toString()}, Error: {error || 'none'}, Dealerships: {dealerships.length}
+        </div>
+      )} */}
 
       {dealerships.length === 0 ? (
         <div className="empty-state">

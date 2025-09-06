@@ -1,0 +1,68 @@
+/* Vehicle Rating Summary Component Styles */
+.rating-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.rating-summary.loading {
+  opacity: 0.6;
+}
+
+.rating-count {
+  color: #666;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+/* Size variations */
+.rating-summary .ant-rate {
+  font-size: 12px;
+}
+
+.rating-summary.small .ant-rate {
+  font-size: 10px;
+}
+
+/* Hover effects */
+.rating-summary:hover .rating-count {
+  color: #1890ff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .rating-summary {
+    gap: 4px;
+  }
+  
+  .rating-count {
+    font-size: 10px;
+  }
+  
+  .rating-summary .ant-rate {
+    font-size: 11px;
+  }
+  
+  .rating-summary.small .ant-rate {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .rating-summary {
+    gap: 2px;
+  }
+  
+  .rating-count {
+    font-size: 9px;
+  }
+  
+  .rating-summary .ant-rate {
+    font-size: 10px;
+  }
+  
+  .rating-summary.small .ant-rate {
+    font-size: 8px;
+  }
+}

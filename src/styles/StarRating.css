@@ -1,0 +1,82 @@
+/* Star Rating Component Styles */
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stars-container {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.star.clickable:hover {
+  transform: scale(1.1);
+}
+
+.star.clickable:hover .star-filled,
+.star.clickable:hover .star-outline {
+  color: #ffc107;
+}
+
+/* Star sizes */
+.star.small .star-filled,
+.star.small .star-outline {
+  font-size: 14px;
+}
+
+.star.medium .star-filled,
+.star.medium .star-outline {
+  font-size: 18px;
+}
+
+.star.large .star-filled,
+.star.large .star-outline {
+  font-size: 24px;
+}
+
+/* Star colors */
+.star-filled {
+  color: #ffc107;
+}
+
+.star-outline {
+  color: #d9d9d9;
+}
+
+.rating-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  margin-left: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .star.small .star-filled,
+  .star.small .star-outline {
+    font-size: 12px;
+  }
+  
+  .star.medium .star-filled,
+  .star.medium .star-outline {
+    font-size: 16px;
+  }
+  
+  .star.large .star-filled,
+  .star.large .star-outline {
+    font-size: 20px;
+  }
+  
+  .rating-value {
+    font-size: 12px;
+  }
+}

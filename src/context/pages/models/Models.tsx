@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import '../../../styles/Models.css';
+import VehicleRatingSummary from '../../../components/common/VehicleRatingSummary';
 const BACKEND_URL = 'http://localhost:8080';
 import rs7Image from '../../../assets/rs7.jpeg'; // Đường dẫn đúng với project bạn
 
@@ -310,6 +311,15 @@ const ModelsPage: React.FC = () => {
                       {/* <div className="car-subtitle">{dongXe.ten}</div> */}
                       <div className="car-price">
                         {translate('Starting at')} {formatPrice(mauXe.giaCoban)} VNĐ
+                      </div>
+                      
+                      {/* Vehicle Rating Summary */}
+                      <div className="car-rating">
+                        <VehicleRatingSummary 
+                          mauXeId={mauXe.id} 
+                          showCount={true} 
+                          size="small" 
+                        />
                       </div>
                       
                       <div className="car-buttons">

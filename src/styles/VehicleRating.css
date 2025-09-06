@@ -1,0 +1,285 @@
+/* Vehicle Rating Component Styles */
+.vehicle-rating-container {
+  margin-top: 24px;
+}
+
+/* Rating Summary Card */
+.rating-summary-card {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.rating-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.rating-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.average-rating {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rating-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.rating-stats {
+  margin-top: 4px;
+}
+
+.rating-actions {
+  display: flex;
+  align-items: center;
+}
+
+.user-rating-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 8px;
+}
+
+/* Rating Form Modal */
+.rating-form-modal .ant-modal-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+.rating-form-modal .ant-modal-body {
+  padding: 24px;
+}
+
+.rating-form {
+  max-width: 100%;
+}
+
+.rating-form .ant-form-item-label > label {
+  font-weight: 600;
+  color: #333;
+}
+
+.rating-form .ant-rate {
+  font-size: 24px;
+}
+
+.rating-form .ant-input,
+.rating-form .ant-input:focus {
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+}
+
+.rating-form .ant-input:hover {
+  border-color: #40a9ff;
+}
+
+.form-actions {
+  margin-bottom: 0;
+  text-align: right;
+}
+
+/* Reviews Card */
+.reviews-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.reviews-card .ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+.reviews-card .ant-card-head-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.reviews-card .ant-card-body {
+  padding: 24px;
+}
+
+/* No Reviews State */
+.no-reviews {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+/* Reviews List */
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.review-item {
+  padding: 16px 0;
+}
+
+.review-item:last-child .ant-divider {
+  display: none;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.reviewer-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.reviewer-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.review-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.review-content {
+  margin-left: 44px;
+}
+
+.review-title {
+  margin-bottom: 8px !important;
+  color: #333;
+  font-weight: 600;
+}
+
+.review-text {
+  margin-bottom: 0 !important;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .rating-summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .rating-actions {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .user-rating-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .review-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .review-content {
+    margin-left: 0;
+  }
+  
+  .reviewer-info {
+    width: 100%;
+  }
+  
+  .rating-form-modal {
+    width: 95% !important;
+    max-width: 500px;
+  }
+  
+  .rating-form-modal .ant-modal-body {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .rating-summary-card .ant-card-body,
+  .reviews-card .ant-card-body {
+    padding: 16px;
+  }
+  
+  .average-rating {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .rating-text {
+    font-size: 16px;
+  }
+  
+  .review-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+/* Animation for new reviews */
+.review-item {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Star rating hover effects */
+.rating-form .ant-rate .ant-rate-star:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+/* Form validation styles */
+.rating-form .ant-form-item-has-error .ant-input {
+  border-color: #ff4d4f;
+}
+
+.rating-form .ant-form-item-has-error .ant-input:focus {
+  border-color: #ff4d4f;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+}
+
+/* Loading states */
+.reviews-card.ant-card-loading .ant-card-body {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

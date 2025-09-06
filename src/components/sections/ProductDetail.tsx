@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import '../../styles/ProductDetail.css';
 import PromotionBanner from './PromotionBanner';
+import VehicleRating from './VehicleRating';
 import { KhuyenMai } from '../../services/marketingService';
 
 // Define interfaces for our data types
@@ -2234,7 +2235,15 @@ const resetToDefaultColor = async () => {
         </div>
       )}
 
-      {/* Updated Wheels Section with wheel comparison functionality */}
+      {/* Vehicle Rating Section */}
+      <VehicleRating 
+        mauXeId={product.id} 
+        tenMauXe={product.tenMau}
+        onRatingSubmit={() => {
+          // Refresh any data if needed after rating submission
+          console.log('Rating submitted for vehicle:', product.tenMau);
+        }}
+      />
       
     </div>
   );
