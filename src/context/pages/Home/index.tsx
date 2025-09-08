@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import HeroBanner from '../../../components/layout/HeroBanner';
 import CarModelFeature from '../../../components/sections/CarModelFeature';
 import FeaturedProducts from '../../../components/sections/FeaturedProducts';
-import NewsAndBlogSection from '../../../components/sections/NewsAndBlogSection';
+// Removed NewsAndBlogSection as requested
 import { useNotification } from '../../NotificationContext';
 
 // Import hình ảnh
@@ -219,10 +219,7 @@ const Home = () => {
         subtitle="Khám phá các dòng xe Audi đỉnh cao với thiết kế đẹp mắt và công nghệ tiên tiến"
       />
       
-      <NewsAndBlogSection 
-        title="Tin tức & Cập nhật mới nhất" 
-        subtitle="Khám phá những mẫu xe mới và bài viết blog mới nhất từ Audi"
-      />
+      {/* NewsAndBlogSection removed */}
     </div>
   );
 };

@@ -35,6 +35,9 @@ import QuotationDetail from './context/pages/QuotationDetail';
 import OrderForm from './context/pages/OrderForm';
 import PaymentSuccess from './context/pages/PaymentSuccess';
 import PaymentCancel from './context/pages/PaymentCancel';
+import ActivityLog from './context/pages/admin/ActivityLog';
+import SupportTickets from './context/pages/SupportTickets';
+import SupportManagement from './context/pages/admin/SupportManagement';
 
 
 import UserOrderManagement from './context/pages/admin/UserOrderManagement';
@@ -62,7 +65,8 @@ function App() {
     '/admin/marketing',
     '/admin/blog',
     '/admin/support',
-    '/admin/settings'
+    '/admin/settings',
+    '/admin/activity-logs'
   ];
   
   const shouldShowHeader = !authRoutes.includes(location.pathname) && !adminRoutes.includes(location.pathname);
@@ -162,7 +166,7 @@ function App() {
                    <ThemeProvider>
                      <AdminLayout>
                        <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                         <UserManagement />
+                         <AdminDashboard />
                        </RoleBasedRoute>
                      </AdminLayout>
                    </ThemeProvider>
@@ -173,7 +177,7 @@ function App() {
                   <ThemeProvider>
                     <AdminLayout>
                       <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                        <ProductManagement />
+                        <AdminDashboard />
                       </RoleBasedRoute>
                     </AdminLayout>
                   </ThemeProvider>
@@ -184,7 +188,7 @@ function App() {
                   <ThemeProvider>
                     <AdminLayout>
                       <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                          <OrderManagement />
+                          <AdminDashboard />
                       </RoleBasedRoute>
                     </AdminLayout>
                   </ThemeProvider>
@@ -194,7 +198,7 @@ function App() {
                   <ThemeProvider>
                     <AdminLayout>
                       <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                        <DealershipManagement />
+                        <AdminDashboard />
                       </RoleBasedRoute>
                     </AdminLayout>
                   </ThemeProvider>
@@ -204,9 +208,7 @@ function App() {
                   <ThemeProvider>
                     <AdminLayout>
                       <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                        <div className="admin-placeholder">
-                          <h2>Trang quản lý tồn kho đang phát triển</h2>
-                        </div>
+                        <AdminDashboard />
                       </RoleBasedRoute>
                     </AdminLayout>
                   </ThemeProvider>
@@ -216,7 +218,7 @@ function App() {
                   <ThemeProvider>
                     <AdminLayout>
                       <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                        <MarketingManagement />
+                        <AdminDashboard />
                       </RoleBasedRoute>
                     </AdminLayout>
                   </ThemeProvider>
@@ -226,7 +228,7 @@ function App() {
                   <ThemeProvider>
                     <AdminLayout>
                       <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                        <BlogManagement />
+                        <AdminDashboard />
                       </RoleBasedRoute>
                     </AdminLayout>
                   </ThemeProvider>
@@ -236,9 +238,7 @@ function App() {
                   <ThemeProvider>
                     <AdminLayout>
                       <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                        <div className="admin-placeholder">
-                          <h2>Trang quản lý hỗ trợ đang phát triển</h2>
-                        </div>
+                        <SupportManagement />
                       </RoleBasedRoute>
                     </AdminLayout>
                   </ThemeProvider>
@@ -248,9 +248,17 @@ function App() {
                   <ThemeProvider>
                     <AdminLayout>
                       <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                        <div className="admin-placeholder">
-                          <h2>Trang cài đặt hệ thống đang phát triển</h2>
-                        </div>
+                        <AdminDashboard />
+                      </RoleBasedRoute>
+                    </AdminLayout>
+                  </ThemeProvider>
+                } />
+
+                <Route path="/admin/activity-logs" element={
+                  <ThemeProvider>
+                    <AdminLayout>
+                      <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                        <AdminDashboard />
                       </RoleBasedRoute>
                     </AdminLayout>
                   </ThemeProvider>
@@ -260,7 +268,7 @@ function App() {
                   <ThemeProvider>
                     <AdminLayout>
                       <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
-                        <Profile />
+                        <AdminDashboard />
                       </RoleBasedRoute>
                     </AdminLayout>
                   </ThemeProvider>
@@ -308,6 +316,11 @@ function App() {
                 <Route path="/myaudi/account" element={
                   <ProtectedRoute>
                     <MyAccount />
+                  </ProtectedRoute>
+                } />
+                <Route path="/support" element={
+                  <ProtectedRoute>
+                    <SupportTickets />
                   </ProtectedRoute>
                 } />
                 <Route path="/payment/success" element={<PaymentSuccess />} />

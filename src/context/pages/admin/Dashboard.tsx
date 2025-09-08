@@ -36,6 +36,7 @@ import MarketingManagement from './MarketingManagement';
 import Profile from './Profile';
 import BlogManagement from './BlogManagement';
 import DealershipManagement from './DealershipManagement';
+import ActivityLog from './ActivityLog';
 // import các component khác nếu có...
 
 const { Sider } = Layout;
@@ -128,6 +129,24 @@ const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
   useEffect(() => {
+    // Sync selected menu with current path
+    const path = window.location.pathname;
+    const mapping: Record<string, string> = {
+      '/admin/dashboard': 'dashboard',
+      '/admin/users': 'users',
+      '/admin/products': 'products',
+      '/admin/orders': 'orders',
+      '/admin/dealers': 'dealers',
+      '/admin/inventory': 'inventory',
+      '/admin/marketing': 'marketing',
+      '/admin/blog': 'blog',
+      '/admin/support': 'support',
+      '/admin/settings': 'settings',
+      '/admin/activity-logs': 'activity-logs',
+      '/admin/profile': 'profile',
+    };
+    if (mapping[path]) setSelectedMenu(mapping[path]);
+
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1024);
       setSidebarCollapsed(window.innerWidth < 1024);
@@ -477,7 +496,24 @@ const Dashboard: React.FC = () => {
             <Menu
               mode="inline"
               selectedKeys={[selectedMenu]}
-              onClick={e => setSelectedMenu(e.key as string)}
+              onClick={e => {
+                const key = e.key as string;
+                setSelectedMenu(key);
+                const keyToPath: Record<string, string> = {
+                  'dashboard': '/admin/dashboard',
+                  'users': '/admin/users',
+                  'products': '/admin/products',
+                  'orders': '/admin/orders',
+                  'dealers': '/admin/dealers',
+                  'inventory': '/admin/inventory',
+                  'marketing': '/admin/marketing',
+                  'blog': '/admin/blog',
+                  'support': '/admin/support',
+                  'settings': '/admin/settings',
+                  'activity-logs': '/admin/activity-logs',
+                };
+                if (keyToPath[key]) navigate(keyToPath[key]);
+              }}
               style={{ border: 'none', fontSize: 18, fontWeight: 500 }}
             >
               <Menu.Item key="dashboard" icon={<AppstoreOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
@@ -505,6 +541,12 @@ const Dashboard: React.FC = () => {
               </Menu.Item>
               <Menu.Item key="blog" icon={<FileTextOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
                 Quản lý bài viết
+              </Menu.Item>
+              <Menu.Item
+                key="activity-logs"
+                icon={<TableOutlined style={{ fontSize: 24, color: '#1890ff' }} />}
+              >
+                Nhật ký hoạt động
               </Menu.Item>
               <Menu.Item key="support" icon={<CustomerServiceOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
                 Quản lý hỗ trợ
@@ -930,6 +972,11 @@ const Dashboard: React.FC = () => {
         {selectedMenu === 'blog' && (
           <AnimatedPage animation="bottom">
             <BlogManagement />
+          </AnimatedPage>
+        )}
+        {selectedMenu === 'activity-logs' && (
+          <AnimatedPage animation="bottom">
+            <ActivityLog />
           </AnimatedPage>
         )}
         {selectedMenu === 'dealers' && (

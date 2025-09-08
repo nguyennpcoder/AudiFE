@@ -482,7 +482,7 @@ const OrderManagement: React.FC = () => {
               }}>
                 <thead>
                   <tr style={{ background: '#fafbfc', color: '#6b7280', fontWeight: 700 }}>
-                    <th style={{ padding: '12px 8px', textAlign: 'left', width: '8%' }}>Mã đơn hàng</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left', width: '8%' }}>Mã đơn</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left', width: '18%' }}>Khách hàng</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left', width: '18%' }}>Đại lý</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left', width: '15%' }}>Ngày đặt</th>

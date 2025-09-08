@@ -1605,7 +1605,7 @@ const ProductManagement: React.FC = () => {
               }}>
                 <thead>
                   <tr style={{ background: '#fafbfc', color: '#6b7280', fontWeight: 700 }}>
-                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>ID</th>
+                    <th style={{ padding: '12px 8px', textAlign: 'left' }}>Mã xe</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left' }}>Tên mẫu xe</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left' }}>Dòng xe</th>
                     <th style={{ padding: '12px 8px', textAlign: 'left' }}>Năm SX</th>
