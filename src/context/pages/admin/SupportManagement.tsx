@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { supportService, YeuCauHoTroDTO, PhanHoiYeuCauDTO } from '../../../services/supportService';
+import { useAuth } from '../../AuthContext';
 
 const SupportManagement: React.FC = () => {
+  const { user } = useAuth();
   const [tickets, setTickets] = useState<YeuCauHoTroDTO[]>([]);
   const [page, setPage] = useState(0);
   const [size] = useState(10);
@@ -11,6 +13,7 @@ const SupportManagement: React.FC = () => {
   const [replies, setReplies] = useState<PhanHoiYeuCauDTO[]>([]);
   const [replyText, setReplyText] = useState('');
   const [filter, setFilter] = useState<{ status?: string }>({});
+  const [scope, setScope] = useState<'assigned' | 'unassigned' | 'all'>('assigned');
 
   const load = async () => {
     setLoading(true);
@@ -24,6 +27,16 @@ const SupportManagement: React.FC = () => {
   };
 
   useEffect(() => { load(); }, [page]);
+
+  // Filter tickets for support view
+  const visibleTickets = useMemo(() => {
+    const agentId = user?.userId;
+    return tickets.filter(t => {
+      if (scope === 'all') return true;
+      if (scope === 'assigned') return t.idNguoiPhuTrach === agentId;
+      return !t.idNguoiPhuTrach; // unassigned
+    });
+  }, [tickets, scope, user?.userId]);
 
   const open = async (t: YeuCauHoTroDTO) => {
     setActive(t);
@@ -45,12 +58,23 @@ const SupportManagement: React.FC = () => {
     await load();
   };
 
+  const takeOwnership = async () => {
+    if (!active || !user?.userId) return;
+    await supportService.assignAgent(active.id!, user.userId);
+    await load();
+  };
+
   return (
     <div style={{ padding: 24 }}>
-      <h2>Quản lý hỗ trợ</h2>
+      <h2>Hộp thư hỗ trợ</h2>
       <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 16 }}>
         <div>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+            <select value={scope} onChange={e => setScope(e.target.value as any)}>
+              <option value="assigned">Của tôi</option>
+              <option value="unassigned">Chưa phân công</option>
+              <option value="all">Tất cả</option>
+            </select>
             <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>Trước</button>
             <span>Trang {page + 1} / {Math.max(1, totalPages)}</span>
             <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}>Sau</button>
@@ -61,14 +85,16 @@ const SupportManagement: React.FC = () => {
                 <th style={{ textAlign: 'left', padding: 8 }}>Tiêu đề</th>
                 <th style={{ textAlign: 'left', padding: 8 }}>Trạng thái</th>
                 <th style={{ textAlign: 'left', padding: 8 }}>Ưu tiên</th>
+                <th style={{ textAlign: 'left', padding: 8 }}>Phụ trách</th>
               </tr>
             </thead>
             <tbody>
-              {tickets.map(t => (
+              {visibleTickets.map(t => (
                 <tr key={t.id} style={{ cursor: 'pointer' }} onClick={() => open(t)}>
                   <td style={{ padding: 8 }}>{t.tieuDe}</td>
                   <td style={{ padding: 8 }}>{t.trangThai}</td>
                   <td style={{ padding: 8 }}>{t.mucDoUuTien}</td>
+                  <td style={{ padding: 8 }}>{t.idNguoiPhuTrach ? (t.idNguoiPhuTrach === user?.userId ? 'Bạn' : `#${t.idNguoiPhuTrach}`) : '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -87,11 +113,27 @@ const SupportManagement: React.FC = () => {
                   <option value="da_giai_quyet">Đã giải quyết</option>
                   <option value="dong">Đóng</option>
                 </select>
+                {!active.idNguoiPhuTrach && (
+                  <button onClick={takeOwnership}>Nhận xử lý</button>
+                )}
               </div>
-              <div style={{ border: '1px solid #eee', borderRadius: 8, padding: 12, maxHeight: 360, overflow: 'auto' }}>
-                {replies.map(r => (
-                  <div key={r.id} style={{ padding: '8px 0', borderBottom: '1px dashed #eee' }}>{r.noiDung}</div>
-                ))}
+              <div style={{ border: '1px solid #eee', borderRadius: 8, padding: 12, maxHeight: 360, overflow: 'auto', background: '#fafafa' }}>
+                {replies.map(r => {
+                  const isCustomer = r.idNguoiDung === active.idNguoiDung;
+                  return (
+                    <div key={r.id} style={{
+                      padding: '8px 12px',
+                      margin: '6px 0',
+                      borderRadius: 8,
+                      background: isCustomer ? '#fff' : '#e6f4ff',
+                      border: '1px solid #eee',
+                      textAlign: isCustomer ? 'left' : 'right'
+                    }}>
+                      <div style={{ fontSize: 12, color: '#888' }}>{isCustomer ? 'Khách hàng' : 'Support'}</div>
+                      <div>{r.noiDung}</div>
+                    </div>
+                  );
+                })}
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                 <input placeholder="Nhập phản hồi..." value={replyText} onChange={e => setReplyText(e.target.value)} style={{ flex: 1 }} />

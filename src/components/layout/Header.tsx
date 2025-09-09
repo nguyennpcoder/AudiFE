@@ -274,7 +274,7 @@ const Header = () => {
                 <div className="dropdown-column">
                   <h3>Hỗ Trợ</h3>
                   <ul>
-                    <li><Link to="/services/support/help">Trợ Giúp</Link></li>
+                    <li><Link to="/support">Trợ Giúp</Link></li>
                     <li><Link to="/services/support/contact">Liên Hệ</Link></li>
                   </ul>
                 </div>

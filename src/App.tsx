@@ -237,7 +237,7 @@ function App() {
                 <Route path="/admin/support" element={
                   <ThemeProvider>
                     <AdminLayout>
-                      <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                      <RoleBasedRoute allowedRoles={['QUAN_TRI', 'SUPPORT']}>
                         <SupportManagement />
                       </RoleBasedRoute>
                     </AdminLayout>
@@ -319,6 +319,12 @@ function App() {
                   </ProtectedRoute>
                 } />
                 <Route path="/support" element={
+                  <ProtectedRoute>
+                    <SupportTickets />
+                  </ProtectedRoute>
+                } />
+                {/* Alias for header menu URL */}
+                <Route path="/services/support/help" element={
                   <ProtectedRoute>
                     <SupportTickets />
                   </ProtectedRoute>
