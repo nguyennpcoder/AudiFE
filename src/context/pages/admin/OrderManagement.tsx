@@ -58,7 +58,13 @@ interface HoSoTraGop {
   lyDoTuChoi: string;
 }
 
-const OrderManagement: React.FC = () => {
+type OrderManagementProps = {
+  useAdminLayout?: boolean;
+  pageTitle?: string;
+  allowedRoles?: string[];
+};
+
+const OrderManagement: React.FC<OrderManagementProps> = ({ useAdminLayout = true, pageTitle = 'Quản lý đơn hàng', allowedRoles }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   
@@ -90,13 +96,16 @@ const OrderManagement: React.FC = () => {
       navigate('/login');
       return;
     }
-    
-    if (user.role !== 'QUAN_TRI') {
+    const role = (user.role || '').toUpperCase();
+    const effectiveAllowed = allowedRoles && allowedRoles.length > 0
+      ? allowedRoles.map(r => r.toUpperCase())
+      : (useAdminLayout ? ['QUAN_TRI'] : ['BAN_HANG','SALES','QUAN_TRI']);
+    if (!effectiveAllowed.includes(role)) {
       alert('Bạn không có quyền truy cập trang này');
       navigate('/');
       return;
     }
-  }, [user, navigate]);
+  }, [user, navigate, useAdminLayout, allowedRoles]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -357,17 +366,19 @@ const OrderManagement: React.FC = () => {
   return (
     <div style={{ 
       background: '#f5f5f5', 
-      height: '100vh', // Cố định chiều cao viewport
-      overflow: 'hidden', // Không cho scroll
+      height: '100vh',
+      overflow: 'hidden',
       padding: 0 
     }}>
-      <AdminHeader pageTitle="Quản lý đơn hàng" />
+      {useAdminLayout ? (
+        <AdminHeader pageTitle={pageTitle} />
+      ) : null}
       <div style={{ 
         maxWidth: 1200, 
         margin: '0 auto', 
         padding: '32px 0 0 0',
-        height: 'calc(100vh - 80px)', // Trừ đi chiều cao header
-        overflow: 'hidden', // Không cho scroll
+        height: useAdminLayout ? 'calc(100vh - 80px)' : 'calc(100vh - 20px)',
+        overflow: 'hidden',
       }}>
         <div className="admin-section" style={{ 
           background: '#fff', 
@@ -375,8 +386,8 @@ const OrderManagement: React.FC = () => {
           boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)', 
           padding: '32px 32px 24px 32px', 
           marginBottom: 32,
-          height: 'calc(100vh - 120px)', // Cố định chiều cao
-          overflow: 'hidden', // Không cho scroll
+          height: useAdminLayout ? 'calc(100vh - 120px)' : 'auto',
+          overflow: 'hidden',
         }}>
           {/* Toolbar */}
           <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -459,10 +470,10 @@ const OrderManagement: React.FC = () => {
             </div>
           </div>
 
-          {/* Table Container - Cố định chiều cao */}
+          {/* Table Container */}
           <div style={{ 
-            height: 'calc(100vh - 280px)', // Điều chỉnh chiều cao sau khi gỡ statistics
-            overflow: 'hidden', // Không cho scroll
+            height: useAdminLayout ? 'calc(100vh - 280px)' : 'calc(100vh - 260px)',
+            overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column'
           }}>

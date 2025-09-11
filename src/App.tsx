@@ -39,6 +39,9 @@ import ActivityLog from './context/pages/admin/ActivityLog';
 import SupportTickets from './context/pages/SupportTickets';
 import SupportManagement from './context/pages/admin/SupportManagement';
 
+import SupportConsoleLayout from './context/pages/SupportConsoleLayout';
+import SalesConsoleLayout from './context/pages/SalesConsoleLayout';
+
 
 import UserOrderManagement from './context/pages/admin/UserOrderManagement';
 import MyOrders from './context/pages/MyOrders';
@@ -74,14 +77,19 @@ function App() {
 
   const isAdminRoute = location.pathname.startsWith('/admin');
 
-  // Redirect to admin dashboard if user is admin
+  // Redirect after login per role
   useEffect(() => {
     console.log('Current Auth State:', { isAuthenticated, userRole: user?.role, currentPath: location.pathname });
     
-    // Kiểm tra không phân biệt chữ hoa/thường
-    if (isAuthenticated && user?.role && user.role.toUpperCase() === 'QUAN_TRI' && location.pathname === '/') {
-      console.log('Redirecting admin to dashboard');
-      navigate('/admin/dashboard', { replace: true });
+    if (isAuthenticated && location.pathname === '/') {
+      const role = (user?.role || '').toUpperCase();
+      if (role === 'QUAN_TRI') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (role === 'BAN_HANG' || role === 'SALES') {
+        navigate('/sales/console', { replace: true });
+      } else if (role === 'HO_TRO' || role === 'SUPPORT') {
+        navigate('/support/console', { replace: true });
+      }
     }
   }, [isAuthenticated, user, navigate, location.pathname]);
 
@@ -237,11 +245,20 @@ function App() {
                 <Route path="/admin/support" element={
                   <ThemeProvider>
                     <AdminLayout>
-                      <RoleBasedRoute allowedRoles={['QUAN_TRI', 'SUPPORT']}>
-                        <SupportManagement />
+                      <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                        <AdminDashboard />
                       </RoleBasedRoute>
                     </AdminLayout>
                   </ThemeProvider>
+                } />
+
+                {/* Support agent console (non-admin URL) */}
+                <Route path="/support/console" element={
+                  <RoleBasedRoute allowedRoles={['SUPPORT', 'HO_TRO']}>
+                    <SupportConsoleLayout title="Support Console">
+                      <SupportManagement useAdminLayout={false} pageTitle="Support Console" />
+                    </SupportConsoleLayout>
+                  </RoleBasedRoute>
                 } />
 
                 <Route path="/admin/settings" element={
@@ -282,6 +299,15 @@ function App() {
                 } />
 
                 <Route path="/product/:id" element={<ProductDetail />} />
+                {/* Sales & Support portals */}
+                <Route path="/sales/console" element={
+                  <RoleBasedRoute allowedRoles={['SALES','BAN_HANG','QUAN_TRI']}>
+                    <SalesConsoleLayout title="Sales Console">
+                      <OrderManagement useAdminLayout={false} pageTitle="Sales Console" allowedRoles={['SALES','BAN_HANG','QUAN_TRI']} />
+                    </SalesConsoleLayout>
+                  </RoleBasedRoute>
+                } />
+
                
                 <Route path="/models" element={<ModelsPage />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />

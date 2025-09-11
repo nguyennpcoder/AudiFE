@@ -37,6 +37,7 @@ import Profile from './Profile';
 import BlogManagement from './BlogManagement';
 import DealershipManagement from './DealershipManagement';
 import ActivityLog from './ActivityLog';
+import SupportManagement from './SupportManagement';
 // import các component khác nếu có...
 
 const { Sider } = Layout;
@@ -972,6 +973,11 @@ const Dashboard: React.FC = () => {
         {selectedMenu === 'blog' && (
           <AnimatedPage animation="bottom">
             <BlogManagement />
+          </AnimatedPage>
+        )}
+        {selectedMenu === 'support' && (
+          <AnimatedPage animation="left">
+            <SupportManagement />
           </AnimatedPage>
         )}
         {selectedMenu === 'activity-logs' && (

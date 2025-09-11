@@ -108,13 +108,18 @@ const Login: React.FC = () => {
         console.log("User in localStorage after login:", currentUser);
         
         // Force a direct state check from the database
-        if (response.role === 'quan_tri') {
-          // For admin users, immediately navigate to dashboard
-          console.log("Admin user detected, navigating to dashboard");
+        const roleUpper = (response.role || '').toString().toUpperCase();
+        if (roleUpper === 'QUAN_TRI') {
+          console.log('Admin user detected, navigating to dashboard');
           navigate('/admin/dashboard', { replace: true });
+        } else if (roleUpper === 'BAN_HANG' || roleUpper === 'SALES') {
+          console.log('Sales detected, navigating to sales portal');
+          navigate('/sales', { replace: true });
+        } else if (roleUpper === 'HO_TRO' || roleUpper === 'SUPPORT') {
+          console.log('Support detected, navigating to support console');
+          navigate('/support/console', { replace: true });
         } else {
-          // For regular users, navigate to home
-          console.log("Regular user detected, navigating to home");
+          console.log('Customer detected, navigating to home');
           navigate('/', { replace: true });
         }
       } else {
