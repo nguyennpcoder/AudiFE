@@ -515,7 +515,7 @@ const Dashboard: React.FC = () => {
                 };
                 if (keyToPath[key]) navigate(keyToPath[key]);
               }}
-              style={{ border: 'none', fontSize: 18, fontWeight: 500 }}
+              style={{ border: 'none', fontSize: 18, fontWeight: 500, marginTop: -25 }}
             >
               <Menu.Item key="dashboard" icon={<AppstoreOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
                 Tổng quan
@@ -561,7 +561,16 @@ const Dashboard: React.FC = () => {
             <Menu
               mode="inline"
               selectedKeys={[selectedMenu]}
-              onClick={e => setSelectedMenu(e.key as string)}
+              onClick={e => {
+                const key = e.key as string;
+                setSelectedMenu(key);
+                const keyToPath: Record<string, string> = {
+                  'profile': '/admin/profile',
+                  'profile-settings': '/admin/settings',
+                  'profile-logout': '/admin/dashboard'
+                };
+                if (keyToPath[key]) navigate(keyToPath[key]);
+              }}
               style={{ border: 'none', fontSize: 18, fontWeight: 500 }}
             >
               <Menu.Item
@@ -971,7 +980,7 @@ const Dashboard: React.FC = () => {
           </AnimatedPage>
         )}
         {selectedMenu === 'blog' && (
-          <AnimatedPage animation="bottom">
+          <AnimatedPage animation="left">
             <BlogManagement />
           </AnimatedPage>
         )}

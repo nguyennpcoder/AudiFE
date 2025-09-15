@@ -20,7 +20,7 @@ const SupportManagement: React.FC<SupportManagementProps> = ({ useAdminLayout = 
   const [replies, setReplies] = useState<PhanHoiYeuCauDTO[]>([]);
   const [replyText, setReplyText] = useState('');
   const [filter, setFilter] = useState<{ status?: string }>({});
-  const [scope, setScope] = useState<'assigned' | 'unassigned' | 'all'>('assigned');
+  const [scope, setScope] = useState<'assigned' | 'unassigned' | 'all'>('all');
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   const load = async () => {
@@ -239,6 +239,13 @@ const SupportManagement: React.FC<SupportManagementProps> = ({ useAdminLayout = 
                       </td>
                     </tr>
                   )}
+                  {visibleTickets.length > 0 && visibleTickets.length < 10 &&
+                    Array.from({ length: 10 - visibleTickets.length }).map((_, index) => (
+                      <tr key={`empty-${index}`} style={{ height: '50px', background: '#fff' }}>
+                        <td colSpan={5} style={{ padding: '10px 8px' }}></td>
+                      </tr>
+                    ))
+                  }
                 </tbody>
               </table>
             </div>

@@ -16,13 +16,14 @@ const SupportConsoleLayout: React.FC<SupportConsoleLayoutProps> = ({ title = 'Su
           position: 'sticky',
           top: 0,
           zIndex: 50,
+         
           background: 'linear-gradient(90deg, #0b0b0b 0%, #111827 55%, #0f172a 100%)',
           color: '#fff',
           padding: '14px 0',
           boxShadow: '0 8px 28px rgba(0,0,0,0.25)'
         }}
       >
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',  marginTop: 80 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <img src="/public/vite.svg" alt="logo" style={{ width: 28, height: 28, filter: 'invert(1)' }} />
             <div style={{ fontWeight: 800, fontSize: 18, letterSpacing: 0.5 }}>Audi Support</div>
@@ -44,10 +45,10 @@ const SupportConsoleLayout: React.FC<SupportConsoleLayoutProps> = ({ title = 'Su
               <i className="fas fa-rotate"></i>
               <span>Làm mới</span>
             </button>
-            <button className="support-primary-btn" title="Tạo ticket">
+            {/* <button className="support-primary-btn" title="Tạo ticket">
               <i className="fas fa-plus"></i>
               <span>Ticket mới</span>
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

@@ -260,10 +260,9 @@ const SupportTickets: React.FC = () => {
   const [focus, setFocus] = useState<{ title: boolean; content: boolean }>({ title: false, content: false });
 
   const loadTickets = async () => {
-    if (!user?.userId) return;
     setLoading(true);
     try {
-      const data = await supportService.getMyTickets(user.userId, page, size);
+      const data = await supportService.getAllTickets(page, size);
       setTickets(data.yeuCau || []);
       setTotalPages(data.totalPages || 1);
     } finally {
@@ -403,7 +402,7 @@ const SupportTickets: React.FC = () => {
 
       <div style={styles.contentGrid as any}>
         <motion.div style={styles.panel} variants={fadeInLeft}>
-          <div style={styles.panelTitle}>Danh sách của tôi</div>
+          <div style={styles.panelTitle}>Danh sách hỗ trợ</div>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
             <AnimatePresence mode="popLayout">
               {tickets.length === 0 && !loading && (

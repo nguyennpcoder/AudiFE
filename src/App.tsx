@@ -25,6 +25,7 @@ import LoadingAnimation from './components/common/LoadingAnimation';
 import AdminLayout from './context/pages/admin/AdminLayout';
 import MarketingManagement from './context/pages/admin/MarketingManagement';
 import Profile from './context/pages/admin/Profile';
+import Settings from './context/pages/admin/Settings';
 import BlogManagement from './context/pages/admin/BlogManagement';
 import BlogList from './context/pages/Blog/BlogList';
 import BlogDetail from './context/pages/Blog/BlogDetail';
@@ -68,6 +69,7 @@ function App() {
     '/admin/marketing',
     '/admin/blog',
     '/admin/support',
+    '/admin/profile',
     '/admin/settings',
     '/admin/activity-logs'
   ];

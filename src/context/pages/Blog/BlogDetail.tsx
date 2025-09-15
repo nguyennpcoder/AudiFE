@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import { useNotification } from '../../NotificationContext';
 import '../../../styles/Blog.css';
+import { logActivity } from '../../../services/activityClient';
 
 const API_URL = 'http://localhost:8080/api/v1/bai-viet';
 const COMMENT_API_URL = 'http://localhost:8080/api/v1/binh-luan';
@@ -433,6 +434,7 @@ const BlogDetail: React.FC = () => {
       if (response.ok) {
         const responseData = await response.json();
         console.log('Comment submitted successfully:', responseData);
+        logActivity('comment_create', { idBaiViet: id });
         
         // Clear form
         setNewComment('');
@@ -449,6 +451,7 @@ const BlogDetail: React.FC = () => {
         const errorData = await response.text();
         console.error('Failed to submit comment:', response.status, errorData);
         showNotification('error', `Lỗi gửi bình luận: ${response.status} - ${errorData}`);
+        logActivity('comment_create', { idBaiViet: id, status: 'fail', statusCode: response.status });
       }
     } catch (err) {
       console.error('Failed to submit comment:', err);
@@ -519,6 +522,7 @@ const BlogDetail: React.FC = () => {
       if (response.ok) {
         const result = await response.json();
         console.log('Reply submitted successfully:', result);
+        logActivity('comment_reply', { idBaiViet: id, parentId });
         
         // Clear form
         setReplyContent('');
@@ -551,6 +555,7 @@ const BlogDetail: React.FC = () => {
         }
         
         showNotification('error', `Lỗi: ${errorMessage}`);
+        logActivity('comment_reply', { idBaiViet: id, parentId, status: 'fail', statusCode: response.status });
       }
     } catch (err) {
       console.error('Failed to submit reply:', err);
@@ -612,6 +617,7 @@ const BlogDetail: React.FC = () => {
       if (response.ok) {
         const result = await response.json();
         console.log(`${endpoint} result:`, result);
+        logActivity(endpoint === 'like' ? 'comment_like' : 'comment_unlike', { commentId });
         
         // Refresh comments từ backend để đảm bảo trạng thái chính xác
         await fetchComments();
@@ -628,6 +634,7 @@ const BlogDetail: React.FC = () => {
       } else {
         const errorData = await response.json();
         console.error('Error response:', errorData);
+        logActivity(endpoint === 'like' ? 'comment_like' : 'comment_unlike', { commentId, status: 'fail', statusCode: response.status });
         
         // Nếu API lỗi, rollback UI
         if (isLiked) {
@@ -727,6 +734,7 @@ const BlogDetail: React.FC = () => {
 
       if (response.ok) {
         showNotification('success', 'Cập nhật bình luận thành công!');
+        logActivity('comment_edit', { commentId });
         setEditingCommentId(null);
         setEditContent('');
         await fetchComments();
@@ -745,6 +753,7 @@ const BlogDetail: React.FC = () => {
           }
         }
         showNotification('error', errorMessage);
+        logActivity('comment_edit', { commentId, status: 'fail', statusCode: response.status });
       }
     } catch (err) {
       console.error('Failed to edit comment:', err);
@@ -770,6 +779,7 @@ const BlogDetail: React.FC = () => {
 
       if (response.ok) {
         showNotification('success', 'Xóa bình luận thành công!');
+        logActivity('comment_delete', { commentId });
         await fetchComments();
       } else {
         const errorData = await response.text();
@@ -786,6 +796,7 @@ const BlogDetail: React.FC = () => {
           }
         }
         showNotification('error', errorMessage);
+        logActivity('comment_delete', { commentId, status: 'fail', statusCode: response.status });
       }
     } catch (err) {
       console.error('Failed to delete comment:', err);
@@ -853,6 +864,23 @@ const BlogDetail: React.FC = () => {
         day: '2-digit',
         month: 'long',
         year: 'numeric'
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  const formatDateTime = (dateString: string): string => {
+    try {
+      return new Date(dateString).toLocaleString('vi-VN', {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
       });
     } catch {
       return dateString;
@@ -1232,7 +1260,7 @@ const BlogDetail: React.FC = () => {
                       )}
                     </div>
                     <div className="blog-comment-date">
-                      {formatDate(comment.ngayBinhLuan)}
+                      {formatDateTime(comment.ngayBinhLuan)}
                     </div>
                   </div>
                   
@@ -1458,7 +1486,7 @@ const BlogDetail: React.FC = () => {
                               )}
                             </div>
                             <div className="blog-comment-date">
-                              {formatDate(reply.ngayBinhLuan)}
+                              {formatDateTime(reply.ngayBinhLuan)}
                             </div>
                           </div>
                           

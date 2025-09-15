@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { loginApi, LoginForm } from '../../services/authService';
+import { logActivity } from '../../services/activityClient';
 import { useAuth } from '../AuthContext';
 import { useNotification } from '../NotificationContext';
 import '../../styles/Auth.css';
@@ -95,6 +96,8 @@ const Login: React.FC = () => {
       if (response.success) {
         // Store the response with login function
         authLogin(response);
+        // activity log
+        logActivity('auth_login_success', { email: formData.email });
         
         // Create success message
         const successMessage = 'Đăng nhập thành công!';
@@ -126,6 +129,7 @@ const Login: React.FC = () => {
         // SỬA Ở ĐÂY: lấy message từ response
         setError(response.message || 'Đăng nhập thất bại, hãy kiểm tra lại thông tin email hoặc mật khẩu');
         antdMessage.error(response.message || 'Đăng nhập thất bại, hãy kiểm tra lại thông tin email hoặc mật khẩu');
+        logActivity('auth_login_fail', { email: formData.email, message: response.message });
       }
     } catch (err: any) {
       // Xử lý lỗi từ API response
@@ -142,6 +146,7 @@ const Login: React.FC = () => {
         setError('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.');
         antdMessage.error('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.');
       }
+      logActivity('auth_login_fail', { email: formData.email, error: err?.message || 'unknown' });
       console.error(err);
     } finally {
       setLoading(false);
@@ -225,6 +230,7 @@ const Login: React.FC = () => {
         
         // Set the firebase user
         setFirebaseUser(userCredential.user);
+        logActivity('auth_social_login_success', { provider, email: userCredential.user.email });
         
         // Show success notification
         antdMessage.success(`Đăng nhập thành công với ${provider}!`);
@@ -239,6 +245,7 @@ const Login: React.FC = () => {
       }
     } catch (error: any) {
       console.error(`Lỗi đăng nhập với ${provider}:`, error);
+      logActivity('auth_social_login_fail', { provider, error: error?.message || 'unknown' });
       
       // Handle account-exists-with-different-credential error
       if (error.code === 'auth/account-exists-with-different-credential') {
