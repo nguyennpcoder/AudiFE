@@ -489,7 +489,7 @@ const Dashboard: React.FC = () => {
           <>
             <div style={{ padding: '0 32px 24px 32px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between' }}>
-                <Title level={3} style={{ margin: 0, fontWeight: 700, fontSize: 24, color: '#222', whiteSpace: 'nowrap' }}>
+                <Title level={3} style={{ margin: 0, fontWeight: 700, fontSize: 24, color: '#222', whiteSpace: 'nowrap', marginTop: -15 }}>
                   Audi Dashboard
                 </Title>
               </div>

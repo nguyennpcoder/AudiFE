@@ -66,6 +66,14 @@ interface HinhAnhTheoBanhXe {
   viTri: number;
 }
 
+// Màu sắc theo API
+interface MauSacApi {
+  id: number;
+  ten: string;
+  maHex?: string;
+  giaThem?: number;
+}
+
 // Khai báo kiểu dữ liệu cho màn hình
 interface ProductsScreenState {
   dongXeList: DongXe[];
@@ -95,6 +103,9 @@ interface ProductsScreenState {
   showBanhXeModal: boolean;
   selectedBanhXe: BanhXe | null;
   newBanhXeImage: HinhAnhTheoBanhXe;
+  availableColorsApi: MauSacApi[];
+  selectedColorId: number | 'all';
+  colorImages: any[];
 }
 
 // Khai báo hằng số URL từ biến môi trường
@@ -159,6 +170,9 @@ const ProductManagement: React.FC = () => {
       loaiHinh: 'banh_xe',
       viTri: 0,
     },
+    availableColorsApi: [],
+    selectedColorId: 'all',
+    colorImages: [],
   });
   
   // Add a new state for tracking newly added images at the top of your component, near other state declarations
@@ -172,6 +186,21 @@ const ProductManagement: React.FC = () => {
 
   // Add this state near the top of the component, after other state declarations
   const [selectedImageType, setSelectedImageType] = useState<string>('noi_that');
+  // Lựa chọn kiểu hiển thị ảnh và màu (chỉ ảnh view/filter, không ảnh upload)
+  const [displayImageType, setDisplayImageType] = useState<'all' | 'ngoai_that' | 'noi_that'>('all');
+  const [selectedColor, setSelectedColor] = useState<string>('all');
+  // Bộ lọc màu cho phần bánh xe (đã hợp nhất theo selectedColorId)
+  // Danh sách màu từ API cho mẫu xe đang mở
+  const [availableColorsApi, setAvailableColorsApi] = useState<MauSacApi[]>([]);
+  const [availableInteriorColorsApi, setAvailableInteriorColorsApi] = useState<MauSacApi[]>([]);
+  // Chọn màu cho ngoại thất (ảnh sản phẩm và bánh xe)
+  const [selectedExteriorColorId, setSelectedExteriorColorId] = useState<number | 'all'>('all');
+  const [colorImagesExterior, setColorImagesExterior] = useState<any[]>([]);
+  // Chọn màu cho nội thất (độc lập với màu xe)
+  const [selectedInteriorColorId, setSelectedInteriorColorId] = useState<number | 'all'>('all');
+  const [colorImagesInterior, setColorImagesInterior] = useState<any[]>([]);
+  // Khi người dùng đã chọn màu nội thất cụ thể, khóa đồng bộ từ màu xe
+  const [interiorColorLocked, setInteriorColorLocked] = useState<boolean>(false);
 
   const handleLogout = () => {
     logout();
@@ -576,13 +605,15 @@ const ProductManagement: React.FC = () => {
   const handleShowEditModal = async (product: MauXe, edit: boolean) => {
     try {
       setState(prev => ({ ...prev, isLoading: true }));
-      
       // Lấy thông tin hình ảnh sản phẩm
       const productImages = await fetchProductImages(product.id);
-      
       // Lấy hình ảnh bánh xe
       await fetchBanhXeImages(product.id);
-      
+      // Lấy danh sách màu theo API
+      await Promise.all([
+        fetchColorsByProduct(product.id),
+        fetchInteriorColorsByProduct(product.id)
+      ]);
       setState(prev => ({ 
         ...prev, 
         showEditModal: true,
@@ -590,6 +621,13 @@ const ProductManagement: React.FC = () => {
         productImages: productImages || [],
         isLoading: false
       }));
+      // Reset bộ lọc về mặc định: hiển thị tất cả ảnh và không lọc theo màu
+      setSelectedExteriorColorId('all');
+      setColorImagesExterior([]);
+      setSelectedInteriorColorId('all');
+      setColorImagesInterior([]);
+      setInteriorColorLocked(false);
+      setDisplayImageType('all');
       setIsEditMode(edit);
     } catch (error) {
       setState(prev => ({ 
@@ -625,6 +663,14 @@ const ProductManagement: React.FC = () => {
       setNewlyAddedImages([]);
     }
     
+    // Reset bộ lọc về mặc định khi đóng modal
+    setSelectedExteriorColorId('all');
+    setColorImagesExterior([]);
+    setSelectedInteriorColorId('all');
+    setColorImagesInterior([]);
+    setInteriorColorLocked(false);
+    setDisplayImageType('all');
+
     setState(prev => ({ 
       ...prev, 
       showEditModal: false,
@@ -1029,6 +1075,72 @@ const ProductManagement: React.FC = () => {
   // Thêm state mới để lưu ảnh Base64
   const [imageDataMap, setImageDataMap] = useState<Record<string, string>>({});
 
+  // Helper: remove Vietnamese diacritics
+  const normalizeText = (s: string): string => {
+    return (s || '')
+      .normalize('NFD')
+      .replace(/\p{Diacritic}+/gu, '')
+      .toLowerCase();
+  };
+
+  // Hiển thị tên màu chuẩn tiếng Việt
+  const displayColorName = (key: string): string => {
+    const labels: Record<string, string> = {
+      trang: 'Trắng', den: 'Đen', xam: 'Xám', bac: 'Bạc', do: 'Đỏ',
+      xanh: 'Xanh dương', luc: 'Xanh lá', vang: 'Vàng', cam: 'Cam', nau: 'Nâu',
+      be: 'Be', tim: 'Tím', hong: 'Hồng', than: 'Than', xam_dam: 'Xám đậm',
+      xam_nhat: 'Xám nhạt', xanh_den: 'Xanh đen', khac_mau: 'Khác'
+    };
+    return labels[key] || key;
+  };
+
+  // Suy luận màu từ tên file/đường dẫn, bao phủ nhiều mã màu của Audi (có dấu/không dấu)
+  const inferColorName = (path: string): string => {
+    const raw = (path || '').toLowerCase();
+    const p = normalizeText(raw);
+
+    // Tập từ khóa cho từng nhóm màu
+    const colorTokens: Array<{ key: string; tokens: string[] }> = [
+      { key: 'trang', tokens: ['trang', 'white', 'ibis', 'glacier', 'ice', 'suzuka-?gray', 'suzuka-gray'] },
+      { key: 'den', tokens: ['den', 'black', 'brilliant', 'mythos'] },
+      { key: 'xam', tokens: ['xam', 'gray', 'grey', 'nardo', 'quantum', 'daytona', 'titanium', 'graphite', 'anthracite'] },
+      { key: 'xam_dam', tokens: ['anthracite', 'graphite', 'gunmetal', 'charcoal'] },
+      { key: 'xam_nhat', tokens: ['light-?gray', 'pearl-?gray'] },
+      { key: 'bac', tokens: ['bac', 'silver', 'florett', 'satin'] },
+      { key: 'do', tokens: ['do', 'red', 'tango', 'misano', 'toronado'] },
+      { key: 'xanh', tokens: ['xanh', 'blue', 'navarra', 'sepang', 'turbo', 'ultra', 'cobalt', 'coban'] },
+      { key: 'xanh_den', tokens: ['night-?blue', 'dark-?blue', 'deep-?blue'] },
+      { key: 'luc', tokens: ['luc', 'green', 'district', 'olive'] },
+      { key: 'vang', tokens: ['vang', 'yellow', 'python', 'vegas'] },
+      { key: 'cam', tokens: ['cam', 'orange', 'pulse'] },
+      { key: 'nau', tokens: ['nau', 'brown', 'mocha', 'cocoa', 'coffee', 'copper'] },
+      { key: 'be', tokens: ['be', 'beige', 'sand'] },
+      { key: 'tim', tokens: ['tim', 'purple', 'violet'] },
+      { key: 'hong', tokens: ['hong', 'pink', 'rose'] },
+    ];
+
+    for (const { key, tokens } of colorTokens) {
+      for (const t of tokens) {
+        const re = new RegExp(`(^|[-_/ ])${t}([-. _/]|$)`);
+        if (re.test(p)) return key;
+        if (re.test(raw)) return key; // phòng khi token có dấu
+      }
+    }
+    return 'khac_mau';
+  };
+
+  // Danh sách màu khả dụng từ ảnh hiện có của sản phẩm đang xem/sửa
+  const availableColors: string[] = React.useMemo(() => {
+    const setColors = new Set<string>();
+    state.productImages.forEach(img => {
+      const c = inferColorName(img.duongDanAnh || '');
+      if (c && c !== 'khac_mau') setColors.add(c);
+    });
+    const arr = Array.from(setColors);
+    if (arr.length === 0) return [];
+    return arr.sort();
+  }, [state.productImages]);
+
   // Trong useEffect hoặc khi lấy được danh sách ảnh
   useEffect(() => {
     const loadImagesAsBase64 = async () => {
@@ -1243,6 +1355,45 @@ const ProductManagement: React.FC = () => {
     }
   };
 
+  // Lấy hình ảnh bánh xe theo MÀU (áp dụng cho tất cả bánh xe của mẫu)
+  const fetchBanhXeImagesForColor = async (mauXeId: number, colorId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      // Danh sách bánh xe theo mẫu
+      const wheelsRes = await fetch(`http://localhost:8080/api/v1/mau-xe/${mauXeId}/banh-xe`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!wheelsRes.ok) throw new Error(`Không thể tải danh sách bánh xe: ${wheelsRes.status}`);
+      const wheels = await wheelsRes.json();
+
+      const allImages: HinhAnhTheoBanhXe[] = [];
+      for (const w of wheels) {
+        try {
+          const imgRes = await fetch(`http://localhost:8080/api/v1/mau-xe/${mauXeId}/banh-xe/${w.id}/hinh-anh/mau-sac/${colorId}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          if (imgRes.ok) {
+            const imgs = await imgRes.json();
+            allImages.push(...imgs);
+          }
+        } catch (e) {
+          console.warn('Fetch wheel images by color error:', e);
+        }
+      }
+      setState(prev => ({ ...prev, banhXeImages: allImages }));
+    } catch (error) {
+      console.error('Error fetching wheel images by color:', error);
+    }
+  };
+
   // Cập nhật useEffect để fetch bánh xe
   useEffect(() => {
     checkServerConnection();
@@ -1250,6 +1401,36 @@ const ProductManagement: React.FC = () => {
     fetchCarModels();
     fetchBanhXe(); // Thêm fetch bánh xe
   }, []);
+
+  // Đồng bộ ảnh theo màu cho toàn bộ khu vực (ảnh sản phẩm + bánh xe)
+  useEffect(() => {
+    if (!state.currentProduct) return;
+    if (selectedExteriorColorId === 'all') {
+      // Ảnh sản phẩm dùng danh sách tổng; bánh xe trả về toàn bộ
+      fetchBanhXeImages(state.currentProduct.id);
+    } else if (typeof selectedExteriorColorId === 'number') {
+      fetchBanhXeImagesForColor(state.currentProduct.id, selectedExteriorColorId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedExteriorColorId, state.currentProduct?.id]);
+
+  // Đồng bộ ảnh nội thất theo màu ngoại thất nếu chưa khóa lựa chọn nội thất
+  useEffect(() => {
+    const syncInteriorIfUnlocked = async () => {
+      if (!state.currentProduct) return;
+      if (interiorColorLocked) return;
+      if (selectedExteriorColorId === 'all') {
+        setColorImagesInterior([]);
+        return;
+      }
+      if (typeof selectedExteriorColorId === 'number') {
+        const data = await fetchImagesByColorRaw(state.currentProduct.id, selectedExteriorColorId);
+        setColorImagesInterior((data || []).filter((d: any) => d.loaiHinh === 'noi_that'));
+      }
+    };
+    syncInteriorIfUnlocked();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedExteriorColorId, state.currentProduct?.id, interiorColorLocked]);
 
   // Thêm section hiển thị bánh xe và hình ảnh trong modal edit
   const renderBanhXeSection = () => {
@@ -1263,12 +1444,12 @@ const ProductManagement: React.FC = () => {
     return (
       <div className="form-group">
         <label>Bánh xe và hình ảnh</label>
+        
         <div className="banh-xe-container">
           {banhXeOfMauXe.length > 0 ? (
             banhXeOfMauXe.map((banhXe) => {
-              const banhXeImages = state.banhXeImages.filter(
-                img => img.idBanhXe === banhXe.id && img.idMau === state.currentProduct!.id
-              );
+              const banhXeImages = state.banhXeImages
+                .filter(img => img.idBanhXe === banhXe.id && img.idMau === state.currentProduct!.id);
               
               return (
                 <div key={banhXe.id} className="banh-xe-item">
@@ -1458,6 +1639,106 @@ const ProductManagement: React.FC = () => {
     } catch (error) {
       console.error("Error deleting banh xe image:", error);
       message.error('Có lỗi xảy ra khi xóa hình ảnh bánh xe');
+    }
+  };
+
+  // Lấy danh sách màu của mẫu xe từ API
+  const fetchColorsByProduct = async (productId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${BACKEND_URL}/api/v1/mau-sac/mau-xe/${productId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!res.ok) throw new Error('Không thể tải danh sách màu');
+      const data = await res.json();
+      setAvailableColorsApi(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.warn('Fetch colors error:', e);
+      setAvailableColorsApi([]);
+    }
+  };
+
+  // Lấy danh sách màu NỘI THẤT từ API (bảng nội thất)
+  const fetchInteriorColorsByProduct = async (productId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${BACKEND_URL}/api/v1/noi-that/mau-xe/${productId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!res.ok) throw new Error('Không thể tải danh sách màu nội thất');
+      const data = await res.json();
+      setAvailableInteriorColorsApi(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.warn('Fetch interior colors error:', e);
+      setAvailableInteriorColorsApi([]);
+    }
+  };
+
+  // Lấy ảnh theo màu từ API
+  const fetchImagesByColor = async (productId: number, colorId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${BACKEND_URL}/api/v1/hinh-anh-theo-mau/mau-xe/${productId}/mau-sac/${colorId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!res.ok) throw new Error('Không thể tải ảnh theo màu');
+      const data = await res.json();
+      setColorImagesExterior(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.warn('Fetch color images error:', e);
+      setColorImagesExterior([]);
+    }
+  };
+
+  // Ảnh theo màu cho NỘI THẤT
+  const fetchInteriorImagesByColor = async (productId: number, interiorColorId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${BACKEND_URL}/api/v1/hinh-anh-noi-that/mau-xe/${productId}/noi-that/${interiorColorId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!res.ok) throw new Error('Không thể tải ảnh màu nội thất');
+      const data = await res.json();
+      setColorImagesInterior(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.warn('Fetch interior color images error:', e);
+      setColorImagesInterior([]);
+    }
+  };
+
+  // Lấy ảnh theo màu (raw) trả về dữ liệu để dùng cho exterior/interior riêng
+  const fetchImagesByColorRaw = async (productId: number, colorId: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${BACKEND_URL}/api/v1/hinh-anh-theo-mau/mau-xe/${productId}/mau-sac/${colorId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!res.ok) throw new Error('Không thể tải ảnh theo màu');
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    } catch (e) {
+      console.warn('Fetch color images (raw) error:', e);
+      return [];
     }
   };
 
@@ -2349,18 +2630,50 @@ const ProductManagement: React.FC = () => {
                   </p>
                 </div>
                 
-                {/* Thêm section bánh xe trước section hình ảnh sản phẩm */}
-                {renderBanhXeSection()}
                 
                 <div className="form-group">
                   <label>Hình ảnh sản phẩm</label>
-                  <div className="product-images-container">
-                    {state.productImages.length > 0 ? (
-                      state.productImages.map((image, index) => {
-                        return (
+
+                  {/* Ngoại thất */}
+                  <div style={{ margin: '8px 0 16px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                      <span style={{ color: '#777', fontSize: 14, marginRight: 4 }}>Màu ngoại thất:</span>
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedExteriorColorId('all'); setColorImagesExterior([]); }}
+                        style={{
+                          padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb',
+                          background: selectedExteriorColorId === 'all' ? '#1890ff' : '#fafbfc',
+                          color: selectedExteriorColorId === 'all' ? '#fff' : '#333', fontWeight: 600,
+                          cursor: 'pointer'
+                        }}
+                      >Tất cả</button>
+                      {availableColorsApi.map(c => (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => {
+                            if (state.currentProduct) {
+                              setSelectedExteriorColorId(c.id);
+                              fetchImagesByColor(state.currentProduct.id, c.id);
+                            }
+                          }}
+                          title={c.ten}
+                          style={{
+                            padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb',
+                            background: selectedExteriorColorId === c.id ? '#1890ff' : '#fafbfc',
+                            color: selectedExteriorColorId === c.id ? '#fff' : '#333', fontWeight: 600,
+                            textTransform: 'none', cursor: 'pointer'
+                          }}
+                        >{c.ten}</button>
+                      ))}
+                    </div>
+                    <div className="product-images-container" style={{ marginTop: 8 }}>
+                      {(selectedExteriorColorId === 'all' ? state.productImages : colorImagesExterior)
+                        .filter((img: any) => img.loaiHinh === 'ngoai_that')
+                        .map((image: any, index: number) => (
                           <div key={image.id} className="product-image-item">
                             <div className="image-wrapper">
-                              {/* Nút xóa ảnh chỉ hiển thị khi edit */}
                               {isEditMode && (
                                 <button 
                                   className="image-delete-btn" 
@@ -2379,16 +2692,81 @@ const ProductManagement: React.FC = () => {
                             </div>
                             <div className="image-type">{image.loaiHinh || 'Unknown'}</div>
                           </div>
-                        );
-                      })
-                    ) : (
-                      <div className="no-images">Không có hình ảnh</div>
-                    )}
+                        ))}
+                      {state.productImages.filter((i: any) => i.loaiHinh === 'ngoai_that').length === 0 && (
+                        <div className="no-images">Không có hình ảnh</div>
+                      )}
+                    </div>
                   </div>
-                  
+
+                  {/* Nội thất - độc lập, có thể khóa theo lựa chọn riêng */}
+                  <div style={{ margin: '16px 0 0' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                      <span style={{ color: '#777', fontSize: 14, marginRight: 4 }}>Màu nội thất:</span>
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedInteriorColorId('all'); setColorImagesInterior([]); setInteriorColorLocked(false); }}
+                        style={{
+                          padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb',
+                          background: selectedInteriorColorId === 'all' ? '#1890ff' : '#fafbfc',
+                          color: selectedInteriorColorId === 'all' ? '#fff' : '#333', fontWeight: 600,
+                          cursor: 'pointer'
+                        }}
+                      >Tất cả</button>
+                      {availableInteriorColorsApi.map(c => (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={async () => {
+                            if (!state.currentProduct) return;
+                            setInteriorColorLocked(true);
+                            setSelectedInteriorColorId(c.id);
+                            await fetchInteriorImagesByColor(state.currentProduct.id, c.id);
+                          }}
+                          title={c.ten}
+                          style={{
+                            padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb',
+                            background: selectedInteriorColorId === c.id ? '#1890ff' : '#fafbfc',
+                            color: selectedInteriorColorId === c.id ? '#fff' : '#333', fontWeight: 600,
+                            textTransform: 'none', cursor: 'pointer'
+                          }}
+                        >{c.ten}</button>
+                      ))}
+                    </div>
+                    <div className="product-images-container" style={{ marginTop: 8 }}>
+                      {(selectedInteriorColorId === 'all' ? state.productImages : colorImagesInterior)
+                        .filter((img: any) => img.loaiHinh === 'noi_that')
+                        .map((image: any, index: number) => (
+                          <div key={image.id} className="product-image-item">
+                            <div className="image-wrapper">
+                              {isEditMode && (
+                                <button 
+                                  className="image-delete-btn" 
+                                  onClick={() => deleteProductImage(image.id)}
+                                  title="Xóa hình ảnh"
+                                >
+                                  <i className="fas fa-times"></i>
+                                </button>
+                              )}
+                              <ImageWithFallback 
+                                src={image.duongDanAnh}
+                                alt={`${state.currentProduct?.tenMau || 'Product'} ${index + 1}`}
+                                fallbackSrc={FALLBACK_IMAGE}
+                                imageType={image.loaiHinh}
+                              />
+                            </div>
+                            <div className="image-type">{image.loaiHinh || 'Unknown'}</div>
+                          </div>
+                        ))}
+                      {state.productImages.filter((i: any) => i.loaiHinh === 'noi_that').length === 0 && (
+                        <div className="no-images">Không có hình ảnh</div>
+                      )}
+                    </div>
+                  </div>
+
                   {/* CHỈ HIỂN THỊ KHI EDIT */}
                   {isEditMode && (
-                    <div className="upload-image-section">
+                    <div className="upload-image-section" style={{ marginTop: 16 }}>
                       <div style={{ 
                         display: 'flex', 
                         gap: 12, 
@@ -2404,13 +2782,12 @@ const ProductManagement: React.FC = () => {
                             border: '1px solid #e5e7eb',
                             fontSize: 15,
                             background: '#fafbfc',
-                            minWidth: 530, // Thu hẹp từ 150px xuống 120px
-                            maxWidth: 530, // Thêm maxWidth để đảm bảo không mở rộng
+                            minWidth: 530,
+                            maxWidth: 530,
                           }}
                         >
                           <option value="noi_that">Nội thất</option>
                           <option value="ngoai_that">Ngoại thất</option>
-                          {/* Gỡ bỏ Interior và Exterior */}
                         </select>
                         
                         <input 
@@ -2444,17 +2821,16 @@ const ProductManagement: React.FC = () => {
                           alignItems: 'center',
                           gap: 8,
                           boxShadow: '0 2px 8px 0 rgba(24,144,255,0.10)',
-                          whiteSpace: 'nowrap', // Đảm bảo text không xuống dòng
+                          whiteSpace: 'nowrap',
                         }}>
                           <i className="fas fa-upload"></i> Tải lên hình ảnh mới
                         </label>
                       </div>
-                      
-                     
-                      
                     </div>
                   )}
                 </div>
+                
+                {renderBanhXeSection()}
                 
                 <div className="form-actions">
                   <button 

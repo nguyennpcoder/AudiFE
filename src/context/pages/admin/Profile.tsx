@@ -1,7 +1,25 @@
 // frontend/audi/src/context/pages/admin/Profile.tsx
-import React, { useEffect, useState } from 'react';
-import { Card, Avatar, Typography, Tag, Button, List, Drawer, Input } from 'antd';
-import { UserOutlined, MailOutlined, PhoneOutlined, SafetyCertificateOutlined, EditOutlined } from '@ant-design/icons';
+import React, { useEffect, useRef, useState } from 'react';
+import { Card, Avatar, Typography, Tag, Button, List, Input, Space, Divider, Badge } from 'antd';
+import { 
+  UserOutlined, 
+  MailOutlined, 
+  PhoneOutlined, 
+  SafetyCertificateOutlined, 
+  EditOutlined,
+  MessageOutlined,
+  PlusOutlined,
+  SettingOutlined,
+  HeartOutlined,
+  CommentOutlined,
+  ShareAltOutlined,
+  EllipsisOutlined,
+  SendOutlined,
+  SmileOutlined,
+  PictureOutlined,
+  VideoCameraOutlined,
+  CheckCircleOutlined
+} from '@ant-design/icons';
 import { useAuth } from '../../AuthContext';
 import { fetchUserProfile, buildAvatarUrl } from '../../../services/authService';
 
@@ -50,6 +68,10 @@ const Profile: React.FC = () => {
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   const [activeThread, setActiveThread] = useState<any | null>(null);
   const [threadInput, setThreadInput] = useState<string>('');
+  const [isTyping, setIsTyping] = useState<Record<string, boolean>>({});
+  const [onlineUsers, setOnlineUsers] = useState<Record<string, boolean>>({});
+  const [darkMode, setDarkMode] = useState<boolean>(false);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const getProfile = async () => {
@@ -111,11 +133,11 @@ const Profile: React.FC = () => {
     return () => { controller.abort(); clearInterval(iv); };
   }, []);
 
-  // Fetch real chat thread when drawer opens
+  // Fetch real chat thread when a room is opened
   useEffect(() => {
     const abort = new AbortController();
     async function loadThread() {
-      if (!isChatOpen || !activeThread) return;
+      if (!activeThread) return;
       try {
         const room = activeThread.room || 'team';
         const res = await fetch(`/api/v1/chat/${room}?page=0&size=30`, {
@@ -141,7 +163,14 @@ const Profile: React.FC = () => {
     loadThread();
     const iv = setInterval(loadThread, 4000);
     return () => { abort.abort(); clearInterval(iv); };
-  }, [isChatOpen, activeThread?.id, activeThread?.room]);
+  }, [activeThread?.id, activeThread?.room]);
+
+  // Auto scroll to bottom on new messages
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [activeThread?.messages?.length]);
 
   // Avatar
   const getAvatar = () => {
@@ -283,10 +312,10 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
-      {/* Team chat nội bộ */}
+      {/* Team chat nội bộ – Instagram style two-pane */}
       <Card
-        title={<span style={{ color: '#0f172a', fontWeight: 800 }}>Team chat nội bộ</span>} 
-        styles={{ header: { borderBottom: 'none', padding: '12px 16px' }, body: { padding: '8px 16px 16px 16px', textAlign: 'left', marginLeft: -600 } }}
+        title={<span style={{ color: '#0f172a', fontWeight: 800 }}>Team chat nội bộ</span>}
+        styles={{ header: { borderBottom: 'none', padding: '12px 16px' }, body: { padding: 0 } }}
         style={{
           maxWidth: 1100,
           width: '90vw',
@@ -296,159 +325,181 @@ const Profile: React.FC = () => {
           boxShadow: '0 8px 32px rgba(34, 197, 94, 0.08)'
         }}
       >
-        <List
-          style={{ paddingLeft: 0, margin: 0, textAlign: 'left' }}
-          itemLayout="horizontal"
-          dataSource={([
-            { id: 'room-team', sender: 'Audi Team', avatar: '/avatar-default.png', room: 'team' },
-            { id: 'room-support', sender: 'Audi Support', avatar: '/avatar-default.png', room: 'support' },
-            { id: 'room-sales', sender: 'Audi Sales', avatar: '/avatar-default.png', room: 'sales' }
-          ].map((it) => ({
-            ...it,
-            createdAt: latestByRoom[it.room]?.createdAt || '',
-            content: latestByRoom[it.room]?.content || '— Chưa có tin nhắn —'
-          })))}
-          renderItem={(item: any) => {
-            const createdAt = item.createdAt || '';
-            const sender = item.sender;
-            const avatar = item.avatar || '/avatar-default.png';
-            const content = item.content || '';
-            const unread = unreadByRoom[item.room] === true;
-            return (
-              <List.Item
-                onClick={() => {
-                  const room = item.room;
-                  setActiveThread({
-                    id: item.id,
-                    title: sender,
-                    room,
-                    participants: [sender, profile?.fullName || 'Bạn'],
-                    messages: [
-                      { id: `${item.id}-1`, from: sender, text: content, time: createdAt, avatar },
-                    ]
-                  });
-                  setIsChatOpen(true);
-                  setUnreadByRoom(prev => ({ ...prev, [room]: false }));
-                }}
-                style={{ width: '100%', padding: '12px 0', margin: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', cursor: 'pointer' }}
-              >
-                <div style={{ display: 'flex', gap: 12, width: '100%', justifyContent: 'flex-start' }}>
-                  <div style={{ position: 'relative' }}>
-                    <Avatar src={avatar} />
-                    {unread && (
-                      <span style={{ position: 'absolute', right: -2, top: -2, width: 10, height: 10, borderRadius: '50%', background: '#1890ff' }} />
-                    )}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: unread ? 700 as any : 600 }}>
-                      <span style={{ color: unread ? '#0f172a' : '#34495e' }}>{sender}</span>
-                      {createdAt && (
-                        <span style={{ color: '#888', fontSize: 12, marginLeft: 8 }}>{createdAt}</span>
-                      )}
-                    </div>
-                    <div style={{
-                      marginTop: 4,
-                      whiteSpace: 'pre-wrap',
-                      overflowWrap: 'anywhere',
-                      wordBreak: 'break-word',
-                      lineHeight: 1.6,
-                      textAlign: 'left',
-                      color: unread ? '#0f172a' : '#64748b',
-                      fontWeight: unread ? 600 : 400
-                    }}>
-                      {content}
-                    </div>
-                  </div>
-                </div>
-              </List.Item>
-            );
-          }}
-        />
-      </Card>
-      <Drawer
-        title={activeThread ? `Trò chuyện với ${activeThread.title}` : 'Trò chuyện'}
-        placement="right"
-        width={420}
-        open={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        styles={{ header: { borderBottom: '1px solid #eee' } }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <div style={{ flex: 1, overflow: 'auto', paddingRight: 8 }}>
-            {(activeThread?.messages || []).map((msg: any) => {
-              const isMine = (profile?.fullName || 'Bạn') === msg.from;
-              return (
-                <div key={msg.id} style={{ display: 'flex', justifyContent: isMine ? 'flex-end' : 'flex-start', marginBottom: 12 }}>
-                  {!isMine && (
-                    <Avatar
-                      src={msg.avatar}
-                      style={{ marginRight: 8 }}
-                      onError={() => true}
-                    />
-                  )}
-                  <div
+        <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', minHeight: 520 }}>
+          {/* Sidebar (threads) */}
+          <div style={{ borderRight: '1px solid #eef2f7', padding: 16 }}>
+            <List
+              style={{ paddingLeft: 0, margin: 0, textAlign: 'left' }}
+              itemLayout="horizontal"
+              dataSource={([
+                { id: 'room-team', sender: 'Audi Team', avatar: '/avatar-default.png', room: 'team' },
+                { id: 'room-support', sender: 'Audi Support', avatar: '/avatar-default.png', room: 'support' },
+                { id: 'room-sales', sender: 'Audi Sales', avatar: '/avatar-default.png', room: 'sales' }
+              ].map((it) => ({
+                ...it,
+                createdAt: latestByRoom[it.room]?.createdAt || '',
+                content: latestByRoom[it.room]?.content || '— Chưa có tin nhắn —'
+              })))}
+              renderItem={(item: any) => {
+                const createdAt = item.createdAt || '';
+                const sender = item.sender;
+                const avatar = item.avatar || '/avatar-default.png';
+                const content = item.content || '';
+                const unread = unreadByRoom[item.room] === true;
+                const selected = activeThread?.room === item.room;
+                return (
+                  <List.Item
+                    onClick={() => {
+                      const room = item.room;
+                      setActiveThread({
+                        id: item.id,
+                        title: sender,
+                        room,
+                        participants: [sender, profile?.fullName || 'Bạn'],
+                        messages: [
+                          { id: `${item.id}-1`, from: sender, text: content, time: createdAt, avatar },
+                        ]
+                      });
+                      setIsChatOpen(true);
+                      setUnreadByRoom(prev => ({ ...prev, [room]: false }));
+                    }}
                     style={{
-                      background: isMine ? '#e3f2fd' : '#f1f5f9',
-                      color: '#0f172a',
-                      padding: '8px 12px',
+                      width: '100%',
+                      padding: '12px 8px',
+                      margin: '4px 0',
                       borderRadius: 12,
-                      maxWidth: 280,
-                      boxShadow: '0 2px 6px rgba(0,0,0,0.06)'
+                      background: selected ? '#f8fafc' : 'transparent',
+                      cursor: 'pointer'
                     }}
                   >
-                    <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>{msg.time}</div>
-                    <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.text}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-            <Input.TextArea
-              value={threadInput}
-              onChange={(e) => setThreadInput(e.target.value)}
-              autoSize={{ minRows: 1, maxRows: 4 }}
-              placeholder="Nhập tin nhắn..."
-            />
-            <Button
-              type="primary"
-              disabled={!threadInput.trim()}
-              onClick={() => {
-                if (!activeThread) return;
-                const newMsg = threadInput.trim();
-                const payload = {
-                  room: activeThread.room || 'team',
-                  senderId: user?.userId,
-                  senderName: profile?.fullName || 'Bạn',
-                  senderAvatar: profile?.avatar || '',
-                  content: newMsg
-                };
-                fetch('/api/v1/chat', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
-                  },
-                  body: JSON.stringify(payload)
-                }).catch(() => {});
-                setActiveThread({
-                  ...activeThread,
-                  messages: [...(activeThread.messages || []), {
-                    id: `${activeThread.id}-${Date.now()}`,
-                    from: profile?.fullName || 'Bạn',
-                    text: newMsg,
-                    time: new Date().toLocaleString('vi-VN'),
-                    avatar: buildAvatarUrl(profile?.avatar)
-                  }]
-                });
-                setThreadInput('');
+                    <div style={{ display: 'flex', gap: 12, width: '100%', justifyContent: 'flex-start' }}>
+                      <div style={{ position: 'relative' }}>
+                        <Avatar src={avatar} />
+                        {unread && (
+                          <span style={{ position: 'absolute', right: -2, top: -2, width: 10, height: 10, borderRadius: '50%', background: '#1890ff' }} />
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: unread ? 700 as any : 600, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ color: unread ? '#0f172a' : '#34495e' }}>{sender}</span>
+                          {createdAt && (
+                            <span style={{ color: '#94a3b8', fontSize: 12, marginLeft: 8 }}>{createdAt}</span>
+                          )}
+                        </div>
+                        <div style={{
+                          marginTop: 4,
+                          whiteSpace: 'pre-wrap',
+                          overflowWrap: 'anywhere',
+                          wordBreak: 'break-word',
+                          lineHeight: 1.6,
+                          textAlign: 'left',
+                          color: unread ? '#0f172a' : '#64748b',
+                          fontWeight: unread ? 600 : 400
+                        }}>
+                          {content}
+                        </div>
+                      </div>
+                    </div>
+                  </List.Item>
+                );
               }}
-            >
-              Gửi
-            </Button>
+            />
+          </div>
+          {/* Conversation */}
+          <div style={{ display: 'flex', flexDirection: 'column', minHeight: 520 }}>
+            {/* Chat header */}
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid #eef2f7', display: 'flex', alignItems: 'center', gap: 12 }}>
+              {activeThread ? (
+                <>
+                  <Avatar src={(activeThread.messages?.[0]?.avatar) || '/avatar-default.png'} />
+                  <div style={{ lineHeight: 1.2 }}>
+                    <div style={{ fontWeight: 700, color: '#0f172a' }}>{activeThread.title}</div>
+                    <div style={{ fontSize: 12, color: '#94a3b8' }}>Nội bộ @admin</div>
+                  </div>
+                </>
+              ) : (
+                <div style={{ fontWeight: 600, color: '#94a3b8' }}>Chọn một cuộc trò chuyện</div>
+              )}
+            </div>
+            {/* Messages */}
+            <div style={{ flex: 1, overflow: 'auto', padding: '16px 16px 8px 16px', background: '#ffffff' }}>
+              {(activeThread?.messages || []).map((msg: any) => {
+                const isMine = (profile?.fullName || 'Bạn') === msg.from;
+                return (
+                  <div key={msg.id} style={{ display: 'flex', justifyContent: isMine ? 'flex-end' : 'flex-start', marginBottom: 12 }}>
+                    {!isMine && (
+                      <Avatar
+                        src={msg.avatar}
+                        style={{ marginRight: 8 }}
+                        onError={() => true}
+                      />
+                    )}
+                    <div
+                      style={{
+                        background: isMine ? '#e3f2fd' : '#f1f5f9',
+                        color: '#0f172a',
+                        padding: '8px 12px',
+                        borderRadius: 18,
+                        maxWidth: 420,
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.06)'
+                      }}
+                    >
+                      <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>{msg.time}</div>
+                      <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.text}</div>
+                    </div>
+                  </div>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+            {/* Composer */}
+            <div style={{ display: 'flex', gap: 8, padding: 12, borderTop: '1px solid #eef2f7' }}>
+              <Input.TextArea
+                value={threadInput}
+                onChange={(e) => setThreadInput(e.target.value)}
+                autoSize={{ minRows: 1, maxRows: 4 }}
+                placeholder="Nhập tin nhắn..."
+              />
+              <Button
+                type="primary"
+                disabled={!threadInput.trim() || !activeThread}
+                onClick={() => {
+                  if (!activeThread) return;
+                  const newMsg = threadInput.trim();
+                  const payload = {
+                    room: activeThread.room || 'team',
+                    senderId: user?.userId,
+                    senderName: profile?.fullName || 'Bạn',
+                    senderAvatar: profile?.avatar || '',
+                    content: newMsg
+                  };
+                  fetch('/api/v1/chat', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+                    },
+                    body: JSON.stringify(payload)
+                  }).catch(() => {});
+                  setActiveThread({
+                    ...activeThread,
+                    messages: [...(activeThread.messages || []), {
+                      id: `${activeThread.id}-${Date.now()}`,
+                      from: profile?.fullName || 'Bạn',
+                      text: newMsg,
+                      time: new Date().toLocaleString('vi-VN'),
+                      avatar: buildAvatarUrl(profile?.avatar)
+                    }]
+                  });
+                  setThreadInput('');
+                }}
+              >
+                Gửi
+              </Button>
+            </div>
           </div>
         </div>
-      </Drawer>
+      </Card>
     </div>
   );
 };

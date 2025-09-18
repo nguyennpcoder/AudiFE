@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     delete axios.defaults.headers.common['Authorization'];
   };
 
-  // First useEffect to validate token and initialize auth state
+  // First useEffect to initialize auth state (optimistic for local sessions)
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -54,21 +54,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setIsValidating(false);
             return;
           }
+            // // Validate token with backend
+            // const isTokenValid = await validateToken(storedToken);
           
-          // Validate token with backend
-          const isTokenValid = await validateToken(storedToken);
-          
-          if (isTokenValid) {
-            // Token is valid, set up authentication
-            setUser(parsedUser);
-            setIsAuthenticated(true);
-            axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
-            console.log('Token validation successful, user authenticated');
-          } else {
-            // Token is invalid, clear everything
-            console.log('Token validation failed, clearing auth data');
-            clearAuthData();
+            // if (isTokenValid) {
+            //   // Token is valid, set up authentication
+            //   setUser(parsedUser);
+            //   setIsAuthenticated(true);
+            //   axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+            //   console.log('Token validation successful, user authenticated');
+            // } else {
+            //   // Token is invalid, clear everything
+            //   console.log('Token validation failed, clearing auth data');
+            //   clearAuthData();
+          // Optimistic hydration: trust localStorage on load.
+          // The axios 401 interceptor will clear auth later if token truly invalid.
+          setUser(parsedUser);
+          setIsAuthenticated(true);
+          axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+          if (!localStorage.getItem('authMode')) {
+            localStorage.setItem('authMode', 'local');
           }
+          console.log('Auth hydrated from localStorage');
         }
       } catch (error) {
         console.error("Error during auth initialization:", error);

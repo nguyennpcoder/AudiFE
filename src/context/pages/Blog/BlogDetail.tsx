@@ -1535,9 +1535,65 @@ const BlogDetail: React.FC = () => {
                           )}
                         </div>
                         
-                        <div className="blog-comment-content reply-content">
-                          {reply.noiDung}
-                        </div>
+                        {/* Hiển thị nội dung reply hoặc form chỉnh sửa giống comment gốc */}
+                        {editingCommentId === reply.id ? (
+                          <div className="blog-comment-edit-form">
+                            <div className="edit-form-header">
+                              <div className="edit-form-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                                </svg>
+                              </div>
+                              <div className="edit-form-title">
+                                <h4>Chỉnh sửa trả lời</h4>
+                                <span className="edit-form-subtitle">Cập nhật nội dung trả lời của bạn</span>
+                              </div>
+                            </div>
+                            <div className="edit-form-content">
+                              <textarea
+                                value={editContent}
+                                onChange={(e) => setEditContent(e.target.value)}
+                                placeholder="Chỉnh sửa trả lời..."
+                                rows={3}
+                                maxLength={1000}
+                                className="edit-form-textarea"
+                              />
+                              <div className="edit-form-character-count">
+                                <span className={`character-count ${editContent.length > 900 ? 'warning' : ''} ${editContent.length > 1000 ? 'error' : ''}`}>
+                                  {editContent.length}/1000
+                                </span>
+                              </div>
+                            </div>
+                            <div className="edit-form-actions">
+                              <button 
+                                onClick={() => handleEditComment(reply.id)}
+                                className={`edit-form-save-btn ${editLoading === reply.id ? 'loading' : ''}`}
+                                disabled={!editContent.trim() || editContent.length > 1000 || editLoading === reply.id}
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" />
+                                </svg>
+                                <span>{editLoading === reply.id ? 'Đang lưu...' : 'Lưu thay đổi'}</span>
+                              </button>
+                              <button 
+                                onClick={() => {
+                                  setEditingCommentId(null);
+                                  setEditContent('');
+                                }}
+                                className="edit-form-cancel-btn"
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                                </svg>
+                                <span>Hủy bỏ</span>
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="blog-comment-content reply-content">
+                            {reply.noiDung}
+                          </div>
+                        )}
                         
                         <div className="blog-comment-actions reply-actions">
                           <button 
