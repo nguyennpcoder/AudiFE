@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { 
+import {
   getAuth, 
   signInWithPopup, 
   GoogleAuthProvider, 
@@ -31,7 +31,14 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+// Guard analytics initialization to avoid runtime errors in unsupported environments
+try {
+  if (typeof window !== 'undefined') {
+    getAnalytics(app);
+  }
+} catch (e) {
+  console.warn('Analytics initialization skipped:', (e as Error)?.message);
+}
 const auth: Auth = getAuth(app);
 
 // Initialize providers
@@ -39,6 +46,8 @@ const googleProvider = new GoogleAuthProvider();
 // Create a new instance for Facebook provider
 const facebookProvider = new FacebookAuthProvider();
 const githubProvider = new GithubAuthProvider();
+// Apple Sign-In via generic OAuthProvider
+const appleProvider = new OAuthProvider('apple.com');
 
 // Configure providers
 googleProvider.setCustomParameters({
@@ -59,6 +68,11 @@ githubProvider.setCustomParameters({
   'allow_signup': 'true'
 });
 
+// Apple provider configuration
+// Note: Apple only shares name on first consent; email may be private/relay
+appleProvider.addScope('email');
+appleProvider.addScope('name');
+
 // Firebase authentication functions
 export const signInWithGoogle = (): Promise<UserCredential> => {
   return signInWithPopup(auth, googleProvider);
@@ -73,6 +87,10 @@ export const signInWithFacebook = (): Promise<UserCredential> => {
 
 export const signInWithGithub = (): Promise<UserCredential> => {
   return signInWithPopup(auth, githubProvider);
+};
+
+export const signInWithApple = (): Promise<UserCredential> => {
+  return signInWithPopup(auth, appleProvider);
 };
 
 export const logoutFirebase = (): Promise<void> => {

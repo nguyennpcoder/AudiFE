@@ -30,6 +30,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const clearAuthData = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('authMode');
     setUser(null);
     setIsAuthenticated(false);
     delete axios.defaults.headers.common['Authorization'];
@@ -84,10 +85,44 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
       (response) => response,
-      (error) => {
-        if (error.response?.status === 401) {
-          console.log('Received 401, clearing auth data');
+      async (error) => {
+        const status = error.response?.status;
+        const originalRequest = error.config || {};
+        if (status === 401) {
+          const hadAuthHeader = !!(
+            originalRequest?.headers?.Authorization ||
+            originalRequest?.headers?.authorization ||
+            axios.defaults.headers.common['Authorization']
+          );
+          // If the failing request was not authenticated, do not force logout/global notice
+          if (!hadAuthHeader) {
+            return Promise.reject(error);
+          }
+          const authMode = localStorage.getItem('authMode');
+          try {
+            // Attempt a single token refresh for Firebase users before logging out
+            if (!originalRequest._retry && auth.currentUser) {
+              originalRequest._retry = true;
+              const newToken = await auth.currentUser.getIdToken(true);
+              axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+              originalRequest.headers = {
+                ...(originalRequest.headers || {}),
+                Authorization: `Bearer ${newToken}`
+              };
+              return axios(originalRequest);
+            }
+          } catch (refreshError) {
+            // Fall through to clear auth below
+            console.warn('Token refresh failed, proceeding to logout');
+          }
+          // If session is from Firebase social login, do NOT clear auth or show global notice
+          if (authMode === 'firebase') {
+            console.log('401 on Firebase session; suppressing global logout/notice');
+            return Promise.reject(error);
+          }
+          console.log('Received 401 on local session, clearing auth data');
           clearAuthData();
+          // Only show notification for local (database) accounts
           showNotification('warning', 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
         }
         return Promise.reject(error);
@@ -105,8 +140,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Set up Firebase auth listener
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
+        setIsValidating(true);
         setFirebaseUser(authUser);
-        setIsAuthenticated(true);
         
         // Check if this is a Facebook login (by checking provider data)
         const isFacebookLogin = authUser.providerData?.some(
@@ -158,17 +193,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         console.log('AuthContext - firebaseUserData:', firebaseUserData);
         
-        // Get Firebase ID token to use for API authorization
+        // Get Firebase ID token to use for API authorization and set headers BEFORE marking authenticated
         authUser.getIdToken().then(token => {
           firebaseUserData.token = token;
           localStorage.setItem('user', JSON.stringify(firebaseUserData));
           localStorage.setItem('token', token);
-          setUser(firebaseUserData);
-          
-          console.log('AuthContext - User data saved to localStorage:', firebaseUserData);
-          
-          // Set the authorization header
+          localStorage.setItem('authMode', 'firebase');
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          setUser(firebaseUserData);
+          setIsAuthenticated(true);
+        }).finally(() => {
+          setIsValidating(false);
         });
       } else {
         setFirebaseUser(null);
@@ -177,6 +212,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (!storedUser) {
           setIsAuthenticated(false);
         }
+        setIsValidating(false);
       }
     });
 
@@ -199,6 +235,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       localStorage.setItem('token', userData.token);
       localStorage.setItem('user', JSON.stringify(userDataToStore));
+      localStorage.setItem('authMode', 'local');
       
       setUser(userDataToStore);
       setIsAuthenticated(true);
