@@ -1414,7 +1414,7 @@ const ProductManagement: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedExteriorColorId, state.currentProduct?.id]);
 
-  // Đồng bộ ảnh nội thất theo màu ngoại thất nếu chưa khóa lựa chọn nội thất
+  // Tự đồng bộ ảnh nội thất theo màu ngoại thất NẾU chưa khóa lựa chọn nội thất
   useEffect(() => {
     const syncInteriorIfUnlocked = async () => {
       if (!state.currentProduct) return;
@@ -1425,7 +1425,7 @@ const ProductManagement: React.FC = () => {
       }
       if (typeof selectedExteriorColorId === 'number') {
         const data = await fetchImagesByColorRaw(state.currentProduct.id, selectedExteriorColorId);
-        setColorImagesInterior((data || []).filter((d: any) => d.loaiHinh === 'noi_that'));
+        setColorImagesInterior((data || []).filter((d: any) => (d.loaiHinh || '').toLowerCase() === 'noi_that'));
       }
     };
     syncInteriorIfUnlocked();
@@ -1702,11 +1702,15 @@ const ProductManagement: React.FC = () => {
     }
   };
 
-  // Ảnh theo màu cho NỘI THẤT
+  // Ảnh theo màu cho NỘI THẤT (dùng cùng endpoint với trang chi tiết)
   const fetchInteriorImagesByColor = async (productId: number, interiorColorId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${BACKEND_URL}/api/v1/hinh-anh-noi-that/mau-xe/${productId}/noi-that/${interiorColorId}`, {
+      const query = typeof selectedExteriorColorId === 'number' 
+        ? `?mauSacNgoaiId=${selectedExteriorColorId}` 
+        : '';
+      const url = `${BACKEND_URL}/api/v1/hinh-anh-theo-noi-that/mau-xe/${productId}/noi-that/${interiorColorId}${query}`;
+      const res = await fetch(url, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1715,7 +1719,17 @@ const ProductManagement: React.FC = () => {
       });
       if (!res.ok) throw new Error('Không thể tải ảnh màu nội thất');
       const data = await res.json();
-      setColorImagesInterior(Array.isArray(data) ? data : []);
+      // Chuẩn hóa dữ liệu và chỉ giữ ảnh nội thất
+      const normalized = (Array.isArray(data) ? data : [])
+        .filter((d: any) => ((d.loaiHinh || '').toLowerCase() === 'noi_that'))
+        .map((d: any) => ({
+          id: d.id,
+          idMauXe: d.idMau || d.idMauXe,
+          duongDanAnh: d.duongDanAnh,
+          loaiHinh: d.loaiHinh,
+          viTri: d.viTri
+        }));
+      setColorImagesInterior(normalized);
     } catch (e) {
       console.warn('Fetch interior color images error:', e);
       setColorImagesInterior([]);
@@ -2640,7 +2654,14 @@ const ProductManagement: React.FC = () => {
                       <span style={{ color: '#777', fontSize: 14, marginRight: 4 }}>Màu ngoại thất:</span>
                       <button
                         type="button"
-                        onClick={() => { setSelectedExteriorColorId('all'); setColorImagesExterior([]); }}
+                        onClick={() => {
+                          setSelectedExteriorColorId('all');
+                          setColorImagesExterior([]);
+                          // Force interior to follow exterior selection
+                          setInteriorColorLocked(false);
+                          setSelectedInteriorColorId('all');
+                          setColorImagesInterior([]);
+                        }}
                         style={{
                           padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb',
                           background: selectedExteriorColorId === 'all' ? '#1890ff' : '#fafbfc',
@@ -2656,6 +2677,10 @@ const ProductManagement: React.FC = () => {
                             if (state.currentProduct) {
                               setSelectedExteriorColorId(c.id);
                               fetchImagesByColor(state.currentProduct.id, c.id);
+                              // Force interior to follow new exterior color
+                              setInteriorColorLocked(false);
+                              setSelectedInteriorColorId('all');
+                              setColorImagesInterior([]);
                             }
                           }}
                           title={c.ten}
@@ -2670,7 +2695,7 @@ const ProductManagement: React.FC = () => {
                     </div>
                     <div className="product-images-container" style={{ marginTop: 8 }}>
                       {(selectedExteriorColorId === 'all' ? state.productImages : colorImagesExterior)
-                        .filter((img: any) => img.loaiHinh === 'ngoai_that')
+                        .filter((img: any) => (img.loaiHinh || '').toLowerCase() === 'ngoai_that')
                         .map((image: any, index: number) => (
                           <div key={image.id} className="product-image-item">
                             <div className="image-wrapper">
@@ -2693,7 +2718,7 @@ const ProductManagement: React.FC = () => {
                             <div className="image-type">{image.loaiHinh || 'Unknown'}</div>
                           </div>
                         ))}
-                      {state.productImages.filter((i: any) => i.loaiHinh === 'ngoai_that').length === 0 && (
+                      {state.productImages.filter((i: any) => (i.loaiHinh || '').toLowerCase() === 'ngoai_that').length === 0 && (
                         <div className="no-images">Không có hình ảnh</div>
                       )}
                     </div>
@@ -2734,8 +2759,12 @@ const ProductManagement: React.FC = () => {
                       ))}
                     </div>
                     <div className="product-images-container" style={{ marginTop: 8 }}>
-                      {(selectedInteriorColorId === 'all' ? state.productImages : colorImagesInterior)
-                        .filter((img: any) => img.loaiHinh === 'noi_that')
+                      {(
+                        selectedInteriorColorId === 'all'
+                          ? (colorImagesInterior.length > 0 ? colorImagesInterior : state.productImages)
+                          : colorImagesInterior
+                        )
+                        .filter((img: any) => (img.loaiHinh || '').toLowerCase() === 'noi_that')
                         .map((image: any, index: number) => (
                           <div key={image.id} className="product-image-item">
                             <div className="image-wrapper">
@@ -2758,7 +2787,10 @@ const ProductManagement: React.FC = () => {
                             <div className="image-type">{image.loaiHinh || 'Unknown'}</div>
                           </div>
                         ))}
-                      {state.productImages.filter((i: any) => i.loaiHinh === 'noi_that').length === 0 && (
+                      {(
+                        (colorImagesInterior.length > 0 ? colorImagesInterior : state.productImages)
+                          .filter((i: any) => (i.loaiHinh || '').toLowerCase() === 'noi_that').length === 0
+                      ) && (
                         <div className="no-images">Không có hình ảnh</div>
                       )}
                     </div>

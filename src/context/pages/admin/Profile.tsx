@@ -1,6 +1,6 @@
 // frontend/audi/src/context/pages/admin/Profile.tsx
 import React, { useEffect, useRef, useState } from 'react';
-import { Card, Avatar, Typography, Tag, Button, List, Input, Space, Divider, Badge } from 'antd';
+import { Card, Avatar, Typography, Tag, Button, List, Input, Space, Divider, Badge, Tooltip, Popconfirm } from 'antd';
 import { 
   UserOutlined, 
   MailOutlined, 
@@ -22,6 +22,10 @@ import {
 } from '@ant-design/icons';
 import { useAuth } from '../../AuthContext';
 import { fetchUserProfile, buildAvatarUrl } from '../../../services/authService';
+import defaultAvatar from '../../../assets/rs7.jpeg';
+import avatarTeam from '../../../assets/rs6.jpg';
+import avatarSupport from '../../../assets/a7.jpg';
+import avatarSales from '../../../assets/audi-rs7.jpeg';
 
 const { Title, Text } = Typography;
 
@@ -63,6 +67,12 @@ const Profile: React.FC = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<any>(user);
   const [messages, setMessages] = useState<any[]>([]);
+  const DEFAULT_AVATAR = defaultAvatar as unknown as string;
+  const ROOM_AVATAR: Record<string, string> = {
+    team: (avatarTeam as unknown as string) || DEFAULT_AVATAR,
+    support: (avatarSupport as unknown as string) || DEFAULT_AVATAR,
+    sales: (avatarSales as unknown as string) || DEFAULT_AVATAR
+  };
   const [latestByRoom, setLatestByRoom] = useState<Record<string, any>>({});
   const [unreadByRoom, setUnreadByRoom] = useState<Record<string, boolean>>({ team: true, support: true, sales: true });
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
@@ -72,6 +82,28 @@ const Profile: React.FC = () => {
   const [onlineUsers, setOnlineUsers] = useState<Record<string, boolean>>({});
   const [darkMode, setDarkMode] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const [userCache, setUserCache] = useState<Record<string, { name: string; avatar?: string }>>({});
+
+  const formatTime = (input: string) => {
+    if (!input) return '';
+    const d = new Date(input);
+    if (!isNaN(d.getTime())) {
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+    // Fallback: strip fractional seconds and replace T with space
+    return input.replace(/\.\d{3,}$/,'').replace('T',' ');
+  };
+
+  type ChatMessage = {
+    id: string;
+    from: string;
+    text: string;
+    time: string;
+    avatar: string;
+    recalled?: boolean;
+    da_xoa?: boolean;
+  };
 
   useEffect(() => {
     const getProfile = async () => {
@@ -152,11 +184,42 @@ const Profile: React.FC = () => {
             messages: list.map((m: any) => ({
               id: m.id,
               from: m.senderName || m.senderId,
+              fromId: m.senderId,
               text: m.content,
               time: m.createdAt,
-              avatar: buildAvatarUrl(m.senderAvatar)
+              avatar: buildAvatarUrl(m.senderAvatar),
+              recalled: m.recalled === true || m.isDeleted === true,
+              da_xoa: m.da_xoa === true || m.daXoa === 1
             }))
           } : prev);
+          // Resolve latest names/avatars for senders
+          const uniqueIds = Array.from(new Set((list || []).map((m: any) => String(m.senderId)).filter((v: string) => !!v))) as string[];
+          const needFetch = uniqueIds.filter((id: string) => !userCache[id]);
+          if (needFetch.length > 0) {
+            Promise.all(needFetch.map(async (id: string) => {
+              try {
+                const res = await fetch(`/api/v1/nguoi-dung/${id}`, {
+                  headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` }
+                });
+                if (!res.ok) return null;
+                const u = await res.json();
+                return { id, name: `${u.ho || ''} ${u.ten || ''}`.trim() || (u.fullName || ''), avatar: u.avatar || u.anh_dai_dien };
+              } catch { return null; }
+            })).then((results) => {
+              const updates: Record<string, { name: string; avatar?: string }> = {};
+              results.forEach((r: any) => { if (r && r.id) updates[r.id] = { name: r.name, avatar: r.avatar }; });
+              if (Object.keys(updates).length > 0) {
+                setUserCache(prev => ({ ...prev, ...updates }));
+                setActiveThread((prev: any) => prev ? {
+                  ...prev,
+                  messages: (prev.messages || []).map((m: any) => {
+                    const info = updates[String(m.fromId)] || userCache[String(m.fromId)];
+                    return info ? { ...m, from: info.name || m.from, avatar: (m.avatar || buildAvatarUrl(info?.avatar)) } : m;
+                  })
+                } : prev);
+              }
+            });
+          }
         }
       } catch {}
     }
@@ -171,6 +234,60 @@ const Profile: React.FC = () => {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [activeThread?.messages?.length]);
+
+  // Recall message (unsend)
+  const recallMessage = async (room: string, messageId: string) => {
+    // Optimistic update
+    setActiveThread((prev: any) => prev ? {
+      ...prev,
+      messages: (prev.messages || []).map((m: ChatMessage) => m.id === messageId ? { ...m, recalled: true, da_xoa: true, text: 'Tin nhắn đã được thu hồi' } : m)
+    } : prev);
+
+    try {
+      const auth = { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` };
+      await fetch(`/api/v1/chat/${messageId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...auth },
+        body: JSON.stringify({ da_xoa: true, recalled: true })
+      });
+      setTimeout(() => {
+        setActiveThread((prev: any) => prev ? { ...prev } : prev);
+      }, 300);
+    } catch {}
+  };
+
+  // Send message helper
+  const sendMessage = () => {
+    if (!activeThread) return;
+    const newMsg = (threadInput || '').trim();
+    if (!newMsg) return;
+    const payload = {
+      room: activeThread.room || 'team',
+      senderId: user?.userId,
+      senderName: profile?.fullName || 'Bạn',
+      senderAvatar: profile?.avatar || '',
+      content: newMsg
+    };
+    fetch('/api/v1/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+      },
+      body: JSON.stringify(payload)
+    }).catch(() => {});
+    setActiveThread({
+      ...activeThread,
+      messages: [...(activeThread.messages || []), {
+        id: `${activeThread.id}-${Date.now()}`,
+        from: profile?.fullName || 'Bạn',
+        text: newMsg,
+        time: new Date().toISOString(),
+        avatar: buildAvatarUrl(profile?.avatar) || DEFAULT_AVATAR
+      }]
+    });
+    setThreadInput('');
+  };
 
   // Avatar
   const getAvatar = () => {
@@ -270,7 +387,18 @@ const Profile: React.FC = () => {
               </Text>
             </div>
           </div>
-          <Button type="primary" icon={<EditOutlined />}>Chỉnh sửa hồ sơ</Button>
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            shape="round"
+            style={{
+              padding: '0 16px',
+              height: 38,
+              boxShadow: '0 4px 12px rgba(25,118,210,0.25)'
+            }}
+          >
+            Chỉnh sửa hồ sơ
+          </Button>
         </div>
         {/* Thông tin chi tiết */}
         <div style={{
@@ -325,25 +453,25 @@ const Profile: React.FC = () => {
           boxShadow: '0 8px 32px rgba(34, 197, 94, 0.08)'
         }}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', minHeight: 520 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', height: '72vh' }}>
           {/* Sidebar (threads) */}
-          <div style={{ borderRight: '1px solid #eef2f7', padding: 16 }}>
+          <div style={{ borderRight: '1px solid #eef2f7', padding: 16, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
             <List
-              style={{ paddingLeft: 0, margin: 0, textAlign: 'left' }}
+              style={{ paddingLeft: 0, margin: 0, textAlign: 'left', height: '100%', overflow: 'auto' }}
               itemLayout="horizontal"
               dataSource={([
-                { id: 'room-team', sender: 'Audi Team', avatar: '/avatar-default.png', room: 'team' },
-                { id: 'room-support', sender: 'Audi Support', avatar: '/avatar-default.png', room: 'support' },
-                { id: 'room-sales', sender: 'Audi Sales', avatar: '/avatar-default.png', room: 'sales' }
+                { id: 'room-team', sender: 'Audi Team', avatar: ROOM_AVATAR['team'], room: 'team' },
+                { id: 'room-support', sender: 'Audi Support', avatar: ROOM_AVATAR['support'], room: 'support' },
+                { id: 'room-sales', sender: 'Audi Sales', avatar: ROOM_AVATAR['sales'], room: 'sales' }
               ].map((it) => ({
                 ...it,
                 createdAt: latestByRoom[it.room]?.createdAt || '',
                 content: latestByRoom[it.room]?.content || '— Chưa có tin nhắn —'
               })))}
               renderItem={(item: any) => {
-                const createdAt = item.createdAt || '';
+                const createdAt = item.createdAt ? formatTime(item.createdAt) : '';
                 const sender = item.sender;
-                const avatar = item.avatar || '/avatar-default.png';
+                const avatar = item.avatar || DEFAULT_AVATAR;
                 const content = item.content || '';
                 const unread = unreadByRoom[item.room] === true;
                 const selected = activeThread?.room === item.room;
@@ -355,6 +483,7 @@ const Profile: React.FC = () => {
                         id: item.id,
                         title: sender,
                         room,
+                        roomAvatar: ROOM_AVATAR[room] || DEFAULT_AVATAR,
                         participants: [sender, profile?.fullName || 'Bạn'],
                         messages: [
                           { id: `${item.id}-1`, from: sender, text: content, time: createdAt, avatar },
@@ -406,12 +535,12 @@ const Profile: React.FC = () => {
             />
           </div>
           {/* Conversation */}
-          <div style={{ display: 'flex', flexDirection: 'column', minHeight: 520 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
             {/* Chat header */}
             <div style={{ padding: '12px 16px', borderBottom: '1px solid #eef2f7', display: 'flex', alignItems: 'center', gap: 12 }}>
               {activeThread ? (
                 <>
-                  <Avatar src={(activeThread.messages?.[0]?.avatar) || '/avatar-default.png'} />
+                  <Avatar src={(activeThread.roomAvatar) || ROOM_AVATAR[activeThread.room] || DEFAULT_AVATAR} />
                   <div style={{ lineHeight: 1.2 }}>
                     <div style={{ fontWeight: 700, color: '#0f172a' }}>{activeThread.title}</div>
                     <div style={{ fontSize: 12, color: '#94a3b8' }}>Nội bộ @admin</div>
@@ -422,31 +551,75 @@ const Profile: React.FC = () => {
               )}
             </div>
             {/* Messages */}
-            <div style={{ flex: 1, overflow: 'auto', padding: '16px 16px 8px 16px', background: '#ffffff' }}>
-              {(activeThread?.messages || []).map((msg: any) => {
+            <div style={{ flex: 1, overflow: 'auto', padding: '16px 16px 8px 16px', background: '#ffffff', minHeight: 0 }}>
+              {(activeThread?.messages || []).map((msg: ChatMessage) => {
                 const isMine = (profile?.fullName || 'Bạn') === msg.from;
                 return (
                   <div key={msg.id} style={{ display: 'flex', justifyContent: isMine ? 'flex-end' : 'flex-start', marginBottom: 12 }}>
                     {!isMine && (
-                      <Avatar
-                        src={msg.avatar}
-                        style={{ marginRight: 8 }}
-                        onError={() => true}
-                      />
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                        <Avatar
+                          src={(msg.from === (profile?.fullName || 'Bạn')) ? (buildAvatarUrl(profile?.avatar) || DEFAULT_AVATAR) : (msg.avatar || ROOM_AVATAR[activeThread?.room || 'team'] || DEFAULT_AVATAR)}
+                          onError={() => true}
+                        />
+                        <div>
+                          {/* Sender full name for group chats */}
+                          <div style={{ fontSize: 12, color: '#64748b', margin: '0 0 4px 4px' }}>{msg.from}</div>
+                          <div
+                            style={{
+                              background: '#f1f5f9',
+                              color: '#0f172a',
+                              padding: '8px 12px',
+                              borderRadius: 18,
+                              maxWidth: 420,
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.06)'
+                            }}
+                          >
+                            <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>{formatTime(msg.time)}</div>
+                            <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: (msg.da_xoa || msg.recalled) ? '#94a3b8' : '#0f172a', fontStyle: (msg.da_xoa || msg.recalled) ? 'italic' as any : 'normal' }}>
+                              {(msg.da_xoa || msg.recalled) ? 'Tin nhắn đã được thu hồi' : msg.text}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     )}
-                    <div
-                      style={{
-                        background: isMine ? '#e3f2fd' : '#f1f5f9',
-                        color: '#0f172a',
-                        padding: '8px 12px',
-                        borderRadius: 18,
-                        maxWidth: 420,
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.06)'
-                      }}
-                    >
-                      <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>{msg.time}</div>
-                      <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.text}</div>
-                    </div>
+                    {isMine && (
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                        <div
+                          style={{
+                            background: '#e3f2fd',
+                            color: '#0f172a',
+                            padding: '8px 12px',
+                            borderRadius: 18,
+                            maxWidth: 420,
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.06)'
+                          }}
+                        >
+                          <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>{formatTime(msg.time)}</div>
+                          <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: (msg.da_xoa || msg.recalled) ? '#94a3b8' : '#0f172a', fontStyle: (msg.da_xoa || msg.recalled) ? 'italic' as any : 'normal' }}>
+                            {(msg.da_xoa || msg.recalled) ? 'Tin nhắn đã được thu hồi' : msg.text}
+                          </div>
+                        </div>
+                        {!(msg.da_xoa || msg.recalled) && (
+                          <Tooltip title="Thu hồi tin nhắn">
+                            <Popconfirm
+                              title="Thu hồi tin nhắn?"
+                              okText="Thu hồi"
+                              cancelText="Hủy"
+                              onConfirm={() => recallMessage(activeThread?.room || 'team', msg.id)}
+                           >
+                              <Button
+                                size="small"
+                                type="default"
+                                shape="circle"
+                                icon={<EllipsisOutlined />}
+                                style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
+                              />
+                            </Popconfirm>
+                          </Tooltip>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -457,42 +630,20 @@ const Profile: React.FC = () => {
               <Input.TextArea
                 value={threadInput}
                 onChange={(e) => setThreadInput(e.target.value)}
-                autoSize={{ minRows: 1, maxRows: 4 }}
+                autoSize={{ minRows: 1, maxRows: 2 }}
+                style={{ resize: 'none', color: '#0f172a', background: '#ffffff' }}
+                rootClassName="composer-input"
+                onPressEnter={(e) => { if (!e.shiftKey) { e.preventDefault(); sendMessage(); } }}
                 placeholder="Nhập tin nhắn..."
+                allowClear
               />
               <Button
                 type="primary"
                 disabled={!threadInput.trim() || !activeThread}
-                onClick={() => {
-                  if (!activeThread) return;
-                  const newMsg = threadInput.trim();
-                  const payload = {
-                    room: activeThread.room || 'team',
-                    senderId: user?.userId,
-                    senderName: profile?.fullName || 'Bạn',
-                    senderAvatar: profile?.avatar || '',
-                    content: newMsg
-                  };
-                  fetch('/api/v1/chat', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
-                    },
-                    body: JSON.stringify(payload)
-                  }).catch(() => {});
-                  setActiveThread({
-                    ...activeThread,
-                    messages: [...(activeThread.messages || []), {
-                      id: `${activeThread.id}-${Date.now()}`,
-                      from: profile?.fullName || 'Bạn',
-                      text: newMsg,
-                      time: new Date().toLocaleString('vi-VN'),
-                      avatar: buildAvatarUrl(profile?.avatar)
-                    }]
-                  });
-                  setThreadInput('');
-                }}
+                icon={<SendOutlined />}
+                shape="round"
+                style={{ height: 38, padding: '0 16px', fontWeight: 600, boxShadow: '0 4px 12px rgba(25,118,210,0.25)' }}
+                onClick={sendMessage}
               >
                 Gửi
               </Button>
