@@ -15,10 +15,17 @@ const PaymentCancel: React.FC = () => {
     const zalopay = searchParams.get('zalopay');
     const momo = searchParams.get('momo');
     const status = searchParams.get('status');
+    const responseCode = searchParams.get('vnp_ResponseCode');
     
     // Determine payment method from URL params
     if (vnpay === '1') {
       setPaymentMethod('VNPay');
+      // For VNPay, response code '00' actually means success, not failure
+      if (responseCode === '00') {
+        // Redirect to success page if we got a successful response code
+        navigate(`/payment/success?vnpay=1&vnp_ResponseCode=${responseCode}`);
+        return;
+      }
       setStatusMessage('Giao dịch thanh toán qua VNPay đã bị hủy hoặc thất bại.');
     } else if (zalopay === '1') {
       setPaymentMethod('ZaloPay');
@@ -36,7 +43,7 @@ const PaymentCancel: React.FC = () => {
     } else {
       setStatusMessage('Giao dịch thanh toán đã bị hủy hoặc thất bại.');
     }
-  }, [searchParams]);
+  }, [searchParams, navigate]);
 
   return (
     <div className="payment-page" style={{ 
@@ -72,4 +79,4 @@ const PaymentCancel: React.FC = () => {
   );
 };
 
-export default PaymentCancel; 
+export default PaymentCancel;

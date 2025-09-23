@@ -466,7 +466,9 @@ const Profile: React.FC = () => {
               ].map((it) => ({
                 ...it,
                 createdAt: latestByRoom[it.room]?.createdAt || '',
-                content: latestByRoom[it.room]?.content || '— Chưa có tin nhắn —'
+                content: (latestByRoom[it.room]?.recalled === true || latestByRoom[it.room]?.da_xoa === true || latestByRoom[it.room]?.daXoa === 1) 
+                  ? `${latestByRoom[it.room]?.senderName || 'Người dùng'}: Tin nhắn đã được thu hồi`
+                  : (latestByRoom[it.room]?.content || '— Chưa có tin nhắn —')
               })))}
               renderItem={(item: any) => {
                 const createdAt = item.createdAt ? formatTime(item.createdAt) : '';
