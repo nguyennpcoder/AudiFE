@@ -49,14 +49,18 @@ import MyOrders from './context/pages/MyOrders';
 import MyAccount from './context/pages/MyAccount';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import DealershipManagement from './context/pages/admin/DealershipManagement';
+import { useScrollToTop } from './hooks/useScrollToTop';
+import useUserStatusChecker from './hooks/useUserStatusChecker';
 
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, user, isValidating } = useAuth();
+  const { isAuthenticated, isValidating, user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [hasShownIntro, setHasShownIntro] = useState(false);
-  
+  useScrollToTop();
+  useUserStatusChecker(); // Thêm hook kiểm tra trạng thái người dùng
+
   const authRoutes = ['/login', '/register', '/forgot-password'];
   const adminRoutes = [
     '/admin', 

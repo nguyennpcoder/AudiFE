@@ -696,7 +696,7 @@ const UserManagement: React.FC = () => {
             >
               <option value="">Tất cả vai trò</option>
               <option value="khach_hang">Khách hàng</option>
-              <option value="quan_tri">Quản trị</option>
+              {/* <option value="quan_tri">Quản trị</option> */}
               <option value="ban_hang">Bán hàng</option>
               <option value="ho_tro">Hỗ trợ</option>
             </select>

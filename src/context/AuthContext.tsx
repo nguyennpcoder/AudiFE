@@ -14,6 +14,7 @@ interface AuthContextType {
   login: (userData: AuthResponse) => void;
   logout: () => void;
   setFirebaseUser: (user: User | null) => void;
+  checkUserStatus: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,6 +35,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null);
     setIsAuthenticated(false);
     delete axios.defaults.headers.common['Authorization'];
+  };
+
+  // Function to check user status
+  const checkUserStatus = async (): Promise<boolean> => {
+    if (!user || !user.token) return true;
+
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api/v1'}/nguoi-dung/profile`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`
+          }
+        }
+      );
+
+      // Check if account is locked
+      if (response.data.trangThai === false) {
+        clearAuthData();
+        showNotification('warning', 'Tài khoản của bạn đã bị quản trị viên khóa');
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.error('Error checking user status:', error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        clearAuthData();
+        showNotification('warning', 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
+        return false;
+      }
+      // For other errors, assume user is still valid
+      return true;
+    }
   };
 
   // First useEffect to initialize auth state (optimistic for local sessions)
@@ -131,6 +165,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           clearAuthData();
           // Only show notification for local (database) accounts
           showNotification('warning', 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
+        }
+        // Kiểm tra nếu lỗi là do tài khoản bị khóa
+        else if (status === 403) {
+          // Kiểm tra nếu người dùng là tài khoản local (không phải Firebase)
+          const authMode = localStorage.getItem('authMode');
+          if (authMode !== 'firebase') {
+            clearAuthData();
+            showNotification('warning', 'Tài khoản của bạn đã bị quản trị viên khóa');
+          }
         }
         return Promise.reject(error);
       }
@@ -275,7 +318,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       isValidating,
       login, 
       logout,
-      setFirebaseUser 
+      setFirebaseUser,
+      checkUserStatus
     }}>
       {children}
     </AuthContext.Provider>

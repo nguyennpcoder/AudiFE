@@ -1,11 +1,14 @@
 // frontend/audi/src/components/sections/ProductDetail.tsx
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Alert, Button, message } from 'antd';
+import { useNotification } from '../../context/NotificationContext';
 import '../../styles/ProductDetail.css';
 import PromotionBanner from './PromotionBanner';
 import VehicleRating from './VehicleRating';
 import { KhuyenMai } from '../../services/marketingService';
+
 
 // Define interfaces for our data types
 interface MauXe {
@@ -106,21 +109,27 @@ interface LegacyInteriorOption {
   duongDanAnh: string;
 }
 
-const ProductDetail: React.FC = () => {
+const ProductDetail: React.FC<{}> = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { showNotification } = useNotification();
+  
+  // State declarations
   const [product, setProduct] = useState<MauXe | null>(null);
-  const [productImages, setProductImages] = useState<HinhAnhXe[]>([]);
-  const [availableColors, setAvailableColors] = useState<MauSac[]>([]);
+  const [dongXe, setDongXe] = useState<string>('');
+  const [parsedSpecs, setParsedSpecs] = useState<any>(null);
+  const [thongSoKyThuat, setThongSoKyThuat] = useState<any>(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isInStock, setIsInStock] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState('exterior');
   const [selectedColor, setSelectedColor] = useState<MauSac | null>(null);
   const [selectedInteriorOption, setSelectedInteriorOption] = useState<number>(0);
-  const [parsedSpecs, setParsedSpecs] = useState<any>(null);
   const [activeColorTab, setActiveColorTab] = useState(0);
   const [activeInteriorTab, setActiveInteriorTab] = useState(0);
-  const [dongXe, setDongXe] = useState<string>('');
-  const [thongSoKyThuat, setThongSoKyThuat] = useState<any>(null);
+  const [productImages, setProductImages] = useState<HinhAnhXe[]>([]);
+  const [availableColors, setAvailableColors] = useState<MauSac[]>([]);
   const [ngoaiThatImages, setNgoaiThatImages] = useState<HinhAnhXe[]>([]);
   const [noiThatImages, setNoiThatImages] = useState<HinhAnhXe[]>([]);
   const [chiTietImages, setChiTietImages] = useState<HinhAnhXe[]>([]);
@@ -223,11 +232,24 @@ const ProductDetail: React.FC = () => {
     }, 280);
   };
 
-  // Đưa trang về đầu khi mới vào
+  // Đưa trang về đầu khi mới vào và kiểm tra nếu sản phẩm hết hàng
   useEffect(() => {
+    // Luôn luôn cuộn lên đầu trang khi component được mount
     window.scrollTo(0, 0);
-  }, []);
     
+    // Kiểm tra trạng thái sản phẩm khi đã load xong
+    if (!isLoading && product) {
+      setIsInStock(product.conHang);
+      if (!product.conHang) {
+        // Hiển thị thông báo và chuyển hướng về trang models
+        showNotification('error', "Rất tiếc, mẫu này vừa hết hàng. Quý khách thông cảm.");
+        setTimeout(() => {
+          navigate('/models');
+        }, 3000);
+      }
+    }
+  }, [product, isLoading, navigate, showNotification]);
+
   const [noiThatOptions, setNoiThatOptions] = useState<NoiThatOption[]>([]);
   const [selectedNoiThat, setSelectedNoiThat] = useState<NoiThatOption | null>(null);
 
@@ -1507,6 +1529,73 @@ const resetToDefaultColor = async () => {
     );
   }
 
+  // Loại bỏ phần kiểm tra tồn kho
+  /*
+  if (stockLoading) {
+    return (
+      <div className="product-detail-loading">
+        <div className="loading-spinner"></div>
+        <p>Đang kiểm tra thông tin sản phẩm...</p>
+      </div>
+    );
+  }
+
+  if (stockError) {
+    return (
+      <div className="product-detail-error">
+        <Alert 
+          message="Lỗi kiểm tra tồn kho" 
+          description={stockError}
+          type="error"
+          showIcon
+        />
+        <div style={{ marginTop: 16 }}>
+          <Button type="primary" onClick={() => navigate('/models')}>
+            Quay lại danh sách sản phẩm
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isInStock) {
+    return (
+      <div className="product-detail-out-of-stock">
+        <Alert 
+          message="Sản phẩm tạm thời hết hàng" 
+          description="Rất tiếc, mẫu này vừa hết hàng. Quý khách vui lòng quay lại sau hoặc chọn mẫu khác."
+          type="warning"
+          showIcon
+        />
+        <div style={{ marginTop: 16 }}>
+          <Button type="primary" onClick={() => navigate('/models')}>
+            Xem các mẫu khác
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  */
+  
+  // Sử dụng trạng thái isInStock từ product.conHang
+  if (!isInStock) {
+    return (
+      <div className="product-detail-out-of-stock">
+        <Alert 
+          message="Sản phẩm tạm thời hết hàng" 
+          description="Rất tiếc, mẫu này vừa hết hàng. Quý khách vui lòng quay lại sau hoặc chọn mẫu khác."
+          type="warning"
+          showIcon
+        />
+        <div style={{ marginTop: 16 }}>
+          <Button type="primary" onClick={() => navigate('/models')}>
+            Xem các mẫu khác
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="error-container_details">
@@ -2204,7 +2293,18 @@ const resetToDefaultColor = async () => {
             </div>
             
             <div className="action-buttons_details">
-              <button className="btn-config_details">Cấu hình xe</button>
+              <button 
+                className="btn-config_details"
+                onClick={() => {
+                  if (!isInStock) {
+                    showNotification('error', "Rất tiếc, mẫu này vừa hết hàng. Quý khách vui lòng quay lại sau hoặc chọn mẫu khác.");
+                    return;
+                  }
+                  navigate(`/configure/${product.id}`);
+                }}
+              >
+                Cấu hình xe
+              </button>
               <button className="btn-test-drive_details">Đặt lịch lái thử</button>
             </div>
           </div>

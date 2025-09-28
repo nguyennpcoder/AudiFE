@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Steps, Button, Card, Row, Col, Typography, Divider, message, Spin, Progress, Alert, Tag, Space } from "antd";
+import { 
+  Steps, 
+  Button, 
+  Card, 
+  Row, 
+  Col, 
+  Typography, 
+  Divider, 
+  Spin, 
+  Progress, 
+  Alert, 
+  Tag, 
+  Space 
+} from "antd";
 import { 
   CarOutlined, 
   BgColorsOutlined, 
@@ -13,14 +26,15 @@ import {
   DownloadOutlined,
   ShoppingCartOutlined,
   GiftOutlined,
-  CreditCardOutlined, // THÊM icon này
-  LockOutlined, // THÊM icon này
-  LoginOutlined // THÊM icon này
+  CreditCardOutlined,
+  LockOutlined,
+  LoginOutlined
 } from "@ant-design/icons";
 import "../../styles/VehicleConfigurator.css";
-import { useAuth } from "../AuthContext"; // Thêm import này
-import { cauHinhService } from "../../services/cauHinhService";
-import { useScrollToTop } from "../../hooks/useScrollToTop"; // THÊM import này
+import { useAuth } from "../../context/AuthContext";
+import { useNotification } from "../../context/NotificationContext";
+import { useScrollToTop } from "../../hooks/useScrollToTop";
+import * as cauHinhService from "../../services/cauHinhService"; // Import cauHinhService
 
 
 const { Title, Text, Paragraph } = Typography;
@@ -36,6 +50,7 @@ interface MauXe {
   namSanXuat: number;
   thongSoKyThuat: string;
   hinhAnh?: string;
+  conHang?: boolean; // Thêm trường conHang
 }
 
 interface MauSac {
@@ -60,10 +75,10 @@ interface NoiThat {
   id: number;
   ten: string;
   moTa: string;
-  giaThem: number; // Thay đổi từ gia thành giaThem
+  giaThem: number;
   duongDanAnh: string;
-  laMacDinh?: boolean; // Thêm field này
-  mauSac?: string; // Thêm field này
+  laMacDinh?: boolean;
+  mauSac?: string;
 }
 
 interface BanhXe {
@@ -73,7 +88,7 @@ interface BanhXe {
   giaThem: number;
   duongDanAnh: string;
   laMacDinh?: boolean;
-  kichThuoc?: string; // Kích thước bánh xe (ví dụ: "19 inch", "20 inch")
+  kichThuoc?: string;
 }
 
 interface CauHinhTuyChinh {
@@ -82,7 +97,7 @@ interface CauHinhTuyChinh {
   idMau: number;
   idMauSac: number;
   idNoiThat?: number;
-  idBanhXe?: number; // Thêm trường này
+  idBanhXe?: number;
   danhSachIdTuyChon: number[];
   tongGia: number;
   ten?: string;
@@ -113,23 +128,71 @@ interface KhuyenMai {
 const VehicleConfigurator: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth(); // Thêm hook này
-  
-  // THÊM: Kiểm tra đăng nhập ngay từ đầu
+  const { isAuthenticated, user } = useAuth();
+  const { showNotification } = useNotification();
+  useScrollToTop();
+
+  // State declarations
+  const [loading, setLoading] = useState(true);
+  const [mauXe, setMauXe] = useState<MauXe | null>(null);
+  const [danhSachMauSac, setDanhSachMauSac] = useState<MauSac[]>([]);
+  const [danhSachTuyChon, setDanhSachTuyChon] = useState<TuyChon[]>([]);
+  const [danhSachNoiThat, setDanhSachNoiThat] = useState<NoiThat[]>([]);
+  const [danhSachBanhXe, setDanhSachBanhXe] = useState<BanhXe[]>([]);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [selectedColor, setSelectedColor] = useState<MauSac | null>(null);
+  const [selectedTuyChon, setSelectedTuyChon] = useState<number[]>([]);
+  const [selectedNoiThat, setSelectedNoiThat] = useState<NoiThat | null>(null);
+  const [selectedBanhXe, setSelectedBanhXe] = useState<BanhXe | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [luuThanhCong, setLuuThanhCong] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareLink, setShareLink] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
+  const [imageCache, setImageCache] = useState<Record<string, string>>({});
+  const [hinhAnhMauSac, setHinhAnhMauSac] = useState<Record<number, string>>({});
+  const [hinhAnhNoiThat, setHinhAnhNoiThat] = useState<Record<number, string>>({});
+  const [hinhAnhBanhXe, setHinhAnhBanhXe] = useState<Record<number, string>>({});
+  const [hinhAnhMauSacNoiThat, setHinhAnhMauSacNoiThat] = useState<Record<string, string>>({});
+  const [activeColorTab, setActiveColorTab] = useState(0);
+  const [activeInteriorTab, setActiveInteriorTab] = useState(0);
+  const [activeWheelTab, setActiveWheelTab] = useState(0);
+  const [colorImages, setColorImages] = useState<{[key: number]: HinhAnhXeTheoMauDTO[]}>({});
+  const [interiorImages, setInteriorImages] = useState<{[key: number]: string[]}>({});
+  const [wheelImages, setWheelImages] = useState<{[key: number]: string[]}>({});
+  const [currentColorImageIndex, setCurrentColorImageIndex] = useState(0);
+  const [currentInteriorImageIndex, setCurrentInteriorImageIndex] = useState(0);
+  const [currentWheelImageIndex, setCurrentWheelImageIndex] = useState(0);
+  const [exteriorFadeState, setExteriorFadeState] = useState<'fade-in' | 'fade-out' | null>(null);
+  const [interiorFadeState, setInteriorFadeState] = useState<'fade-in' | 'fade-out' | null>(null);
+  const [wheelFadeState, setWheelFadeState] = useState<'fade-in' | 'fade-out' | null>(null);
+  const [isInStock, setIsInStock] = useState(true);
+  const [previewMode, setPreviewMode] = useState(false); // Thêm state previewMode
+  const [orderLoading, setOrderLoading] = useState(false); // Thêm state orderLoading
+  const [saving, setSaving] = useState(false); // Thêm state saving
+  const [cauHinhHienTai, setCauHinhHienTai] = useState<CauHinhTuyChinh>({ // Thêm state cauHinhHienTai
+    idMau: parseInt(id || '0'),
+    idMauSac: 0,
+    danhSachIdTuyChon: [],
+    tongGia: 0
+  });
+  const [hinhAnhXeTheoMau, setHinhAnhXeTheoMau] = useState<Record<number, HinhAnhXeTheoMauDTO[]>>({}); // Thêm state hinhAnhXeTheoMau
+  const [danhSachKhuyenMai, setDanhSachKhuyenMai] = useState<KhuyenMai[]>([]); // Thêm state danhSachKhuyenMai
+  const [khuyenMai, setKhuyenMai] = useState<KhuyenMai | null>(null); // Thêm state khuyenMai
+  const [giaSauKhuyenMai, setGiaSauKhuyenMai] = useState<number>(0); // Thêm state giaSauKhuyenMai
+  const [khuyenMaiDuocChon, setKhuyenMaiDuocChon] = useState<KhuyenMai | null>(null); // Thêm state khuyenMaiDuocChon
+
+  // Kiểm tra đăng nhập ngay từ đầu
   useEffect(() => {
     if (!isAuthenticated) {
-      message.warning('Vui lòng đăng nhập để tùy chỉnh cấu hình xe');
-      navigate('/login', { 
-        state: { 
-          from: `/configurator/${id}`,
-          message: 'Vui lòng đăng nhập để tùy chỉnh cấu hình xe'
-        } 
-      });
+      console.log("User not authenticated, redirecting to login");
+      showNotification('warning', 'Vui lòng đăng nhập để cấu hình xe');
+      navigate('/login');
       return;
     }
   }, [isAuthenticated, navigate, id]);
 
-  // THÊM: Hiển thị màn hình bảo vệ nếu chưa đăng nhập
+  // Hiển thị màn hình bảo vệ nếu chưa đăng nhập
   if (!isAuthenticated) {
     return (
       <div className="vehicle-configurator-container">
@@ -190,45 +253,6 @@ const VehicleConfigurator: React.FC = () => {
     );
   }
 
-  // THÊM: Sử dụng custom hook để scroll to top
-  useScrollToTop();
-  
-  // State cho dữ liệu
-  const [mauXe, setMauXe] = useState<MauXe | null>(null);
-  const [danhSachMauSac, setDanhSachMauSac] = useState<MauSac[]>([]);
-  const [danhSachTuyChon, setDanhSachTuyChon] = useState<TuyChon[]>([]);
-  const [danhSachNoiThat, setDanhSachNoiThat] = useState<NoiThat[]>([]);
-  const [danhSachBanhXe, setDanhSachBanhXe] = useState<BanhXe[]>([]);
-  
-  // State cho hình ảnh xe theo màu
-  const [hinhAnhXeTheoMau, setHinhAnhXeTheoMau] = useState<{ [key: number]: HinhAnhXeTheoMauDTO[] }>({});
-  
-  // State cho cấu hình hiện tại
-  const [cauHinhHienTai, setCauHinhHienTai] = useState<CauHinhTuyChinh>({
-    idMau: parseInt(id || "0"),
-    idMauSac: 0,
-    danhSachIdTuyChon: [],
-    tongGia: 0
-  });
-  
-  // State cho UI
-  const [currentStep, setCurrentStep] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
-  
-  // State cho khuyến mãi
-  const [khuyenMai, setKhuyenMai] = useState<any>(null);
-  const [giaSauKhuyenMai, setGiaSauKhuyenMai] = useState(0);
-
-  // Thêm state cho khuyến mãi
-  const [danhSachKhuyenMai, setDanhSachKhuyenMai] = useState<KhuyenMai[]>([]);
-  const [khuyenMaiDuocChon, setKhuyenMaiDuocChon] = useState<KhuyenMai | null>(null);
-
-  // THÊM state cho modal đặt hàng
-  const [orderModalVisible, setOrderModalVisible] = useState(false);
-  const [orderLoading, setOrderLoading] = useState(false);
-
   // Load dữ liệu ban đầu - CHỈ CHẠY KHI ĐÃ ĐĂNG NHẬP
   useEffect(() => {
     if (isAuthenticated) {
@@ -243,6 +267,17 @@ const VehicleConfigurator: React.FC = () => {
       // Load mẫu xe
       const mauXeResponse = await axios.get(`${BACKEND_URL}/mau-xe/${id}`);
       setMauXe(mauXeResponse.data);
+      
+      // Check if product is in stock
+      if (!mauXeResponse.data.conHang) {
+        setIsInStock(false);
+        showNotification('error', "Rất tiếc, mẫu này vừa hết hàng. Quý khách vui lòng quay lại sau hoặc chọn mẫu khác.", "", 3);
+        setTimeout(() => {
+          navigate('/models');
+        }, 3000);
+        return;
+      }
+      setIsInStock(true);
       
       // Load màu sắc cho mẫu xe cụ thể
       const mauSacResponse = await axios.get(`${BACKEND_URL}/mau-sac/mau-xe/${id}`);
@@ -290,7 +325,7 @@ const VehicleConfigurator: React.FC = () => {
             }
           ];
           setDanhSachTuyChon(defaultTuyChon);
-          message.warning('Sử dụng tùy chọn mặc định do lỗi server');
+          showNotification('warning', 'Sử dụng tùy chọn mặc định do lỗi server', '', 3);
         }
       }
       
@@ -327,7 +362,7 @@ const VehicleConfigurator: React.FC = () => {
             }
           ];
           setDanhSachNoiThat(defaultNoiThat);
-          message.warning('Sử dụng nội thất mặc định do lỗi server');
+          showNotification('warning', 'Sử dụng nội thất mặc định do lỗi server', '', 3);
         }
       }
       
@@ -375,7 +410,7 @@ const VehicleConfigurator: React.FC = () => {
             }
           ];
           setDanhSachBanhXe(defaultBanhXe);
-          message.warning('Sử dụng bánh xe mặc định do lỗi server');
+          showNotification('warning', 'Sử dụng bánh xe mặc định do lỗi server', '', 3);
         }
       }
       
@@ -385,6 +420,9 @@ const VehicleConfigurator: React.FC = () => {
       // SỬA: Load hình ảnh cho TẤT CẢ màu sắc ngay từ đầu
       if (mauSacResponse.data.length > 0) {
         const defaultColor = mauSacResponse.data[0];
+        setSelectedColor(defaultColor);
+        
+        // Cập nhật cấu hình hiện tại với màu sắc mặc định
         setCauHinhHienTai(prev => ({
           ...prev,
           idMauSac: defaultColor.id
@@ -395,15 +433,15 @@ const VehicleConfigurator: React.FC = () => {
         await loadAllColorImages(mauSacResponse.data);
       }
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Lỗi khi tải dữ liệu:", error);
-      message.error("Không thể tải dữ liệu cấu hình xe");
+      showNotification('error', 'Không thể tải dữ liệu cấu hình. Vui lòng thử lại sau.', '', 3);
     } finally {
       setLoading(false);
     }
   };
 
-  // THÊM FUNCTION MỚI: Load hình ảnh cho tất cả màu sắc
+  // FUNCTION MỚI: Load hình ảnh cho tất cả màu sắc
   const loadAllColorImages = async (danhSachMauSac: MauSac[]) => {
     try {
       console.log(`Loading images for all ${danhSachMauSac.length} colors...`);
@@ -449,7 +487,7 @@ const VehicleConfigurator: React.FC = () => {
       
     } catch (error) {
       console.error("Lỗi khi load tất cả hình ảnh màu sắc:", error);
-      message.warning('Có lỗi khi load một số hình ảnh màu sắc');
+      showNotification('warning', 'Có lỗi khi load một số hình ảnh màu sắc', '', 3);
     }
   };
 
@@ -507,26 +545,38 @@ const VehicleConfigurator: React.FC = () => {
   // Tính tổng giá - Sửa để bao gồm nội thất
   const tinhTongGia = async () => {
     try {
+      if (!mauXe || !selectedColor) return;
+      
       console.log('Đang tính giá với params:', {
-        idMauXe: cauHinhHienTai.idMau,
-        idMauSac: cauHinhHienTai.idMauSac,
-        idNoiThat: cauHinhHienTai.idNoiThat,
-        idTuyChon: cauHinhHienTai.danhSachIdTuyChon
+        idMauXe: mauXe?.id,
+        idMauSac: selectedColor?.id,
+        idNoiThat: selectedNoiThat?.id,
+        idBanhXe: selectedBanhXe?.id,
+        idTuyChon: selectedTuyChon
       });
       
       const response = await axios.get(`${BACKEND_URL}/cau-hinh/tinh-gia`, {
         params: {
-          idMauXe: cauHinhHienTai.idMau,
-          idMauSac: cauHinhHienTai.idMauSac,
-          idNoiThat: cauHinhHienTai.idNoiThat,
-          idTuyChon: cauHinhHienTai.danhSachIdTuyChon
+          idMauXe: mauXe?.id,
+          idMauSac: selectedColor?.id,
+          idNoiThat: selectedNoiThat?.id,
+          idBanhXe: selectedBanhXe?.id,
+          idTuyChon: selectedTuyChon.join(',')
         }
       });
       
       console.log('Response tính giá:', response.data);
       
       const tongGia = response.data;
-      setCauHinhHienTai(prev => ({ ...prev, tongGia }));
+      setCauHinhHienTai(prev => ({ 
+        ...prev, 
+        idMau: mauXe.id,
+        idMauSac: selectedColor.id,
+        idNoiThat: selectedNoiThat?.id,
+        idBanhXe: selectedBanhXe?.id,
+        danhSachIdTuyChon: selectedTuyChon,
+        tongGia 
+      }));
       
       // Tính khuyến mãi
       await tinhKhuyenMai(tongGia);
@@ -538,35 +588,43 @@ const VehicleConfigurator: React.FC = () => {
       let tongGia = mauXe?.giaCoban || 0;
       
       // Cộng giá màu sắc
-      const mauSac = danhSachMauSac.find(m => m.id === cauHinhHienTai.idMauSac);
+      const mauSac = danhSachMauSac.find(m => m.id === selectedColor?.id);
       if (mauSac && mauSac.giaThem) {
         tongGia += mauSac.giaThem;
       }
       
       // Cộng giá nội thất
-      const noiThat = danhSachNoiThat.find(n => n.id === cauHinhHienTai.idNoiThat);
+      const noiThat = danhSachNoiThat.find(n => n.id === selectedNoiThat?.id);
       if (noiThat && noiThat.giaThem) {
         tongGia += noiThat.giaThem;
       }
       
       // Cộng giá bánh xe
-      const banhXe = danhSachBanhXe.find(b => b.id === cauHinhHienTai.idBanhXe);
+      const banhXe = danhSachBanhXe.find(b => b.id === selectedBanhXe?.id);
       if (banhXe && banhXe.giaThem) {
         tongGia += banhXe.giaThem;
       }
       
       // Cộng giá tùy chọn
-      cauHinhHienTai.danhSachIdTuyChon.forEach(tuyChonId => {
+      selectedTuyChon.forEach(tuyChonId => {
         const tuyChon = danhSachTuyChon.find(t => t.id === tuyChonId);
         if (tuyChon && tuyChon.gia) {
           tongGia += tuyChon.gia;
         }
       });
       
-      setCauHinhHienTai(prev => ({ ...prev, tongGia }));
+      setCauHinhHienTai(prev => ({ 
+        ...prev, 
+        idMau: mauXe?.id || 0,
+        idMauSac: selectedColor?.id || 0,
+        idNoiThat: selectedNoiThat?.id,
+        idBanhXe: selectedBanhXe?.id,
+        danhSachIdTuyChon: selectedTuyChon,
+        tongGia 
+      }));
       setGiaSauKhuyenMai(tongGia);
       
-      message.warning('Sử dụng tính giá thủ công do lỗi server');
+      showNotification('warning', 'Sử dụng tính giá thủ công do lỗi server', '', 3);
     }
   };
 
@@ -578,16 +636,17 @@ const VehicleConfigurator: React.FC = () => {
       });
       
       if (response.data && response.data.coApDung) {
-        setKhuyenMai(response.data);
+        setKhuyenMai(response.data.khuyenMai);
         
         // Fix logic tính giảm giá - sử dụng đúng enum từ backend
         let giamGia = 0;
-        switch (response.data.loaiKhuyenMai) {
+        const khuyenMaiData = response.data.khuyenMai;
+        switch (khuyenMaiData.loaiGiamGia) {
           case 'phan_tram':
-            giamGia = (tongGia * response.data.giaTri) / 100;
+            giamGia = (tongGia * khuyenMaiData.giaTriGiam) / 100;
             break;
           case 'so_tien_co_dinh':
-            giamGia = response.data.giaTri;
+            giamGia = khuyenMaiData.giaTriGiam;
             break;
           case 'tuy_chon_mien_phi':
             giamGia = 0; // Không giảm giá, chỉ miễn phí tùy chọn
@@ -600,8 +659,8 @@ const VehicleConfigurator: React.FC = () => {
         setGiaSauKhuyenMai(giaSauKhuyenMai);
         
         console.log('Khuyến mãi áp dụng:', {
-          loaiKhuyenMai: response.data.loaiKhuyenMai,
-          giaTri: response.data.giaTri,
+          loaiKhuyenMai: khuyenMaiData.loaiGiamGia,
+          giaTri: khuyenMaiData.giaTriGiam,
           giamGia: giamGia,
           giaSauKhuyenMai: giaSauKhuyenMai
         });
@@ -619,14 +678,17 @@ const VehicleConfigurator: React.FC = () => {
 
   // Cập nhật cấu hình khi thay đổi - Sửa để bao gồm nội thất
   useEffect(() => {
-    if (cauHinhHienTai.idMauSac > 0) {
+    if (selectedColor) {
       tinhTongGia();
     }
-  }, [cauHinhHienTai.idMauSac, cauHinhHienTai.danhSachIdTuyChon, cauHinhHienTai.idNoiThat]);
+  }, [selectedColor, selectedTuyChon, selectedNoiThat, selectedBanhXe]);
 
   // Xử lý chọn màu sắc - SỬA: Không cần load lại hình ảnh nữa
   const handleChonMauSac = async (mauSac: MauSac) => {
     console.log('Chọn màu sắc:', mauSac);
+    setSelectedColor(mauSac);
+    
+    // Cập nhật cấu hình hiện tại
     setCauHinhHienTai(prev => ({
       ...prev,
       idMauSac: mauSac.id
@@ -638,47 +700,58 @@ const VehicleConfigurator: React.FC = () => {
 
   // Xử lý chọn tùy chọn
   const handleChonTuyChon = (tuyChonId: number) => {
-    setCauHinhHienTai(prev => {
-      const danhSachMoi = prev.danhSachIdTuyChon.includes(tuyChonId)
-        ? prev.danhSachIdTuyChon.filter(id => id !== tuyChonId)
-        : [...prev.danhSachIdTuyChon, tuyChonId];
+    setSelectedTuyChon(prev => {
+      const danhSachMoi = prev.includes(tuyChonId)
+        ? prev.filter(id => id !== tuyChonId)
+        : [...prev, tuyChonId];
       
-      return {
-        ...prev,
+      // Cập nhật cấu hình hiện tại
+      setCauHinhHienTai(prevCauHinh => ({
+        ...prevCauHinh,
         danhSachIdTuyChon: danhSachMoi
-      };
+      }));
+      
+      return danhSachMoi;
     });
   };
 
   // Xử lý chọn nội thất
   const handleChonNoiThat = (noiThatId: number) => {
+    const noiThat = danhSachNoiThat.find(n => n.id === noiThatId) || null;
+    setSelectedNoiThat(noiThat);
+    
+    // Cập nhật cấu hình hiện tại
     setCauHinhHienTai(prev => ({
       ...prev,
-      idNoiThat: noiThatId
+      idNoiThat: noiThat?.id
     }));
   };
 
   const handleChonBanhXe = (banhXeId: number) => {
+    const banhXe = danhSachBanhXe.find(b => b.id === banhXeId) || null;
+    setSelectedBanhXe(banhXe);
+    
+    // Cập nhật cấu hình hiện tại
     setCauHinhHienTai(prev => ({
       ...prev,
-      idBanhXe: banhXeId
+      idBanhXe: banhXe?.id
     }));
   };
 
   // Thêm function validation
   const validateCauHinh = () => {
-    if (!cauHinhHienTai.idMau || !cauHinhHienTai.idMauSac) {
-      message.error("Vui lòng chọn mẫu xe và màu sắc");
+    if (!mauXe || !selectedColor) {
+      showNotification('error', "Vui lòng chọn mẫu xe và màu sắc", "", 3);
       return false;
     }
     
     if (!isAuthenticated || !user) {
-      message.error("Vui lòng đăng nhập để lưu cấu hình");
+      showNotification('error', "Vui lòng đăng nhập để lưu cấu hình", "", 3);
       return false;
     }
     
     if (!cauHinhHienTai.tongGia || cauHinhHienTai.tongGia <= 0) {
-      message.error("Vui lòng tính giá trước khi lưu");
+      showNotification('error', "Vui lòng tính giá trước khi lưu", "", 3);
       return false;
     }
     
@@ -693,7 +766,7 @@ const VehicleConfigurator: React.FC = () => {
         return null;
       }
 
-      setSaving(true);
+      setIsSaving(true);
       
       // Tạo object cấu hình với đầy đủ thông tin
       const cauHinhData = {
@@ -709,9 +782,9 @@ const VehicleConfigurator: React.FC = () => {
       
       console.log('Gửi dữ liệu cấu hình:', cauHinhData);
       
-      const response = await cauHinhService.createCauHinh(cauHinhData);
+      const response = await cauHinhService.cauHinhService.createCauHinh(cauHinhData);
       
-      message.success("Đã lưu cấu hình thành công!");
+      showNotification('success', "Đã lưu cấu hình thành công!", "", 3);
       return response.id;
     } catch (error: any) {
       console.error("Lỗi khi lưu cấu hình:", error);
@@ -723,24 +796,24 @@ const VehicleConfigurator: React.FC = () => {
         
         if (error.response.status === 400) {
           const errorMessage = error.response.data.message || 'Dữ liệu không hợp lệ';
-          message.error(`Lỗi validation: ${errorMessage}`);
+          showNotification('error', `Lỗi validation: ${errorMessage}`, "", 3);
         } else if (error.response.status === 401) {
-          message.error('Vui lòng đăng nhập để sử dụng tính năng này');
+          showNotification('error', 'Vui lòng đăng nhập để sử dụng tính năng này', "", 3);
         } else if (error.response.status === 403) {
-          message.error('Bạn không có quyền truy cập tính năng này');
+          showNotification('error', 'Bạn không có quyền truy cập tính năng này', "", 3);
         } else {
-          message.error(`Lỗi server: ${error.response.data.message || 'Không thể lưu cấu hình'}`);
+          showNotification('error', `Lỗi server: ${error.response.data.message || 'Không thể lưu cấu hình'}`, "", 3);
         }
       } else if (error.request) {
         console.error('Request error:', error.request);
-        message.error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng');
+        showNotification('error', 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng', "", 3);
       } else {
-        message.error('Lỗi không xác định: ' + error.message);
+        showNotification('error', 'Lỗi không xác định: ' + error.message, "", 3);
       }
       
       return null;
     } finally {
-      setSaving(false);
+      setIsSaving(false);
     }
   };
 
@@ -749,18 +822,17 @@ const VehicleConfigurator: React.FC = () => {
     try {
       // Kiểm tra xem user đã đăng nhập chưa
       if (!isAuthenticated || !user) {
-        message.error("Vui lòng đăng nhập để xuất PDF");
+        showNotification('error', "Vui lòng đăng nhập để xuất PDF", "", 3);
         return;
       }
 
       // Hiển thị loading
-      const hideLoading = message.loading('Đang tạo PDF...', 0);
+      showNotification('info', 'Đang tạo PDF...', "", 0); // Thay "loading" bằng "info"
       
       // Lưu cấu hình trước
       const configId = await handleLuuCauHinh();
       if (!configId) {
-        hideLoading();
-        message.error('Không thể lưu cấu hình');
+        showNotification('error', 'Không thể lưu cấu hình', "", 3);
         return;
       }
       
@@ -794,20 +866,19 @@ const VehicleConfigurator: React.FC = () => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
         
-        hideLoading();
-        message.success('Đã xuất PDF thành công!');
+        showNotification('success', 'Đã xuất PDF thành công!', "", 3);
         
       } catch (downloadError) {
         console.error("Lỗi khi download PDF:", downloadError);
         
         // Fallback: mở trong tab mới
         window.open(pdfUrl, '_blank');
-        message.success({ content: 'Đã mở PDF trong tab mới!', key: 'pdf' });
+        showNotification('success', 'Đã mở PDF trong tab mới!', "", 3);
       }
       
     } catch (error) {
       console.error("Lỗi khi xuất PDF:", error);
-      message.error({ content: 'Không thể xuất PDF: ' + (error as any).message, key: 'pdf' });
+      showNotification('error', 'Không thể xuất PDF: ' + (error as any).message, "", 3);
     }
   };
 
@@ -818,23 +889,21 @@ const VehicleConfigurator: React.FC = () => {
       if (configId) {
         const shareUrl = `${window.location.origin}/quotation/${configId}`;
         await navigator.clipboard.writeText(shareUrl);
-        message.success("Đã sao chép link chia sẻ!");
+        showNotification('success', "Đã sao chép link chia sẻ!", "", 3);
       }
     } catch (error) {
-      message.error("Không thể chia sẻ cấu hình");
+      showNotification('error', "Không thể chia sẻ cấu hình", "", 3);
     }
   };
 
   // Thêm function để retry load data
   const retryLoadData = async () => {
-    message.loading('Đang thử lại...', 0);
+    showNotification('info', 'Đang thử lại...', "", 0); // Thay "loading" bằng "info"
     try {
       await loadInitialData();
-      message.destroy();
-      message.success('Đã tải lại dữ liệu thành công!');
+      showNotification('success', 'Đã tải lại dữ liệu thành công!', "", 3);
     } catch (error) {
-      message.destroy();
-      message.error('Không thể tải lại dữ liệu');
+      showNotification('error', 'Không thể tải lại dữ liệu', "", 3);
     }
   };
 
@@ -1285,25 +1354,28 @@ const VehicleConfigurator: React.FC = () => {
     );
   }
 
-  // THÊM function xử lý đặt hàng ngay
+  // function xử lý đặt hàng ngay
   const handleDatHangNgay = async () => {
     try {
       // Kiểm tra xem user đã đăng nhập chưa
       if (!isAuthenticated || !user) {
-        message.error("Vui lòng đăng nhập để đặt hàng");
+        showNotification('error', "Vui lòng đăng nhập để đặt hàng", "", 3);
         return;
       }
 
       // Kiểm tra cấu hình đã hoàn thành chưa
-      if (!cauHinhHienTai.idMauSac || cauHinhHienTai.tongGia <= 0) {
-        message.error("Vui lòng hoàn thành cấu hình xe trước khi đặt hàng");
+      if (!selectedColor || cauHinhHienTai.tongGia <= 0) {
+        showNotification('error', "Vui lòng hoàn thành cấu hình xe trước khi đặt hàng", "", 3);
         return;
       }
 
+      setOrderLoading(true);
+      
       // Lưu cấu hình trước
       const configId = await handleLuuCauHinh();
       if (!configId) {
-        message.error('Không thể lưu cấu hình');
+        showNotification('error', 'Không thể lưu cấu hình', "", 3);
+        setOrderLoading(false);
         return;
       }
 
@@ -1317,7 +1389,9 @@ const VehicleConfigurator: React.FC = () => {
 
     } catch (error) {
       console.error("Lỗi khi đặt hàng:", error);
-      message.error("Không thể đặt hàng");
+      showNotification('error', "Không thể đặt hàng", "", 3);
+    } finally {
+      setOrderLoading(false);
     }
   };
 

@@ -61,6 +61,9 @@ interface CauHinhTuyChinh {
     ten: string;
     gia: number;
   }>;
+  mauXe?: {
+    conHang: boolean;
+  };
 }
 
 interface DaiLy {
@@ -112,6 +115,7 @@ const OrderForm: React.FC = () => {
   const [selectedPromotion, setSelectedPromotion] = useState<number | null>(null);
   const [searchPromotion, setSearchPromotion] = useState('');
   const [filteredPromotions, setFilteredPromotions] = useState<any[]>([]);
+  const [isInStock, setIsInStock] = useState<boolean>(true);
 
   // Danh sách phương thức thanh toán online
   const paymentMethods: PaymentMethod[] = [
@@ -211,14 +215,25 @@ const OrderForm: React.FC = () => {
     }
   }, [user, form]);
 
+
   const loadInitialData = async () => {
     try {
       setLoading(true);
       
       // Load cấu hình
       const configResponse = await axios.get(`${BACKEND_URL}/cau-hinh/${configId}`);
-      setCauHinh(configResponse.data);
-      setGiaSauKhuyenMai(configResponse.data.tongGia || 0);
+      const configData = configResponse.data;
+      setCauHinh(configData);
+      setGiaSauKhuyenMai(configData.tongGia || 0);
+      
+      // Kiểm tra trạng thái còn hàng từ thông tin mẫu xe
+      if (configData.mauXe && !configData.mauXe.conHang) {
+        setIsInStock(false);
+        message.error("Rất tiếc, mẫu xe này vừa hết hàng. Quý khách thông cảm.", 3);
+        setTimeout(() => {
+          navigate('/models');
+        }, 3000);
+      }
       
       // Load danh sách đại lý
       const daiLyResponse = await axios.get(`${BACKEND_URL}/dai-ly`);
@@ -1040,6 +1055,30 @@ const OrderForm: React.FC = () => {
     return (
       <div className="error-container">
         <Text type="danger">Không tìm thấy cấu hình xe</Text>
+      </div>
+    );
+  }
+
+  if (!isInStock) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        padding: 20
+      }}>
+        <Alert 
+          message="Sản phẩm tạm thời hết hàng" 
+          description="Rất tiếc, mẫu xe này vừa hết hàng. Quý khách vui lòng quay lại sau hoặc chọn mẫu khác."
+          type="warning"
+          showIcon
+          style={{ marginBottom: 16, width: '100%', maxWidth: 500 }}
+        />
+        <Button type="primary" onClick={() => navigate('/models')}>
+          Xem các mẫu khác
+        </Button>
       </div>
     );
   }
