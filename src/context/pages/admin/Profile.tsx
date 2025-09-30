@@ -443,7 +443,7 @@ const Profile: React.FC = () => {
       {/* Team chat nội bộ – Instagram style two-pane */}
       <Card
         title={<span style={{ color: '#0f172a', fontWeight: 800 }}>Team chat nội bộ</span>}
-        styles={{ header: { borderBottom: 'none', padding: '12px 16px' }, body: { padding: 0 } }}
+        styles={{ header: { borderBottom: 'none', padding: '12px 16px', marginTop: '-30px' }, body: { padding: 0 } }}
         style={{
           maxWidth: 1100,
           width: '90vw',
@@ -453,7 +453,7 @@ const Profile: React.FC = () => {
           boxShadow: '0 8px 32px rgba(34, 197, 94, 0.08)'
         }}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', height: '72vh' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '330px 1fr', height: '50vh' }}>
           {/* Sidebar (threads) */}
           <div style={{ borderRight: '1px solid #eef2f7', padding: 16, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
             <List

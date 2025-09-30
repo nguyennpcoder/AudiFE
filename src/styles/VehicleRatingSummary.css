@@ -10,19 +10,60 @@
   opacity: 0.6;
 }
 
+.rating-stars {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.rating-stars.large {
+  font-size: 20px;
+}
+
+.rating-stars.small {
+  font-size: 14px;
+}
+
 .rating-count {
   color: #666;
   font-size: 11px;
   margin-left: 4px;
 }
 
-/* Size variations */
+/* Fix sao không hiển thị màu vàng */
 .rating-summary .ant-rate {
-  font-size: 12px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.rating-summary .ant-rate.ant-rate-large {
+  font-size: 20px;
 }
 
 .rating-summary .ant-rate.ant-rate-small {
-  font-size: 10px;
+  font-size: 14px;
+}
+
+.rating-summary .ant-rate .ant-rate-star {
+  margin-right: 2px;
+}
+
+/* Đảm bảo các sao được đánh giá hiển thị màu vàng */
+.rating-summary .ant-rate .ant-rate-star-full .ant-rate-star-first,
+.rating-summary .ant-rate .ant-rate-star-full .ant-rate-star-second {
+  color: #fadb14;
+}
+
+.rating-summary .ant-rate .ant-rate-star-half .ant-rate-star-first {
+  color: #fadb14;
+}
+
+.rating-summary .ant-rate .ant-rate-star-half .ant-rate-star-second {
+  color: #f0f0f0;
+}
+
+.rating-summary .ant-rate .ant-rate-star-zero .ant-rate-star-first, 
+.rating-summary .ant-rate .ant-rate-star-zero .ant-rate-star-second {
+  color: #f0f0f0;
 }
 
 /* Hover effects */
@@ -40,29 +81,27 @@
     font-size: 10px;
   }
   
-  .rating-summary .ant-rate {
-    font-size: 11px;
+  .rating-stars {
+    font-size: 14px;
   }
   
-  .rating-summary .ant-rate.ant-rate-small {
-    font-size: 9px;
-  }
-}
-
-@media (max-width: 480px) {
-  .rating-summary {
-    gap: 2px;
+  .rating-stars.large {
+    font-size: 16px;
   }
   
-  .rating-count {
-    font-size: 9px;
+  .rating-stars.small {
+    font-size: 12px;
   }
   
   .rating-summary .ant-rate {
-    font-size: 10px;
+    font-size: 14px;
+  }
+  
+  .rating-summary .ant-rate.ant-rate-large {
+    font-size: 16px;
   }
   
   .rating-summary .ant-rate.ant-rate-small {
-    font-size: 8px;
+    font-size: 12px;
   }
 }

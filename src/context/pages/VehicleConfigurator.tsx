@@ -190,7 +190,7 @@ const VehicleConfigurator: React.FC = () => {
       navigate('/login');
       return;
     }
-  }, [isAuthenticated, navigate, id]);
+  }, [isAuthenticated, navigate]);
 
   // Hiển thị màn hình bảo vệ nếu chưa đăng nhập
   if (!isAuthenticated) {
@@ -271,10 +271,10 @@ const VehicleConfigurator: React.FC = () => {
       // Check if product is in stock
       if (!mauXeResponse.data.conHang) {
         setIsInStock(false);
-        showNotification('error', "Rất tiếc, mẫu này vừa hết hàng. Quý khách vui lòng quay lại sau hoặc chọn mẫu khác.", "", 3);
+        showNotification('error', "Rất tiếc, mẫu này vừa hết hàng. Quý khách vui lòng quay lại sau hoặc chọn mẫu khác.", "", 2000);
         setTimeout(() => {
           navigate('/models');
-        }, 3000);
+        }, 1000);
         return;
       }
       setIsInStock(true);

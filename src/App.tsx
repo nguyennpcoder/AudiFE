@@ -49,6 +49,7 @@ import MyOrders from './context/pages/MyOrders';
 import MyAccount from './context/pages/MyAccount';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import DealershipManagement from './context/pages/admin/DealershipManagement';
+import RatingManagement from './context/pages/admin/RatingManagement';
 import { useScrollToTop } from './hooks/useScrollToTop';
 import useUserStatusChecker from './hooks/useUserStatusChecker';
 
@@ -75,7 +76,8 @@ function App() {
     '/admin/support',
     '/admin/profile',
     '/admin/settings',
-    '/admin/activity-logs'
+    '/admin/activity-logs',
+    '/admin/ratings'
   ];
   
   const shouldShowHeader = !authRoutes.includes(location.pathname) && !adminRoutes.includes(location.pathname);
@@ -239,6 +241,16 @@ function App() {
                 } />
 
                 <Route path="/admin/blog" element={
+                  <ThemeProvider>
+                    <AdminLayout>
+                      <RoleBasedRoute allowedRoles={['QUAN_TRI']}>
+                        <AdminDashboard />
+                      </RoleBasedRoute>
+                    </AdminLayout>
+                  </ThemeProvider>
+                } />
+
+                <Route path="/admin/ratings" element={
                   <ThemeProvider>
                     <AdminLayout>
                       <RoleBasedRoute allowedRoles={['QUAN_TRI']}>

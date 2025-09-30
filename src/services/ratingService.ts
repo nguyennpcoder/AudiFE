@@ -37,6 +37,15 @@ export interface TrungBinhSaoResponse {
   trungBinhSao: number;
 }
 
+// Helper function to get auth headers
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` })
+  };
+};
+
 class RatingService {
   // Get ratings for a specific vehicle
   async getDanhGiaByMauXe(
@@ -83,9 +92,7 @@ class RatingService {
     try {
       const response = await fetch(`${BACKEND_URL}/api/v1/danh-gia`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(ratingData)
       });
       
@@ -108,8 +115,14 @@ class RatingService {
     size: number = 10
   ): Promise<DanhGiaResponse> {
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(
-        `${BACKEND_URL}/api/v1/danh-gia/nguoi-dung/${idNguoiDung}?page=${page}&size=${size}`
+        `${BACKEND_URL}/api/v1/danh-gia/nguoi-dung/${idNguoiDung}?page=${page}&size=${size}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
       );
       
       if (!response.ok) {

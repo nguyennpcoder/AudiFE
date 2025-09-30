@@ -24,7 +24,9 @@ import {
   EyeOutlined,
   EditOutlined,
   DeleteOutlined,
-  LogoutOutlined
+  
+  LogoutOutlined,
+  StarOutlined
 } from '@ant-design/icons';
 // import './AdminSidebar.css'; // Tạo file này để custom lại style cho giống 100%
 import DashboardHeader from './DashboardHeader';
@@ -38,6 +40,7 @@ import BlogManagement from './BlogManagement';
 import DealershipManagement from './DealershipManagement';
 import ActivityLog from './ActivityLog';
 import SupportManagement from './SupportManagement';
+import RatingManagement from './RatingManagement';
 // import các component khác nếu có...
 
 const { Sider } = Layout;
@@ -139,6 +142,7 @@ const Dashboard: React.FC = () => {
       '/admin/orders': 'orders',
       '/admin/dealers': 'dealers',
       '/admin/inventory': 'inventory',
+      '/admin/ratings': 'ratings',
       '/admin/marketing': 'marketing',
       '/admin/blog': 'blog',
       '/admin/support': 'support',
@@ -507,6 +511,7 @@ const Dashboard: React.FC = () => {
                   'orders': '/admin/orders',
                   'dealers': '/admin/dealers',
                   'inventory': '/admin/inventory',
+                  'ratings': '/admin/ratings',
                   'marketing': '/admin/marketing',
                   'blog': '/admin/blog',
                   'support': '/admin/support',
@@ -534,6 +539,9 @@ const Dashboard: React.FC = () => {
               </Menu.Item>
               <Menu.Item key="inventory" icon={<HomeOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
                 Quản lý tồn kho
+              </Menu.Item>
+              <Menu.Item key="ratings" icon={<StarOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
+                Quản lý đánh giá
               </Menu.Item>
               <Menu.Item key="marketing" icon={<SoundOutlined style={{ fontSize: 24, color: '#1890ff' }} />}>
 
@@ -997,6 +1005,11 @@ const Dashboard: React.FC = () => {
         {selectedMenu === 'dealers' && (
           <AnimatedPage animation="right">
             <DealershipManagement />
+          </AnimatedPage>
+        )}
+        {selectedMenu === 'ratings' && (
+          <AnimatedPage animation="center">
+            <RatingManagement />
           </AnimatedPage>
         )}
         {selectedMenu === 'profile' && (

@@ -123,6 +123,7 @@ const ProductDetail: React.FC<{}> = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isInStock, setIsInStock] = useState<boolean>(true);
+  const [outOfStockNotified, setOutOfStockNotified] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState('exterior');
   const [selectedColor, setSelectedColor] = useState<MauSac | null>(null);
   const [selectedInteriorOption, setSelectedInteriorOption] = useState<number>(0);
@@ -236,19 +237,19 @@ const ProductDetail: React.FC<{}> = () => {
   useEffect(() => {
     // Luôn luôn cuộn lên đầu trang khi component được mount
     window.scrollTo(0, 0);
-    
-    // Kiểm tra trạng thái sản phẩm khi đã load xong
-    if (!isLoading && product) {
-      setIsInStock(product.conHang);
-      if (!product.conHang) {
-        // Hiển thị thông báo và chuyển hướng về trang models
-        showNotification('error', "Rất tiếc, mẫu này vừa hết hàng. Quý khách thông cảm.");
-        setTimeout(() => {
-          navigate('/models');
-        }, 3000);
-      }
+  }, []);
+
+  // Kiểm tra trạng thái sản phẩm khi đã load xong
+  useEffect(() => {
+    if (!isLoading && product && !product.conHang && !outOfStockNotified) {
+      // Hiển thị thông báo và chuyển hướng về trang models
+      setOutOfStockNotified(true);
+      showNotification('error', "Rất tiếc, mẫu này vừa hết hàng. Quý khách vui lòng quay lại sau hoặc chọn mẫu khác.", "", 3000);
+      setTimeout(() => {
+        navigate('/models');
+      }, 1000);
     }
-  }, [product, isLoading, navigate, showNotification]);
+  }, [product, isLoading, navigate, showNotification, outOfStockNotified]);
 
   const [noiThatOptions, setNoiThatOptions] = useState<NoiThatOption[]>([]);
   const [selectedNoiThat, setSelectedNoiThat] = useState<NoiThatOption | null>(null);

@@ -79,12 +79,23 @@ const VehicleRating: React.FC<VehicleRatingProps> = ({
         daMua: values.daMua || false
       };
 
-      await ratingService.themDanhGia(ratingData);
+      const newRating = await ratingService.themDanhGia(ratingData);
       
       message.success('Đánh giá của bạn đã được gửi và đang chờ duyệt');
       form.resetFields();
       setShowRatingForm(false);
-      fetchRatings(); // Refresh ratings
+      
+      // Thêm đánh giá mới vào danh sách để hiển thị ngay lập tức
+      if (newRating) {
+        setDanhGiaList(prev => [newRating, ...prev]);
+        setUserHasRated(true);
+        setUserRating(newRating);
+        
+        // Cập nhật lại trung bình sao
+        const updatedData = await ratingService.getDanhGiaByMauXe(mauXeId, 0, 10);
+        setTrungBinhSao(updatedData.trungBinhSao || 0);
+      }
+      
       onRatingSubmit?.();
     } catch (error: any) {
       console.error('Error submitting rating:', error);

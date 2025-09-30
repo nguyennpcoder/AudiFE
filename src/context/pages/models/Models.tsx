@@ -318,7 +318,7 @@ const ModelsPage: React.FC = () => {
                         <VehicleRatingSummary 
                           mauXeId={mauXe.id} 
                           showCount={true} 
-                          size="small" 
+                          size="large" 
                         />
                       </div>
                       
