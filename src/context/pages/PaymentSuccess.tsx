@@ -18,109 +18,187 @@ const PaymentSuccess: React.FC = () => {
   const [isPaymentSuccessful, setIsPaymentSuccessful] = useState<boolean>(false);
 
   useEffect(() => {
-    const orderId = searchParams.get('orderId');
-    const vnpay = searchParams.get('vnpay');
-    const zalopay = searchParams.get('zalopay');
-    const momo = searchParams.get('momo');
-    
-    // Determine payment method first
-    let detectedPaymentMethod = '';
-    if (vnpay === '1') {
-      detectedPaymentMethod = 'VNPay';
-    } else if (zalopay === '1') {
-      detectedPaymentMethod = 'ZaloPay';
-    } else if (momo === '1') {
-      detectedPaymentMethod = 'MoMo';
-    }
-    setPaymentMethod(detectedPaymentMethod);
-
-    console.log('Payment params:', { orderId, vnpay, zalopay, momo, detectedPaymentMethod });
-
-    // Handle VNPay
-    if (vnpay === '1') {
-      const vnpResponseCode = searchParams.get('vnp_ResponseCode');
-      const vnpTransactionStatus = searchParams.get('vnp_TransactionStatus');
-      const vnpTransactionNo = searchParams.get('vnp_TransactionNo');
+    const fetchData = async () => {
+      const orderId = searchParams.get('orderId');
+      const vnpay = searchParams.get('vnpay');
+      const zalopay = searchParams.get('zalopay');
+      const momo = searchParams.get('momo');
       
-      console.log('VNPay params:', { vnpResponseCode, vnpTransactionStatus, vnpTransactionNo });
-      
-      // VNPay success: vnp_ResponseCode = '00' and vnp_TransactionStatus = '00'
-      if (vnpResponseCode === '00') {
-        setIsPaymentSuccessful(true);
-        if (orderId) {
-          updatePaymentStatusOnBackend(orderId, vnpTransactionNo, 'VNPay', '00');
-          loadOrderInfo(orderId, vnpTransactionNo);
-          checkPaymentStatusWithoutOverride(orderId);
-        } else {
-          setLoading(false);
-        }
-        return;
-      } else {
-        // VNPay failed
-        navigate('/payment/cancel?vnpay=1&vnp_ResponseCode=' + vnpResponseCode);
-        return;
+      // Determine payment method first
+      let detectedPaymentMethod = '';
+      if (vnpay === '1') {
+        detectedPaymentMethod = 'VNPay';
+      } else if (zalopay === '1') {
+        detectedPaymentMethod = 'ZaloPay';
+      } else if (momo === '1') {
+        detectedPaymentMethod = 'MoMo';
       }
-    }
+      setPaymentMethod(detectedPaymentMethod);
 
-    // Handle ZaloPay
-    if (zalopay === '1') {
-      const zaloStatus = searchParams.get('status');
-      const zpTransId = searchParams.get('zp_trans_id');
-      console.log('ZaloPay status:', zaloStatus);
-      
-      if (zaloStatus) {
-        // ZaloPay status: 1 = success, -49 = cancelled, other = failed
-        if (zaloStatus === '1') {
+      console.log('Payment params:', { orderId, vnpay, zalopay, momo, detectedPaymentMethod });
+
+      // Handle VNPay
+      if (vnpay === '1') {
+        const vnpResponseCode = searchParams.get('vnp_ResponseCode');
+        const vnpTransactionStatus = searchParams.get('vnp_TransactionStatus');
+        const vnpTransactionNo = searchParams.get('vnp_TransactionNo');
+        
+        console.log('VNPay params:', { vnpResponseCode, vnpTransactionStatus, vnpTransactionNo });
+        
+        // VNPay success: vnp_ResponseCode = '00' and vnp_TransactionStatus = '00'
+        if (vnpResponseCode === '00') {
           setIsPaymentSuccessful(true);
           if (orderId) {
-            updatePaymentStatusOnBackend(orderId, zpTransId, 'ZaloPay', 'SUCCESS');
-            loadOrderInfo(orderId, zpTransId);
+            updatePaymentStatusOnBackend(orderId, vnpTransactionNo, 'VNPay', '00');
+            loadOrderInfo(orderId, vnpTransactionNo);
             checkPaymentStatusWithoutOverride(orderId);
           } else {
-          setLoading(false);
-        }
+            setLoading(false);
+          }
           return;
         } else {
-          // Redirect to cancel page for failed/cancelled ZaloPay
-          navigate('/payment/cancel?zalopay=1&status=' + zaloStatus);
+          // VNPay failed
+          navigate('/payment/cancel?vnpay=1&vnp_ResponseCode=' + vnpResponseCode);
           return;
         }
       }
-    }
 
-    // Handle MoMo
-    if (momo === '1') {
-      const momoResultCode = searchParams.get('resultCode');
-      const momoMessage = searchParams.get('message');
-      const momoTransId = searchParams.get('transId');
-      
-      console.log('MoMo params:', { momoResultCode, momoMessage, momoTransId });
-      
-      // MoMo resultCode: 0 = success
-      if (momoResultCode === '0' || momoMessage === 'Successful.') {
-        setIsPaymentSuccessful(true);
-        if (orderId) {
-          updatePaymentStatusOnBackend(orderId, momoTransId, 'MoMo', 'SUCCESS');
-          loadOrderInfo(orderId, momoTransId);
-          checkPaymentStatusWithoutOverride(orderId);
-        } else {
-          setLoading(false);
+      // Handle ZaloPay
+      if (zalopay === '1') {
+        const zaloStatus = searchParams.get('status');
+        const zpTransId = searchParams.get('zp_trans_id');
+        console.log('ZaloPay status:', zaloStatus);
+        
+        if (zaloStatus) {
+          // ZaloPay status: 1 = success, -49 = cancelled, other = failed
+          if (zaloStatus === '1') {
+            setIsPaymentSuccessful(true);
+            if (orderId) {
+              updatePaymentStatusOnBackend(orderId, zpTransId, 'ZaloPay', 'SUCCESS');
+              loadOrderInfo(orderId, zpTransId);
+              checkPaymentStatusWithoutOverride(orderId);
+            } else {
+            setLoading(false);
+          }
+            return;
+          } else {
+            // Redirect to cancel page for failed/cancelled ZaloPay
+            navigate('/payment/cancel?zalopay=1&status=' + zaloStatus);
+            return;
+          }
         }
-        return;
-      } else if (momoResultCode && momoResultCode !== '0') {
-        // Redirect to cancel page for failed MoMo
-        navigate('/payment/cancel?momo=1&resultCode=' + momoResultCode);
-        return;
       }
-    }
 
-    // Handle other cases or when no specific payment method is detected
-    if (orderId) {
-      loadOrderInfo(orderId, null);
-      checkPaymentStatus(orderId);
-    } else {
-      setLoading(false);
-    }
+      // Handle MoMo
+      if (momo === '1') {
+        const momoResultCode = searchParams.get('resultCode');
+        const momoOrderId = searchParams.get('orderId');
+        const momoTransId = searchParams.get('transId');
+        const momoAmount = searchParams.get('amount');
+        
+        console.log('MoMo params:', { momoResultCode, momoOrderId, momoTransId, momoAmount });
+        
+        // MoMo success: resultCode = '0'
+        if (momoResultCode === '0') {
+          setIsPaymentSuccessful(true);
+          
+          // Always derive a numeric orderId for MoMo (backend expects a number)
+          // MoMo orderId format: PARTNERCODE_config_TIMESTAMP (when creating from config)
+          // or PARTNERCODE_ORDERID_TIMESTAMP (when using existing order)
+          let effectiveOrderId: string | null = null;
+          let isConfigFlow = false;
+          if (momoOrderId) {
+            const parts = momoOrderId.split('_');
+            if (parts.length > 2) {
+              // If second segment is 'config', use the timestamp; otherwise use the numeric id in segment 2
+              isConfigFlow = parts[1] === 'config';
+              effectiveOrderId = isConfigFlow ? parts[2] : parts[1];
+            } else {
+              effectiveOrderId = momoOrderId;
+            }
+          }
+          // Fallback to generic orderId only if it looks numeric
+          if (!effectiveOrderId) {
+            const numericOnly = orderId && /^\d+$/.test(orderId) ? orderId : null;
+            effectiveOrderId = numericOnly;
+          }
+          
+          console.log('Effective orderId for MoMo:', effectiveOrderId, 'isConfigFlow:', isConfigFlow);
+          
+          // Only call finalize fallback for config flow (when order wasn't created upfront)
+          if (isConfigFlow) {
+            try {
+              await axios.post(`${BACKEND_URL}/thanh-toan/momo/finalize-from-return`, {
+                resultCode: momoResultCode,
+                orderId: momoOrderId,
+                transId: momoTransId,
+                amount: momoAmount,
+                extraData: searchParams.get('extraData') || ''
+              });
+            } catch (e) {
+              console.warn('Finalize-from-return failed (non-fatal):', e);
+            }
+          }
+          
+          // If MoMo created order from config, backend IPN will create order/payment.
+          // We cannot call update-payment-status or fetch order immediately.
+          if (effectiveOrderId && !isConfigFlow) {
+            // First try to update the payment status
+            try {
+              await updatePaymentStatusOnBackend(
+                effectiveOrderId,
+                momoTransId || '',
+                'momo',
+                'SUCCESS'
+              );
+              console.log('Payment status updated successfully');
+            } catch (error) {
+              console.error('Error updating payment status:', error);
+            }
+            
+            // Then try to load order info with retries
+            let retryCount = 0;
+            const maxRetries = 3;
+            
+            const loadOrderWithRetry = async () => {
+              try {
+                await loadOrderInfo(effectiveOrderId, momoTransId || '');
+                await checkPaymentStatus(effectiveOrderId);
+              } catch (error) {
+                console.error(`Error loading order info (attempt ${retryCount + 1}):`, error);
+                if (retryCount < maxRetries) {
+                  retryCount++;
+                  setTimeout(loadOrderWithRetry, 2000); // Retry after 2 seconds
+                } else {
+                  // Even if we can't load the order, still show success
+                  setLoading(false);
+                }
+              }
+            };
+            
+            loadOrderWithRetry();
+          } else {
+            // Config flow or missing orderId: show success directly and let IPN create order/payment in backend
+            setLoading(false);
+          }
+          return; // Important: stop processing after handling MoMo
+        } else {
+          // MoMo payment failed
+          navigate('/payment/cancel?momo=1&resultCode=' + (momoResultCode || '99'));
+          return;
+        }
+      }
+
+      // Handle other cases or when no specific payment method is detected
+      if (orderId) {
+        loadOrderInfo(orderId, null);
+        checkPaymentStatus(orderId);
+      } else {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [searchParams, navigate]);
 
   // Function to update payment status on backend
@@ -133,8 +211,8 @@ const PaymentSuccess: React.FC = () => {
     try {
       const updateData = {
         orderId: orderId,
-        transactionId: transactionId,
-        paymentMethod: paymentMethod,
+        transactionId: transactionId || 'unknown',
+        paymentMethod: paymentMethod.toLowerCase(), // Ensure lowercase for backend
         status: status,
         amount: searchParams.get('amount') || searchParams.get('vnp_Amount'), // VNPay uses vnp_Amount
         timestamp: new Date().toISOString()
@@ -143,16 +221,11 @@ const PaymentSuccess: React.FC = () => {
       console.log('Updating payment status:', updateData);
       
       const response = await axios.post(`${BACKEND_URL}/thanh-toan/update-payment-status`, updateData);
-      
-      if (response.data.success) {
-        console.log('Payment status updated successfully');
-      } else {
-        console.error('Failed to update payment status:', response.data.message);
-      }
+      console.log('Payment status update response:', response.data);
+      return response.data;
     } catch (error) {
       console.error('Error updating payment status:', error);
-      // Don't fail the whole process if backend update fails
-      // The user still sees success, but log the error for debugging
+      throw error;
     }
   };
 

@@ -47,6 +47,27 @@ const getAuthHeaders = () => {
 };
 
 class RatingService {
+  // Get all ratings (admin)
+  async getAllDanhGia(
+    page: number = 0,
+    size: number = 10,
+    sortBy: string = 'ngayTao',
+    sortDir: 'asc' | 'desc' = 'desc'
+  ): Promise<DanhGiaResponse> {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/api/v1/danh-gia?page=${page}&size=${size}&sortBy=${sortBy}&sortDir=${sortDir}`,
+        { headers: getAuthHeaders() }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching all ratings:', error);
+      throw error;
+    }
+  }
   // Get ratings for a specific vehicle
   async getDanhGiaByMauXe(
     idMauXe: number, 
@@ -141,9 +162,7 @@ class RatingService {
     try {
       const response = await fetch(`${BACKEND_URL}/api/v1/danh-gia/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(ratingData)
       });
       
@@ -163,7 +182,8 @@ class RatingService {
   async xoaDanhGia(id: number): Promise<void> {
     try {
       const response = await fetch(`${BACKEND_URL}/api/v1/danh-gia/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAuthHeaders(),
       });
       
       if (!response.ok) {
@@ -183,7 +203,8 @@ class RatingService {
   ): Promise<DanhGiaResponse> {
     try {
       const response = await fetch(
-        `${BACKEND_URL}/api/v1/danh-gia/cho-duyet?page=${page}&size=${size}`
+        `${BACKEND_URL}/api/v1/danh-gia/cho-duyet?page=${page}&size=${size}`,
+        { headers: getAuthHeaders() }
       );
       
       if (!response.ok) {
@@ -203,7 +224,8 @@ class RatingService {
       const response = await fetch(
         `${BACKEND_URL}/api/v1/danh-gia/${id}/duyet?approve=${approve}`,
         {
-          method: 'PATCH'
+          method: 'PATCH',
+          headers: getAuthHeaders(),
         }
       );
       
