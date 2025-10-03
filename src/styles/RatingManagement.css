@@ -154,6 +154,17 @@
   margin-top: 16px;
 }
 
+/* Text trong Rating Preview - Màu đen */
+.rating-preview .ant-typography {
+  color: #000 !important;
+}
+
+/* Modal confirm text - Màu đen */
+.ant-modal-confirm-content,
+.ant-modal-body p {
+  color: #000 !important;
+}
+
 /* Table Styles */
 .ant-table-thead > tr > th {
   background: #fafafa;
@@ -267,6 +278,45 @@
 .ant-modal-footer {
   border-top: 1px solid #f0f0f0;
   padding: 12px 24px;
+}
+
+/* Modal Title - Màu đen */
+.ant-modal-header .ant-modal-title {
+  color: #000 !important;
+  font-weight: 600;
+}
+
+/* Nút đóng Modal - Màu đỏ */
+.ant-modal-close {
+  color: #ff4d4f !important;
+}
+
+.ant-modal-close:hover {
+  color: #ff7875 !important;
+  background-color: rgba(255, 77, 79, 0.1) !important;
+}
+
+/* Text trong Rating Detail Modal - Màu đen */
+.rating-detail {
+  color: #000;
+}
+
+.rating-detail .customer-details h4,
+.rating-detail .customer-details .ant-typography {
+  color: #000 !important;
+}
+
+.rating-detail .ant-typography {
+  color: #000 !important;
+}
+
+.rating-detail .ant-typography-secondary {
+  color: #666 !important;
+}
+
+.rating-content h5,
+.rating-content .ant-typography {
+  color: #000 !important;
 }
 
 /* Tag Styles */

@@ -5,6 +5,7 @@ export interface DanhGia {
   id: number;
   idNguoiDung: number;
   tenNguoiDung: string;
+  avatarNguoiDung?: string; // Thêm field này
   idMauXe: number;
   tenMauXe: string;
   soSao: number;
@@ -111,6 +112,10 @@ class RatingService {
   // Submit a new rating
   async themDanhGia(ratingData: DanhGiaRequest): Promise<DanhGia> {
     try {
+      // Debug log để kiểm tra dữ liệu gửi lên backend
+      console.log('RatingService - Sending rating data:', ratingData);
+      console.log('RatingService - Rating value:', ratingData.soSao, 'Type:', typeof ratingData.soSao);
+      
       const response = await fetch(`${BACKEND_URL}/api/v1/danh-gia`, {
         method: 'POST',
         headers: getAuthHeaders(),
@@ -122,7 +127,13 @@ class RatingService {
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
       
-      return await response.json();
+      const result = await response.json();
+      
+      // Debug log để kiểm tra response từ backend
+      console.log('RatingService - Response from backend:', result);
+      console.log('RatingService - Rating value from backend:', result.soSao, 'Type:', typeof result.soSao);
+      
+      return result;
     } catch (error) {
       console.error('Error submitting rating:', error);
       throw error;

@@ -122,7 +122,7 @@ const PromotionBanner: React.FC<PromotionBannerProps> = ({
 
   return (
     <div style={{ marginBottom: '24px' }}>
-      <h3 style={{ marginBottom: '16px', color: '#222' }}>
+      <h3 style={{ marginBottom: '16px', color: 'rgba(255, 255, 255, 0.8)' }}>
         <GiftOutlined style={{ marginRight: '8px', color: '#fa8c16' }} />
         Khuyến mãi hiện tại
       </h3>

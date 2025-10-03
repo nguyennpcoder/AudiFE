@@ -2412,3 +2412,69 @@
   display: none !important;
 }
 
+/* ========================================
+   PROMOTION & RATING SECTIONS - BRIGHT TEXT ON DARK
+   ======================================== */
+
+/* Promotion Section - Dark background with bright text */
+.promotion-section_special {
+  background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+  padding: 60px 0;
+  position: relative;
+}
+
+.promotion-header_special h2 {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 2.5rem;
+  margin-bottom: 32px;
+  text-align: left;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+}
+
+.promotion-content_special {
+  padding: 20px 0;
+}
+
+/* Rating Section - Dark background with bright text */
+.rating-section_special {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  padding: 60px 0 80px;
+  position: relative;
+}
+
+.rating-header_special h2 {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 2.5rem;
+  margin-bottom: 32px;
+  text-align: left;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+}
+
+.rating-content_special {
+  padding: 20px 0;
+}
+
+/* Responsive adjustments for promotion/rating sections */
+@media (max-width: 768px) {
+  .promotion-header_special h2,
+  .rating-header_special h2 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .promotion-header_special h2,
+  .rating-header_special h2 {
+    font-size: 1.8rem;
+  }
+  
+  .promotion-section_special,
+  .rating-section_special {
+    padding: 40px 0;
+  }
+}
+

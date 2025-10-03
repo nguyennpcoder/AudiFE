@@ -9,6 +9,8 @@ import '../../styles/VehicleRating.css';
 const { TextArea } = Input;
 const { Title, Text, Paragraph } = Typography;
 
+// Thêm constant cho BACKEND_URL
+const BACKEND_URL = 'http://localhost:8080';
 
 interface VehicleRatingProps {
   mauXeId: number;
@@ -32,6 +34,41 @@ const VehicleRating: React.FC<VehicleRatingProps> = ({
   const [userHasRated, setUserHasRated] = useState(false);
   const [userRating, setUserRating] = useState<DanhGia | null>(null);
 
+  // Thêm hàm getUserAvatarUrl giống như trong BlogDetail
+  const getUserAvatarUrl = (avatarPath?: string) => {
+    console.log('getUserAvatarUrl called with:', avatarPath);
+    
+    if (!avatarPath || avatarPath === 'null' || avatarPath === 'undefined') {
+      console.log('No avatar path, using default');
+      return '/avatar-default.png';
+    }
+    
+    // If it's already a full URL (from Google, Facebook, etc.), return as is
+    if (avatarPath.startsWith('http')) {
+      console.log('Full URL detected:', avatarPath);
+      return avatarPath;
+    }
+    
+    // If it starts with /, it's a relative path
+    if (avatarPath.startsWith('/')) {
+      const url = `${BACKEND_URL}${avatarPath}`;
+      console.log('Relative path converted to:', url);
+      return url;
+    }
+    
+    // If it contains uploads/images/avatar_user, it's already a full path
+    if (avatarPath.includes('uploads/images/avatar_user/')) {
+      const url = `${BACKEND_URL}/${avatarPath}`;
+      console.log('Full path with uploads converted to:', url);
+      return url;
+    }
+    
+    // Otherwise, assume it's a filename and build the full URL
+    const url = `${BACKEND_URL}/uploads/images/avatar_user/${avatarPath}`;
+    console.log('Filename converted to:', url);
+    return url;
+  };
+
   // Fetch ratings for this vehicle
   const fetchRatings = async () => {
     try {
@@ -40,6 +77,21 @@ const VehicleRating: React.FC<VehicleRatingProps> = ({
       
       setDanhGiaList(data.danhGia || []);
       setTrungBinhSao(data.trungBinhSao || 0);
+      
+      // Debug log để kiểm tra dữ liệu rating
+      console.log('VehicleRating - Raw data from backend:', data);
+      console.log('VehicleRating - Trung binh sao:', data.trungBinhSao, 'Type:', typeof data.trungBinhSao);
+      if (data.danhGia && data.danhGia.length > 0) {
+        data.danhGia.forEach((rating: DanhGia, index: number) => {
+          console.log(`VehicleRating - Rating ${index + 1}:`, {
+            id: rating.id,
+            soSao: rating.soSao,
+            type: typeof rating.soSao,
+            tenNguoiDung: rating.tenNguoiDung,
+            trangThai: rating.trangThai
+          });
+        });
+      }
       
       // Check if current user has already rated
       if (isAuthenticated && user) {
@@ -70,16 +122,37 @@ const VehicleRating: React.FC<VehicleRatingProps> = ({
 
     try {
       setSubmitting(true);
+      
+      // Ensure rating value is a number (support half stars like 2.5, 3.5)
+      const soSaoValue = typeof values.soSao === 'number' ? values.soSao : parseFloat(values.soSao);
+      
+      // Debug log để kiểm tra giá trị rating từ form
+      console.log('VehicleRating - Form values:', values);
+      console.log('VehicleRating - Rating value from form:', soSaoValue, 'Type:', typeof soSaoValue);
+      
+      // Validate rating is between 0.5 and 5.0
+      if (isNaN(soSaoValue) || soSaoValue < 0.5 || soSaoValue > 5) {
+        message.error('Số sao không hợp lệ. Vui lòng chọn từ 0.5 đến 5 sao.');
+        setSubmitting(false);
+        return;
+      }
+      
       const ratingData: DanhGiaRequest = {
         idNguoiDung: user?.userId || 0,
         idMauXe: mauXeId,
-        soSao: values.soSao,
+        soSao: soSaoValue, // Use validated number value
         tieuDe: values.tieuDe,
         noiDung: values.noiDung,
         daMua: values.daMua || false
       };
+      
+      console.log('VehicleRating - Rating data to send:', ratingData);
 
       const newRating = await ratingService.themDanhGia(ratingData);
+      
+      // Debug log để kiểm tra response từ backend
+      console.log('VehicleRating - Response from backend:', newRating);
+      console.log('VehicleRating - Rating value from backend:', newRating?.soSao, 'Type:', typeof newRating?.soSao);
       
       message.success('Đánh giá của bạn đã được gửi và đang chờ duyệt');
       form.resetFields();
@@ -134,10 +207,11 @@ const VehicleRating: React.FC<VehicleRatingProps> = ({
           <div className="rating-overview">
             <div className="average-rating">
               <StarRating 
-                rating={trungBinhSao} 
+                rating={typeof trungBinhSao === 'string' ? parseFloat(trungBinhSao) : trungBinhSao} 
                 size="large" 
                 readonly 
-                showValue 
+                showValue
+                allowHalf
               />
               <Text className="rating-text">
                 {trungBinhSao.toFixed(1)} trên 5 sao
@@ -156,9 +230,10 @@ const VehicleRating: React.FC<VehicleRatingProps> = ({
                 <div className="user-rating-info">
                   <Text>Bạn đã đánh giá: </Text>
                   <StarRating 
-                    rating={userRating?.soSao || 0} 
+                    rating={typeof userRating?.soSao === 'string' ? parseFloat(userRating.soSao) : (userRating?.soSao || 0)} 
                     size="small" 
                     readonly 
+                    allowHalf
                   />
                   <Text type="secondary">
                     ({getStatusTag(userRating?.trangThai || 'cho_duyet')})
@@ -277,14 +352,22 @@ const VehicleRating: React.FC<VehicleRatingProps> = ({
               <div key={danhGia.id} className="review-item">
                 <div className="review-header">
                   <div className="reviewer-info">
-                    <Avatar icon={<UserOutlined />} />
+                  <Avatar 
+  src={getUserAvatarUrl(danhGia.avatarNguoiDung)}
+  icon={<UserOutlined />}
+  onError={() => {
+    console.log('Avatar failed to load, using default icon');
+    return true;
+  }}
+/>
                     <div className="reviewer-details">
                       <Text strong>{danhGia.tenNguoiDung}</Text>
                       <div className="review-meta">
                         <StarRating 
-                          rating={danhGia.soSao} 
+                          rating={typeof danhGia.soSao === 'string' ? parseFloat(danhGia.soSao) : danhGia.soSao} 
                           size="small" 
                           readonly 
+                          allowHalf
                         />
                         <Text type="secondary">
                           {formatDate(danhGia.ngayTao)}

@@ -217,9 +217,17 @@ const RatingManagement: React.FC = () => {
       title: 'Đánh giá',
       dataIndex: 'soSao',
       key: 'soSao',
-      render: (rating: number) => (
-        <StarRating rating={rating} size="small" readonly />
-      ),
+      render: (rating: number) => {
+        // Debug log để kiểm tra giá trị rating
+        console.log('RatingManagement - Rating value:', rating, 'Type:', typeof rating);
+        
+        // Đảm bảo rating là số thập phân nếu cần
+        const normalizedRating = typeof rating === 'string' ? parseFloat(rating) : rating;
+        
+        return (
+          <StarRating rating={normalizedRating} size="small" readonly allowHalf />
+        );
+      },
     },
     {
       title: 'Tiêu đề',
@@ -442,7 +450,18 @@ const RatingManagement: React.FC = () => {
                         </td>
                         <td style={{ padding: '10px 8px' }}><Text strong>{rating.tenMauXe}</Text></td>
                         <td style={{ padding: '10px 8px' }}>
-                          <StarRating rating={rating.soSao} size="small" readonly />
+                          {/* Debug log cho table body */}
+                          {(() => {
+                            console.log('RatingManagement Table - Rating value:', rating.soSao, 'Type:', typeof rating.soSao);
+                            return null;
+                          })()}
+                          {/* Đảm bảo rating là số thập phân */}
+                          <StarRating 
+                            rating={typeof rating.soSao === 'string' ? parseFloat(rating.soSao) : rating.soSao} 
+                            size="small" 
+                            readonly 
+                            allowHalf 
+                          />
                         </td>
                         <td style={{ padding: '10px 8px', maxWidth: 200 }}>
                           <Text ellipsis={{ tooltip: rating.tieuDe }} style={{ maxWidth: 200 }}>
@@ -600,6 +619,7 @@ const RatingManagement: React.FC = () => {
         open={showDetailModal}
         onCancel={() => setShowDetailModal(false)}
         footer={null}
+        
         width={600}
       >
         {selectedRating && (
@@ -613,7 +633,12 @@ const RatingManagement: React.FC = () => {
                 </div>
               </div>
               <div className="rating-meta">
-                <StarRating rating={selectedRating.soSao} size="large" readonly />
+                <StarRating 
+                  rating={typeof selectedRating.soSao === 'string' ? parseFloat(selectedRating.soSao) : selectedRating.soSao} 
+                  size="large" 
+                  readonly 
+                  allowHalf 
+                />
                 <Text type="secondary">{formatDate(selectedRating.ngayTao)}</Text>
                 {getStatusTag(selectedRating.trangThai)}
               </div>
@@ -665,7 +690,12 @@ const RatingManagement: React.FC = () => {
             <p>Bạn có chắc chắn muốn duyệt đánh giá này?</p>
             <div className="rating-preview">
               <Text strong>{selectedRating.tenNguoiDung}</Text>
-              <StarRating rating={selectedRating.soSao} size="small" readonly />
+              <StarRating 
+                rating={typeof selectedRating.soSao === 'string' ? parseFloat(selectedRating.soSao) : selectedRating.soSao} 
+                size="small" 
+                readonly 
+                allowHalf 
+              />
               <Text>{selectedRating.tieuDe}</Text>
             </div>
           </div>

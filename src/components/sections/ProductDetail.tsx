@@ -2312,39 +2312,72 @@ const resetToDefaultColor = async () => {
         </div>
       </section>
 
+      {/* Promotion Section - Uses special classes to avoid conflicts */}
       {product && (
-        <PromotionBanner
-          mauXeId={product.id}
-          tongGiaTri={product.giaCoban}
-          onSelectPromotion={setSelectedPromotion}
-        />
+        <section className="promotion-section_special">
+          <div className="container_details">
+            <div className="promotion-header_special">
+              <h2>Khuyến mãi đặc biệt</h2>
+            </div>
+            <div className="promotion-content_special">
+              <PromotionBanner
+                mauXeId={product.id}
+                tongGiaTri={product.giaCoban}
+                onSelectPromotion={setSelectedPromotion}
+              />
+              
+              {selectedPromotion && (
+                <div style={{ 
+                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%)',
+                  border: '2px solid rgba(59, 130, 246, 0.5)',
+                  padding: '24px', 
+                  borderRadius: '16px', 
+                  marginTop: '24px',
+                  boxShadow: '0 4px 16px rgba(59, 130, 246, 0.2)',
+                  backdropFilter: 'blur(10px)'
+                }}>
+                  <div style={{ 
+                    fontWeight: 700, 
+                    color: '#ffffff', 
+                    fontSize: '24px',
+                    marginBottom: '12px',
+                    textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                  }}>
+                    💰 Giá sau khuyến mãi: {formatPrice(calculateDiscountedPrice())}
+                  </div>
+                  <div style={{ 
+                    fontSize: '18px', 
+                    color: '#a7f3d0',
+                    fontWeight: 600,
+                    textShadow: '0 1px 4px rgba(0, 0, 0, 0.2)'
+                  }}>
+                    ✨ Tiết kiệm: {formatPrice(calculateTotalPrice() - calculateDiscountedPrice())}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
       )}
 
-      {selectedPromotion && (
-        <div style={{ 
-          background: '#f6ffed', 
-          padding: '16px', 
-          borderRadius: '8px', 
-          marginTop: '16px' 
-        }}>
-          <div style={{ fontWeight: 600, color: '#52c41a' }}>
-            Giá sau khuyến mãi: {formatPrice(calculateDiscountedPrice())}
+      {/* Vehicle Rating Section - Uses special classes to avoid conflicts */}
+      <section className="rating-section_special">
+        <div className="container_details">
+          <div className="rating-header_special">
+            <h2>Đánh giá từ khách hàng</h2>
           </div>
-          <div style={{ fontSize: '14px', color: '#666' }}>
-            Tiết kiệm: {formatPrice(product.giaCoban - calculateDiscountedPrice())}
+          <div className="rating-content_special">
+            <VehicleRating 
+              mauXeId={product.id} 
+              tenMauXe={product.tenMau}
+              onRatingSubmit={() => {
+                // Refresh any data if needed after rating submission
+                console.log('Rating submitted for vehicle:', product.tenMau);
+              }}
+            />
           </div>
         </div>
-      )}
-
-      {/* Vehicle Rating Section */}
-      <VehicleRating 
-        mauXeId={product.id} 
-        tenMauXe={product.tenMau}
-        onRatingSubmit={() => {
-          // Refresh any data if needed after rating submission
-          console.log('Rating submitted for vehicle:', product.tenMau);
-        }}
-      />
+      </section>
       
     </div>
   );

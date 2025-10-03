@@ -42,6 +42,12 @@ import SupportManagement from './context/pages/admin/SupportManagement';
 
 import SupportConsoleLayout from './context/pages/SupportConsoleLayout';
 import SalesConsoleLayout from './context/pages/SalesConsoleLayout';
+import StarRatingDebug from './components/test/StarRatingDebug';
+import SimpleRatingTest from './components/test/SimpleRatingTest';
+import DataTest from './components/test/DataTest';
+import RatingDataCheck from './components/test/RatingDataCheck';
+import ForceHalfStarTest from './components/test/ForceHalfStarTest';
+import RatingFormTest from './components/test/RatingFormTest';
 
 
 import UserOrderManagement from './context/pages/admin/UserOrderManagement';
@@ -375,6 +381,12 @@ function App() {
                 } />
                 <Route path="/payment/success" element={<PaymentSuccess />} />
                 <Route path="/payment/cancel" element={<PaymentCancel />} />
+                <Route path="/test/rating" element={<StarRatingDebug />} />
+                <Route path="/test/simple" element={<SimpleRatingTest />} />
+                <Route path="/test/data" element={<DataTest />} />
+                <Route path="/test/rating-check" element={<RatingDataCheck />} />
+                <Route path="/test/force-half" element={<ForceHalfStarTest />} />
+                <Route path="/test/rating-form" element={<RatingFormTest />} />
               </Routes>
             </main>
             {shouldShowFooter && <Footer />}

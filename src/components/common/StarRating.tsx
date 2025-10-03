@@ -10,6 +10,7 @@ interface StarRatingProps {
   showValue?: boolean;
   onChange?: (rating: number) => void;
   className?: string;
+  allowHalf?: boolean;
 }
 
 const StarRating: React.FC<StarRatingProps> = ({
@@ -19,7 +20,8 @@ const StarRating: React.FC<StarRatingProps> = ({
   readonly = false,
   showValue = false,
   onChange,
-  className = ''
+  className = '',
+  allowHalf = false
 }) => {
   const handleStarClick = (starRating: number) => {
     if (!readonly && onChange) {
@@ -29,8 +31,57 @@ const StarRating: React.FC<StarRatingProps> = ({
 
   const renderStars = () => {
     const stars = [];
+    
+    // Debug log to check rating value
+    if (allowHalf && rating % 1 !== 0) {
+      console.log('StarRating Debug:', {
+        rating,
+        floor: Math.floor(rating),
+        ceil: Math.ceil(rating),
+        decimal: rating % 1,
+        allowHalf
+      });
+    }
+    
     for (let i = 1; i <= maxRating; i++) {
-      const isFilled = i <= rating;
+      let isFilled, isHalfFilled;
+      
+      if (allowHalf) {
+        // For 4.5: stars 1,2,3,4 are filled, star 5 is half-filled
+        const decimalPart = rating % 1;
+        const floorRating = Math.floor(rating);
+        const ceilRating = Math.ceil(rating);
+        
+        isFilled = i <= floorRating;
+        // Show half star if current star index equals ceiling of rating and there's a decimal part > 0
+        isHalfFilled = i === ceilRating && decimalPart > 0;
+        
+        // Debug: Log when we should show half star
+        if (i === ceilRating && decimalPart > 0) {
+          console.log(`Should show half star for rating ${rating}:`, {
+            i,
+            ceilRating,
+            decimalPart,
+            isHalfFilled
+          });
+        }
+        
+        // Debug log for each star
+        if (rating % 1 !== 0) {
+          console.log(`Star ${i}:`, {
+            isFilled,
+            isHalfFilled,
+            decimalPart,
+            floorRating,
+            ceilRating,
+            rating
+          });
+        }
+      } else {
+        isFilled = i <= Math.round(rating);
+        isHalfFilled = false;
+      }
+      
       stars.push(
         <span
           key={i}
@@ -40,6 +91,13 @@ const StarRating: React.FC<StarRatingProps> = ({
         >
           {isFilled ? (
             <StarFilled className="star-filled" />
+          ) : isHalfFilled ? (
+            <div className="star-half">
+              <StarOutlined className="star-outline" />
+              <div className="star-half-fill">
+                <StarFilled className="star-filled" />
+              </div>
+            </div>
           ) : (
             <StarOutlined className="star-outline" />
           )}
