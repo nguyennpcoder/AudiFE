@@ -1,0 +1,124 @@
+/* ====================================
+   🎨 SCROLL PROGRESS BAR & BUTTONS
+   ==================================== */
+
+/* Scroll Progress Bar */
+.scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.1);
+  z-index: 10000;
+  backdrop-filter: blur(10px);
+}
+
+/* .scroll-progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #bb0a1e 0%,
+    #ff0a30 50%,
+    #bb0a1e 100%
+  );
+  background-size: 200% 100%;
+  transition: width 0.1s ease;
+  animation: gradient-flow 3s ease infinite;
+  box-shadow: 0 0 10px rgba(187, 10, 30, 0.5),
+              0 0 20px rgba(187, 10, 30, 0.3);
+} */
+
+@keyframes gradient-flow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Scroll to Top Button */
+.scroll-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #bb0a1e, #ff0a30);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  box-shadow: 0 5px 20px rgba(187, 10, 30, 0.4);
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  animation: bounce-in-up 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes bounce-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(100px) scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1.1);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.scroll-to-top:hover {
+  transform: translateY(-5px) scale(1.1);
+  box-shadow: 0 10px 30px rgba(187, 10, 30, 0.6);
+  animation: pulse-glow 1s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 10px 30px rgba(187, 10, 30, 0.6),
+                0 0 20px rgba(187, 10, 30, 0.4);
+  }
+  50% {
+    box-shadow: 0 10px 30px rgba(187, 10, 30, 0.8),
+                0 0 40px rgba(187, 10, 30, 0.6);
+  }
+}
+
+.scroll-to-top:active {
+  transform: translateY(-2px) scale(1.05);
+}
+
+.scroll-to-top svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  animation: arrow-bounce 2s ease-in-out infinite;
+}
+
+@keyframes arrow-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .scroll-to-top {
+    width: 45px;
+    height: 45px;
+    bottom: 20px;
+    right: 20px;
+  }
+  
+  .scroll-progress-bar {
+    height: 2px;
+  }
+}
+

@@ -78,11 +78,11 @@ export const buttonVariants: Variants = {
   },
   loading: {
     scale: 1,
-    rotate: [0, 360],
+    opacity: [0.5, 1],
     transition: {
-      duration: 1,
+      duration: 0.8,
       repeat: Infinity,
-      ease: "linear"
+      ease: "easeInOut"
     }
   }
 };
@@ -131,17 +131,17 @@ export const slideVariants: Variants = {
   })
 };
 
-// Loading spinner animation
+// Loading spinner animation - Optimized without spinning
 export const spinnerVariants: Variants = {
   start: {
-    rotate: 0
+    opacity: 0.3
   },
   end: {
-    rotate: 360,
+    opacity: 1,
     transition: {
-      duration: 1,
+      duration: 0.6,
       repeat: Infinity,
-      ease: "linear"
+      ease: "easeInOut"
     }
   }
 };

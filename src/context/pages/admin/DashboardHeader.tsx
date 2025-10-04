@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Layout, Breadcrumb, Badge, Button } from 'antd';
 import { BellOutlined, DollarOutlined, UsergroupAddOutlined, HeartOutlined, LockOutlined, MenuOutlined, BulbOutlined, BulbFilled } from '@ant-design/icons';
 import '../../../styles/DashboardHeader.css';
+
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ComposedChart, Line, LineChart } from 'recharts';
 import { fetchSampleCarModels, CarModel } from '../../../services/carModelService';
 import { fetchSalesStaff, User, buildAvatarUrl } from '../../../services/authService';
@@ -99,6 +100,7 @@ const DashboardHeader: React.FC<any> = ({
   return (
   <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
     <Header
+      className="dashboard-header"
       style={{
         background: '#f5f5f5',
         padding: '0 32px',
@@ -164,7 +166,7 @@ const DashboardHeader: React.FC<any> = ({
     </Header>
     <Content style={{ padding: '24px 32px 0 32px', background: '#f5f5f5' }}>
       <div
-        className="dashboard-cards"
+        className="dashboard-cards admin-stats-card animate-fade-in-up"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', // Giảm minmax từ 200px xuống 160px
@@ -173,7 +175,7 @@ const DashboardHeader: React.FC<any> = ({
         }}
       >
         {/* Card 1: Today's Sales - Updated */}
-        <div style={{
+        <div className="admin-stats-card" style={{
           background: 'linear-gradient(135deg, #ffffff 0%, #f8faff 100%)',
           borderRadius: 16,
           padding: '12px', // Giảm padding từ 20px xuống 12px
@@ -184,7 +186,6 @@ const DashboardHeader: React.FC<any> = ({
           transition: 'all 0.3s ease',
           minHeight: 140,
         }}
-        className="hover-card"
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'translateY(-4px)';
           e.currentTarget.style.boxShadow = '0 16px 48px rgba(0, 0, 0, 0.12)';
@@ -255,7 +256,7 @@ const DashboardHeader: React.FC<any> = ({
         </div>
 
         {/* Card 2: Staff - Updated */}
-        <div style={{
+        <div className="admin-stats-card" style={{
           background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)',
           borderRadius: 16,
           padding: '12px', // Giảm padding
@@ -266,7 +267,6 @@ const DashboardHeader: React.FC<any> = ({
           transition: 'all 0.3s ease',
           minHeight: 140,
         }}
-        className="hover-card"
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'translateY(-4px)';
           e.currentTarget.style.boxShadow = '0 16px 48px rgba(0, 0, 0, 0.12)';
@@ -339,7 +339,7 @@ const DashboardHeader: React.FC<any> = ({
         </div>
 
         {/* Card 3: New Clients - Updated */}
-        <div style={{
+        <div className="admin-stats-card" style={{
           background: 'linear-gradient(135deg, #ffffff 0%, #fef7ff 100%)',
           borderRadius: 16,
           padding: '12px', // Giảm padding
@@ -350,7 +350,6 @@ const DashboardHeader: React.FC<any> = ({
           transition: 'all 0.3s ease',
           minHeight: 140,
         }}
-        className="hover-card"
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'translateY(-4px)';
           e.currentTarget.style.boxShadow = '0 16px 48px rgba(0, 0, 0, 0.12)';
@@ -421,7 +420,7 @@ const DashboardHeader: React.FC<any> = ({
         </div>
 
         {/* Card 4: New Orders - Updated */}
-        <div style={{
+        <div className="admin-stats-card" style={{
           background: 'linear-gradient(135deg, #ffffff 0%, #fffbeb 100%)',
           borderRadius: 16,
           padding: '12px', // Giảm padding
@@ -432,7 +431,6 @@ const DashboardHeader: React.FC<any> = ({
           transition: 'all 0.3s ease',
           minHeight: 140,
         }}
-        className="hover-card"
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'translateY(-4px)';
           e.currentTarget.style.boxShadow = '0 16px 48px rgba(0, 0, 0, 0.12)';
@@ -505,9 +503,9 @@ const DashboardHeader: React.FC<any> = ({
 
       {/* 4 biểu đồ với layout 2x2 cân đối - GIỮ NGUYÊN TẤT CẢ CONTENT */}
      {/* 4 biểu đồ với layout 2x2 cân đối - ĐÃ ĐỔI VỊ TRÍ */}
-<div className="dashboard-charts-grid" style={{ marginBottom: 32 }}>
+<div className="dashboard-charts-grid admin-chart-container animate-fade-in-up " style={{ marginBottom: 32 }}>
   {/* Biểu đồ Bar - Vị trí 1 (trên trái) - GIỮ NGUYÊN */}
-  <div style={{
+  <div className="admin-chart-container" style={{
     background: '#fff',
     borderRadius: 16,
     overflow: 'hidden',
@@ -516,7 +514,7 @@ const DashboardHeader: React.FC<any> = ({
     flexDirection: 'column'
   }}>
     {/* Phần biểu đồ Bar hiện đại */}
-    <div style={{
+    <div className="dashboard-chart-content" style={{
       padding: '32px 40px',
       background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
       flex: 1,
@@ -563,7 +561,7 @@ const DashboardHeader: React.FC<any> = ({
     </div>
     
     {/* Phần content Bar Chart hiện đại */}
-    <div style={{ 
+    <div className="dashboard-chart-footer" style={{ 
       padding: '28px 40px 36px 40px',
       background: 'linear-gradient(135deg, #ffffff 0%, #f8fffe 100%)',
       borderTop: 'none',
@@ -650,7 +648,7 @@ const DashboardHeader: React.FC<any> = ({
           gap: 20,
           marginBottom: 20
         }}>
-          <div style={{
+          <div className="stats-item animate-scale-in " style={{
             textAlign: 'center',
             padding: '16px 12px',
             background: 'rgba(34, 197, 94, 0.08)',
@@ -660,7 +658,7 @@ const DashboardHeader: React.FC<any> = ({
             <div style={{ fontSize: 22, fontWeight: 700, color: '#22c55e', marginBottom: 4 }}>2,458</div>
             <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Tổng xe bán</div>
           </div>
-          <div style={{
+          <div className="stats-item animate-scale-in " style={{
             textAlign: 'center',
             padding: '16px 12px',
             background: 'rgba(16, 185, 129, 0.08)',
@@ -670,7 +668,7 @@ const DashboardHeader: React.FC<any> = ({
             <div style={{ fontSize: 22, fontWeight: 700, color: '#10b981', marginBottom: 4 }}>+327</div>
             <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Đơn hàng mới</div>
           </div>
-          <div style={{
+          <div className="stats-item animate-scale-in " style={{
             textAlign: 'center',
             padding: '16px 12px',
             background: 'rgba(5, 150, 105, 0.08)',
@@ -718,7 +716,7 @@ const DashboardHeader: React.FC<any> = ({
   </div>
 
   {/* Biểu đồ Area - Vị trí 2 (trên phải) - ĐÃ CHUYỂN LÊN */}
-  <div style={{
+  <div className="admin-chart-container" style={{
     background: '#fff',
     borderRadius: 16,
     overflow: 'hidden',
@@ -856,7 +854,7 @@ const DashboardHeader: React.FC<any> = ({
           gap: 16,
           marginBottom: 20
         }}>
-          <div style={{
+          <div className="stats-item animate-scale-in " style={{
             textAlign: 'center',
             padding: '16px 12px',
             background: 'rgba(139, 92, 246, 0.08)',
@@ -866,7 +864,7 @@ const DashboardHeader: React.FC<any> = ({
             <div style={{ fontSize: 20, fontWeight: 700, color: '#8b5cf6', marginBottom: 4 }}>$2.4M</div>
             <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Doanh thu tháng</div>
           </div>
-          <div style={{
+          <div className="stats-item animate-scale-in " style={{
             textAlign: 'center',
             padding: '16px 12px',
             background: 'rgba(124, 58, 237, 0.08)',
@@ -917,7 +915,7 @@ const DashboardHeader: React.FC<any> = ({
   </div>
 
   {/* Biểu đồ Pie - Vị trí 3 (dưới trái) - ĐÃ CHUYỂN XUỐNG */}
-  <div style={{
+  <div className="admin-chart-container" style={{
     background: '#fff',
     borderRadius: 16,
     overflow: 'hidden',
@@ -1048,7 +1046,7 @@ const DashboardHeader: React.FC<any> = ({
           gap: 20,
           marginBottom: 20
         }}>
-          <div style={{
+          <div className="stats-item animate-scale-in " style={{
             textAlign: 'center',
             padding: '16px 12px',
             background: 'rgba(136, 132, 216, 0.08)',
@@ -1058,7 +1056,7 @@ const DashboardHeader: React.FC<any> = ({
             <div style={{ fontSize: 22, fontWeight: 700, color: '#8884d8', marginBottom: 4 }}>1,000</div>
             <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Tổng lượt tham gia</div>
           </div>
-          <div style={{
+          <div className="stats-item animate-scale-in " style={{
             textAlign: 'center',
             padding: '16px 12px',
             background: 'rgba(130, 202, 157, 0.08)',
@@ -1068,7 +1066,7 @@ const DashboardHeader: React.FC<any> = ({
             <div style={{ fontSize: 22, fontWeight: 700, color: '#82ca9d', marginBottom: 4 }}>+120</div>
             <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Khách hàng mới</div>
           </div>
-          <div style={{
+          <div className="stats-item animate-scale-in " style={{
             textAlign: 'center',
             padding: '16px 12px',
             background: 'rgba(255, 198, 88, 0.08)',
@@ -1090,7 +1088,7 @@ const DashboardHeader: React.FC<any> = ({
           borderTop: '1px solid rgba(0,0,0,0.06)'
         }}>
           {pieData.map((entry, index) => (
-            <div key={index} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div key={index} className="legend-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{
                 width: 12,
                 height: 12,
@@ -1107,7 +1105,7 @@ const DashboardHeader: React.FC<any> = ({
   </div>
 
   {/* Biểu đồ Line - Vị trí 4 (dưới phải) - GIỮ NGUYÊN */}
-  <div style={{
+  <div className="admin-chart-container" style={{
     background: '#fff',
     borderRadius: 16,
     overflow: 'hidden',
@@ -1220,7 +1218,7 @@ const DashboardHeader: React.FC<any> = ({
 </div>
 
 
-      <div style={{
+      <div className="animate-fade-in-up " style={{
         padding: '0 32px',
         display: 'flex',
         gap: 20,
@@ -1229,7 +1227,7 @@ const DashboardHeader: React.FC<any> = ({
         flexWrap: 'wrap'
       }}>
         {/* Bảng dự án/Audi Store - Updated */}
-        <div style={{
+        <div className="admin-table-container" style={{
           flex: 2.3,
           minWidth: 500,
           background: '#fff',
@@ -1385,7 +1383,7 @@ const DashboardHeader: React.FC<any> = ({
               overflow: 'hidden'
             }}>
               {carModels.map((model, index) => (
-                <div key={model.id} style={{
+                <div key={model.id} className="admin-table-row" style={{
                   minHeight: 56,
                   display: 'flex',
                   alignItems: 'center',
@@ -1541,7 +1539,7 @@ const DashboardHeader: React.FC<any> = ({
                     </div>
                   </div>
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                    <div style={{
+                    <div className="shimmer-effect" style={{
                       width: '60%',
                       height: 6,
                       background: 'rgba(99, 102, 241, 0.1)',
@@ -1556,7 +1554,8 @@ const DashboardHeader: React.FC<any> = ({
                         borderRadius: 16,
                         transition: 'width 0.3s ease',
                         position: 'relative',
-                        overflow: 'hidden'
+                        overflow: 'hidden',
+                        animation: 'progressFill 1.5s ease-out forwards'
                       }}>
                         <div style={{
                           position: 'absolute',
@@ -1617,7 +1616,7 @@ const DashboardHeader: React.FC<any> = ({
           </div>
         </div>
         {/* Lịch sử đơn hàng - Updated */}
-        <div style={{
+        <div className="admin-table-container" style={{
           flex: 1,
           minWidth: 280,
           background: '#fff',
@@ -1717,7 +1716,7 @@ const DashboardHeader: React.FC<any> = ({
               }} />
               
               {/* Timeline items */}
-              <div style={{
+              <div className="admin-table-row audi-order" style={{
                 display: 'flex',
                 alignItems: 'center',
                 marginBottom: 20,
@@ -1745,7 +1744,7 @@ const DashboardHeader: React.FC<any> = ({
                 </div>
               </div>
               
-              <div style={{
+              <div className="admin-table-row audi-order" style={{
                 display: 'flex',
                 alignItems: 'center',
                 marginBottom: 20,
@@ -1773,7 +1772,7 @@ const DashboardHeader: React.FC<any> = ({
                 </div>
               </div>
               
-              <div style={{
+              <div className="admin-table-row audi-order" style={{
                 display: 'flex',
                 alignItems: 'center',
                 marginBottom: 20,
@@ -1801,7 +1800,7 @@ const DashboardHeader: React.FC<any> = ({
                 </div>
               </div>
               
-              <div style={{
+              <div className="admin-table-row audi-order" style={{
                 display: 'flex',
                 alignItems: 'center',
                 marginBottom: 20,
@@ -1829,7 +1828,7 @@ const DashboardHeader: React.FC<any> = ({
                 </div>
               </div>
               
-              <div style={{
+              <div className="admin-table-row audi-order" style={{
                 display: 'flex',
                 alignItems: 'center',
                 position: 'relative'
@@ -1861,7 +1860,7 @@ const DashboardHeader: React.FC<any> = ({
           <div style={{
             padding: '0 28px 24px 28px'
           }}>
-            <button style={{
+            <button className="audi-orders-btn" style={{
               width: '100%',
               padding: '12px 20px',
               background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',

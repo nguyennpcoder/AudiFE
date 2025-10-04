@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react';
 import HeroBanner from '../../../components/layout/HeroBanner';
 import CarModelFeature from '../../../components/sections/CarModelFeature';
 import FeaturedProducts from '../../../components/sections/FeaturedProducts';
+import BrandExperience from '../../../components/sections/BrandExperience';
+import ScrollProgress from '../../../components/common/ScrollProgress';
 // Removed NewsAndBlogSection as requested
 import { useNotification } from '../../NotificationContext';
+import '../../../styles/AdvancedAnimations.css';
 
 // Import hình ảnh
 import etronGTImage from '../../../assets/rs-etron-gt.jpg';
@@ -197,30 +200,33 @@ const Home = () => {
   };
 
   return (
-    <div className="home-page" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', gap: '0' }}>
-      <HeroBanner 
-        {...carModels[currentModelIndex]} 
-        totalModels={carModels.length}
-        currentIndex={currentModelIndex}
-        onDotClick={handleModelDotClick}
-      />
-      
-      <CarModelFeature 
-        {...featureModels[selectedFeatureIndex]} 
-        totalModels={featureModels.length}
-        currentIndex={selectedFeatureIndex}
-        onPrev={handleFeaturePrev}
-        onNext={handleFeatureNext}
-        onDotClick={handleFeatureDotClick}
-      />
-      
-      <FeaturedProducts 
-        title="Dòng xe nổi bật của Audi" 
-        subtitle="Khám phá các dòng xe Audi đỉnh cao với thiết kế đẹp mắt và công nghệ tiên tiến"
-      />
-      
-      {/* NewsAndBlogSection removed */}
-    </div>
+    <>
+      <ScrollProgress />
+      <div className="home-page" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', gap: '0' }}>
+        <HeroBanner 
+          {...carModels[currentModelIndex]} 
+          totalModels={carModels.length}
+          currentIndex={currentModelIndex}
+          onDotClick={handleModelDotClick}
+        />
+        
+        <CarModelFeature 
+          {...featureModels[selectedFeatureIndex]} 
+          totalModels={featureModels.length}
+          currentIndex={selectedFeatureIndex}
+          onPrev={handleFeaturePrev}
+          onNext={handleFeatureNext}
+          onDotClick={handleFeatureDotClick}
+        />
+           {/* <FeaturedProducts 
+          title="Dòng xe nổi bật của Audi" 
+          subtitle="Khám phá các dòng xe Audi đỉnh cao với thiết kế đẹp mắt và công nghệ tiên tiến"
+        /> */}
+        <BrandExperience />
+        
+        {/* NewsAndBlogSection removed */}
+      </div>
+    </>
   );
 };
 

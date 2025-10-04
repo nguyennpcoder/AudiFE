@@ -4,6 +4,8 @@ import dayjs, { Dayjs } from 'dayjs';
 import AdminHeader from './AdminHeader';
 import { activityLogService, NhatKyHoatDongDTO } from '../../../services/activityLogService';
 import { buildAvatarUrl } from '../../../services/authService';
+import '../../../styles/Admin.css';
+// import '../../../styles/AdminAnimations.css';
 
 // Removed antd Typography/DatePicker in favor of native controls to match other admin pages
 

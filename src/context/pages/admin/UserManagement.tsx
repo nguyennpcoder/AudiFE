@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import '../../../styles/Admin.css';
+// import '../../../styles/AdminAnimations.css';
 import axios from 'axios';
 import { Breadcrumb, message } from 'antd'; // Thêm message vào đây
 import { message as antdMessage } from 'antd'; // Thêm antdMessage vào đây

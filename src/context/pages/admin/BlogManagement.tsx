@@ -4,6 +4,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, StopOu
 
 import { blogService, BaiViet } from '../../../services/blogService';
 import '../../../styles/Admin.css';
+// import '../../../styles/AdminAnimations.css';
 import AdminHeader from './AdminHeader';
 import AnimatedPage from './AnimatedPage';
 

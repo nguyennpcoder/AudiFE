@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { message } from 'antd';
 import { changePasswordApi } from '../../services/authService';
 import '../../styles/Auth.css';
+import '../../styles/AuthAnimations.css';
 
 const ChangePassword: React.FC = () => {
   const [formData, setFormData] = useState({

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import '../../../styles/Admin.css';
+// import '../../../styles/AdminAnimations.css';
 import { marketingService, KhuyenMai, DieuKienKhuyenMai } from '../../../services/marketingService';
 import AdminHeader from './AdminHeader';
 

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { supportService, YeuCauHoTroDTO, PhanHoiYeuCauDTO } from '../../../services/supportService';
 import { useAuth } from '../../AuthContext';
 import '../../../styles/Admin.css';
+// import '../../../styles/AdminAnimations.css';
 import AdminHeader from './AdminHeader';
 
 type SupportManagementProps = {

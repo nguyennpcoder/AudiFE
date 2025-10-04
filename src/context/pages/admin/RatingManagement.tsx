@@ -31,6 +31,7 @@ import { ratingService, DanhGia } from '../../../services/ratingService';
 import StarRating from '../../../components/common/StarRating';
 import '../../../styles/RatingManagement.css';
 import '../../../styles/Admin.css';
+// import '../../../styles/AdminAnimations.css';
 import AdminHeader from './AdminHeader';
 
 const { Title, Text, Paragraph } = Typography;

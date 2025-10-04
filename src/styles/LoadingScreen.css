@@ -1,0 +1,168 @@
+/* ====================================
+   🎨 LOADING SCREEN ANIMATIONS
+   ==================================== */
+
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #000000, #1a1a1a);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fade-out 0.5s 2s ease-out forwards;
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.loading-content {
+  text-align: center;
+  position: relative;
+}
+
+/* Audi Rings Animation */
+.audi-logo-container {
+  margin-bottom: 30px;
+  animation: scale-in 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.audi-rings {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  height: 60px;
+}
+
+.ring {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #bb0a1e;
+  border-radius: 50%;
+  animation: ring-pulse 2s ease-in-out infinite;
+}
+
+.ring-1 {
+  animation-delay: 0s;
+}
+
+.ring-2 {
+  animation-delay: 0.2s;
+}
+
+.ring-3 {
+  animation-delay: 0.4s;
+}
+
+.ring-4 {
+  animation-delay: 0.6s;
+}
+
+@keyframes ring-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+}
+
+/* Loading Text Animation */
+.loading-text {
+  margin-bottom: 30px;
+  font-size: 24px;
+  font-weight: 300;
+  letter-spacing: 8px;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.letter {
+  display: inline-block;
+  animation: letter-wave 1.5s ease-in-out infinite;
+}
+
+@keyframes letter-wave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Loading Bar */
+.loading-bar {
+  width: 300px;
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.loading-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #bb0a1e, #ff0a30, #bb0a1e);
+  background-size: 200% 100%;
+  border-radius: 10px;
+  animation: loading-fill 2s ease-in-out infinite;
+}
+
+@keyframes loading-fill {
+  0% {
+    width: 0%;
+    background-position: 0% 50%;
+  }
+  50% {
+    width: 100%;
+    background-position: 100% 50%;
+  }
+  100% {
+    width: 100%;
+    background-position: 200% 50%;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .audi-rings {
+    height: 40px;
+  }
+  
+  .ring {
+    width: 35px;
+    height: 35px;
+    border-width: 3px;
+  }
+  
+  .loading-text {
+    font-size: 18px;
+    letter-spacing: 5px;
+  }
+  
+  .loading-bar {
+    width: 200px;
+  }
+}
+

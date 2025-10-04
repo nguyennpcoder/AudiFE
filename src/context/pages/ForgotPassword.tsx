@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { message } from 'antd';
 import { quenMatKhauApi, resetMatKhauApi } from '../../services/authService';
 import '../../styles/Auth.css';
+import '../../styles/AuthAnimations.css';
 import logo from '../../assets/logo.svg';
 import backgroundVideo from '../../assets/audivideo.mp4';
 import mailSentVideo from '../../assets/mail_sent.mp4';

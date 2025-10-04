@@ -11,6 +11,17 @@
   overflow: hidden;
   padding-top: 0;
   transition: background-image 0.8s ease-in-out;
+  animation: ken-burns 20s ease-in-out infinite alternate;
+}
+
+/* Ken Burns parallax effect */
+@keyframes ken-burns {
+  0% {
+    background-size: 100%;
+  }
+  100% {
+    background-size: 110%;
+  }
 }
 
 .hb-hero-banner::after {
@@ -32,10 +43,26 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(to right, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.8) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(0,0,0,0.8) 0%,
+    rgba(187, 10, 30, 0.1) 25%,
+    rgba(0,0,0,0.4) 50%,
+    rgba(0,0,0,0.9) 100%
+  );
   z-index: 1;
   pointer-events: none;
-  opacity: 0.5;
+  opacity: 0.7;
+  animation: gradient-pulse 8s ease-in-out infinite;
+}
+
+@keyframes gradient-pulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .hero-banner .hero-banner-image {
@@ -82,6 +109,26 @@
   font-weight: 500;
   margin-bottom: 10px;
   animation: slideInLeft 0.6s 0.2s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: -0.5px;
+  position: relative;
+}
+
+.hb-hero-banner .hb-hero-title::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #bb0a1e, transparent);
+  animation: title-underline 1s 0.8s ease-out forwards;
+}
+
+@keyframes title-underline {
+  to {
+    width: 150px;
+  }
 }
 
 .hb-hero-banner .hb-hero-subtitle {
@@ -133,9 +180,22 @@
   position: relative;
   overflow: hidden;
   z-index: 1;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1),
+              0 0 0 0 rgba(255, 255, 255, 0);
   min-width: 200px;
   text-align: center;
+  animation: button-pulse 3s ease-in-out infinite;
+}
+
+@keyframes button-pulse {
+  0%, 100% {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1),
+                0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1),
+                0 0 0 10px rgba(255, 255, 255, 0);
+  }
 }
 
 .hb-hero-banner .hb-btn-primary::before {
@@ -153,8 +213,10 @@
 
 .hb-hero-banner .hb-btn-primary:hover {
   color: white;
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 10px 25px rgba(255, 255, 255, 0.3),
+              0 0 30px rgba(187, 10, 30, 0.3);
+  animation: none;
 }
 
 .hb-hero-banner .hb-btn-primary:hover::before {
@@ -239,6 +301,15 @@
   padding: 40px 20px;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   opacity: 0;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.hb-hero-banner .hb-spec-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(187, 10, 30, 0.3);
 }
 
 .hb-hero-banner .hb-spec-item:nth-child(1) {
@@ -265,6 +336,20 @@
   font-size: 36px;
   font-weight: bold;
   margin-bottom: 5px;
+  background: linear-gradient(135deg, #ffffff, #bb0a1e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer-text 3s ease-in-out infinite;
+}
+
+@keyframes shimmer-text {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .hb-hero-banner .hb-spec-subtext {

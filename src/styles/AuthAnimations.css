@@ -1,0 +1,161 @@
+/* ====================================
+   🎨 AUTH HOVER EFFECTS ONLY
+   NO ANIMATIONS - CLEAN & SIMPLE
+   ==================================== */
+
+/* ============ BUTTON HOVER EFFECTS ============ */
+
+.auth-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* Ripple effect on click */
+.auth-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.auth-button:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Button hover lift */
+.auth-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+}
+
+.auth-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ============ SOCIAL BUTTONS HOVER ============ */
+
+.google, .facebook, .github {
+  transition: box-shadow 0.3s ease, filter 0.3s ease;
+}
+
+.google:hover, .facebook:hover, .github:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  filter: brightness(1.05);
+}
+
+/* ============ LINKS UNDERLINE HOVER ============ */
+
+.auth-links a {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Underline animation */
+.auth-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #3b82f6;
+  transition: width 0.3s ease;
+}
+
+.auth-links a:hover::after {
+  width: 100%;
+}
+
+.auth-links a:hover {
+  transform: translateX(5px);
+}
+
+/* ============ BACK HOME BUTTON HOVER ============ */
+
+.back-home-button {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer effect on hover */
+.back-home-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.back-home-button:hover::before {
+  left: 100%;
+}
+
+.back-home-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+}
+
+.back-home-button i {
+  transition: transform 0.3s ease;
+}
+
+.back-home-button:hover i {
+  transform: scale(1.1);
+}
+
+/* ============ INPUT HOVER EFFECTS ============ */
+
+.form-group input:not(:focus):hover,
+.form-group select:not(:focus):hover {
+  border-color: #60a5fa;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+  transition: all 0.3s ease;
+}
+
+/* ============ METHOD OPTIONS HOVER ============ */
+
+.method-option {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.method-option:hover {
+  transform: translateX(5px);
+}
+
+/* ============ DARK MODE ADJUSTMENTS ============ */
+
+@media (prefers-color-scheme: dark) {
+  .auth-button {
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  }
+
+  .auth-button:hover {
+    box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5);
+  }
+}
+
+/* ============ ACCESSIBILITY ============ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

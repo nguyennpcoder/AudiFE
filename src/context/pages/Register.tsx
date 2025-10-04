@@ -4,6 +4,7 @@ import { registerApi, RegisterForm } from '../../services/authService';
 import { useAuth } from '../AuthContext';
 import { useNotification } from '../NotificationContext';
 import '../../styles/Auth.css';
+import '../../styles/AuthAnimations.css';
 import logo from '../../assets/logo.svg';
 // Import video for background
 import backgroundVideo from '../../assets/audivideo.mp4';

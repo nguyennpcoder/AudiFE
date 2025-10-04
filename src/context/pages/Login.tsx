@@ -5,6 +5,7 @@ import { logActivity } from '../../services/activityClient';
 import { useAuth } from '../AuthContext';
 import { useNotification } from '../NotificationContext';
 import '../../styles/Auth.css';
+import '../../styles/AuthAnimations.css';
 // Import logo for Audi
 import logo from '../../assets/logo.svg';
 // Import video for background

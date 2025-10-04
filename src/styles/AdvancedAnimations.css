@@ -1,0 +1,537 @@
+/* ========================================
+   🎨 ADVANCED ANIMATIONS FOR AUDI WEBSITE
+   ======================================== */
+
+/* ============ SMOOTH SCROLL ============ */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ============ PARALLAX EFFECTS ============ */
+@keyframes parallax-float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.02);
+  }
+}
+
+.parallax-element {
+  animation: parallax-float 6s ease-in-out infinite;
+}
+
+/* ============ GRADIENT ANIMATIONS ============ */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animated-gradient {
+  background: linear-gradient(
+    -45deg,
+    #000000,
+    #1a1a1a,
+    #bb0a1e,
+    #000000
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+/* ============ SHIMMER EFFECT ============ */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+/* ============ GLOW EFFECTS ============ */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(187, 10, 30, 0.5),
+                0 0 10px rgba(187, 10, 30, 0.3),
+                0 0 15px rgba(187, 10, 30, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(187, 10, 30, 0.8),
+                0 0 20px rgba(187, 10, 30, 0.6),
+                0 0 30px rgba(187, 10, 30, 0.4);
+  }
+}
+
+.glow-effect {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* ============ 3D FLIP CARD ============ */
+.flip-card {
+  perspective: 1000px;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.flip-card:hover {
+  transform: rotateY(10deg) rotateX(5deg);
+}
+
+/* ============ REVEAL ANIMATIONS ============ */
+@keyframes reveal-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes reveal-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes reveal-from-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.reveal-left {
+  animation: reveal-from-left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.reveal-right {
+  animation: reveal-from-right 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.reveal-bottom {
+  animation: reveal-from-bottom 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.reveal-scale {
+  animation: reveal-scale 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* ============ LOADING ANIMATIONS ============ */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #e0e0e0 40px,
+    #f0f0f0 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+/* ============ FLOATING ELEMENTS ============ */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.float-element {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ============ BOUNCE EFFECTS ============ */
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(100px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+.bounce-in {
+  animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ============ SLIDE & FADE ============ */
+@keyframes slide-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-fade-in {
+  animation: slide-fade-in 0.6s ease-out forwards;
+}
+
+/* ============ RIPPLE EFFECT ============ */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+}
+
+.ripple-effect:active::after {
+  animation: ripple 0.6s ease-out;
+}
+
+/* ============ TEXT ANIMATIONS ============ */
+@keyframes text-glow {
+  0%, 100% {
+    text-shadow: 0 0 10px rgba(187, 10, 30, 0.5),
+                 0 0 20px rgba(187, 10, 30, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(187, 10, 30, 0.8),
+                 0 0 40px rgba(187, 10, 30, 0.5),
+                 0 0 60px rgba(187, 10, 30, 0.3);
+  }
+}
+
+.text-glow {
+  animation: text-glow 2s ease-in-out infinite;
+}
+
+/* ============ BORDER ANIMATIONS ============ */
+@keyframes border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animated-border {
+  position: relative;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.animated-border::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #bb0a1e, #fff, #bb0a1e);
+  background-size: 200% 200%;
+  border-radius: inherit;
+  z-index: -1;
+  animation: border-flow 3s ease infinite;
+}
+
+/* ============ ROTATE ANIMATIONS - REMOVED SPINNING EFFECTS ============ */
+/* Spinning animations removed for better performance and user experience */
+
+/* ============ PULSE ANIMATIONS ============ */
+@keyframes pulse-scale {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.pulse-scale {
+  animation: pulse-scale 2s ease-in-out infinite;
+}
+
+/* ============ PARALLAX LAYERS ============ */
+.parallax-layer-1 {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.parallax-layer-2 {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.parallax-layer-3 {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* ============ HOVER EFFECTS ============ */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(187, 10, 30, 0.6),
+              0 0 40px rgba(187, 10, 30, 0.4);
+  transition: box-shadow 0.3s ease;
+}
+
+.hover-scale {
+  transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* ============ STAGGER ANIMATIONS ============ */
+.stagger-item:nth-child(1) { animation-delay: 0.1s; }
+.stagger-item:nth-child(2) { animation-delay: 0.2s; }
+.stagger-item:nth-child(3) { animation-delay: 0.3s; }
+.stagger-item:nth-child(4) { animation-delay: 0.4s; }
+.stagger-item:nth-child(5) { animation-delay: 0.5s; }
+.stagger-item:nth-child(6) { animation-delay: 0.6s; }
+
+/* ============ PERFORMANCE OPTIMIZATIONS ============ */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+/* ============ FADE VARIATIONS ============ */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 40px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -40px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.fade-in-up {
+  animation: fade-in-up 0.6s ease-out;
+}
+
+.fade-in-down {
+  animation: fade-in-down 0.6s ease-out;
+}
+
+/* ============ ZOOM EFFECTS ============ */
+@keyframes zoom-in {
+  from {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.zoom-in {
+  animation: zoom-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ============ SLIDE VARIATIONS ============ */
+@keyframes slide-in-left {
+  from {
+    transform: translate3d(-100%, 0, 0);
+    visibility: visible;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translate3d(100%, 0, 0);
+    visibility: visible;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.slide-in-left {
+  animation: slide-in-left 0.6s ease-out;
+}
+
+.slide-in-right {
+  animation: slide-in-right 0.6s ease-out;
+}
+
+/* ============ FLIP ANIMATIONS ============ */
+@keyframes flip-in-x {
+  from {
+    transform: perspective(400px) rotate3d(1, 0, 0, 90deg);
+    opacity: 0;
+  }
+  40% {
+    transform: perspective(400px) rotate3d(1, 0, 0, -20deg);
+  }
+  60% {
+    transform: perspective(400px) rotate3d(1, 0, 0, 10deg);
+    opacity: 1;
+  }
+  80% {
+    transform: perspective(400px) rotate3d(1, 0, 0, -5deg);
+  }
+  to {
+    transform: perspective(400px);
+  }
+}
+
+.flip-in-x {
+  animation: flip-in-x 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ============ MAGNETIC EFFECT ============ */
+.magnetic-element {
+  transition: transform 0.2s ease;
+}
+
+.magnetic-element:hover {
+  transform: translate(var(--mouse-x, 0), var(--mouse-y, 0));
+}
+
+/* ============ BLUR EFFECTS ============ */
+@keyframes blur-in {
+  from {
+    filter: blur(10px);
+    opacity: 0;
+  }
+  to {
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+
+.blur-in {
+  animation: blur-in 0.8s ease-out;
+}
+
+/* ============ PERSPECTIVE EFFECTS ============ */
+.perspective-container {
+  perspective: 1000px;
+}
+
+.perspective-element {
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
+}
+
+.perspective-element:hover {
+  transform: rotateY(15deg) rotateX(10deg);
+}
+
