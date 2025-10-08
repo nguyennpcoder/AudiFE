@@ -252,7 +252,7 @@ const Header = () => {
               </div>
             </li>
             <li className="nav-item nav-animate-item nav-animate-item-2">
-              <Link to="/rs-etron">RS e-tron</Link>
+              <Link to="/rs7-performance">RS 7 performance</Link>
             </li>
             <li className="nav-item nav-animate-item nav-animate-item-3">
               <Link to="/services">Dịch Vụ</Link>

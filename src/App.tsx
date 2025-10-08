@@ -58,6 +58,7 @@ import DealershipManagement from './context/pages/admin/DealershipManagement';
 import RatingManagement from './context/pages/admin/RatingManagement';
 import { useScrollToTop } from './hooks/useScrollToTop';
 import useUserStatusChecker from './hooks/useUserStatusChecker';
+import RS7Performance from './context/pages/RS7Performance';
 
 function App() {
   const location = useLocation();
@@ -164,6 +165,8 @@ function App() {
             <main className={`main-content ${!shouldShowHeader ? 'auth-page' : ''}`}>
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/rs7" element={<RS7Performance />} />
+                <Route path="/rs7-performance" element={<RS7Performance />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/myaudi" element={
