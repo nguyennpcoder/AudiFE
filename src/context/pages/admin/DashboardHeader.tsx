@@ -1405,7 +1405,7 @@ const DashboardHeader: React.FC<any> = ({
                       overflow: 'hidden',
                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
                     }}>
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={model.hinhAnh}
                         alt={model.tenMau}
                         style={{
@@ -1438,7 +1438,7 @@ const DashboardHeader: React.FC<any> = ({
                           title={`${staff.ho} ${staff.ten}`}
                         >
                           {staff.avatar && !buildAvatarUrl(staff.avatar).includes('avatar-default.png') ? (
-                            <img
+                            <img loading="lazy" decoding="async"
                               src={buildAvatarUrl(staff.avatar)}
                               alt={`${staff.ho} ${staff.ten}`}
                               style={{

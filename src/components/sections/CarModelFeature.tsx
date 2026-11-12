@@ -117,7 +117,7 @@ const CarModelFeature = ({
         {/* Slide container với logic mượt mà */}
         <div className="feature-slideshow">
           <div className={`feature-slide ${fadeState || ''} ${slideDirection || ''}`}>
-            <img
+            <img loading="lazy" decoding="async"
               src={backgroundImage}
               alt="Audi car model"
               className="feature-image"

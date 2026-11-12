@@ -708,7 +708,7 @@ const BlogManagement: React.FC = () => {
                       transition: 'all 0.3s ease',
                     }}
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={imagePreview || getRandomPlaceholder()}
                       alt=""
                       style={{
@@ -961,7 +961,7 @@ const BlogManagement: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                   <label style={{ color: '#1890ff', fontWeight: 500, marginBottom: 8, fontSize: 14, display: 'block', textAlign: 'center' }}>Ảnh đại diện</label>
                   {viewing.anhDaiDien ? (
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={getImageUrl(viewing.anhDaiDien)}
                       alt="Ảnh đại diện"
                       style={{
@@ -1131,7 +1131,7 @@ const BlogManagement: React.FC = () => {
               borderRadius: 0
             }}
           >
-            <img
+            <img loading="lazy" decoding="async"
               src={imgUrl}
               alt="Ảnh đại diện bài viết"
               style={{

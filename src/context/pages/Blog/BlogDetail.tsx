@@ -1030,7 +1030,7 @@ const BlogDetail: React.FC = () => {
         <h1 className="blog-article-title">{post.tieuDe}</h1>
 
         <div className="blog-article-author">
-          <img
+          <img loading="lazy" decoding="async"
             src={authorAvatarUrl}
             alt="Author Avatar"
             className="blog-author-avatar large"
@@ -1061,7 +1061,7 @@ const BlogDetail: React.FC = () => {
 
       {post.anhDaiDien && (
         <div className="blog-article-featured-image">
-          <img 
+          <img loading="lazy" decoding="async" 
             src={getBlogImageUrl(post.anhDaiDien)} 
             alt={post.tieuDe}
             onError={(e) => {
@@ -1141,7 +1141,7 @@ const BlogDetail: React.FC = () => {
               >
                 <div className="blog-related-post-image">
                   {relatedPost.anhDaiDien ? (
-                    <img 
+                    <img loading="lazy" decoding="async" 
                       src={getBlogImageUrl(relatedPost.anhDaiDien)} 
                       alt={relatedPost.tieuDe}
                       onError={(e) => {
@@ -1151,7 +1151,7 @@ const BlogDetail: React.FC = () => {
                     />
                   ) : (
                     <div className="blog-placeholder-image small">
-                      <img 
+                      <img loading="lazy" decoding="async" 
                         src={getRandomPlaceholder()} 
                         alt="Placeholder"
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -1240,7 +1240,7 @@ const BlogDetail: React.FC = () => {
             comments.map((comment) => (
               <div key={comment.id} className="blog-comment">
                 <div className="blog-comment-header">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={getUserAvatarUrl(comment.avatarNguoiDung)}
                     alt={comment.tenNguoiDung || 'Người dùng'}
                     className="blog-comment-avatar"
@@ -1473,7 +1473,7 @@ const BlogDetail: React.FC = () => {
                     {comment.replies.map((reply) => (
                       <div key={reply.id} className="blog-comment reply">
                         <div className="blog-comment-header">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={getUserAvatarUrl(reply.avatarNguoiDung)}
                             alt={reply.tenNguoiDung || 'Người dùng'}
                             className="blog-comment-avatar reply-avatar"

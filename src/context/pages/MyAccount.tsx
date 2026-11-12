@@ -418,7 +418,7 @@ const MyAccount: React.FC = () => {
                   justifyContent: 'center',
                 }}
               >
-                <img
+                <img loading="lazy" decoding="async"
                   src={avatarPreview || getAvatarUrl(userProfile?.avatar) || '/avatar-default.png'}
                   alt=""
                   style={{

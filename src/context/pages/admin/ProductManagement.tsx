@@ -1214,7 +1214,7 @@ const ProductManagement: React.FC = () => {
     }, [src, fallbackSrc, imageType]);
 
     return (
-      <img
+      <img loading="lazy" decoding="async"
         src={imgSrc}
         alt={alt}
         onError={(e) => {
@@ -2930,7 +2930,7 @@ const ProductManagement: React.FC = () => {
               borderRadius: 0
             }}
           >
-            <img
+            <img loading="lazy" decoding="async"
               src={imgUrl}
               alt="Ảnh sản phẩm"
               style={{

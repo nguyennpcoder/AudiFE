@@ -96,7 +96,7 @@ const BanhXeSelector: React.FC<BanhXeSelectorProps> = ({
                         onClick={() => handleBanhXeSelect(banhXe)}
                     >
                         <div className="banh-xe-image">
-                            <img src={banhXe.duongDanAnh} alt={banhXe.ten} />
+                            <img loading="lazy" decoding="async" src={banhXe.duongDanAnh} alt={banhXe.ten} />
                         </div>
                         
                         <div className="banh-xe-info">
@@ -133,7 +133,7 @@ const BanhXeSelector: React.FC<BanhXeSelectorProps> = ({
                             .sort((a, b) => a.viTri - b.viTri)
                             .map((hinh, index) => (
                                 <div key={hinh.id} className="banh-xe-gallery-item">
-                                    <img 
+                                    <img loading="lazy" decoding="async" 
                                         src={hinh.duongDanAnh} 
                                         alt={`${selectedBanhXe.ten} - ${index + 1}`}
                                         className="banh-xe-gallery-image"

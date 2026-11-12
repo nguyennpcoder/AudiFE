@@ -25,7 +25,7 @@ const SupportConsoleLayout: React.FC<SupportConsoleLayoutProps> = ({ title = 'Su
       >
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',  marginTop: 80 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <img src="/public/vite.svg" alt="logo" style={{ width: 28, height: 28, filter: 'invert(1)' }} />
+            <img loading="lazy" decoding="async" src="/public/vite.svg" alt="logo" style={{ width: 28, height: 28, filter: 'invert(1)' }} />
             <div style={{ fontWeight: 800, fontSize: 18, letterSpacing: 0.5 }}>Audi Support</div>
           </div>
           <div style={{ opacity: 0.9, fontSize: 14 }}>Real‑time helpdesk</div>

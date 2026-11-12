@@ -109,7 +109,7 @@ const ImageWithFallback: React.FC<{
   }, [src, fallbackSrc]);
 
   return (
-    <img
+    <img loading="lazy" decoding="async"
       src={imgSrc}
       alt={alt}
       onError={(e) => {

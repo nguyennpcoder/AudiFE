@@ -302,7 +302,7 @@ const BlogList: React.FC = () => {
                         />
                       ) : (
                         <div className="blog-placeholder-image">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={getRandomPlaceholder()}
                             alt="Placeholder"
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -352,7 +352,7 @@ const BlogList: React.FC = () => {
 
                       <div className="blog-card-footer">
                         <div className="blog-author-info">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={authorAvatarUrl}
                             alt="Author Avatar"
                             className="blog-author-avatar"

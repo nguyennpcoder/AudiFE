@@ -930,7 +930,7 @@ const VehicleConfigurator: React.FC = () => {
                   >
                     <div className="color-preview">
                       {mainImage ? (
-                        <img 
+                        <img loading="lazy" decoding="async" 
                           src={`${BACKEND_URL.replace('/api/v1', '')}${mainImage.duongDanAnh}`}
                           alt={`${mauSac.ten} - ${mauXe?.tenMau}`}
                           className="color-car-image"
@@ -1079,7 +1079,7 @@ const VehicleConfigurator: React.FC = () => {
                     onClick={() => handleChonNoiThat(noiThat.id)}
                   >
                     {noiThat.duongDanAnh && (
-                      <img 
+                      <img loading="lazy" decoding="async" 
                         src={`${BACKEND_URL.replace('/api/v1', '')}${noiThat.duongDanAnh}`}
                         alt={noiThat.ten}
                         className="interior-image"
@@ -1135,7 +1135,7 @@ const VehicleConfigurator: React.FC = () => {
                     onClick={() => handleChonBanhXe(banhXe.id)}
                   >
                     {banhXe.duongDanAnh && (
-                      <img 
+                      <img loading="lazy" decoding="async" 
                         src={`${BACKEND_URL.replace('/api/v1', '')}${banhXe.duongDanAnh}`}
                         alt={banhXe.ten}
                         className="wheel-image"

@@ -592,7 +592,7 @@ const ActivityLog: React.FC = () => {
             borderRadius: 0
           }}
         >
-          <img
+          <img loading="lazy" decoding="async"
             src={hoveredUserImgUrl}
             alt="avatar"
             style={{

@@ -29,7 +29,7 @@ const audiMarkerIcon = L.divIcon({
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
       position: relative;
     ">
-      <img 
+      <img loading="lazy" decoding="async" 
         src="${logoAudi}" 
         alt="Audi Logo" 
         style="

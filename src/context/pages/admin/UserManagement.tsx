@@ -1177,7 +1177,7 @@ const UserManagement: React.FC = () => {
                     marginTop: 8
                   }}
                 >
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={buildAvatarUrl(
                       state.currentUser.avatar ||
                       state.currentUser.avatarUrl ||
@@ -1544,7 +1544,7 @@ const UserManagement: React.FC = () => {
               borderRadius: 0            // Không bo tròn khung ngoài
             }}
           >
-            <img
+            <img loading="lazy" decoding="async"
               src={imgUrl}
               alt="avatar"
               style={{

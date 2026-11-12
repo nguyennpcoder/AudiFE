@@ -1681,7 +1681,7 @@ const resetToDefaultColor = async () => {
                   <p>Đang tải hình ảnh...</p>
                 </div>
               ) : (
-                <img 
+                <img loading="lazy" decoding="async" 
                   src={imageCache[featuredImage] || getImageUrl(featuredImage)} 
                   alt={product.tenMau} 
                   onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
@@ -1737,7 +1737,7 @@ const resetToDefaultColor = async () => {
                       >
                         {/* Hình ảnh hiện tại (màu mới) */}
                         <div className="compare-original" style={{ zIndex: 1 }}>
-                          <img 
+                          <img loading="lazy" decoding="async" 
                             src={imageCache[ngoaiThatImages[currentImageIndex]?.duongDanAnh] || getImageUrl(ngoaiThatImages[currentImageIndex]?.duongDanAnh)} 
                             alt={`${product.tenMau} exterior`}
                             onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
@@ -1753,7 +1753,7 @@ const resetToDefaultColor = async () => {
                             zIndex: 2
                           }}
                         >
-                          <img 
+                          <img loading="lazy" decoding="async" 
                             src={imageCache[compareImages[currentImageIndex < compareImages.length ? currentImageIndex : 0]?.duongDanAnh] || 
                                getImageUrl(compareImages[currentImageIndex < compareImages.length ? currentImageIndex : 0]?.duongDanAnh)} 
                             alt={`${product.tenMau} ${compareColor.ten} exterior`}
@@ -1784,7 +1784,7 @@ const resetToDefaultColor = async () => {
                         </div>
                       </div>
                     ) : (
-                      <img 
+                      <img loading="lazy" decoding="async" 
                         src={imageCache[ngoaiThatImages[currentImageIndex]?.duongDanAnh] || getImageUrl(ngoaiThatImages[currentImageIndex]?.duongDanAnh)} 
                         alt={`${product.tenMau} exterior`}
                         onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
@@ -1937,7 +1937,7 @@ const resetToDefaultColor = async () => {
                       >
                         {/* Current wheel image - using same color as comparison */}
                         <div className="compare-original" style={{ zIndex: 1 }}>
-                          <img 
+                          <img loading="lazy" decoding="async" 
                             src={imageCache[banhXeImages[activeWheelTab]?.duongDanAnh] || getImageUrl(banhXeImages[activeWheelTab]?.duongDanAnh)} 
                             alt="Bánh xe hiện tại"
                             onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
@@ -1953,7 +1953,7 @@ const resetToDefaultColor = async () => {
                             zIndex: 2
                           }}
                         >
-                          <img 
+                          <img loading="lazy" decoding="async" 
                             src={imageCache[compareWheelImages[activeWheelTab < compareWheelImages.length ? activeWheelTab : 0]?.duongDanAnh] || 
                                  getImageUrl(compareWheelImages[activeWheelTab < compareWheelImages.length ? activeWheelTab : 0]?.duongDanAnh)} 
                             alt="Bánh xe so sánh"
@@ -1984,7 +1984,7 @@ const resetToDefaultColor = async () => {
                         </div>
                       </div>
                     ) : (
-                      <img 
+                      <img loading="lazy" decoding="async" 
                         src={imageCache[banhXeImages[activeWheelTab]?.duongDanAnh] || getImageUrl(banhXeImages[activeWheelTab]?.duongDanAnh)} 
                         alt="Bánh xe"
                         onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
@@ -2045,7 +2045,7 @@ const resetToDefaultColor = async () => {
                     onClick={() => handleBanhXeSelect(defaultWheel, selectedColor?.id)}
                     title={`${defaultWheel.ten} (Bánh xe mặc định)`}
                   >
-                    <img 
+                    <img loading="lazy" decoding="async" 
                       src={getImageUrl(defaultWheel.duongDanAnh)} 
                       alt={defaultWheel.ten}
                       style={{
@@ -2081,7 +2081,7 @@ const resetToDefaultColor = async () => {
                       onClick={() => handleBanhXeSelect(wheel, selectedColor?.id)}
                       title={wheel.ten}
                     >
-                      <img 
+                      <img loading="lazy" decoding="async" 
                         src={getImageUrl(wheel.duongDanAnh)} 
                         alt={wheel.ten}
                         style={{
@@ -2139,7 +2139,7 @@ const resetToDefaultColor = async () => {
               <div className="image-slideshow_details">
                 <div className="slide-container_details">
                   <div className={`slide_details ${interiorFadeState || ''} ${interiorSlideDirection || ''}`}>
-                    <img 
+                    <img loading="lazy" decoding="async" 
                       src={imageCache[noiThatImages[activeInteriorTab]?.duongDanAnh] || getImageUrl(noiThatImages[activeInteriorTab]?.duongDanAnh)} 
                       alt={`${product.tenMau} interior`}
                       onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE }}
@@ -2197,7 +2197,7 @@ const resetToDefaultColor = async () => {
                       }}
                     >
                       {/* Use thumbnail image for selection */}
-                      <img 
+                      <img loading="lazy" decoding="async" 
                         src={getImageUrl(option.duongDanAnh)} 
                         alt={option.ten}
                         style={{

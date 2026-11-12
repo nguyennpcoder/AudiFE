@@ -293,7 +293,7 @@ const ModelsPage: React.FC = () => {
                     animationDelay: `${index * 0.1}s`
                   }}>
                     <div className="car-image-container">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={getProductImageUrl(mauXe.id)}
                         alt={mauXe.tenMau}
                         className="car-image"

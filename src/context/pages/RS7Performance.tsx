@@ -848,7 +848,7 @@ const SimilarModels = () => {
       <div className="similar-grid">
         {items.map((it) => (
           <a key={it.name} className="similar-card" href={it.href}>
-            <img src={it.src} alt={it.name} />
+            <img loading="lazy" decoding="async" src={it.src} alt={it.name} />
             <div className="similar-overlay" />
             <div className="similar-caption">
               <div className="tagline">{it.tagline}</div>
