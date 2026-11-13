@@ -344,9 +344,7 @@ const MyAccount: React.FC = () => {
 
       // Notify listeners (Header) to refresh avatar immediately
       try {
-        const fullUrl = uploadedPath.startsWith('http')
-          ? uploadedPath
-          : `http://localhost:8080/uploads/images/avatar_user/${avatarValue}`;
+        const fullUrl = resolveAvatarUrl(uploadedPath);
         const evt = new CustomEvent('user-avatar-updated', { detail: { avatar: fullUrl } });
         window.dispatchEvent(evt);
       } catch {

@@ -29,6 +29,26 @@ const KIND_FOLDER: Record<MediaKind, string> = {
 
 const ABSOLUTE_URL = /^(?:https?:)?\/\//i;
 
+/**
+ * Files created while the app is running (avatar uploads, blog covers,
+ * admin-uploaded car photos) are written to the backend disk. They are not
+ * part of the pinned GitHub CDN commit, so they must be loaded from the API
+ * origin instead.
+ *
+ * Naming patterns produced by the backend:
+ *   1794532713925_copy_xxx.jpeg      (AuthController.dang-ky)
+ *   copy_xxx_1794532713925.jpeg      (FileStorageService / upload/avatar)
+ *   color_12_1a2b3c4d.jpg            (MauSacImageService)
+ *   1_ngoai_that_2.jpeg              (HinhAnhXeService)
+ */
+const RUNTIME_UPLOAD_NAME =
+  /(?:\d{13}[_-][^/]+|[^/]+_\d{13}\.[A-Za-z0-9]+|color_\d+_[0-9a-f]{8}\.[A-Za-z0-9]+|\d+_(?:ngoai_that|noi_that|chi_tiet|tinh_nang|thu_nho)_[^/]+)$/i;
+
+function isRuntimeUpload(path: string): boolean {
+  const name = path.split('/').pop() || '';
+  return RUNTIME_UPLOAD_NAME.test(name);
+}
+
 function defaultFor(kind: MediaKind): string {
   if (kind === 'avatar') return DEFAULT_AVATAR;
   if (kind === 'blog') return DEFAULT_BLOG_IMAGE;
@@ -37,6 +57,11 @@ function defaultFor(kind: MediaKind): string {
 
 function joinWithBase(path: string): string {
   const clean = path.replace(/^\/+/, '');
+
+  // Runtime uploads only exist on the backend, never on the pinned CDN.
+  if (isRuntimeUpload(clean)) {
+    return API_ORIGIN ? `${API_ORIGIN}/${clean}` : `/${clean}`;
+  }
 
   // No CDN configured (local dev): keep the path relative so the Vite proxy
   // and the Spring Boot static handler can serve it.
