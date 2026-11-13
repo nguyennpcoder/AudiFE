@@ -259,18 +259,28 @@ const SupportTickets: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [focus, setFocus] = useState<{ title: boolean; content: boolean }>({ title: false, content: false });
 
+  const isStaff = user?.role === 'quan_tri' || user?.role === 'ho_tro';
+
   const loadTickets = async () => {
     setLoading(true);
     try {
-      const data = await supportService.getAllTickets(page, size);
+      const data = isStaff
+        ? await supportService.getAllTickets(page, size)
+        : user?.userId
+          ? await supportService.getMyTickets(user.userId, page, size)
+          : { yeuCau: [], totalPages: 1 };
       setTickets(data.yeuCau || []);
       setTotalPages(data.totalPages || 1);
+      setError(null);
+    } catch (e) {
+      console.error('Không tải được danh sách yêu cầu:', e);
+      setError('Không thể tải danh sách yêu cầu. Vui lòng thử lại sau.');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { loadTickets(); }, [page]);
+  useEffect(() => { loadTickets(); }, [page, user?.userId, user?.role]);
 
   const submitTicket = async () => {
     if (!user?.userId) return;

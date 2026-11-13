@@ -52,7 +52,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { changePasswordApi } from '../../services/authService';
-import { getAvatarUrl } from '../../utils/media';
+import { getAvatarUrl as resolveAvatarUrl } from '../../utils/media';
 import axios from 'axios';
 import '../../styles/MyAccount.css';
 
@@ -231,7 +231,7 @@ const MyAccount: React.FC = () => {
       return '/avatar-default-256.png';
     }
 
-    const resolved = getAvatarUrl(avatarPath);
+    const resolved = resolveAvatarUrl(avatarPath);
     return avatarVersion
       ? `${resolved}${resolved.includes('?') ? '&' : '?'}v=${avatarVersion}`
       : resolved;
