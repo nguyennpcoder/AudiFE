@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-label="Audi">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#14161b"/>
+      <stop offset="0.6" stop-color="#1e2129"/>
+      <stop offset="1" stop-color="#0a0b0e"/>
+    </linearGradient>
+    <linearGradient id="c" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a3f4a"/>
+      <stop offset="1" stop-color="#171a20"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#g)"/>
+  <path d="M250 430c20-70 70-118 150-130l120-18c70-10 130-10 200 4l130 28c64 14 104 50 122 116l18 58H238z" fill="url(#c)" stroke="#545a66" stroke-width="3"/>
+  <path d="M408 316l52-58c14-16 34-24 58-24h132c24 0 44 8 58 24l52 58" fill="none" stroke="#6b727f" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="386" cy="486" r="62" fill="#0b0c0f" stroke="#5b616d" stroke-width="10"/>
+  <circle cx="386" cy="486" r="26" fill="#3b414c"/>
+  <circle cx="814" cy="486" r="62" fill="#0b0c0f" stroke="#5b616d" stroke-width="10"/>
+  <circle cx="814" cy="486" r="26" fill="#3b414c"/>
+  <g transform="translate(600 170)" fill="none" stroke="#f5f5f5" stroke-width="6" opacity="0.9">
+    <circle cx="-64" cy="0" r="34"/>
+    <circle cx="-21" cy="0" r="34"/>
+    <circle cx="21" cy="0" r="34"/>
+    <circle cx="64" cy="0" r="34"/>
+  </g>
+</svg>

@@ -1,6 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../../../styles/Blog.css';
+import {
+  DEFAULT_AVATAR,
+  DEFAULT_BLOG_IMAGE,
+  applyImageFallback,
+  getAvatarUrl,
+  getBlogImageUrl,
+} from '../../../utils/media';
 
 // Configuration for API endpoint
 const API_URL = 'http://localhost:8080/api/v1/bai-viet/public';
@@ -42,48 +49,7 @@ const BlogList: React.FC = () => {
   };
 
   // Get avatar URL for author
-  const getAuthorAvatarUrl = (avatarPath?: string) => {
-    if (avatarPath) {
-      const avatarUrl = avatarPath.startsWith('http')
-        ? avatarPath
-        : `http://localhost:8080/${avatarPath}`;
-      return avatarUrl;
-    }
-    return '/avatar-default.png';
-  };
-
-  // Tạo danh sách placeholder images
-  const placeholderImages = [
-    'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
-    'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
-    'https://gw.alipayobjects.com/zos/rmsportal/DkKNubTaaVsKwUzKzQhQ.png',
-    'https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png',
-    'https://gw.alipayobjects.com/zos/rmsportal/rMSqrFDLlkZjfWKXoQpa.png'
-  ];
-
-  const getRandomPlaceholder = () => {
-    const randomIndex = Math.floor(Math.random() * placeholderImages.length);
-    return placeholderImages[randomIndex];
-  };
-
-  // Get image URL for blog posts
-  const getBlogImageUrl = (imagePath?: string) => {
-    if (!imagePath) return getRandomPlaceholder();
-
-    if (imagePath.startsWith('http')) {
-      return imagePath;
-    }
-
-    if (imagePath.startsWith('/uploads/')) {
-      return `http://localhost:8080${imagePath}`;
-    }
-
-    if (!imagePath.includes('/')) {
-      return `http://localhost:8080/uploads/images/blogs/${imagePath}`;
-    }
-
-    return getRandomPlaceholder();
-  };
+  const getAuthorAvatarUrl = (avatarPath?: string) => getAvatarUrl(avatarPath);
 
   useEffect(() => {
     scrollToTop();
@@ -290,25 +256,13 @@ const BlogList: React.FC = () => {
                     style={{ cursor: 'pointer' }}
                   >
                     <div className="blog-card-image">
-                      {post.anhDaiDien ? (
-                        <img
-                          src={getBlogImageUrl(post.anhDaiDien)}
-                          alt={post.tieuDe}
-                          loading="lazy"
-                          onError={(e) => {
-                            console.error('Blog image failed to load:', post.anhDaiDien);
-                            e.currentTarget.src = getRandomPlaceholder();
-                          }}
-                        />
-                      ) : (
-                        <div className="blog-placeholder-image">
-                          <img loading="lazy" decoding="async"
-                            src={getRandomPlaceholder()}
-                            alt="Placeholder"
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          />
-                        </div>
-                      )}
+                      <img
+                        src={getBlogImageUrl(post.anhDaiDien)}
+                        alt={post.tieuDe}
+                        loading="lazy"
+                        decoding="async"
+                        onError={(e) => applyImageFallback(e, DEFAULT_BLOG_IMAGE)}
+                      />
                       <div className="blog-image-overlay"></div>
                     </div>
 
@@ -363,16 +317,7 @@ const BlogList: React.FC = () => {
                               objectFit: 'cover',
                               border: '2px solid rgba(255, 255, 255, 0.2)'
                             }}
-                            onError={(e) => {
-                              console.log('Author avatar failed to load, using default');
-                              const target = e.currentTarget;
-                              if (target.src !== '/avatar-default.png') {
-                                target.src = '/avatar-default.png';
-                              }
-                            }}
-                            onLoad={() => {
-                              console.log('Author avatar loaded successfully:', authorAvatarUrl);
-                            }}
+                            onError={(e) => applyImageFallback(e, DEFAULT_AVATAR)}
                           />
                           <div className="blog-author-details">
                             <span className="blog-author-name">{post.tenTacGia}</span>

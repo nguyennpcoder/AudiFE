@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-label="Audi Blog">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111318"/>
+      <stop offset="0.55" stop-color="#1c1f26"/>
+      <stop offset="1" stop-color="#0a0b0e"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.55">
+      <stop offset="0" stop-color="#e11d2e" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#e11d2e" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#g)"/>
+  <rect width="1200" height="675" fill="url(#glow)"/>
+  <g transform="translate(600 300)" fill="none" stroke="#f5f5f5" stroke-width="9" opacity="0.92">
+    <circle cx="-96" cy="0" r="52"/>
+    <circle cx="-32" cy="0" r="52"/>
+    <circle cx="32" cy="0" r="52"/>
+    <circle cx="96" cy="0" r="52"/>
+  </g>
+  <text x="600" y="438" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="30" letter-spacing="10" fill="#b8bcc6">AUDI BLOG</text>
+  <text x="600" y="486" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="18" letter-spacing="3" fill="#6d727d">TIN TỨC &amp; CẢM HỨNG</text>
+</svg>

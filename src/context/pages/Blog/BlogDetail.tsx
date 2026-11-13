@@ -4,6 +4,13 @@ import { useAuth } from '../../AuthContext';
 import { useNotification } from '../../NotificationContext';
 import '../../../styles/Blog.css';
 import { logActivity } from '../../../services/activityClient';
+import {
+  DEFAULT_AVATAR,
+  DEFAULT_BLOG_IMAGE,
+  applyImageFallback,
+  getAvatarUrl,
+  getBlogImageUrl,
+} from '../../../utils/media';
 
 const API_URL = 'http://localhost:8080/api/v1/bai-viet';
 const COMMENT_API_URL = 'http://localhost:8080/api/v1/binh-luan';
@@ -97,85 +104,10 @@ const BlogDetail: React.FC = () => {
     }
   };
 
-  // Get avatar URL for author (giữ nguyên như cũ)
-  const getAuthorAvatarUrl = (avatarPath?: string) => {
-    if (avatarPath) {
-      const avatarUrl = avatarPath.startsWith('http')
-        ? avatarPath
-        : `http://localhost:8080/${avatarPath}`;
-      return avatarUrl;
-    }
-    return '/avatar-default.png';
-  };
+  // Get avatar URL for author / comment users
+  const getAuthorAvatarUrl = (avatarPath?: string) => getAvatarUrl(avatarPath);
 
-  // Cải thiện hàm getUserAvatarUrl để xử lý tốt hơn
-  const getUserAvatarUrl = (avatarPath?: string) => {
-    console.log('getUserAvatarUrl called with:', avatarPath);
-    
-    if (!avatarPath || avatarPath === 'null' || avatarPath === 'undefined') {
-      console.log('No avatar path, using default');
-      return '/avatar-default.png';
-    }
-    
-    // If it's already a full URL (from Google, Facebook, etc.), return as is
-    if (avatarPath.startsWith('http')) {
-      console.log('Full URL detected:', avatarPath);
-      return avatarPath;
-    }
-    
-    // If it starts with /, it's a relative path
-    if (avatarPath.startsWith('/')) {
-      const url = `http://localhost:8080${avatarPath}`;
-      console.log('Relative path converted to:', url);
-      return url;
-    }
-    
-    // If it contains uploads/images/avatar_user, it's already a full path
-    if (avatarPath.includes('uploads/images/avatar_user/')) {
-      const url = `http://localhost:8080/${avatarPath}`;
-      console.log('Full path with uploads converted to:', url);
-      return url;
-    }
-    
-    // Otherwise, assume it's a filename and build the full URL
-    // This handles the case where backend only stores filename like "1756041370218_IMG_1106.jpg"
-    const url = `http://localhost:8080/uploads/images/avatar_user/${avatarPath}`;
-    console.log('Filename converted to:', url);
-    return url;
-  };
-
-  // Tạo danh sách placeholder images
-  const placeholderImages = [
-    'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
-    'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
-    'https://gw.alipayobjects.com/zos/rmsportal/DkKNubTaaVsKwUzKzQhQ.png',
-    'https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png',
-    'https://gw.alipayobjects.com/zos/rmsportal/rMSqrFDLlkZjfWKXoQpa.png'
-  ];
-
-  const getRandomPlaceholder = () => {
-    const randomIndex = Math.floor(Math.random() * placeholderImages.length);
-    return placeholderImages[randomIndex];
-  };
-
-  // Get image URL for blog posts
-  const getBlogImageUrl = (imagePath?: string) => {
-    if (!imagePath) return getRandomPlaceholder();
-    
-    if (imagePath.startsWith('http')) {
-      return imagePath;
-    }
-    
-    if (imagePath.startsWith('/uploads/')) {
-      return `http://localhost:8080${imagePath}`;
-    }
-    
-    if (!imagePath.includes('/')) {
-      return `http://localhost:8080/uploads/images/blogs/${imagePath}`;
-    }
-    
-    return getRandomPlaceholder();
-  };
+  const getUserAvatarUrl = (avatarPath?: string) => getAvatarUrl(avatarPath);
 
   // Cập nhật fetchComments để xử lý avatar tốt hơn
   const fetchComments = useCallback(async () => {
@@ -1041,16 +973,7 @@ const BlogDetail: React.FC = () => {
               objectFit: 'cover',
               border: '2px solid rgba(255, 255, 255, 0.2)'
             }}
-            onError={(e) => {
-              console.log('Author avatar failed to load, using default');
-              const target = e.currentTarget;
-              if (target.src !== '/avatar-default.png') {
-                target.src = '/avatar-default.png';
-              }
-            }}
-            onLoad={() => {
-              console.log('Author avatar loaded successfully:', authorAvatarUrl);
-            }}
+            onError={(e) => applyImageFallback(e, DEFAULT_AVATAR)}
           />
           <div className="blog-article-author-info">
             <div className="blog-article-author-name">{post.tenTacGia}</div>
@@ -1064,10 +987,7 @@ const BlogDetail: React.FC = () => {
           <img loading="lazy" decoding="async" 
             src={getBlogImageUrl(post.anhDaiDien)} 
             alt={post.tieuDe}
-            onError={(e) => {
-              console.error('Blog featured image failed to load:', post.anhDaiDien);
-              e.currentTarget.src = getRandomPlaceholder();
-            }}
+            onError={(e) => applyImageFallback(e, DEFAULT_BLOG_IMAGE)}
           />
         </div>
       )}
@@ -1140,24 +1060,11 @@ const BlogDetail: React.FC = () => {
                 style={{ cursor: 'pointer' }}
               >
                 <div className="blog-related-post-image">
-                  {relatedPost.anhDaiDien ? (
-                    <img loading="lazy" decoding="async" 
-                      src={getBlogImageUrl(relatedPost.anhDaiDien)} 
-                      alt={relatedPost.tieuDe}
-                      onError={(e) => {
-                        console.error('Related post image failed to load:', relatedPost.anhDaiDien);
-                        e.currentTarget.src = getRandomPlaceholder();
-                      }}
-                    />
-                  ) : (
-                    <div className="blog-placeholder-image small">
-                      <img loading="lazy" decoding="async" 
-                        src={getRandomPlaceholder()} 
-                        alt="Placeholder"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    </div>
-                  )}
+                  <img loading="lazy" decoding="async"
+                    src={getBlogImageUrl(relatedPost.anhDaiDien)}
+                    alt={relatedPost.tieuDe}
+                    onError={(e) => applyImageFallback(e, DEFAULT_BLOG_IMAGE)}
+                  />
                 </div>
                 <div className="blog-related-post-content">
                   <h3>{relatedPost.tieuDe}</h3>
@@ -1244,13 +1151,7 @@ const BlogDetail: React.FC = () => {
                     src={getUserAvatarUrl(comment.avatarNguoiDung)}
                     alt={comment.tenNguoiDung || 'Người dùng'}
                     className="blog-comment-avatar"
-                    onError={(e) => {
-                      console.log('Comment avatar failed to load, using default');
-                      const target = e.currentTarget;
-                      if (target.src !== '/avatar-default.png') {
-                        target.src = '/avatar-default.png';
-                      }
-                    }}
+                    onError={(e) => applyImageFallback(e, DEFAULT_AVATAR)}
                   />
                   <div className="blog-comment-info">
                     <div className="blog-comment-author">

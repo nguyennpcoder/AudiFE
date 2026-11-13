@@ -3,6 +3,7 @@ import { message } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, StopOutlined, EyeOutlined, CameraOutlined } from '@ant-design/icons';
 
 import { blogService, BaiViet } from '../../../services/blogService';
+import { DEFAULT_BLOG_IMAGE, applyImageFallback, getBlogImageUrl } from '../../../utils/media';
 import '../../../styles/Admin.css';
 // import '../../../styles/AdminAnimations.css';
 import AdminHeader from './AdminHeader';
@@ -138,21 +139,6 @@ const BlogManagement: React.FC = () => {
     }
   };
 
-  // Tạo danh sách placeholder images từ Ant Design
-  const placeholderImages = [
-    'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png',
-    'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
-    'https://gw.alipayobjects.com/zos/rmsportal/DkKNubTaaVsKwUzKzQhQ.png',
-    'https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png',
-    'https://gw.alipayobjects.com/zos/rmsportal/rMSqrFDLlkZjfWKXoQpa.png'
-  ];
-
-  // Lấy placeholder image ngẫu nhiên
-  const getRandomPlaceholder = () => {
-    const randomIndex = Math.floor(Math.random() * placeholderImages.length);
-    return placeholderImages[randomIndex];
-  };
-
   // Handle image change
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -166,28 +152,16 @@ const BlogManagement: React.FC = () => {
   };
 
   // Thêm function helper để xử lý đường dẫn ảnh
-  const getImageUrl = (imagePath: string | undefined): string | undefined => {
-    if (!imagePath) return getRandomPlaceholder();
-    
-    // Nếu đã có đường dẫn đầy đủ
-    if (imagePath.startsWith('/uploads/') || imagePath.startsWith('http')) {
-      return `http://localhost:8080${imagePath}`;
-    }
-    
-    // Nếu chỉ có tên file
-    return `http://localhost:8080/uploads/images/blogs/${imagePath}`;
+  const getImageUrl = (imagePath: string | undefined): string => {
+    return getBlogImageUrl(imagePath);
   };
 
   // Reset form when editing changes
   useEffect(() => {
     if (editing) {
-      if (editing.anhDaiDien) {
-        setImagePreview(getImageUrl(editing.anhDaiDien) || getRandomPlaceholder());
-      } else {
-        setImagePreview(getRandomPlaceholder());
-      }
+      setImagePreview(getImageUrl(editing.anhDaiDien));
     } else {
-      setImagePreview(getRandomPlaceholder());
+      setImagePreview(DEFAULT_BLOG_IMAGE);
     }
     setImageFile(null);
   }, [editing, showForm]);
@@ -709,7 +683,7 @@ const BlogManagement: React.FC = () => {
                     }}
                   >
                     <img loading="lazy" decoding="async"
-                      src={imagePreview || getRandomPlaceholder()}
+                      src={imagePreview || DEFAULT_BLOG_IMAGE}
                       alt=""
                       style={{
                         width: '100%',
@@ -718,15 +692,9 @@ const BlogManagement: React.FC = () => {
                         borderRadius: '10px',
                         display: 'block',
                         transition: 'filter 0.2s',
-                        filter: imagePreview && !imagePreview.includes('alipayobjects') ? 'none' : 'grayscale(1) opacity(0.7)',
+                        filter: imagePreview && imagePreview !== DEFAULT_BLOG_IMAGE ? 'none' : 'grayscale(1) opacity(0.7)',
                       }}
-                      onError={(e) => {
-                        console.log('Image failed to load, using placeholder');
-                        e.currentTarget.src = getRandomPlaceholder();
-                      }}
-                      onLoad={() => {
-                        console.log('Image loaded successfully:', imagePreview);
-                      }}
+                      onError={(e) => applyImageFallback(e, DEFAULT_BLOG_IMAGE)}
                     />
                     {(!imagePreview || isImageHover) && (
                       <div className="avatar-upload-overlay">

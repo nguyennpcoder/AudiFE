@@ -1,13 +1,19 @@
 // frontend/audi/src/pages/Models.tsx
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import '../../../styles/Models.css';
 import VehicleRatingSummary from '../../../components/common/VehicleRatingSummary';
-const BACKEND_URL = 'http://localhost:8080';
-import rs7Image from '../../../assets/rs7.jpeg'; // Đường dẫn đúng với project bạn
+import { cachedFetchJson } from '../../../utils/apiCache';
+import {
+  DEFAULT_CAR_IMAGE,
+  applyImageFallback,
+  getVehicleImageUrl,
+} from '../../../utils/media';
 
-const FALLBACK_IMAGE = rs7Image;
+const BACKEND_URL = 'http://localhost:8080';
+const LIST_CACHE_TTL = 5 * 60 * 1000;
+const IMAGE_CACHE_TTL = 30 * 60 * 1000;
 
 interface HinhAnhXe {
   id: number;
@@ -15,6 +21,11 @@ interface HinhAnhXe {
   duongDanAnh: string;
   loaiHinh: string;
   viTri?: number;
+}
+
+interface AnhDaiDienMauXe {
+  idMauXe: number;
+  duongDanAnh: string;
 }
 
 interface DongXe {
@@ -36,7 +47,7 @@ interface MauXe {
   thongSoKyThuat: string;
   conHang: boolean;
   ngayRaMat: string;
-  duongDanAnh?: string; // Thêm nếu có ảnh
+  duongDanAnh?: string;
 }
 
 // Từ điển dịch tiếng Việt
@@ -60,111 +71,185 @@ const translate = (key: string): string => {
   return translations[key as keyof typeof translations] || key;
 };
 
-// Hàm format giá tiền
 const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('vi-VN').format(price);
 };
 
-// Hàm animation cho cards
-const useCardAnimation = (isVisible: boolean) => {
-  const [animationClass, setAnimationClass] = useState('');
-  
-  useEffect(() => {
-    if (isVisible) {
-      setAnimationClass('car-card');
+/** Run async work with a small concurrency limit so the API is not flooded. */
+async function mapWithLimit<T, R>(
+  items: T[],
+  limit: number,
+  worker: (item: T) => Promise<R>
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let cursor = 0;
+
+  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (cursor < items.length) {
+      const index = cursor;
+      cursor += 1;
+      results[index] = await worker(items[index]);
     }
-  }, [isVisible]);
-  
-  return animationClass;
-};
+  });
+
+  await Promise.all(runners);
+  return results;
+}
 
 const ModelsPage: React.FC = () => {
   const [dongXeList, setDongXeList] = useState<DongXe[]>([]);
   const [mauXeMap, setMauXeMap] = useState<Record<number, MauXe[]>>({});
+  const [primaryImages, setPrimaryImages] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
-  const [productImagesMap, setProductImagesMap] = useState<Record<number, HinhAnhXe[]>>({});
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [selectedBodyType, setSelectedBodyType] = useState<string | null>(null);
-  const [bodyTypeFilters, setBodyTypeFilters] = useState<string[]>([]);
-  const [filteredData, setFilteredData] = useState<DongXe[]>([]);
-  const [isFilterAnimating, setIsFilterAnimating] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let cancelled = false;
+    const isCancelled = () => cancelled;
+
     const fetchDongXeAndMauXe = async () => {
       setLoading(true);
+
       try {
-        const dongXeRes = await axios.get(`${BACKEND_URL}/api/v1/dong-xe`);
-        setDongXeList(dongXeRes.data);
-        setFilteredData(dongXeRes.data);
-
-        // Lấy các giá trị phan_loai duy nhất
-        const uniqueBodyTypes = Array.from(new Set(dongXeRes.data.map((item: DongXe) => item.phanLoai))) as string[];
-        setBodyTypeFilters(uniqueBodyTypes);
-
-        const mauXeMapTemp: Record<number, MauXe[]> = {};
-        const imagesMap: Record<number, HinhAnhXe[]> = {};
-
-        for (const dongXe of dongXeRes.data) {
-          const mauXeRes = await axios.get(`${BACKEND_URL}/api/v1/mau-xe/dong-xe/${dongXe.id}`);
-          const mauXeList = mauXeRes.data;
-
-          // Lấy ảnh cho từng mẫu xe (dùng API giống FeaturedProducts)
-          await Promise.all(
-            mauXeList.map(async (mauXe: MauXe) => {
-              try {
-                const imgRes = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${mauXe.id}`);
-                imagesMap[mauXe.id] = imgRes.data || [];
-              } catch {
-                imagesMap[mauXe.id] = [];
+        // Two independent endpoints in parallel. The old code made one request
+        // per body type (and then one per model) in sequence.
+        const [dongXe, mauXe] = await Promise.all([
+          cachedFetchJson<DongXe[]>('dong-xe', LIST_CACHE_TTL, async () => {
+            const response = await axios.get(`${BACKEND_URL}/api/v1/dong-xe`);
+            return response.data;
+          }),
+          cachedFetchJson<MauXe[]>('mau-xe:tom-tat', LIST_CACHE_TTL, async () => {
+            // Fast path: lightweight projection, no colour/option collections.
+            try {
+              const response = await axios.get(
+                `${BACKEND_URL}/api/v1/mau-xe/danh-sach/tom-tat`,
+                { timeout: 15000 }
+              );
+              if (Array.isArray(response.data) && response.data.length > 0) {
+                return response.data as MauXe[];
               }
-            })
-          );
+            } catch {
+              // Older backend without the summary endpoint: use the full list.
+            }
 
-          mauXeMapTemp[dongXe.id] = mauXeList;
+            const response = await axios.get(`${BACKEND_URL}/api/v1/mau-xe`, {
+              timeout: 30000,
+            });
+            return response.data;
+          }),
+        ]);
+
+        if (cancelled) return;
+
+        const grouped: Record<number, MauXe[]> = {};
+        for (const model of mauXe) {
+          if (!grouped[model.idDong]) grouped[model.idDong] = [];
+          grouped[model.idDong].push(model);
         }
-        setMauXeMap(mauXeMapTemp);
-        setProductImagesMap(imagesMap);
-      } catch (err) {
-        console.error('Lỗi khi tải dữ liệu:', err);
+
+        setDongXeList(dongXe);
+        setMauXeMap(grouped);
+        setLoading(false);
+
+        // Render the cards immediately; images stream in afterwards.
+        void loadPrimaryImages(mauXe, isCancelled);
+      } catch (error) {
+        console.error('Lỗi khi tải dữ liệu:', error);
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
     };
+
     fetchDongXeAndMauXe();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // Effect để xử lý filter với animation
-  useEffect(() => {
-    setIsFilterAnimating(true);
-    
-    const timer = setTimeout(() => {
-      const filtered = dongXeList.filter(dongXe => {
-        if (selectedModel) return dongXe.ten === selectedModel;
-        if (selectedBodyType) return dongXe.phanLoai === selectedBodyType;
-        return true;
-      });
-      setFilteredData(filtered);
-      setIsFilterAnimating(false);
-    }, 150);
+  const loadPrimaryImages = async (models: MauXe[], isCancelled: () => boolean) => {
+    try {
+      // New bulk endpoint: one request returns the cover image of every model.
+      const list = await cachedFetchJson<AnhDaiDienMauXe[]>(
+        'model-cover-images',
+        IMAGE_CACHE_TTL,
+        async () => {
+          const response = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/danh-sach/dai-dien`, {
+            timeout: 20000,
+          });
+          return response.data;
+        }
+      );
 
-    return () => clearTimeout(timer);
-  }, [selectedModel, selectedBodyType, dongXeList]);
+      if (isCancelled()) return;
+
+      const imageMap: Record<number, string> = {};
+      for (const item of list || []) {
+        if (item?.idMauXe && item?.duongDanAnh) {
+          imageMap[item.idMauXe] = item.duongDanAnh;
+        }
+      }
+
+      // An empty result is suspicious (the backend may still be deploying the
+      // endpoint), so use the existing per-model endpoint as a fallback.
+      if (Object.keys(imageMap).length > 0) {
+        setPrimaryImages(imageMap);
+        return;
+      }
+    } catch {
+      // Bulk endpoint not available yet: fall through.
+    }
+
+    try {
+      const pairs = await mapWithLimit(models, 6, async (model) => {
+        try {
+          const images = await cachedFetchJson<HinhAnhXe[]>(
+            `model-images:${model.id}`,
+            IMAGE_CACHE_TTL,
+            async () => {
+              const response = await axios.get(
+                `${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${model.id}`,
+                { timeout: 20000 }
+              );
+              return response.data;
+            }
+          );
+
+          const exterior = images.find((image) => image.loaiHinh === 'ngoai_that');
+          const cover = exterior || images[0];
+          return [model.id, cover?.duongDanAnh || ''] as const;
+        } catch {
+          return [model.id, ''] as const;
+        }
+      });
+
+      if (isCancelled()) return;
+
+      const imageMap: Record<number, string> = {};
+      for (const [id, path] of pairs) {
+        if (path) imageMap[id] = path;
+      }
+      setPrimaryImages(imageMap);
+    } catch (error) {
+      console.error('Không thể tải ảnh xe:', error);
+    }
+  };
+
+  const bodyTypeFilters = useMemo(
+    () => Array.from(new Set(dongXeList.map((item) => item.phanLoai))).filter(Boolean),
+    [dongXeList]
+  );
+
+  const filteredData = useMemo(() => {
+    if (selectedModel) return dongXeList.filter((dongXe) => dongXe.ten === selectedModel);
+    if (selectedBodyType) return dongXeList.filter((dongXe) => dongXe.phanLoai === selectedBodyType);
+    return dongXeList;
+  }, [dongXeList, selectedModel, selectedBodyType]);
 
   // Hàm lấy url ảnh giống FeaturedProducts
   const getProductImageUrl = (productId: number): string => {
-    try {
-      const productImages = productImagesMap[productId];
-      if (productImages && productImages.length > 0) {
-        const exteriorImages = productImages.filter(img => img.loaiHinh === 'ngoai_that');
-        const targetImage = exteriorImages.length > 0 ? exteriorImages[0] : productImages[0];
-        if (targetImage && targetImage.duongDanAnh) {
-          return `${BACKEND_URL}${targetImage.duongDanAnh}`;
-        }
-      }
-      return FALLBACK_IMAGE;
-    } catch {
-      return FALLBACK_IMAGE;
-    }
+    const path = primaryImages[productId];
+    return path ? getVehicleImageUrl(path) : DEFAULT_CAR_IMAGE;
   };
 
   // Hàm xử lý click filter
@@ -172,20 +257,18 @@ const ModelsPage: React.FC = () => {
     setSelectedModel(selectedModel === model ? null : model);
     setSelectedBodyType(null);
 
-    // Scroll lên đầu phần main
     setTimeout(() => {
       mainRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100); // delay nhỏ để đảm bảo render xong
+    }, 50);
   };
 
   const handleBodyTypeFilter = (bodyType: string | null) => {
     setSelectedBodyType(selectedBodyType === bodyType ? null : bodyType);
     setSelectedModel(null);
 
-    // Scroll lên đầu phần main
     setTimeout(() => {
       mainRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+    }, 50);
   };
 
   // Kiểm tra trạng thái xe
@@ -212,7 +295,7 @@ const ModelsPage: React.FC = () => {
       {/* Sidebar filter */}
       <aside className="models-sidebar">
         <h3>{translate('All models')}</h3>
-        
+
         {/* Models Filter */}
         <div className="filter-section">
           <div className="filter-title">{translate('Models')}</div>
@@ -249,7 +332,6 @@ const ModelsPage: React.FC = () => {
               // Nếu đã chọn model, chỉ body type của model đó sáng
               let isDisabled = false;
               if (selectedModel) {
-                // Tìm model đã chọn
                 const selectedDongXe = dongXeList.find(d => d.ten === selectedModel);
                 isDisabled = selectedDongXe ? selectedDongXe.phanLoai !== type : false;
               }
@@ -274,15 +356,10 @@ const ModelsPage: React.FC = () => {
           </div>
         </div>
       </aside>
+
       {/* Main content */}
       <main className="models-main" ref={mainRef}>
-        {isFilterAnimating && (
-          <div className="loading-container" style={{ minHeight: '200px' }}>
-            <div className="loading-spinner"></div>
-          </div>
-        )}
-        
-        {!isFilterAnimating && filteredData.map(dongXe => (
+        {filteredData.map(dongXe => (
           <section key={dongXe.id} className="models-section">
             <h2 className="section-title">{dongXe.ten}</h2>
             <div className="models-grid">
@@ -290,38 +367,37 @@ const ModelsPage: React.FC = () => {
                 const status = getCarStatus(mauXe);
                 return (
                   <div key={mauXe.id} className="car-card" style={{
-                    animationDelay: `${index * 0.1}s`
+                    animationDelay: `${index * 0.08}s`
                   }}>
                     <div className="car-image-container">
-                      <img loading="lazy" decoding="async"
+                      <img
+                        loading="lazy"
+                        decoding="async"
                         src={getProductImageUrl(mauXe.id)}
                         alt={mauXe.tenMau}
                         className="car-image"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = FALLBACK_IMAGE;
-                        }}
+                        onError={(e) => applyImageFallback(e, DEFAULT_CAR_IMAGE)}
                       />
                       {status === translate('New') && (
                         <div className="car-badge">{status}</div>
                       )}
                     </div>
-                    
+
                     <div className="car-content">
                       <div className="car-title">{mauXe.tenMau}</div>
-                      {/* <div className="car-subtitle">{dongXe.ten}</div> */}
                       <div className="car-price">
                         {translate('Starting at')} {formatPrice(mauXe.giaCoban)} VNĐ
                       </div>
-                      
-                      {/* Vehicle Rating Summary */}
+
+                      {/* Vehicle Rating Summary (lazy: only loads when visible) */}
                       <div className="car-rating">
-                        <VehicleRatingSummary 
-                          mauXeId={mauXe.id} 
-                          showCount={true} 
-                          size="large" 
+                        <VehicleRatingSummary
+                          mauXeId={mauXe.id}
+                          showCount={true}
+                          size="large"
                         />
                       </div>
-                      
+
                       <div className="car-buttons">
                         <Link to={`/product/${mauXe.id}`} className="models-btn-primary">
                           {translate('Explore')}
@@ -345,11 +421,11 @@ const ModelsPage: React.FC = () => {
             </div>
           </section>
         ))}
-        
-        {!isFilterAnimating && filteredData.length === 0 && (
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '4rem 2rem', 
+
+        {filteredData.length === 0 && (
+          <div style={{
+            textAlign: 'center',
+            padding: '4rem 2rem',
             color: '#666',
             fontSize: '1.2rem'
           }}>

@@ -59,14 +59,11 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks(id: string) {
             if (!id.includes('node_modules')) return
-            if (id.includes('firebase')) return 'firebase'
-            if (id.includes('antd') || id.includes('@ant-design')) return 'antd'
-            if (id.includes('recharts') || id.includes('d3-')) return 'charts'
-            if (id.includes('leaflet')) return 'maps'
-            if (id.includes('framer-motion')) return 'motion'
-            if (id.includes('react-router')) return 'router'
-            if (id.includes('/react/') || id.includes('react-dom') || id.includes('scheduler')) return 'react'
-            return
+            // One vendor chunk. Splitting React/antd/charts from each other
+            // creates circular chunk imports (Rollup moves the shared CJS
+            // interop helpers into a different chunk), which crashed the app
+            // with "Cannot read properties of undefined (reading 'version')".
+            return 'vendor'
           },
         },
       },

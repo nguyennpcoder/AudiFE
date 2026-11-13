@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Rate, Tooltip } from 'antd';
 import { useAuth } from '../../context/AuthContext';
 import { ratingService } from '../../services/ratingService';
@@ -11,6 +11,46 @@ interface VehicleRatingSummaryProps {
   className?: string;
 }
 
+interface RatingSummaryCache {
+  t: number;
+  avg: number;
+  count: number;
+}
+
+const RATING_CACHE_PREFIX = 'audi-rating-v1:';
+const RATING_CACHE_TTL = 5 * 60 * 1000;
+const memoryCache = new Map<number, RatingSummaryCache>();
+
+function readRatingCache(id: number): RatingSummaryCache | null {
+  const inMemory = memoryCache.get(id);
+  if (inMemory && Date.now() - inMemory.t <= RATING_CACHE_TTL) return inMemory;
+
+  try {
+    const raw = sessionStorage.getItem(`${RATING_CACHE_PREFIX}${id}`);
+    if (!raw) return null;
+    const entry = JSON.parse(raw) as RatingSummaryCache;
+    if (!entry || typeof entry.t !== 'number') return null;
+    if (Date.now() - entry.t > RATING_CACHE_TTL) {
+      sessionStorage.removeItem(`${RATING_CACHE_PREFIX}${id}`);
+      return null;
+    }
+    memoryCache.set(id, entry);
+    return entry;
+  } catch {
+    return null;
+  }
+}
+
+function writeRatingCache(id: number, avg: number, count: number) {
+  const entry: RatingSummaryCache = { t: Date.now(), avg, count };
+  memoryCache.set(id, entry);
+  try {
+    sessionStorage.setItem(`${RATING_CACHE_PREFIX}${id}`, JSON.stringify(entry));
+  } catch {
+    // Ignore storage quota / private mode.
+  }
+}
+
 const VehicleRatingSummary: React.FC<VehicleRatingSummaryProps> = ({
   mauXeId,
   showCount = true,
@@ -20,78 +60,115 @@ const VehicleRatingSummary: React.FC<VehicleRatingSummaryProps> = ({
   const [averageRating, setAverageRating] = useState<number>(0);
   const [ratingCount, setRatingCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [visible, setVisible] = useState<boolean>(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated, user } = useAuth();
+  const userId = user?.userId;
+
+  // Only request ratings when the card is close to the viewport. The models
+  // page has 14 cards, so this avoids 14-28 requests during the first paint.
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    if (typeof IntersectionObserver === 'undefined') {
+      setVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '240px 0px' }
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
+    if (!visible) return;
+
+    let cancelled = false;
+
     const fetchRatingSummary = async () => {
       try {
         setLoading(true);
-        
-        // Fetch average rating
-        const avgData = await ratingService.getTrungBinhSaoMauXe(mauXeId);
-        let avgRating = avgData.trungBinhSao || 0;
-        
-        // Fetch rating count
-        const ratingData = await ratingService.getDanhGiaByMauXe(mauXeId, 0, 1);
-        let count = ratingData.totalItems || 0;
-        
-        // If user is authenticated, check if they have a pending rating
-        // and include it in the average calculation
-        if (isAuthenticated && user) {
+
+        const cached = readRatingCache(mauXeId);
+        let avgRating = cached?.avg ?? 0;
+        let count = cached?.count ?? 0;
+
+        if (!cached) {
+          // One request gives both the average and the number of reviews.
+          const ratingData = await ratingService.getDanhGiaByMauXe(mauXeId, 0, 1);
+          avgRating = ratingData.trungBinhSao || 0;
+          count = ratingData.totalItems || 0;
+          writeRatingCache(mauXeId, avgRating, count);
+        }
+
+        // Authenticated users may have a pending rating that is not part of
+        // the public average yet. This stays an opt-in extra request.
+        if (isAuthenticated && userId) {
           const userRatings = await ratingService.getDanhGiaByMauXe(mauXeId, 0, 100);
           const userRating = userRatings.danhGia?.find(
-            rating => rating.idNguoiDung === user.userId
+            (rating) => rating.idNguoiDung === userId
           );
-          
-          // If user has a rating that's not included in the public average
-          // (e.g. pending approval), adjust the average
+
           if (userRating && userRatings.trungBinhSao !== undefined) {
             avgRating = userRatings.trungBinhSao;
             count = userRatings.danhGia.length;
           }
         }
-        
+
+        if (cancelled) return;
         setAverageRating(avgRating);
         setRatingCount(count);
       } catch (error) {
         console.error('Error fetching rating summary:', error);
-        // Set default values on error
-        setAverageRating(0);
-        setRatingCount(0);
+        if (!cancelled) {
+          setAverageRating(0);
+          setRatingCount(0);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchRatingSummary();
-  }, [mauXeId, isAuthenticated, user]);
+    return () => {
+      cancelled = true;
+    };
+  }, [visible, mauXeId, isAuthenticated, userId]);
 
-  if (loading) {
-    return (
-      <div className={`rating-summary loading ${size} ${className}`}>
-        <Rate disabled value={0} className={`rating-stars ${size}`} />
-        {showCount && <span className="rating-count">...</span>}
-      </div>
-    );
-  }
+  const pending = !visible || loading;
 
-  const ratingTooltip = ratingCount > 0 
+  const ratingTooltip = ratingCount > 0
     ? `${averageRating.toFixed(1)} sao từ ${ratingCount} đánh giá`
     : 'Chưa có đánh giá';
 
   return (
-    <Tooltip title={ratingTooltip}>
-      <div className={`rating-summary ${size} ${className}`}>
-        <Rate 
-          disabled 
-          value={averageRating} 
+    <Tooltip title={pending ? '' : ratingTooltip}>
+      <div
+        ref={containerRef}
+        className={`rating-summary ${pending ? 'loading' : ''} ${size} ${className}`}
+      >
+        <Rate
+          disabled
+          value={pending ? 0 : averageRating}
           allowHalf
           className={`rating-stars ${size}`}
         />
-        {showCount && ratingCount > 0 && (
-          <span className="rating-count">
-            ({ratingCount})
-          </span>
+        {showCount && (
+          pending
+            ? <span className="rating-count">...</span>
+            : ratingCount > 0 && (
+              <span className="rating-count">({ratingCount})</span>
+            )
         )}
       </div>
     </Tooltip>
