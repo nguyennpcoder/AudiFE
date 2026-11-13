@@ -1378,6 +1378,9 @@ const BlogDetail: React.FC = () => {
                             src={getUserAvatarUrl(reply.avatarNguoiDung)}
                             alt={reply.tenNguoiDung || 'Người dùng'}
                             className="blog-comment-avatar reply-avatar"
+                            loading="lazy"
+                            decoding="async"
+                            onError={(e) => applyImageFallback(e, DEFAULT_AVATAR)}
                           />
                           <div className="blog-comment-info">
                             <div className="blog-comment-author">

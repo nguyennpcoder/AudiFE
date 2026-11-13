@@ -1110,6 +1110,7 @@ const BlogManagement: React.FC = () => {
                 border: '4px solid #fff',
                 boxShadow: '0 2px 12px 0 rgba(24,144,255,0.10)'
               }}
+              onError={(e) => applyImageFallback(e, DEFAULT_BLOG_IMAGE)}
             />
           </div>
         );
