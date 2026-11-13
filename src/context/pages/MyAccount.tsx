@@ -219,15 +219,15 @@ const MyAccount: React.FC = () => {
 
   const getAvatarUrl = (avatarPath?: string) => {
     if (!avatarPath || avatarPath.trim() === '') {
-      return '/avatar-default.png';
+      return '/avatar-default-256.png';
     }
     
     if (avatarPath.startsWith('http')) {
       return `${avatarPath}${avatarVersion ? `?v=${avatarVersion}` : ''}`;
     }
     
-    if (avatarPath === 'avatar-default.png') {
-      return '/avatar-default.png';
+    if (/^\/?avatar-default(?:-256)?\.png$/i.test(avatarPath)) {
+      return '/avatar-default-256.png';
     }
     
     if (avatarPath.includes('uploads/images/avatar_user/')) {
@@ -419,7 +419,7 @@ const MyAccount: React.FC = () => {
                 }}
               >
                 <img loading="lazy" decoding="async"
-                  src={avatarPreview || getAvatarUrl(userProfile?.avatar) || '/avatar-default.png'}
+                  src={avatarPreview || getAvatarUrl(userProfile?.avatar) || '/avatar-default-256.png'}
                   alt=""
                   style={{
                     width: '100%',

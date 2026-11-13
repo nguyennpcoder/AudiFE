@@ -141,7 +141,7 @@ class NewsService {
 
   // Get blog image URL
   getBlogImageUrl(imagePath?: string): string {
-    if (!imagePath) return '/avatar-default.png';
+    if (!imagePath) return '/avatar-default-256.png';
     
     if (imagePath.startsWith('http')) {
       return imagePath;
@@ -169,7 +169,7 @@ class NewsService {
     }
     
     // Return default vehicle image
-    return '/avatar-default.png';
+    return '/avatar-default-256.png';
   }
 
   // Format date for display

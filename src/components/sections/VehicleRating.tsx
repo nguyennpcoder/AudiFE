@@ -40,7 +40,7 @@ const VehicleRating: React.FC<VehicleRatingProps> = ({
     
     if (!avatarPath || avatarPath === 'null' || avatarPath === 'undefined') {
       console.log('No avatar path, using default');
-      return '/avatar-default.png';
+      return '/avatar-default-256.png';
     }
     
     // If it's already a full URL (from Google, Facebook, etc.), return as is

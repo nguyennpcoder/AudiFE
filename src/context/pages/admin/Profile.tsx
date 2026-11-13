@@ -50,14 +50,14 @@ const supportMessages = [
   {
     id: 1,
     sender: 'Audi Team',
-    avatar: '/avatar-default.png',
+    avatar: '/avatar-default-256.png',
     content: 'Lịch họp nội bộ vào 10h sáng mai, vui lòng tham dự đúng giờ.',
     createdAt: '2024-07-20 09:00'
   },
   {
     id: 2,
     sender: 'Audi Support',
-    avatar: '/avatar-default.png',
+    avatar: '/avatar-default-256.png',
     content: 'Bạn có yêu cầu hỗ trợ mới từ khách hàng #1234.',
     createdAt: '2024-07-19 15:30'
   }

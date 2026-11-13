@@ -108,7 +108,7 @@ const ActivityLog: React.FC = () => {
   const resolveAvatarForUser = async (record: NhatKyHoatDongDTO): Promise<string> => {
     const cacheKey = (record.idNguoiDung ?? record.id) as number;
     if (cacheKey && userAvatarCache[cacheKey]) return userAvatarCache[cacheKey];
-    const fallback = '/avatar-default.png';
+    const fallback = '/avatar-default-256.png';
 
     // Try from chiTietHoatDong first
     try {
@@ -375,7 +375,7 @@ const ActivityLog: React.FC = () => {
                                 setHoveredUserId(record.idNguoiDung ?? record.id);
                                 setHoveredUserImgPos({ x: e.clientX, y: e.clientY });
                                 // Set temp default image then resolve real
-                                setHoveredUserImgUrl('/avatar-default.png');
+                                setHoveredUserImgUrl('/avatar-default-256.png');
                                 const url = await resolveAvatarForUser(record);
                                 setHoveredUserImgUrl(url);
                               }}

@@ -15,7 +15,7 @@ import type { SyntheticEvent } from 'react';
 const RAW_MEDIA_BASE = (import.meta.env.VITE_MEDIA_URL || '').trim().replace(/\/+$/, '');
 const API_ORIGIN = (import.meta.env.VITE_API_ORIGIN || '').trim().replace(/\/+$/, '');
 
-export const DEFAULT_AVATAR = '/avatar-default.png';
+export const DEFAULT_AVATAR = '/avatar-default-256.png';
 export const DEFAULT_BLOG_IMAGE = '/blog-placeholder.svg';
 export const DEFAULT_CAR_IMAGE = '/car-placeholder.svg';
 
@@ -68,7 +68,7 @@ export function resolveMediaUrl(rawPath: string | null | undefined, kind: MediaK
   }
 
   // Ignore legacy placeholder names that point at the old (broken) file.
-  if (/^\/?avatar-default\.(png|svg)$/i.test(value)) return fallback;
+  if (/^\/?avatar-default(?:-256)?\.(png|svg)$/i.test(value)) return fallback;
   if (/^\/?(blog|car)-placeholder\.svg$/i.test(value)) return fallback;
 
   let path = value.replace(/\\/g, '/');

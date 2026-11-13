@@ -184,7 +184,7 @@ const Header = () => {
     
     // Fallback to default avatar
     console.log('Using default avatar');
-    return '/avatar-default.png';
+    return '/avatar-default-256.png';
   };
 
   // Debug function to test avatar loading
@@ -342,9 +342,9 @@ const Header = () => {
                     console.log('Avatar failed to load:', avatarUrl);
                     console.log('Error event:', e);
                     const target = e.currentTarget;
-                    if (target.src !== '/avatar-default.png') {
+                    if (target.src !== '/avatar-default-256.png') {
                       console.log('Falling back to default avatar');
-                      target.src = '/avatar-default.png';
+                      target.src = '/avatar-default-256.png';
                     }
                   }}
                   onLoad={() => {

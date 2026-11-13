@@ -227,7 +227,7 @@ const Register: React.FC = () => {
               }}
             >
               <img
-                src={avatarPreview || '/avatar-default.png'}
+                src={avatarPreview || '/avatar-default-256.png'}
                 alt=""
                 style={{
                   width: '100%',

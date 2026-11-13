@@ -175,6 +175,6 @@ export const handleGoogleAvatar = async (photoURL: string): Promise<string> => {
     return photoURL;
   } catch (error) {
     console.error('Error handling Google avatar:', error);
-    return '/avatar-default.png';
+    return '/avatar-default-256.png';
   }
 };

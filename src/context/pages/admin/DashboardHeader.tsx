@@ -1437,7 +1437,7 @@ const DashboardHeader: React.FC<any> = ({
                           }}
                           title={`${staff.ho} ${staff.ten}`}
                         >
-                          {staff.avatar && !buildAvatarUrl(staff.avatar).includes('avatar-default.png') ? (
+                          {staff.avatar && !buildAvatarUrl(staff.avatar).includes('avatar-default-256.png') ? (
                             <img loading="lazy" decoding="async"
                               src={buildAvatarUrl(staff.avatar)}
                               alt={`${staff.ho} ${staff.ten}`}
@@ -1452,7 +1452,7 @@ const DashboardHeader: React.FC<any> = ({
                                 objectFit: 'cover'
                               }}
                               onError={(e) => {
-                                e.currentTarget.src = '/avatar-default.png';
+                                e.currentTarget.src = '/avatar-default-256.png';
                               }}
                             />
                           ) : (

@@ -332,8 +332,8 @@ export const updateUser = async (id: number, data: any, token: string) => {
 // Utility function to build avatar URL
 export const buildAvatarUrl = (avatar?: string): string => {
   console.log('buildAvatarUrl input:', avatar);
-  if (!avatar) {
-    return '/avatar-default.png';
+  if (!avatar || /^\/?avatar-default(?:-256)?\.(png|svg)$/i.test(avatar)) {
+    return '/avatar-default-256.png';
   }
   
   // If it's already a full URL (from Google, Facebook, etc.), return as is
