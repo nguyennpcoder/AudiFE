@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import '../../styles/RS7Performance.css';
 import '../../styles/HeroBanner.css';
+import { resolveMediaUrl } from '../../utils/media';
 import bannerJpg from '@rs7/banner.avif';
 import bannerAvif from '@rs7/banner.avif';
 // removed gallery and technology images
@@ -160,7 +161,7 @@ const DesignShowcase = () => {
     if (selected?.id) load(selected.id);
   }, [selected]);
 
-  const toFull = (p?: string) => (p ? `${BACKEND_URL}${p}` : '');
+  const toFull = (p?: string) => (p ? resolveMediaUrl(p, 'vehicle') : '');
   const next = () => setIdx((p) => (images.length ? (p + 1) % images.length : 0));
   const prev = () => setIdx((p) => (images.length ? (p - 1 + images.length) % images.length : 0));
 

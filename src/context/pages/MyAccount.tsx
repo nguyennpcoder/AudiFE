@@ -52,6 +52,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { changePasswordApi } from '../../services/authService';
+import { getAvatarUrl } from '../../utils/media';
 import axios from 'axios';
 import '../../styles/MyAccount.css';
 
@@ -229,12 +230,11 @@ const MyAccount: React.FC = () => {
     if (/^\/?avatar-default(?:-256)?\.png$/i.test(avatarPath)) {
       return '/avatar-default-256.png';
     }
-    
-    if (avatarPath.includes('uploads/images/avatar_user/')) {
-      return `http://localhost:8080/${avatarPath}${avatarVersion ? `?v=${avatarVersion}` : ''}`;
-    }
-    
-    return `http://localhost:8080/uploads/images/avatar_user/${avatarPath}${avatarVersion ? `?v=${avatarVersion}` : ''}`;
+
+    const resolved = getAvatarUrl(avatarPath);
+    return avatarVersion
+      ? `${resolved}${resolved.includes('?') ? '&' : '?'}v=${avatarVersion}`
+      : resolved;
   };
 
   const formatDate = (dateString: string) => {

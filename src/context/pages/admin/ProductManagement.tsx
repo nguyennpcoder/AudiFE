@@ -7,6 +7,7 @@ import axios from 'axios';
 import { message } from 'antd';
 
 import AdminHeader from './AdminHeader';
+import { resolveMediaUrl } from '../../../utils/media';
 
 // Backend URL constant for image paths
 const BACKEND_URL = 'http://localhost:8080';
@@ -287,7 +288,7 @@ const ProductManagement: React.FC = () => {
           if (!exteriorImg.duongDanAnh.startsWith('/src/assets/')) {
             map[product.id] = exteriorImg.duongDanAnh.startsWith('http')
               ? exteriorImg.duongDanAnh
-              : `${BACKEND_URL}${exteriorImg.duongDanAnh.startsWith('/') ? '' : '/'}${exteriorImg.duongDanAnh}`;
+              : resolveMediaUrl(exteriorImg.duongDanAnh, 'vehicle');
           }
         }
       } catch (e) {
@@ -1036,18 +1037,10 @@ const ProductManagement: React.FC = () => {
       if (url.includes('/RS') || url.includes('rs5') || url.includes('rs7')) {
         console.log("RS model image detected:", url);
         // Special handling for RS models - try different URL formation
-        fullUrl = url.startsWith('http') 
-          ? url 
-          : url.startsWith('/') 
-            ? `${BACKEND_URL}${url}` 
-            : `${BACKEND_URL}/${url}`;
+        fullUrl = url.startsWith('http') ? url : resolveMediaUrl(url, 'vehicle');
       } else {
         // Regular URL handling for other models
-        fullUrl = url.startsWith('http') 
-          ? url 
-          : url.startsWith('/') 
-            ? `${BACKEND_URL}${url}` 
-            : `${BACKEND_URL}/${url}`;
+        fullUrl = url.startsWith('http') ? url : resolveMediaUrl(url, 'vehicle');
       }
       
       console.log("Fetching image from:", fullUrl);
@@ -1194,20 +1187,10 @@ const ProductManagement: React.FC = () => {
           imageType === 'noi_that') {
         console.log("Handling special RS interior image:", src);
         // Thử một số path khác nhau nếu cần
-        if (src.startsWith('/')) {
-          setImgSrc(`${BACKEND_URL}${src}`);
-        } else {
-          setImgSrc(`${BACKEND_URL}/${src}`);
-        }
+        setImgSrc(src.startsWith('http') ? src : resolveMediaUrl(src, 'vehicle'));
       } else {
         // Xử lý URL thông thường
-        if (src.startsWith('http')) {
-          setImgSrc(src);
-        } else if (src.startsWith('/')) {
-          setImgSrc(`${BACKEND_URL}${src}`);
-        } else {
-          setImgSrc(`${BACKEND_URL}/${src}`);
-        }
+        setImgSrc(src.startsWith('http') ? src : resolveMediaUrl(src, 'vehicle'));
       }
       
       setHasError(false);

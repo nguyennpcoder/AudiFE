@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { resolveMediaUrl } from "../../utils/media";
 import { 
   Steps, 
   Button, 
@@ -931,7 +932,7 @@ const VehicleConfigurator: React.FC = () => {
                     <div className="color-preview">
                       {mainImage ? (
                         <img loading="lazy" decoding="async" 
-                          src={`${BACKEND_URL.replace('/api/v1', '')}${mainImage.duongDanAnh}`}
+                          src={resolveMediaUrl(mainImage.duongDanAnh, 'vehicle')}
                           alt={`${mauSac.ten} - ${mauXe?.tenMau}`}
                           className="color-car-image"
                           onError={(e) => {
@@ -1080,7 +1081,7 @@ const VehicleConfigurator: React.FC = () => {
                   >
                     {noiThat.duongDanAnh && (
                       <img loading="lazy" decoding="async" 
-                        src={`${BACKEND_URL.replace('/api/v1', '')}${noiThat.duongDanAnh}`}
+                        src={resolveMediaUrl(noiThat.duongDanAnh, 'vehicle')}
                         alt={noiThat.ten}
                         className="interior-image"
                         onError={(e) => {
@@ -1136,7 +1137,7 @@ const VehicleConfigurator: React.FC = () => {
                   >
                     {banhXe.duongDanAnh && (
                       <img loading="lazy" decoding="async" 
-                        src={`${BACKEND_URL.replace('/api/v1', '')}${banhXe.duongDanAnh}`}
+                        src={resolveMediaUrl(banhXe.duongDanAnh, 'vehicle')}
                         alt={banhXe.ten}
                         className="wheel-image"
                         onError={(e) => {

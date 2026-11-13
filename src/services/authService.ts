@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getAvatarUrl } from '../utils/media';
 
 // const API_URL = `${import.meta.env.VITE_API_URL || 'https://audivn.onrender.com/api/v1'}/auth`;
 const API_URL = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api/v1'}/auth`;
@@ -345,14 +346,11 @@ export const buildAvatarUrl = (avatar?: string): string => {
   // If it starts with /, it's a relative path
   if (avatar.startsWith('/')) {
     console.log('buildAvatarUrl output (relative path):', avatar);
-    return avatar;
+    return getAvatarUrl(avatar);
   }
   
   // Otherwise, assume it's a filename and build the full URL
-  const fileName = avatar.split('/').pop();
-  const url = `http://localhost:8080/uploads/images/avatar_user/${fileName}`;
-  console.log('buildAvatarUrl output (built URL):', url);
-  return url;
+  return getAvatarUrl(avatar);
 };
 
 export const fetchUserProfile = async (token: string) => {

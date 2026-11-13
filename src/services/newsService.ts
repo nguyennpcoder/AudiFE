@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { resolveMediaUrl } from '../utils/media';
 
 const BACKEND_URL = 'http://localhost:8080';
 
@@ -142,30 +143,13 @@ class NewsService {
   // Get blog image URL
   getBlogImageUrl(imagePath?: string): string {
     if (!imagePath) return '/avatar-default-256.png';
-    
-    if (imagePath.startsWith('http')) {
-      return imagePath;
-    }
-    
-    if (imagePath.startsWith('/uploads/')) {
-      return `${BACKEND_URL}${imagePath}`;
-    }
-    
-    return `${BACKEND_URL}/uploads/images/blogs/${imagePath}`;
+    return resolveMediaUrl(imagePath, 'blog');
   }
 
   // Get vehicle image URL
   getVehicleImageUrl(vehicleId: number, imagePath?: string): string {
     if (imagePath) {
-      if (imagePath.startsWith('http')) {
-        return imagePath;
-      }
-      
-      if (imagePath.startsWith('/uploads/')) {
-        return `${BACKEND_URL}${imagePath}`;
-      }
-      
-      return `${BACKEND_URL}/uploads/images/vehicles/${imagePath}`;
+      return resolveMediaUrl(imagePath, 'vehicle');
     }
     
     // Return default vehicle image

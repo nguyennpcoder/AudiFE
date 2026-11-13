@@ -4,6 +4,7 @@ import { StarOutlined, UserOutlined, CheckCircleOutlined, ClockCircleOutlined } 
 import StarRating from '../common/StarRating';
 import { useAuth } from '../../context/AuthContext';
 import { ratingService, DanhGia, DanhGiaRequest } from '../../services/ratingService';
+import { getAvatarUrl } from '../../utils/media';
 import '../../styles/VehicleRating.css';
 
 const { TextArea } = Input;
@@ -35,39 +36,7 @@ const VehicleRating: React.FC<VehicleRatingProps> = ({
   const [userRating, setUserRating] = useState<DanhGia | null>(null);
 
   // Thêm hàm getUserAvatarUrl giống như trong BlogDetail
-  const getUserAvatarUrl = (avatarPath?: string) => {
-    console.log('getUserAvatarUrl called with:', avatarPath);
-    
-    if (!avatarPath || avatarPath === 'null' || avatarPath === 'undefined') {
-      console.log('No avatar path, using default');
-      return '/avatar-default-256.png';
-    }
-    
-    // If it's already a full URL (from Google, Facebook, etc.), return as is
-    if (avatarPath.startsWith('http')) {
-      console.log('Full URL detected:', avatarPath);
-      return avatarPath;
-    }
-    
-    // If it starts with /, it's a relative path
-    if (avatarPath.startsWith('/')) {
-      const url = `${BACKEND_URL}${avatarPath}`;
-      console.log('Relative path converted to:', url);
-      return url;
-    }
-    
-    // If it contains uploads/images/avatar_user, it's already a full path
-    if (avatarPath.includes('uploads/images/avatar_user/')) {
-      const url = `${BACKEND_URL}/${avatarPath}`;
-      console.log('Full path with uploads converted to:', url);
-      return url;
-    }
-    
-    // Otherwise, assume it's a filename and build the full URL
-    const url = `${BACKEND_URL}/uploads/images/avatar_user/${avatarPath}`;
-    console.log('Filename converted to:', url);
-    return url;
-  };
+  const getUserAvatarUrl = (avatarPath?: string) => getAvatarUrl(avatarPath);
 
   // Fetch ratings for this vehicle
   const fetchRatings = async () => {

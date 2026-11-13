@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { resolveMediaUrl } from '../utils/media';
 
 export interface CarModel {
   id: number;
@@ -22,7 +23,7 @@ export async function fetchSampleCarModels(): Promise<CarModel[]> {
       try {
         const imgRes = await axios.get(`${BACKEND_URL}/api/v1/hinh-anh/mau-xe/${item.id}`);
         if (imgRes.data && imgRes.data.length > 0) {
-          hinhAnh = `${BACKEND_URL}${imgRes.data[0].duongDanAnh}`;
+          hinhAnh = resolveMediaUrl(imgRes.data[0].duongDanAnh, 'vehicle');
         }
       } catch {
         hinhAnh = '';

@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { resolveMediaUrl } from '../../utils/media';
 import '../../styles/FeaturedProducts.css';
 
 // Import hình ảnh từ thư mục assets (fallback images)
@@ -96,8 +97,8 @@ const ImageWithFallback: React.FC<{
     } 
     // Handle relative URLs that need the backend URL added
     else if (src.startsWith('/uploads/')) {
-      const updatedSrc = `${BACKEND_URL}${src}`;
-      console.log(`Added backend URL to path: "${updatedSrc}"`);
+      const updatedSrc = resolveMediaUrl(src, 'vehicle');
+      console.log(`Added media URL to path: "${updatedSrc}"`);
       setImgSrc(updatedSrc);
     }
     // For all other URLs, use as is
@@ -988,8 +989,8 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
         const targetImage = exteriorImages.length > 0 ? exteriorImages[0] : productImages[0];
   
         if (targetImage && targetImage.duongDanAnh) {
-          // The path already starts with /uploads/, so just append to BACKEND_URL
-          const fullUrl = `${BACKEND_URL}${targetImage.duongDanAnh}`;
+          // Uploads are served by the media CDN, not by the API host.
+          const fullUrl = resolveMediaUrl(targetImage.duongDanAnh, 'vehicle');
           console.log(`Full image URL: ${fullUrl}`);
           return fullUrl;
         }

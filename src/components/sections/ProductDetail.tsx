@@ -8,6 +8,7 @@ import '../../styles/ProductDetail.css';
 import PromotionBanner from './PromotionBanner';
 import VehicleRating from './VehicleRating';
 import { KhuyenMai } from '../../services/marketingService';
+import { resolveMediaUrl } from '../../utils/media';
 
 
 // Define interfaces for our data types
@@ -633,10 +634,10 @@ const ProductDetail: React.FC<{}> = () => {
     if (imagePath.startsWith('http')) {
       console.log('Using direct URL:', imagePath);
       return imagePath;
-    } else if (imagePath.startsWith('/uploads/')) {
-      // For uploads directory, use the correct static file path
-      console.log('Using uploads URL:', `${BACKEND_URL}${imagePath}`);
-      return `${BACKEND_URL}${imagePath}`;
+    } else if (imagePath.startsWith('/uploads/') || imagePath.startsWith('uploads/')) {
+      // Uploads live on the media CDN (GitHub raw / Supabase Storage), not on
+      // the Render backend, which only serves the API.
+      return resolveMediaUrl(imagePath, 'vehicle');
     } else if (imagePath.startsWith('/')) {
       console.log('Using backend URL with provided path:', `${BACKEND_URL}${imagePath}`);
       return `${BACKEND_URL}${imagePath}`;
@@ -646,12 +647,20 @@ const ProductDetail: React.FC<{}> = () => {
     }
   };
 
+  // Resolve a media path for fetch()/cache preloading.
+  const toFetchableMediaUrl = (url: string) => {
+    if (!url) return url;
+    if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url;
+    return resolveMediaUrl(url, 'vehicle');
+  };
+
   // Add Base64 image conversion function similar to what's in ProductManagement.tsx
   const fetchImageAsBase64 = async (url: string) => {
     if (!url) return FALLBACK_IMAGE;
     
     try {
-      const response = await fetch(url.startsWith('http') ? url : `${BACKEND_URL}${url.startsWith('/') ? '' : '/'}${url}`, {
+      const target = toFetchableMediaUrl(url);
+      const response = await fetch(target, {
         method: 'GET',
       });
       
@@ -1836,7 +1845,7 @@ const resetToDefaultColor = async () => {
                     className={`color-swatch_details ${selectedColor?.id === defaultColor.id ? 'selected' : ''} ${compareColor?.id === defaultColor.id ? 'comparing' : ''} default-color`}
                     style={{ 
                       backgroundColor: defaultColor.maHex,
-                      backgroundImage: defaultColor.duongDanAnh ? `url(${BACKEND_URL}${defaultColor.duongDanAnh})` : 'none',
+                      backgroundImage: defaultColor.duongDanAnh ? `url(${resolveMediaUrl(defaultColor.duongDanAnh, 'vehicle')})` : 'none',
                       borderRadius: '15px'
                     }}
                     onClick={() => handleColorSelect(defaultColor)}
@@ -1878,7 +1887,7 @@ const resetToDefaultColor = async () => {
                         className={`color-swatch_details ${selectedColor?.id === color.id ? 'selected' : ''} ${compareColor?.id === color.id ? 'comparing' : ''}`}
                         style={{ 
                           backgroundColor: color.maHex,
-                          backgroundImage: color.duongDanAnh ? `url(${BACKEND_URL}${color.duongDanAnh})` : 'none',
+                          backgroundImage: color.duongDanAnh ? `url(${resolveMediaUrl(color.duongDanAnh, 'vehicle')})` : 'none',
                           borderRadius: '15px'
                         }}
                         onClick={() => handleColorSelect(color)}
